@@ -9,6 +9,10 @@ node_modules/
 # Production
 /dist
 /build
+frontend/dist/
+frontend/build/
+backend/dist/
+backend/build/
 
 # Misc
 .DS_Store
@@ -80,6 +84,7 @@ storybook-static
 
 # API Generated files (if you generate TypeScript client)
 /src/api/generated/
+frontend/src/api/generated/
 
 # OS
 Thumbs.db

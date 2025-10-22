@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Clinic {
+  id                 String              @id @default(uuid())
+  name               String
+  registrationNumber String?             @unique @map("registration_number")
+  address            String?
+  phone              String?
+  email              String?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  
+  users              User[]
+  submissions        MedicalSubmission[]
+
+  @@map("clinics")
+}
+
+model User {
+  id                  String              @id @default(uuid())
+  clinicId            String              @map("clinic_id")
+  email               String              @unique
+  passwordHash        String              @map("password_hash")
+  name                String
+  role                UserRole
+  status              UserStatus          @default(active)
+  lastLoginAt         DateTime?           @map("last_login_at")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+  
+  clinic              Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  createdSubmissions  MedicalSubmission[] @relation("CreatedBy")
+  approvedSubmissions MedicalSubmission[] @relation("ApprovedBy")
+  auditLogs           AuditLog[]
+
+  @@index([clinicId])
+  @@index([email])
+  @@map("users")
+}
+
+model MedicalSubmission {
+  id              String            @id @default(uuid())
+  clinicId        String            @map("clinic_id")
+  createdById     String            @map("created_by")
+  approvedById    String?           @map("approved_by")
+  examType        ExamType          @map("exam_type")
+  patientName     String            @map("patient_name")
+  patientNric     String            @map("patient_nric")
+  patientDob      DateTime          @map("patient_dob") @db.Date
+  status          SubmissionStatus  @default(draft)
+  formData        Json              @map("form_data")
+  createdDate     DateTime          @default(now()) @map("created_date")
+  submittedDate   DateTime?         @map("submitted_date")
+  approvedDate    DateTime?         @map("approved_date")
+  rejectedReason  String?           @map("rejected_reason")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  
+  clinic          Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  createdBy       User              @relation("CreatedBy", fields: [createdById], references: [id])
+  approvedBy      User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+  auditLogs       AuditLog[]
+
+  @@index([clinicId])
+  @@index([createdById])
+  @@index([status])
+  @@index([patientNric])
+  @@index([examType])
+  @@index([createdDate(sort: Desc)])
+  @@map("medical_submissions")
+}
+
+model AuditLog {
+  id            String    @id @default(uuid())
+  submissionId  String    @map("submission_id")
+  userId        String    @map("user_id")
+  eventType     EventType @map("event_type")
+  changes       Json?
+  ipAddress     String?   @map("ip_address")
+  userAgent     String?   @map("user_agent")
+  timestamp     DateTime  @default(now())
+  
+  submission    MedicalSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id])
+
+  @@index([submissionId])
+  @@index([timestamp(sort: Desc)])
+  @@map("audit_logs")
+}
+
+enum UserRole {
+  doctor
+  nurse
+  admin
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+enum ExamType {
+  SIX_MONTHLY_MDW @map("Six-monthly Medical Exam for Migrant Domestic Workers (MOM)")
+  WORK_PERMIT     @map("Full Medical Exam for Work Permit (MOM)")
+  AGED_DRIVERS    @map("Medical Exam for Aged Drivers (SPF)")
+}
+
+enum SubmissionStatus {
+  draft
+  pending_approval
+  submitted
+  rejected
+}
+
+enum EventType {
+  created
+  updated
+  submitted
+  approved
+  rejected
+  deleted
+}

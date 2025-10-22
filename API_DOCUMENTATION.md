@@ -192,7 +192,7 @@ prism mock openapi.yaml
 ### 5. Validate Responses
 ```bash
 # Validate API responses against spec
-prism proxy openapi.yaml http://localhost:3000
+prism proxy openapi.yaml http://localhost:3344
 ```
 
 ## Backend Implementation Guide
