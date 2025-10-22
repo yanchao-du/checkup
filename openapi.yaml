@@ -1,0 +1,1262 @@
+openapi: 3.0.3
+info:
+  title: Singapore Medical Portal API
+  description: |
+    API for medical examination portal supporting Singapore clinics with role-based access control,
+    exam submission workflows, and approval management.
+    
+    **Supported Exam Types:**
+    - Six-monthly Medical Exam for Migrant Domestic Workers (MOM)
+    - Full Medical Exam for Work Permit (MOM)
+    - Medical Exam for Aged Drivers (SPF)
+    
+    **User Roles:**
+    - **Doctor**: Can create, approve, and submit exams directly to government
+    - **Nurse**: Can create exams and route to doctors for approval
+    - **Admin**: Can manage users and view all submissions
+    
+    **Workflow:**
+    1. Nurse/Doctor creates exam (can save as draft)
+    2. If nurse submits, exam goes to pending_approval status
+    3. Doctor reviews and approves
+    4. Approved exam is submitted to government portal
+    
+    **Security Note:** This is a demonstration API specification. Production implementation
+    would require HIPAA-compliant infrastructure, proper encryption, audit logging, and
+    secure authentication mechanisms.
+    
+  version: 1.0.0
+  contact:
+    name: CheckUp Medical Portal
+    email: support@checkup.sg
+  license:
+    name: Proprietary
+    
+servers:
+  - url: https://api.checkup.sg/v1
+    description: Production server
+  - url: https://staging-api.checkup.sg/v1
+    description: Staging server
+  - url: http://localhost:3000/v1
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Submissions
+    description: Medical exam submissions (completed and submitted)
+  - name: Drafts
+    description: Draft medical exams (incomplete)
+  - name: Approvals
+    description: Approval workflow for pending submissions
+  - name: Users
+    description: User management (admin only)
+  - name: Dashboard
+    description: Dashboard statistics and overview
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: doctor@clinic.sg
+                password:
+                  type: string
+                  format: password
+                  example: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT authentication token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate current session token
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Retrieve authenticated user information
+      responses:
+        '200':
+          description: User information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /submissions:
+    get:
+      tags:
+        - Submissions
+      summary: List all submissions
+      description: |
+        Get list of medical exam submissions. Results are filtered based on user role:
+        - Admins see all submissions
+        - Doctors/Nurses see only their own submissions
+      parameters:
+        - name: status
+          in: query
+          description: Filter by submission status
+          schema:
+            type: string
+            enum: [pending_approval, submitted, rejected]
+        - name: examType
+          in: query
+          description: Filter by exam type
+          schema:
+            $ref: '#/components/schemas/ExamType'
+        - name: patientName
+          in: query
+          description: Search by patient name (partial match)
+          schema:
+            type: string
+        - name: patientNric
+          in: query
+          description: Search by patient NRIC/FIN
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          description: Filter submissions from this date
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          description: Filter submissions until this date
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: List of submissions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MedicalSubmission'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags:
+        - Submissions
+      summary: Create new submission
+      description: |
+        Create a new medical exam submission. Behavior varies by role:
+        - Doctors: Submission goes directly to 'submitted' status
+        - Nurses: Submission goes to 'pending_approval' status unless routeForApproval is false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - examType
+                - patientName
+                - patientNric
+                - patientDateOfBirth
+                - formData
+              properties:
+                examType:
+                  $ref: '#/components/schemas/ExamType'
+                patientName:
+                  type: string
+                  example: Maria Santos
+                patientNric:
+                  type: string
+                  description: Singapore NRIC or FIN number
+                  example: S1234567A
+                patientDateOfBirth:
+                  type: string
+                  format: date
+                  example: "1990-05-15"
+                formData:
+                  type: object
+                  description: Exam-specific form fields
+                  additionalProperties: true
+                routeForApproval:
+                  type: boolean
+                  description: If true, route to doctor for approval (nurse only)
+                  default: true
+      responses:
+        '201':
+          description: Submission created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /submissions/{id}:
+    get:
+      tags:
+        - Submissions
+      summary: Get submission by ID
+      description: Retrieve detailed information about a specific submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Submission ID
+          schema:
+            type: string
+            example: sub-001
+      responses:
+        '200':
+          description: Submission details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    put:
+      tags:
+        - Submissions
+      summary: Update submission
+      description: Update an existing submission (only if not yet submitted)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patientName:
+                  type: string
+                patientNric:
+                  type: string
+                patientDateOfBirth:
+                  type: string
+                  format: date
+                formData:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Submission updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /drafts:
+    get:
+      tags:
+        - Drafts
+      summary: List all drafts
+      description: Get list of draft medical exams (incomplete submissions)
+      parameters:
+        - name: examType
+          in: query
+          schema:
+            $ref: '#/components/schemas/ExamType'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of drafts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MedicalSubmission'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags:
+        - Drafts
+      summary: Create draft
+      description: Save incomplete medical exam as draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - examType
+                - patientName
+              properties:
+                examType:
+                  $ref: '#/components/schemas/ExamType'
+                patientName:
+                  type: string
+                patientNric:
+                  type: string
+                patientDateOfBirth:
+                  type: string
+                  format: date
+                formData:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Draft created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /drafts/{id}:
+    get:
+      tags:
+        - Drafts
+      summary: Get draft by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Draft details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    put:
+      tags:
+        - Drafts
+      summary: Update draft
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patientName:
+                  type: string
+                patientNric:
+                  type: string
+                patientDateOfBirth:
+                  type: string
+                  format: date
+                formData:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Draft updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    delete:
+      tags:
+        - Drafts
+      summary: Delete draft
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Draft deleted
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /drafts/{id}/submit:
+    post:
+      tags:
+        - Drafts
+      summary: Submit draft
+      description: Convert draft to submission (pending_approval or submitted based on role)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                routeForApproval:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Draft submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /approvals:
+    get:
+      tags:
+        - Approvals
+      summary: List pending approvals
+      description: Get submissions pending doctor approval (doctors only)
+      parameters:
+        - name: examType
+          in: query
+          schema:
+            $ref: '#/components/schemas/ExamType'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of pending approvals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MedicalSubmission'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Not authorized (doctors only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /approvals/{id}/approve:
+    post:
+      tags:
+        - Approvals
+      summary: Approve submission
+      description: Approve pending submission and submit to government portal (doctors only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+                  description: Optional approval notes
+      responses:
+        '200':
+          description: Submission approved and submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /approvals/{id}/reject:
+    post:
+      tags:
+        - Approvals
+      summary: Reject submission
+      description: Reject pending submission and return to nurse (doctors only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                  description: Reason for rejection
+                  example: Incomplete blood pressure readings
+      responses:
+        '200':
+          description: Submission rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List clinic users
+      description: Get all users in the clinic (admin only)
+      parameters:
+        - name: role
+          in: query
+          description: Filter by user role
+          schema:
+            $ref: '#/components/schemas/UserRole'
+        - name: status
+          in: query
+          description: Filter by user status
+          schema:
+            type: string
+            enum: [active, inactive]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ClinicUser'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      tags:
+        - Users
+      summary: Create new user
+      description: Add new user to the clinic (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - role
+                - password
+              properties:
+                name:
+                  type: string
+                  example: Dr. John Smith
+                email:
+                  type: string
+                  format: email
+                  example: john.smith@clinic.sg
+                role:
+                  $ref: '#/components/schemas/UserRole'
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicUser'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicUser'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: Update user information (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                role:
+                  $ref: '#/components/schemas/UserRole'
+                status:
+                  type: string
+                  enum: [active, inactive]
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicUser'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Deactivate user (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard statistics
+      description: Retrieve overview statistics for the current user
+      responses:
+        '200':
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalSubmissions:
+                    type: integer
+                    description: Total submissions (all time)
+                    example: 156
+                  drafts:
+                    type: integer
+                    description: Number of drafts
+                    example: 3
+                  pendingApprovals:
+                    type: integer
+                    description: Pending approvals (doctors only)
+                    example: 5
+                  thisMonthSubmissions:
+                    type: integer
+                    description: Submissions this month
+                    example: 23
+                  submittedCount:
+                    type: integer
+                    description: Successfully submitted count
+                    example: 142
+                  recentSubmissions:
+                    type: array
+                    description: 5 most recent submissions
+                    items:
+                      $ref: '#/components/schemas/MedicalSubmission'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /audit-trail/{submissionId}:
+    get:
+      tags:
+        - Submissions
+      summary: Get audit trail
+      description: Retrieve complete audit trail for a submission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit trail events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  submissionId:
+                    type: string
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                        eventType:
+                          type: string
+                          enum: [created, updated, submitted, approved, rejected]
+                        userId:
+                          type: string
+                        userName:
+                          type: string
+                        details:
+                          type: object
+                          additionalProperties: true
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        name:
+          type: string
+          example: Dr. Sarah Tan
+        email:
+          type: string
+          format: email
+          example: doctor@clinic.sg
+        role:
+          $ref: '#/components/schemas/UserRole'
+        clinicId:
+          type: string
+          example: clinic1
+        clinicName:
+          type: string
+          example: HealthFirst Medical Clinic
+
+    UserRole:
+      type: string
+      enum: [doctor, nurse, admin]
+      description: |
+        - doctor: Can create, approve, and submit exams
+        - nurse: Can create exams and route to doctors
+        - admin: Can manage users and view all data
+
+    ClinicUser:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          type: string
+          enum: [active, inactive]
+        lastLogin:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ExamType:
+      type: string
+      enum:
+        - Six-monthly Medical Exam for Migrant Domestic Workers (MOM)
+        - Full Medical Exam for Work Permit (MOM)
+        - Medical Exam for Aged Drivers (SPF)
+      description: |
+        Type of medical examination:
+        - Six-monthly Medical Exam for Migrant Domestic Workers: Regular health screening for MDWs
+        - Full Medical Exam for Work Permit: Comprehensive exam for work permit applications
+        - Medical Exam for Aged Drivers: Medical assessment for elderly drivers
+
+    SubmissionStatus:
+      type: string
+      enum: [draft, pending_approval, submitted, rejected]
+      description: |
+        - draft: Incomplete exam saved for later
+        - pending_approval: Submitted by nurse, awaiting doctor approval
+        - submitted: Approved and submitted to government portal
+        - rejected: Rejected by doctor, requires revision
+
+    MedicalSubmission:
+      type: object
+      required:
+        - id
+        - examType
+        - patientName
+        - patientNric
+        - patientDateOfBirth
+        - status
+        - createdBy
+        - createdByName
+        - createdDate
+        - clinicId
+        - formData
+      properties:
+        id:
+          type: string
+          example: sub-001
+        examType:
+          $ref: '#/components/schemas/ExamType'
+        patientName:
+          type: string
+          example: Maria Santos
+        patientNric:
+          type: string
+          description: Singapore NRIC or FIN number
+          example: S1234567A
+        patientDateOfBirth:
+          type: string
+          format: date
+          example: "1990-05-15"
+        status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        createdBy:
+          type: string
+          description: User ID who created the submission
+          example: "2"
+        createdByName:
+          type: string
+          example: Nurse Mary Lim
+        createdDate:
+          type: string
+          format: date-time
+          example: "2025-10-15T10:30:00Z"
+        submittedDate:
+          type: string
+          format: date-time
+          description: Date when submitted to government portal
+          example: "2025-10-15T14:20:00Z"
+        approvedBy:
+          type: string
+          description: Doctor ID who approved
+          example: "1"
+        approvedByName:
+          type: string
+          example: Dr. Sarah Tan
+        approvedDate:
+          type: string
+          format: date-time
+          example: "2025-10-15T14:00:00Z"
+        rejectedReason:
+          type: string
+          description: Reason for rejection (if status is rejected)
+        clinicId:
+          type: string
+          example: clinic1
+        formData:
+          type: object
+          description: Exam-specific form fields
+          additionalProperties: true
+          example:
+            height: "160"
+            weight: "55"
+            bloodPressure: "120/80"
+            pregnancyTest: "Negative"
+            chestXray: "Normal"
+
+    MDWExamFormData:
+      description: Form data for Six-monthly Medical Exam for Migrant Domestic Workers
+      type: object
+      properties:
+        height:
+          type: string
+          description: Height in cm
+          example: "160"
+        weight:
+          type: string
+          description: Weight in kg
+          example: "55"
+        bloodPressure:
+          type: string
+          pattern: '^\d{2,3}/\d{2,3}$'
+          example: "120/80"
+        pregnancyTest:
+          type: string
+          enum: [Positive, Negative, Not Applicable]
+        chestXray:
+          type: string
+          enum: [Normal, Abnormal]
+        chestXrayDetails:
+          type: string
+          description: Details if abnormal
+        fitnessToWork:
+          type: string
+          enum: [Fit, Unfit, Fit with conditions]
+
+    WorkPermitExamFormData:
+      description: Form data for Full Medical Exam for Work Permit
+      type: object
+      properties:
+        height:
+          type: string
+          example: "175"
+        weight:
+          type: string
+          example: "70"
+        bloodPressure:
+          type: string
+          example: "118/75"
+        hivTest:
+          type: string
+          enum: [Positive, Negative]
+        tbTest:
+          type: string
+          enum: [Positive, Negative]
+        hepatitisBTest:
+          type: string
+          enum: [Positive, Negative]
+        syphilisTest:
+          type: string
+          enum: [Positive, Negative]
+        malariaTest:
+          type: string
+          enum: [Positive, Negative]
+        chestXray:
+          type: string
+          enum: [Normal, Abnormal]
+        urinalysis:
+          type: string
+
+    AgedDriverExamFormData:
+      description: Form data for Medical Exam for Aged Drivers
+      type: object
+      properties:
+        visualAcuity:
+          type: string
+          example: "6/6"
+        visualAcuityLeft:
+          type: string
+          example: "6/6"
+        visualAcuityRight:
+          type: string
+          example: "6/6"
+        hearingTest:
+          type: string
+          enum: [Normal, Impaired]
+        bloodPressure:
+          type: string
+          example: "130/85"
+        diabetes:
+          type: string
+          enum: [Yes, No]
+        diabetesControlled:
+          type: string
+          enum: [Yes, No, N/A]
+        heartCondition:
+          type: string
+          enum: [Yes, No]
+        neurologicalCondition:
+          type: string
+          enum: [Yes, No]
+        fitnessStatus:
+          type: string
+          enum: [Fit to Drive, Unfit to Drive, Fit with restrictions]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        totalPages:
+          type: integer
+          example: 5
+        totalItems:
+          type: integer
+          example: 94
+        hasNext:
+          type: boolean
+          example: true
+        hasPrevious:
+          type: boolean
+          example: false
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Invalid credentials
+        code:
+          type: string
+          description: Error code
+          example: AUTH_FAILED
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
+
+  responses:
+    UnauthorizedError:
+      description: Authentication failed or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Unauthorized
+            code: UNAUTHORIZED
+            
+    ForbiddenError:
+      description: User doesn't have permission for this action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Forbidden - insufficient permissions
+            code: FORBIDDEN
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Resource not found
+            code: NOT_FOUND
+
+    BadRequestError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Validation failed
+            code: VALIDATION_ERROR
+            details:
+              patientNric: Invalid NRIC format
