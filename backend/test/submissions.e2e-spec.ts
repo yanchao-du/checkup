@@ -1,0 +1,324 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import request from 'supertest';
+import { AppModule } from './../src/app.module';
+import { PrismaService } from '../src/prisma/prisma.service';
+
+describe('Submissions (e2e)', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+  let doctorToken: string;
+  let nurseToken: string;
+  let adminToken: string;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('v1');
+    app.useGlobalPipes(new ValidationPipe());
+    app.enableCors();
+    
+    prisma = app.get<PrismaService>(PrismaService);
+    
+    await app.init();
+
+    // Get tokens for all user roles
+    const doctorRes = await request(app.getHttpServer())
+      .post('/v1/auth/login')
+      .send({ email: 'doctor@clinic.sg', password: 'password' });
+    doctorToken = doctorRes.body.token;
+
+    const nurseRes = await request(app.getHttpServer())
+      .post('/v1/auth/login')
+      .send({ email: 'nurse@clinic.sg', password: 'password' });
+    nurseToken = nurseRes.body.token;
+
+    const adminRes = await request(app.getHttpServer())
+      .post('/v1/auth/login')
+      .send({ email: 'admin@clinic.sg', password: 'password' });
+    adminToken = adminRes.body.token;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  describe('/v1/submissions (GET)', () => {
+    it('should return submissions for doctor', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('data');
+          expect(res.body).toHaveProperty('pagination');
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.pagination).toHaveProperty('page');
+          expect(res.body.pagination).toHaveProperty('totalItems');
+        });
+    });
+
+    it('should return submissions for nurse', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('data');
+          expect(Array.isArray(res.body.data)).toBe(true);
+        });
+    });
+
+    it('should return all clinic submissions for admin', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('data');
+          expect(Array.isArray(res.body.data)).toBe(true);
+        });
+    });
+
+    it('should filter by status', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions?status=submitted')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data.every((s: any) => s.status === 'submitted')).toBe(true);
+        });
+    });
+
+    it('should filter by exam type', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions?examType=SIX_MONTHLY_MDW')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200);
+    });
+
+    it('should paginate results', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions?page=1&limit=2')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.pagination.page).toBe(1);
+          expect(res.body.pagination.limit).toBe(2);
+        });
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions')
+        .expect(401);
+    });
+  });
+
+  describe('/v1/submissions (POST)', () => {
+    it('should create submission as doctor (direct submit)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          patientName: 'Test Patient Doctor',
+          patientNric: 'S9999999A',
+          patientDateOfBirth: '1990-01-01',
+          formData: {
+            height: '170',
+            weight: '65',
+            bloodPressure: '120/80',
+            pregnancyTest: 'Negative',
+            chestXray: 'Normal',
+          },
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+      expect(res.body.patientName).toBe('Test Patient Doctor');
+      expect(res.body.examType).toBe('SIX_MONTHLY_MDW');
+      expect(res.body).toHaveProperty('id');
+      expect(res.body).toHaveProperty('createdBy');
+      expect(res.body).toHaveProperty('submittedDate');
+    });
+
+    it('should create submission as nurse (pending approval)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'WORK_PERMIT',
+          patientName: 'Test Patient Nurse',
+          patientNric: 'S8888888B',
+          patientDateOfBirth: '1985-05-15',
+          formData: {
+            height: '165',
+            weight: '60',
+            bloodPressure: '118/75',
+            hivTest: 'Negative',
+            tbTest: 'Negative',
+          },
+          routeForApproval: true,
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('pending_approval');
+      expect(res.body.patientName).toBe('Test Patient Nurse');
+      expect(res.body.submittedDate).toBeNull();
+    });
+
+    it('should create submission as nurse without routing for approval', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'AGED_DRIVERS',
+          patientName: 'Test Patient Direct',
+          patientNric: 'S7777777C',
+          patientDateOfBirth: '1960-03-20',
+          formData: {
+            visualAcuity: '6/6',
+            hearingTest: 'Normal',
+            bloodPressure: '125/80',
+          },
+          routeForApproval: false,
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .post('/v1/submissions')
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          patientName: 'Test',
+          patientNric: 'S1111111A',
+          patientDateOfBirth: '1990-01-01',
+          formData: {},
+        })
+        .expect(401);
+    });
+
+    it('should fail with missing required fields', () => {
+      return request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          // Missing required fields
+        })
+        .expect(400);
+    });
+  });
+
+  describe('/v1/submissions/:id (GET)', () => {
+    let submissionId: string;
+
+    beforeAll(async () => {
+      // Create a test submission
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          patientName: 'Test Get',
+          patientNric: 'S6666666D',
+          patientDateOfBirth: '1992-06-10',
+          formData: { height: '160' },
+        });
+      submissionId = res.body.id;
+    });
+
+    it('should get submission by id', () => {
+      return request(app.getHttpServer())
+        .get(`/v1/submissions/${submissionId}`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.id).toBe(submissionId);
+          expect(res.body.patientName).toBe('Test Get');
+        });
+    });
+
+    it('should fail for non-existent submission', () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions/00000000-0000-0000-0000-000000000000')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(404);
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .get(`/v1/submissions/${submissionId}`)
+        .expect(401);
+    });
+  });
+
+  describe('/v1/submissions/:id (PUT)', () => {
+    let submissionId: string;
+
+    beforeAll(async () => {
+      // Create a test submission in pending_approval status
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'WORK_PERMIT',
+          patientName: 'Test Update',
+          patientNric: 'S5555555E',
+          patientDateOfBirth: '1988-08-08',
+          formData: { height: '170' },
+          routeForApproval: true,
+        });
+      submissionId = res.body.id;
+    });
+
+    it('should update submission', async () => {
+      const res = await request(app.getHttpServer())
+        .put(`/v1/submissions/${submissionId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          patientName: 'Test Update Modified',
+          formData: { height: '175', weight: '70' },
+        })
+        .expect(200);
+
+      expect(res.body.patientName).toBe('Test Update Modified');
+      expect(res.body.formData.height).toBe('175');
+      expect(res.body.formData.weight).toBe('70');
+    });
+
+    it('should fail to update submitted submission', async () => {
+      // Create submitted submission
+      const submitted = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          patientName: 'Already Submitted',
+          patientNric: 'S4444444F',
+          patientDateOfBirth: '1991-01-01',
+          formData: {},
+        });
+
+      return request(app.getHttpServer())
+        .put(`/v1/submissions/${submitted.body.id}`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({ patientName: 'Should Fail' })
+        .expect(403);
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .put(`/v1/submissions/${submissionId}`)
+        .send({ patientName: 'Fail' })
+        .expect(401);
+    });
+  });
+});
