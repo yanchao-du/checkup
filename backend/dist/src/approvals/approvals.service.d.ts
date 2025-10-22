@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class ApprovalsService {
     private prisma;
     constructor(prisma: PrismaService);
-    findPendingApprovals(clinicId: string, examType?: string, page?: number, limit?: number): Promise<{
+    findPendingApprovals(clinicId: string, examType?: string, pageParam?: number, limitParam?: number): Promise<{
         data: {
             id: any;
             examType: any;

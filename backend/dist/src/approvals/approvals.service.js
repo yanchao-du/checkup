@@ -17,7 +17,9 @@ let ApprovalsService = class ApprovalsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async findPendingApprovals(clinicId, examType, page = 1, limit = 20) {
+    async findPendingApprovals(clinicId, examType, pageParam, limitParam) {
+        const page = Number(pageParam) || 1;
+        const limit = Number(limitParam) || 20;
         const where = {
             clinicId,
             status: 'pending_approval',

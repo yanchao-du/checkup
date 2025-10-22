@@ -18,31 +18,29 @@ const approvals_service_1 = require("./approvals.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
+const approval_dto_1 = require("./dto/approval.dto");
 let ApprovalsController = class ApprovalsController {
     approvalsService;
     constructor(approvalsService) {
         this.approvalsService = approvalsService;
     }
-    findPendingApprovals(user, examType, page, limit) {
+    findPendingApprovals(user, query) {
         if (user.role !== 'doctor') {
             throw new common_1.ForbiddenException('Only doctors can view approvals');
         }
-        return this.approvalsService.findPendingApprovals(user.clinicId, examType, page, limit);
+        return this.approvalsService.findPendingApprovals(user.clinicId, query.examType, query.page, query.limit);
     }
-    approve(id, user, notes) {
+    approve(id, user, dto) {
         if (user.role !== 'doctor') {
             throw new common_1.ForbiddenException('Only doctors can approve submissions');
         }
-        return this.approvalsService.approve(id, user.id, user.clinicId, notes);
+        return this.approvalsService.approve(id, user.id, user.clinicId, dto.notes);
     }
-    reject(id, user, reason) {
+    reject(id, user, dto) {
         if (user.role !== 'doctor') {
             throw new common_1.ForbiddenException('Only doctors can reject submissions');
         }
-        if (!reason) {
-            throw new common_1.ForbiddenException('Rejection reason is required');
-        }
-        return this.approvalsService.reject(id, user.id, user.clinicId, reason);
+        return this.approvalsService.reject(id, user.id, user.clinicId, dto.reason);
     }
 };
 exports.ApprovalsController = ApprovalsController;
@@ -50,11 +48,9 @@ __decorate([
     (0, common_1.Get)(),
     (0, roles_decorator_1.Roles)('doctor'),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __param(1, (0, common_1.Query)('examType')),
-    __param(2, (0, common_1.Query)('page')),
-    __param(3, (0, common_1.Query)('limit')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Number, Number]),
+    __metadata("design:paramtypes", [Object, approval_dto_1.ApprovalQueryDto]),
     __metadata("design:returntype", void 0)
 ], ApprovalsController.prototype, "findPendingApprovals", null);
 __decorate([
@@ -62,9 +58,9 @@ __decorate([
     (0, roles_decorator_1.Roles)('doctor'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
-    __param(2, (0, common_1.Body)('notes')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, String]),
+    __metadata("design:paramtypes", [String, Object, approval_dto_1.ApproveDto]),
     __metadata("design:returntype", void 0)
 ], ApprovalsController.prototype, "approve", null);
 __decorate([
@@ -72,9 +68,9 @@ __decorate([
     (0, roles_decorator_1.Roles)('doctor'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
-    __param(2, (0, common_1.Body)('reason')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, String]),
+    __metadata("design:paramtypes", [String, Object, approval_dto_1.RejectDto]),
     __metadata("design:returntype", void 0)
 ], ApprovalsController.prototype, "reject", null);
 exports.ApprovalsController = ApprovalsController = __decorate([

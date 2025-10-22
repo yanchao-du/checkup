@@ -6,13 +6,13 @@ Your NestJS backend for the CheckUp Medical Portal is now running successfully!
 
 ## 📊 What's Running
 
-**Backend API**: http://localhost:3001/v1
+**Backend API**: http://localhost:3344/v1
 **Database**: PostgreSQL (local instance on port 5432)
 **Database Name**: `checkup_medical`
 
 ## ⚙️ Configuration
 
-- **Port Changed**: 3001 (instead of 3000, which was in use)
+- **Port**: 3344 (configurable in .env)
 - **Database**: Using your existing local PostgreSQL instead of Docker
 - **SSL Certificate**: Bypassed for Prisma downloads (corporate proxy issue)
 
@@ -36,26 +36,26 @@ Login with these credentials:
 
 ### 1. Login as Doctor
 ```bash
-curl -X POST http://localhost:3001/v1/auth/login \
+curl -X POST http://localhost:3344/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"doctor@clinic.sg","password":"password"}'
 ```
 
 ### 2. Get Current User (with token)
 ```bash
-curl -X GET http://localhost:3001/v1/auth/me \
+curl -X GET http://localhost:3344/v1/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### 3. List Submissions
 ```bash
-curl -X GET http://localhost:3001/v1/submissions \
+curl -X GET http://localhost:3344/v1/submissions \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### 4. List Pending Approvals (Doctor only)
 ```bash
-curl -X GET http://localhost:3001/v1/approvals \
+curl -X GET http://localhost:3344/v1/approvals \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -131,8 +131,8 @@ npx prisma migrate reset
 ## 🔧 Troubleshooting
 
 ### Port Already in Use
-- Changed from 3000 → 3001 in `.env`
-- Frontend should connect to `http://localhost:3001/v1`
+- Backend configured to use port 3344 in `.env`
+- Frontend should connect to `http://localhost:3344/v1`
 
 ### PostgreSQL Not Running
 ```bash
@@ -158,7 +158,7 @@ Update your React frontend to use the API:
 1. **Update API Base URL**
    ```typescript
    // src/api/client.ts
-   const API_URL = 'http://localhost:3001/v1';
+   const API_URL = 'http://localhost:3344/v1';
    ```
 
 2. **Replace `useMockData` Hook**
@@ -169,7 +169,7 @@ Update your React frontend to use the API:
 3. **Update Auth Context**
    ```typescript
    // Login
-   const response = await fetch('http://localhost:3001/v1/auth/login', {
+   const response = await fetch('http://localhost:3344/v1/auth/login', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({ email, password })
@@ -200,7 +200,7 @@ Update your React frontend to use the API:
 
 The backend is fully functional and ready to integrate with your React frontend!
 
-**Backend API**: http://localhost:3001/v1 ✅
+**Backend API**: http://localhost:3344/v1 ✅
 **Database**: PostgreSQL with seed data ✅
 **Authentication**: JWT with role-based access ✅
 **Endpoints**: Auth, Submissions, Approvals ✅

@@ -35,13 +35,13 @@ Changed the frontend development server port from **5173** to **6688** and updat
 | Service | Port | URL |
 |---------|------|-----|
 | Frontend (Vite) | 6688 | http://localhost:6688 |
-| Backend (NestJS) | 3001 | http://localhost:3001/v1 |
+| Backend (NestJS) | 3344 | http://localhost:3344/v1 |
 | PostgreSQL | 5432 | localhost:5432 |
 
 ## Verification
 
 ✅ Frontend running on: http://localhost:6688
-✅ Backend configured to accept CORS from: http://localhost:6688
+✅ Backend configured to run on: http://localhost:3344/v1
 ✅ All documentation updated
 
 ## Next Steps

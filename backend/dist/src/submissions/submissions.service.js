@@ -52,7 +52,9 @@ let SubmissionsService = class SubmissionsService {
         return this.formatSubmission(submission);
     }
     async findAll(userId, userRole, clinicId, query) {
-        const { status, examType, patientName, patientNric, fromDate, toDate, page = 1, limit = 20 } = query;
+        const { status, examType, patientName, patientNric, fromDate, toDate } = query;
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 20;
         const where = {
             status: { not: 'draft' },
         };

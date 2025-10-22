@@ -1,8 +1,9 @@
 import { ApprovalsService } from './approvals.service';
+import { ApprovalQueryDto, ApproveDto, RejectDto } from './dto/approval.dto';
 export declare class ApprovalsController {
     private approvalsService;
     constructor(approvalsService: ApprovalsService);
-    findPendingApprovals(user: any, examType?: string, page?: number, limit?: number): Promise<{
+    findPendingApprovals(user: any, query: ApprovalQueryDto): Promise<{
         data: {
             id: any;
             examType: any;
@@ -30,7 +31,7 @@ export declare class ApprovalsController {
             hasPrevious: boolean;
         };
     }>;
-    approve(id: string, user: any, notes?: string): Promise<{
+    approve(id: string, user: any, dto: ApproveDto): Promise<{
         id: any;
         examType: any;
         patientName: any;
@@ -48,7 +49,7 @@ export declare class ApprovalsController {
         clinicId: any;
         formData: any;
     }>;
-    reject(id: string, user: any, reason: string): Promise<{
+    reject(id: string, user: any, dto: RejectDto): Promise<{
         id: any;
         examType: any;
         patientName: any;

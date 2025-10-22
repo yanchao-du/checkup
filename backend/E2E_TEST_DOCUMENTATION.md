@@ -227,7 +227,7 @@ npm run test:e2e
 ```bash
 # Backend should be stopped when running E2E tests
 # Tests start their own instance of the app
-lsof -ti:3001 | xargs kill -9
+lsof -ti:3344 | xargs kill -9
 npm run test:e2e
 ```
 

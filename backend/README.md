@@ -41,7 +41,7 @@ npx prisma db seed
 npm run start:dev
 ```
 
-The API will be available at `http://localhost:3001/v1`
+The API will be available at `http://localhost:3344/v1`
 
 ## 📁 Project Structure
 
@@ -179,7 +179,7 @@ npm run start:prod
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment | `development` |
-| `PORT` | Server port | `3001` |
+| `PORT` | Server port | `3344` |
 | `DATABASE_URL` | PostgreSQL connection string | - |
 | `JWT_SECRET` | JWT signing secret | - |
 | `JWT_EXPIRES_IN` | JWT expiration time | `1d` |
@@ -289,7 +289,7 @@ npx prisma generate
 ### Port Already in Use
 ```bash
 # Change PORT in .env file
-PORT=3001
+PORT=3344
 ```
 
 ## 🔮 Next Steps

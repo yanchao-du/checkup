@@ -73,7 +73,7 @@ npx prisma db seed
 node_modules/.bin/nest start --watch
 ```
 
-Backend API runs at: http://localhost:3001/v1
+Backend API runs at: http://localhost:3344/v1
 
 **See [BACKEND_SETUP_COMPLETE.md](BACKEND_SETUP_COMPLETE.md) for detailed setup instructions.**
 
