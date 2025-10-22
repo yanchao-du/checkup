@@ -6,7 +6,7 @@ Changed the frontend development server port from **5173** to **6688** and updat
 ## Changes Made
 
 ### 1. Frontend Configuration
-**File: `vite.config.ts`**
+**File: `frontend/vite.config.ts`**
 - Changed `server.port` from `3000` to `6688`
 
 ### 2. Backend CORS Configuration
@@ -47,7 +47,7 @@ Changed the frontend development server port from **5173** to **6688** and updat
 ## Next Steps
 
 If you need to change the port again in the future, update these files:
-1. `vite.config.ts` - Frontend port
+1. `frontend/vite.config.ts` - Frontend port
 2. `backend/.env` - CORS_ORIGIN
 3. `backend/src/main.ts` - Default CORS origin
 4. Documentation files (README.md, backend/README.md, API_DOCUMENTATION.md)

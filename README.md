@@ -23,9 +23,11 @@ A comprehensive medical examination portal for Singapore clinics with role-based
 
 ```
 CheckUp/
-├── src/                    # React frontend
-│   ├── components/        # UI components
-│   └── ...
+├── frontend/              # React frontend
+│   ├── src/              # Frontend source code
+│   ├── index.html        # HTML entry point
+│   ├── vite.config.ts    # Vite configuration
+│   └── package.json      # Frontend dependencies
 ├── backend/               # NestJS backend API
 │   ├── src/              # API source code
 │   ├── prisma/           # Database schema & migrations
@@ -41,6 +43,9 @@ CheckUp/
 ### Frontend (React)
 
 ```bash
+# Navigate to frontend
+cd frontend
+
 # Install dependencies
 npm install
 
