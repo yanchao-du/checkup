@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { useNavigate, NavigateFunction } from 'react-router-dom';
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { useNavigate, NavigateFunction, useLocation } from 'react-router-dom';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,32 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | number | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Block browser back/forward buttons
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      
+      // Push current state back to prevent navigation
+      window.history.pushState(null, '', window.location.pathname + window.location.search);
+      
+      // Show our custom dialog
+      setPendingNavigation(-1);
+      setShowDialog(true);
+    };
+
+    // Push a state to enable popstate detection
+    window.history.pushState(null, '', window.location.pathname + window.location.search);
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [hasUnsavedChanges, location]);
 
   const navigateWithConfirmation = useCallback((to: string | number) => {
     if (hasUnsavedChanges) {
@@ -44,13 +70,15 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       setHasUnsavedChanges(false);
       setShowDialog(false);
       
-      if (typeof pendingNavigation === 'number') {
-        navigate(pendingNavigation);
-      } else {
-        navigate(pendingNavigation);
-      }
-      
-      setPendingNavigation(null);
+      // Small delay to ensure state is cleared before navigation
+      setTimeout(() => {
+        if (typeof pendingNavigation === 'number') {
+          navigate(pendingNavigation);
+        } else {
+          navigate(pendingNavigation);
+        }
+        setPendingNavigation(null);
+      }, 0);
     }
   };
 
