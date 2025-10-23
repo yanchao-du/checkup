@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { approvalsApi } from '../services';
+import { approvalsApi, submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -15,8 +15,10 @@ import {
   TableRow,
 } from './ui/table';
 import { toast } from 'sonner';
+import { useAuth } from './AuthContext';
 
 export function RejectedSubmissions() {
+  const { user } = useAuth();
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,7 +26,10 @@ export function RejectedSubmissions() {
     const fetchRejectedSubmissions = async () => {
       try {
         setIsLoading(true);
-        const response = await approvalsApi.getRejected({ page: 1, limit: 100 });
+        // Doctors use approvals endpoint, nurses use submissions endpoint
+        const response = user?.role === 'doctor' 
+          ? await approvalsApi.getRejected({ page: 1, limit: 100 })
+          : await submissionsApi.getRejected({ page: 1, limit: 100 });
         setRejectedSubmissions(response.data);
       } catch (error) {
         console.error('Failed to fetch rejected submissions:', error);
@@ -35,7 +40,7 @@ export function RejectedSubmissions() {
     };
 
     fetchRejectedSubmissions();
-  }, []);
+  }, [user?.role]);
 
   if (isLoading) {
     return (
@@ -50,14 +55,20 @@ export function RejectedSubmissions() {
     <div className="space-y-6">
       <div>
         <h2 className="text-slate-900 mb-1">Rejected Submissions</h2>
-        <p className="text-slate-600">Review submissions you have rejected</p>
+        <p className="text-slate-600">
+          {user?.role === 'doctor' 
+            ? 'Review submissions you have rejected'
+            : 'Review your submissions that were rejected'}
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Rejected Medical Examinations ({rejectedSubmissions.length})</CardTitle>
           <CardDescription>
-            Submissions that were rejected and returned to drafts
+            {user?.role === 'doctor'
+              ? 'Submissions that were rejected and returned to drafts'
+              : 'Your submissions that were rejected by doctors'}
           </CardDescription>
         </CardHeader>
         <CardContent>

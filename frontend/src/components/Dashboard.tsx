@@ -51,8 +51,17 @@ export function Dashboard() {
           });
           setPendingApprovals(approvalsResponse.data);
 
-          // Fetch rejected submissions
+          // Fetch rejected submissions for doctors
           const rejectedResponse = await approvalsApi.getRejected({ 
+            page: 1, 
+            limit: 100 
+          });
+          setRejectedSubmissions(rejectedResponse.data);
+        }
+
+        // Fetch rejected submissions for nurses
+        if (user?.role === 'nurse') {
+          const rejectedResponse = await submissionsApi.getRejected({ 
             page: 1, 
             limit: 100 
           });

@@ -42,6 +42,18 @@ export const submissionsApi = {
     return submissionsApi.getAll(queryParams);
   },
 
+  // Get rejected submissions (for nurses)
+  getRejected: async (params?: SubmissionQueryParams): Promise<PaginatedResponse<MedicalSubmission>> => {
+    const queryString = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => [key, String(value)])
+    ).toString();
+    
+    const endpoint = queryString ? `/submissions/rejected?${queryString}` : '/submissions/rejected';
+    return apiClient.get<PaginatedResponse<MedicalSubmission>>(endpoint);
+  },
+
   // Get submission history (audit logs)
   getHistory: async (id: string): Promise<AuditLog[]> => {
     return apiClient.get<AuditLog[]>(`/submissions/${id}/history`);

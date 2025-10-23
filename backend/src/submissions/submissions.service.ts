@@ -116,6 +116,49 @@ export class SubmissionsService {
     };
   }
 
+  async findRejectedSubmissions(userId: string, clinicId: string, query: SubmissionQueryDto) {
+    const { examType } = query;
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 50;
+
+    const where: any = {
+      clinicId,
+      status: 'rejected',
+      createdById: userId, // Nurses see only their own rejected submissions
+    };
+
+    if (examType) {
+      where.examType = examType;
+    }
+
+    const [submissions, total] = await Promise.all([
+      this.prisma.medicalSubmission.findMany({
+        where,
+        include: {
+          createdBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+          approvedBy: { select: { name: true } }, // This will be the rejector
+        },
+        orderBy: { createdDate: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.medicalSubmission.count({ where }),
+    ]);
+
+    return {
+      data: submissions.map(s => this.formatSubmission(s)),
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        hasNext: page < Math.ceil(total / limit),
+        hasPrevious: page > 1,
+      },
+    };
+  }
+
   async findOne(id: string, userId: string, userRole: string, clinicId: string) {
     const submission = await this.prisma.medicalSubmission.findUnique({
       where: { id },

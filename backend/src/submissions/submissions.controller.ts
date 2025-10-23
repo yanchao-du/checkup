@@ -23,6 +23,11 @@ export class SubmissionsController {
     return this.submissionsService.findAll(user.id, user.role, user.clinicId, query);
   }
 
+  @Get('rejected')
+  findRejectedSubmissions(@CurrentUser() user: any, @Query() query: SubmissionQueryDto) {
+    return this.submissionsService.findRejectedSubmissions(user.id, user.clinicId, query);
+  }
+
   @Post()
   create(@CurrentUser() user: any, @Body() dto: CreateSubmissionDto) {
     return this.submissionsService.create(user.id, user.role, user.clinicId, dto);

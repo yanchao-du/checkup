@@ -82,7 +82,7 @@ function AppRoutes() {
                   <Route 
                     path="/rejected-submissions" 
                     element={
-                      <RoleProtectedRoute allowedRoles={['doctor', 'admin']}>
+                      <RoleProtectedRoute allowedRoles={['doctor', 'nurse', 'admin']}>
                         <RejectedSubmissions />
                       </RoleProtectedRoute>
                     } 
