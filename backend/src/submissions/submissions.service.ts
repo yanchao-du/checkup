@@ -280,11 +280,20 @@ export class SubmissionsService {
       throw new ForbiddenException('Only drafts can be submitted for approval');
     }
 
+    // Doctors submit directly to 'submitted' status
+    // Nurses submit to 'pending_approval' status
+    const status = userRole === 'doctor' ? 'submitted' : 'pending_approval';
+
     const submission = await this.prisma.medicalSubmission.update({
       where: { id },
       data: {
-        status: 'pending_approval',
+        status: status as any,
         submittedDate: new Date(),
+        // If doctor, auto-approve
+        ...(userRole === 'doctor' && {
+          approvedById: userId,
+          approvedDate: new Date(),
+        }),
       },
       include: {
         createdBy: { select: { name: true } },
@@ -300,8 +309,10 @@ export class SubmissionsService {
         userId,
         eventType: 'submitted',
         changes: { 
-          status: 'pending_approval',
-          assignedDoctorName: submission.assignedDoctor?.name,
+          status,
+          ...(status === 'pending_approval' && submission.assignedDoctor && {
+            assignedDoctorName: submission.assignedDoctor.name,
+          }),
         },
       },
     });

@@ -183,7 +183,9 @@ export function NewSubmission() {
         patientDateOfBirth,
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
-        routeForApproval: user.role === 'nurse' && isRouteForApproval,
+        // Don't send routeForApproval: false for doctors - backend treats that as draft
+        // Only send routeForApproval: true when nurse is routing for approval
+        ...(user.role === 'nurse' && isRouteForApproval && { routeForApproval: true }),
         assignedDoctorId: assignedDoctorId || undefined,
       };
 
@@ -191,10 +193,14 @@ export function NewSubmission() {
         // Update existing submission
         await submissionsApi.update(id, submissionData);
 
-        // If nurse and routing for approval
+        // Submit the draft (changes status from draft to submitted/pending_approval)
         if (user.role === 'nurse' && isRouteForApproval) {
           await submissionsApi.submitForApproval(id);
           toast.success('Routed for approval successfully');
+        } else if (user.role === 'doctor') {
+          // Doctor submitting directly to agency
+          await submissionsApi.submitForApproval(id);
+          toast.success('Medical exam submitted successfully');
         } else {
           toast.success('Submission updated successfully');
         }
