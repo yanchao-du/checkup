@@ -559,7 +559,7 @@ export function NewSubmission() {
             <div className="space-y-2 px-6 pb-4">
               <Label htmlFor="assignedDoctor">Assign to Doctor *</Label>
               <Select value={assignedDoctorId} onValueChange={setAssignedDoctorId}>
-                <SelectTrigger id="assignedDoctor">
+                <SelectTrigger id="assignedDoctor" data-testid="assignedDoctor">
                   <SelectValue placeholder="Select a doctor" />
                 </SelectTrigger>
                 <SelectContent>
@@ -578,7 +578,7 @@ export function NewSubmission() {
           
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSubmit}>
+            <AlertDialogAction data-testid="confirm-submit-button" onClick={handleSubmit}>
               {isRouteForApproval ? 'Route for Approval' : 'Submit'}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -24,7 +24,7 @@ describe('Approval Workflow', () => {
           
           // Should show submission details
           cy.url().should('include', '/view-submission')
-          cy.contains('Patient Details').should('be.visible')
+          cy.contains('Patient Information').should('be.visible')
         }
       })
     })
