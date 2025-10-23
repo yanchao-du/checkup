@@ -4,9 +4,10 @@ import { approvalsApi, submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { XCircle, Eye, Loader2, RotateCcw } from 'lucide-react';
+import { XCircle, Eye, Loader2, RotateCcw, Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -23,6 +24,7 @@ export function RejectedSubmissions() {
   const navigate = useNavigate();
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [reopeningId, setReopeningId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,6 +46,11 @@ export function RejectedSubmissions() {
 
     fetchRejectedSubmissions();
   }, [user?.role]);
+
+  const filteredRejections = rejectedSubmissions.filter(submission => 
+    submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleReopen = async (submissionId: string) => {
     try {
@@ -89,7 +96,25 @@ export function RejectedSubmissions() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Rejected Medical Examinations ({rejectedSubmissions.length})</CardTitle>
+          <CardTitle>Search Rejected Submissions</CardTitle>
+          <CardDescription>Find submissions by patient name or NRIC</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search by patient name or NRIC..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Rejected Medical Examinations ({filteredRejections.length})</CardTitle>
           <CardDescription>
             {user?.role === 'doctor'
               ? 'Submissions that were rejected and returned to drafts'
@@ -97,11 +122,12 @@ export function RejectedSubmissions() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {rejectedSubmissions.length === 0 ? (
+          {filteredRejections.length === 0 ? (
             <div className="text-center py-12">
               <XCircle className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Rejected Submissions</h3>
-              <p className="text-sm mt-1">You haven't rejected any submissions yet</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Rejected Submissions Found</h3>
+              {searchQuery && <p className="text-sm mt-1">Try adjusting your search</p>}
+              {!searchQuery && <p className="text-sm mt-1">You haven't rejected any submissions yet</p>}
             </div>
           ) : (
             <Table>
@@ -119,7 +145,7 @@ export function RejectedSubmissions() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rejectedSubmissions.map((submission) => (
+                {filteredRejections.map((submission) => (
                   <TableRow key={submission.id}>
                     <TableCell className="font-medium">{submission.patientName}</TableCell>
                     <TableCell>{submission.patientNric}</TableCell>

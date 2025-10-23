@@ -5,9 +5,9 @@ import { approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Clock, Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -33,6 +33,7 @@ export function PendingApprovals() {
   const navigate = useNavigate();
   const [pendingApprovals, setPendingApprovals] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<MedicalSubmission | null>(null);
   const [isApproving, setIsApproving] = useState(false);
 
@@ -52,6 +53,11 @@ export function PendingApprovals() {
 
     fetchPendingApprovals();
   }, []);
+
+  const filteredApprovals = pendingApprovals.filter(approval => 
+    approval.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    approval.patientNric.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleApprove = async () => {
     if (!selectedSubmission || !user) return;
@@ -115,15 +121,34 @@ export function PendingApprovals() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Submissions Awaiting Approval ({pendingApprovals.length})</CardTitle>
+          <CardTitle>Search Pending Approvals</CardTitle>
+          <CardDescription>Find submissions by patient name or NRIC</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search by patient name or NRIC..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Submissions Awaiting Approval ({filteredApprovals.length})</CardTitle>
           <CardDescription>Review medical exams before submission to government agencies</CardDescription>
         </CardHeader>
         <CardContent data-testid="approvals-list">
-          {pendingApprovals.length === 0 ? (
+          {filteredApprovals.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <CheckCircle className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p>No pending approvals</p>
-              <p className="text-sm mt-1">All submissions have been reviewed</p>
+              <p>No pending approvals found</p>
+              {searchQuery && <p className="text-sm mt-1">Try adjusting your search</p>}
+              {!searchQuery && <p className="text-sm mt-1">All submissions have been reviewed</p>}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -139,7 +164,7 @@ export function PendingApprovals() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pendingApprovals.map((submission) => (
+                  {filteredApprovals.map((submission) => (
                     <TableRow 
                       key={submission.id}
                       className="cursor-pointer hover:bg-slate-50"
