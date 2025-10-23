@@ -6,11 +6,12 @@ import { Link } from 'react-router-dom';
 import { 
   FileText, 
   FileEdit, 
-  CheckCircle, 
+  CheckCircle,
+  XCircle,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Send
 } from 'lucide-react';
-import { Badge } from './ui/badge';
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
@@ -20,6 +21,7 @@ export function Dashboard() {
   const [submissions, setSubmissions] = useState<MedicalSubmission[]>([]);
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<MedicalSubmission[]>([]);
+  const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -48,6 +50,13 @@ export function Dashboard() {
             limit: 100 
           });
           setPendingApprovals(approvalsResponse.data);
+
+          // Fetch rejected submissions
+          const rejectedResponse = await approvalsApi.getRejected({ 
+            page: 1, 
+            limit: 100 
+          });
+          setRejectedSubmissions(rejectedResponse.data);
         }
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
@@ -58,6 +67,97 @@ export function Dashboard() {
 
     fetchData();
   }, [user?.role]);
+
+  // Combine all activities for doctors
+  const getRecentActivities = () => {
+    type Activity = MedicalSubmission & { 
+      activityType: 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'submitted';
+      activityDate: Date;
+    };
+
+    const activities: Activity[] = [];
+
+    // Add drafts
+    drafts.forEach(draft => {
+      activities.push({
+        ...draft,
+        activityType: 'draft',
+        activityDate: new Date(draft.createdDate),
+      });
+    });
+
+    // Add submissions by status
+    submissions.forEach(submission => {
+      let activityType: 'pending_approval' | 'approved' | 'rejected' | 'submitted' = 'submitted';
+      
+      if (submission.status === 'pending_approval') {
+        activityType = 'pending_approval';
+      } else if (submission.status === 'submitted' && submission.approvedByName) {
+        activityType = 'approved'; // Doctor approved and submitted to agency
+      } else if (submission.status === 'rejected') {
+        activityType = 'rejected';
+      }
+
+      activities.push({
+        ...submission,
+        activityType,
+        activityDate: new Date(submission.submittedDate || submission.approvedDate || submission.createdDate),
+      });
+    });
+
+    // Add rejected submissions for doctors (if not already included)
+    if (user?.role === 'doctor') {
+      rejectedSubmissions.forEach(rejected => {
+        // Only add if not already in submissions list
+        if (!activities.find(a => a.id === rejected.id)) {
+          activities.push({
+            ...rejected,
+            activityType: 'rejected',
+            activityDate: new Date(rejected.createdDate),
+          });
+        }
+      });
+    }
+
+    // Sort by date, most recent first
+    return activities.sort((a, b) => b.activityDate.getTime() - a.activityDate.getTime()).slice(0, 10);
+  };
+
+  const recentActivities = getRecentActivities();
+
+  const getActivityIcon = (activityType: string) => {
+    switch (activityType) {
+      case 'draft':
+        return { Icon: FileEdit, bgColor: 'bg-amber-50', iconColor: 'text-amber-600' };
+      case 'pending_approval':
+        return { Icon: AlertCircle, bgColor: 'bg-orange-50', iconColor: 'text-orange-600' };
+      case 'approved':
+        return { Icon: CheckCircle, bgColor: 'bg-green-50', iconColor: 'text-green-600' };
+      case 'rejected':
+        return { Icon: XCircle, bgColor: 'bg-red-50', iconColor: 'text-red-600' };
+      case 'submitted':
+        return { Icon: Send, bgColor: 'bg-blue-50', iconColor: 'text-blue-600' };
+      default:
+        return { Icon: FileText, bgColor: 'bg-gray-50', iconColor: 'text-gray-600' };
+    }
+  };
+
+  const getActivityLabel = (activityType: string) => {
+    switch (activityType) {
+      case 'draft':
+        return 'Draft Created';
+      case 'pending_approval':
+        return 'Pending Approval';
+      case 'approved':
+        return 'Approved & Submitted';
+      case 'rejected':
+        return 'Rejected';
+      case 'submitted':
+        return 'Submitted';
+      default:
+        return activityType;
+    }
+  };
 
   const thisMonthSubmissions = submissions.filter(s => {
     const date = new Date(s.submittedDate || s.createdDate);
@@ -166,17 +266,17 @@ export function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Recent Submissions */}
+      {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Submissions</CardTitle>
-          <CardDescription>Your latest medical exam submissions</CardDescription>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>Your latest actions and submissions</CardDescription>
         </CardHeader>
         <CardContent>
-          {submissions.length === 0 ? (
+          {recentActivities.length === 0 ? (
             <div className="text-center py-8 text-slate-500">
               <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p>No submissions yet</p>
+              <p>No recent activity</p>
               {(user?.role === 'doctor' || user?.role === 'nurse') && (
                 <Link to="/new-submission">
                   <Button variant="link" className="mt-2">Create your first submission</Button>
@@ -185,40 +285,44 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {submissions.slice(0, 5).map((submission: MedicalSubmission) => (
-                <Link 
-                  key={submission.id} 
-                  to={`/view-submission/${submission.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-50 rounded flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-blue-600" />
+              {recentActivities.map((activity) => {
+                const { Icon, bgColor, iconColor } = getActivityIcon(activity.activityType);
+                const linkPath = activity.activityType === 'draft' 
+                  ? `/draft/${activity.id}` 
+                  : `/view-submission/${activity.id}`;
+                
+                return (
+                  <Link 
+                    key={activity.id} 
+                    to={linkPath}
+                    className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 ${bgColor} rounded flex items-center justify-center`}>
+                        <Icon className={`w-5 h-5 ${iconColor}`} />
+                      </div>
+                      <div>
+                        <p className="text-slate-900">{activity.patientName}</p>
+                        <p className="text-sm text-slate-500">{formatExamType(activity.examType)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-slate-900">{submission.patientName}</p>
-                      <p className="text-sm text-slate-500">{formatExamType(submission.examType)}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType)}</p>
+                        {activity.activityType === 'approved' && activity.approvedByName && (
+                          <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
+                        )}
+                        {activity.activityType === 'rejected' && activity.approvedByName && (
+                          <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
+                        )}
+                      </div>
+                      <span className="text-sm text-slate-500">
+                        {activity.activityDate.toLocaleDateString()}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant={
-                      submission.status === 'submitted' ? 'default' :
-                      submission.status === 'pending_approval' ? 'secondary' :
-                      'outline'
-                    }>
-                      {submission.status.replace('_', ' ')}
-                    </Badge>
-                    <span className="text-sm text-slate-500">
-                      {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-              {submissions.length > 5 && (
-                <Link to="/submissions">
-                  <Button variant="link" className="w-full">View all submissions</Button>
-                </Link>
-              )}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </CardContent>
