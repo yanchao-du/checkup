@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { approvalsApi, submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { XCircle, Eye, Loader2 } from 'lucide-react';
+import { Button } from './ui/button';
+import { XCircle, Eye, Loader2, RotateCcw } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -19,8 +20,10 @@ import { useAuth } from './AuthContext';
 
 export function RejectedSubmissions() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [reopeningId, setReopeningId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRejectedSubmissions = async () => {
@@ -41,6 +44,21 @@ export function RejectedSubmissions() {
 
     fetchRejectedSubmissions();
   }, [user?.role]);
+
+  const handleReopen = async (submissionId: string) => {
+    try {
+      setReopeningId(submissionId);
+      await submissionsApi.reopenSubmission(submissionId);
+      toast.success('Submission reopened and moved to drafts');
+      // Redirect to draft edit page
+      navigate(`/draft/${submissionId}`);
+    } catch (error) {
+      console.error('Failed to reopen submission:', error);
+      toast.error('Failed to reopen submission');
+    } finally {
+      setReopeningId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -115,12 +133,35 @@ export function RejectedSubmissions() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link to={`/view-submission/${submission.id}`}>
-                        <button className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
-                          <Eye className="w-4 h-4" />
-                          View
-                        </button>
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link to={`/view-submission/${submission.id}`}>
+                          <button className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
+                            <Eye className="w-4 h-4" />
+                            View
+                          </button>
+                        </Link>
+                        {user?.role === 'nurse' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleReopen(submission.id)}
+                            disabled={reopeningId === submission.id}
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          >
+                            {reopeningId === submission.id ? (
+                              <>
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                Reopening...
+                              </>
+                            ) : (
+                              <>
+                                <RotateCcw className="w-3 h-3 mr-1" />
+                                Reopen
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

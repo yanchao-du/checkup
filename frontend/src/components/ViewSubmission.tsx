@@ -460,6 +460,60 @@ export function ViewSubmission() {
         </Card>
       )}
 
+      {/* Nurse Reopen Button - only show for nurses viewing their own rejected submissions */}
+      {user?.role === 'nurse' && submission.status === 'rejected' && submission.createdById === user.id && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Submission Rejected</CardTitle>
+            <CardDescription>
+              This submission was rejected. You can reopen it to make changes and resubmit for approval.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {submission.rejectedReason && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm font-medium text-red-900 mb-1">Rejection Reason:</p>
+                  <p className="text-sm text-red-700">{submission.rejectedReason}</p>
+                </div>
+              )}
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  className="text-green-600 border-green-300 hover:bg-green-50"
+                  onClick={async () => {
+                    try {
+                      setIsSubmitting(true);
+                      await submissionsApi.reopenSubmission(id!);
+                      toast.success('Submission reopened and moved to drafts');
+                      navigate(`/draft/${id}`);
+                    } catch (error) {
+                      console.error('Failed to reopen submission:', error);
+                      toast.error('Failed to reopen submission');
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Reopening...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Reopen & Edit Submission
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Approve Dialog */}
       <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
         <AlertDialogContent>

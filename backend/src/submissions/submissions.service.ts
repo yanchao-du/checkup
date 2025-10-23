@@ -202,6 +202,7 @@ export class SubmissionsService {
     const submission = await this.prisma.medicalSubmission.update({
       where: { id },
       data: {
+        ...(dto.examType && { examType: dto.examType as any }),
         ...(dto.patientName && { patientName: dto.patientName }),
         ...(dto.patientNric && { patientNric: dto.patientNric }),
         ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
@@ -266,6 +267,53 @@ export class SubmissionsService {
         changes: { 
           status: 'pending_approval',
           assignedDoctorName: submission.assignedDoctor?.name,
+        },
+      },
+    });
+
+    return this.formatSubmission(submission);
+  }
+
+  async reopenSubmission(id: string, userId: string, userRole: string) {
+    const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    if (existing.createdById !== userId && userRole !== 'admin') {
+      throw new ForbiddenException('Access denied: You can only reopen your own submissions');
+    }
+
+    if (existing.status !== 'rejected') {
+      throw new ForbiddenException('Only rejected submissions can be reopened');
+    }
+
+    const submission = await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        status: 'draft',
+        rejectedReason: null,
+        approvedById: null,
+        approvedDate: null,
+      },
+      include: {
+        createdBy: { select: { name: true } },
+        approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
+      },
+    });
+
+    // Audit log
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'updated',
+        changes: { 
+          action: 'reopened',
+          previousStatus: 'rejected',
+          newStatus: 'draft',
         },
       },
     });

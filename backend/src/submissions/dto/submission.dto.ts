@@ -33,6 +33,10 @@ export class CreateSubmissionDto {
 export class UpdateSubmissionDto {
   @IsOptional()
   @IsString()
+  examType?: string;
+
+  @IsOptional()
+  @IsString()
   patientName?: string;
   
   @IsOptional()
@@ -54,6 +58,10 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsString()
   assignedDoctorId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  routeForApproval?: boolean;
 }
 
 export class SubmissionQueryDto {

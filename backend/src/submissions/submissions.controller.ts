@@ -48,6 +48,11 @@ export class SubmissionsController {
     return this.submissionsService.submitForApproval(id, user.id, user.role);
   }
 
+  @Post(':id/reopen')
+  reopenSubmission(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.submissionsService.reopenSubmission(id, user.id, user.role);
+  }
+
   @Get(':id/history')
   getHistory(@Param('id') id: string) {
     return this.submissionsService.getAuditTrail(id);

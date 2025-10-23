@@ -63,4 +63,9 @@ export const submissionsApi = {
   submitForApproval: async (id: string): Promise<MedicalSubmission> => {
     return apiClient.post<MedicalSubmission>(`/submissions/${id}/submit`);
   },
+
+  // Reopen rejected submission (convert back to draft)
+  reopenSubmission: async (id: string): Promise<MedicalSubmission> => {
+    return apiClient.post<MedicalSubmission>(`/submissions/${id}/reopen`);
+  },
 };
