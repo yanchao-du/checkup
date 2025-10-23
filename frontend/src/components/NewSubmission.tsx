@@ -83,6 +83,15 @@ export function NewSubmission() {
         } finally {
           setIsLoading(false);
         }
+      } else {
+        // Reset form when creating new submission (no id)
+        setExamType('');
+        setPatientName('');
+        setPatientNric('');
+        setPatientDateOfBirth('');
+        setExaminationDate('');
+        setAssignedDoctorId('');
+        setFormData({});
       }
     };
 
