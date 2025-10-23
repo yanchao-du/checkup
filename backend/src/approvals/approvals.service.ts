@@ -81,14 +81,30 @@ export class ApprovalsService {
       },
     });
 
-    // Audit log
-    await this.prisma.auditLog.create({
-      data: {
-        submissionId: id,
-        userId: doctorId,
-        eventType: 'approved',
-        changes: { notes },
-      },
+    // Determine agency based on exam type
+    const agency = updated.examType === 'AGED_DRIVERS' 
+      ? 'Singapore Police Force' 
+      : 'Ministry of Manpower';
+
+    // Create audit logs for both approval and agency submission
+    await this.prisma.auditLog.createMany({
+      data: [
+        {
+          submissionId: id,
+          userId: doctorId,
+          eventType: 'approved',
+          changes: { notes },
+        },
+        {
+          submissionId: id,
+          userId: doctorId,
+          eventType: 'submitted',
+          changes: { 
+            status: 'submitted',
+            agency,
+          },
+        },
+      ],
     });
 
     return this.formatSubmission(updated);

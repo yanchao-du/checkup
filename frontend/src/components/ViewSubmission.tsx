@@ -319,12 +319,16 @@ export function ViewSubmission() {
                       case 'updated':
                         return 'Draft Updated';
                       case 'submitted':
-                        // Only show "Submitted to Agency" if status is actually submitted (not pending_approval)
-                        if (details?.status === 'submitted' || submission.status === 'submitted') {
+                        // Check the status at the TIME of this event (from details), not current submission status
+                        if (details?.status === 'submitted') {
                           return 'Submitted to Agency';
                         }
-                        // If status is pending_approval, this means routed for approval
-                        return 'Routed for Approval';
+                        // If status was pending_approval, this means routed for approval
+                        if (details?.status === 'pending_approval') {
+                          return 'Routed for Approval';
+                        }
+                        // Fallback for old events without status in details
+                        return 'Submitted';
                       case 'approved':
                         return 'Approved by Doctor';
                       case 'rejected':
@@ -336,15 +340,17 @@ export function ViewSubmission() {
 
                   const getEventDescription = (eventType: string, details: any) => {
                     if (eventType === 'submitted') {
-                      // If routed for approval, show assigned doctor
-                      if (details?.assignedDoctorName || submission.assignedDoctorName) {
-                        return `Assigned to: ${details?.assignedDoctorName || submission.assignedDoctorName}`;
+                      // If routed for approval (status was pending_approval), show assigned doctor
+                      if (details?.status === 'pending_approval' && details?.assignedDoctorName) {
+                        return `Assigned to: ${details.assignedDoctorName}`;
                       }
-                      // If actually submitted to agency, show agency name
-                      if (details?.status === 'submitted' || submission.status === 'submitted') {
-                        return submission.examType === 'AGED_DRIVERS' 
-                          ? 'Singapore Police Force' 
-                          : 'Ministry of Manpower';
+                      // If submitted to agency (status was submitted), show agency name
+                      if (details?.status === 'submitted' && details?.agency) {
+                        return details.agency;
+                      }
+                      // Fallback to assigned doctor from submission if not in event details
+                      if (submission.assignedDoctorName && !details?.agency) {
+                        return `Assigned to: ${submission.assignedDoctorName}`;
                       }
                     }
                     if (eventType === 'approved' && submission.approvedByName) {
