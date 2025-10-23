@@ -16,7 +16,7 @@ export const approvalsApi = {
         .map(([key, value]) => [key, String(value)])
     ).toString();
     
-    const endpoint = queryString ? `/approvals/pending?${queryString}` : '/approvals/pending';
+    const endpoint = queryString ? `/approvals?${queryString}` : '/approvals';
     return apiClient.get<PaginatedResponse<MedicalSubmission>>(endpoint);
   },
 
