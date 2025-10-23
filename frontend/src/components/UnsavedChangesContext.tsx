@@ -24,12 +24,13 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | number | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   // Block browser back/forward buttons
   useEffect(() => {
-    if (!hasUnsavedChanges) return;
+    if (!hasUnsavedChanges || isNavigating) return;
 
     const handlePopState = (e: PopStateEvent) => {
       e.preventDefault();
@@ -50,7 +51,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [hasUnsavedChanges, location]);
+  }, [hasUnsavedChanges, location, isNavigating]);
 
   const navigateWithConfirmation = useCallback((to: string | number) => {
     if (hasUnsavedChanges) {
@@ -67,18 +68,27 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
   const handleProceed = () => {
     if (pendingNavigation !== null) {
+      // Set flags to allow navigation
+      setIsNavigating(true);
       setHasUnsavedChanges(false);
       setShowDialog(false);
       
-      // Small delay to ensure state is cleared before navigation
-      setTimeout(() => {
-        if (typeof pendingNavigation === 'number') {
-          navigate(pendingNavigation);
-        } else {
-          navigate(pendingNavigation);
-        }
-        setPendingNavigation(null);
-      }, 0);
+      // For back navigation, we need to go back twice:
+      // Once to undo the pushState we did to block it
+      // Once more to actually go back
+      if (typeof pendingNavigation === 'number' && pendingNavigation < 0) {
+        // Go back the number of times needed
+        const steps = pendingNavigation - 1; // -1 becomes -2, etc.
+        navigate(steps);
+      } else if (typeof pendingNavigation === 'number') {
+        navigate(pendingNavigation);
+      } else {
+        navigate(pendingNavigation);
+      }
+      
+      // Reset after navigation
+      setPendingNavigation(null);
+      setTimeout(() => setIsNavigating(false), 100);
     }
   };
 
