@@ -288,6 +288,34 @@ export function ViewSubmission() {
         </div>
 
         <div className="space-y-6">
+          {submission.status === 'submitted' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Agency Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-slate-500">Submitted To</p>
+                    <p className="text-slate-900">
+                      {submission.examType === 'AGED_DRIVERS' 
+                        ? 'Singapore Police Force' 
+                        : 'Ministry of Manpower'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Exam Category</p>
+                    <p className="text-slate-900 text-sm">
+                      {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
+                      {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
+                      {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Submission Timeline</CardTitle>
@@ -453,34 +481,6 @@ export function ViewSubmission() {
               )}
             </CardContent>
           </Card>
-
-          {submission.status === 'submitted' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Agency Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-slate-500">Submitted To</p>
-                    <p className="text-slate-900">
-                      {submission.examType === 'AGED_DRIVERS' 
-                        ? 'Singapore Police Force' 
-                        : 'Ministry of Manpower'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500">Exam Category</p>
-                    <p className="text-slate-900 text-sm">
-                      {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
-                      {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
-                      {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
 
