@@ -57,4 +57,14 @@ export const usersApi = {
   changeStatus: async (id: string, status: 'active' | 'inactive'): Promise<ClinicUser> => {
     return apiClient.put<ClinicUser>(`/users/${id}`, { status });
   },
+
+  // Get default doctor (Nurse only)
+  getDefaultDoctor: async (): Promise<{ defaultDoctorId: string | null; defaultDoctor: Doctor | null }> => {
+    return apiClient.get('/users/me/default-doctor');
+  },
+
+  // Set default doctor (Nurse only)
+  setDefaultDoctor: async (defaultDoctorId: string): Promise<{ message: string; defaultDoctorId: string | null; defaultDoctor: Doctor | null }> => {
+    return apiClient.put('/users/me/default-doctor', { defaultDoctorId });
+  },
 };

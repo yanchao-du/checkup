@@ -170,4 +170,79 @@ export class UsersService {
 
     return { message: 'User deleted successfully' };
   }
+
+  async getDefaultDoctor(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        defaultDoctorId: true,
+        defaultDoctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      defaultDoctorId: user.defaultDoctorId,
+      defaultDoctor: user.defaultDoctor,
+    };
+  }
+
+  async setDefaultDoctor(userId: string, defaultDoctorId: string) {
+    // Verify the user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Verify the doctor exists and is in the same clinic
+    if (defaultDoctorId) {
+      const doctor = await this.prisma.user.findFirst({
+        where: {
+          id: defaultDoctorId,
+          clinicId: user.clinicId,
+          role: 'doctor',
+          status: 'active',
+        },
+      });
+
+      if (!doctor) {
+        throw new NotFoundException('Doctor not found or inactive');
+      }
+    }
+
+    // Update the user's default doctor
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { defaultDoctorId },
+      select: {
+        id: true,
+        defaultDoctorId: true,
+        defaultDoctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return {
+      message: 'Default doctor updated successfully',
+      defaultDoctorId: updatedUser.defaultDoctorId,
+      defaultDoctor: updatedUser.defaultDoctor,
+    };
+  }
 }

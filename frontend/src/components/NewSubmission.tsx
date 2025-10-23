@@ -25,6 +25,8 @@ import {
   AlertDialogTitle,
 } from './ui/alert-dialog';
 
+import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
+
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)' },
   { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
@@ -45,9 +47,11 @@ export function NewSubmission() {
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showSetDefaultDoctorDialog, setShowSetDefaultDoctorDialog] = useState(false);
   const [isRouteForApproval, setIsRouteForApproval] = useState(false);
   const [assignedDoctorId, setAssignedDoctorId] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -70,13 +74,22 @@ export function NewSubmission() {
         try {
           const doctorsList = await usersApi.getDoctors();
           setDoctors(doctorsList);
+          
+          // Load default doctor
+          const { defaultDoctorId } = await usersApi.getDefaultDoctor();
+          setHasDefaultDoctor(!!defaultDoctorId);
+          
+          if (defaultDoctorId && !id) {
+            // Only set default doctor for new submissions, not when editing drafts
+            setAssignedDoctorId(defaultDoctorId);
+          }
         } catch (error) {
           console.error('Failed to fetch doctors:', error);
         }
       }
     };
     fetchDoctors();
-  }, [user]);
+  }, [user, id]);
 
   useEffect(() => {
     const loadSubmission = async () => {
@@ -120,6 +133,13 @@ export function NewSubmission() {
                     examinationDate || Object.keys(formData).length > 0);
     setHasUnsavedChanges(hasData);
   }, [examType, patientName, patientNric, patientDateOfBirth, examinationDate, formData, setHasUnsavedChanges]);
+
+  // Reset unsaved changes when component unmounts
+  useEffect(() => {
+    return () => {
+      setHasUnsavedChanges(false);
+    };
+  }, [setHasUnsavedChanges]);
 
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -509,8 +529,13 @@ export function NewSubmission() {
             <Button 
               variant="outline" 
               onClick={() => {
-                setIsRouteForApproval(true);
-                setShowSubmitDialog(true);
+                // Check if default doctor is set
+                if (!hasDefaultDoctor) {
+                  setShowSetDefaultDoctorDialog(true);
+                } else {
+                  setIsRouteForApproval(true);
+                  setShowSubmitDialog(true);
+                }
               }}
               disabled={!isFormValid || isSaving}
             >
@@ -584,6 +609,19 @@ export function NewSubmission() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SetDefaultDoctorDialog
+        open={showSetDefaultDoctorDialog}
+        doctors={doctors}
+        onClose={() => setShowSetDefaultDoctorDialog(false)}
+        onSave={(doctorId: string) => {
+          setAssignedDoctorId(doctorId);
+          setHasDefaultDoctor(true);
+          setShowSetDefaultDoctorDialog(false);
+          setIsRouteForApproval(true);
+          setShowSubmitDialog(true);
+        }}
+      />
     </div>
   );
 }

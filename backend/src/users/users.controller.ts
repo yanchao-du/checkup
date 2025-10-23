@@ -40,6 +40,21 @@ export class UsersController {
     return this.usersService.findDoctors(user.clinicId);
   }
 
+  @Get('me/default-doctor')
+  @Roles('nurse')
+  async getDefaultDoctor(@CurrentUser() user: any) {
+    return this.usersService.getDefaultDoctor(user.id);
+  }
+
+  @Put('me/default-doctor')
+  @Roles('nurse')
+  async setDefaultDoctor(
+    @CurrentUser() user: any,
+    @Body() body: { defaultDoctorId: string },
+  ) {
+    return this.usersService.setDefaultDoctor(user.id, body.defaultDoctorId);
+  }
+
   @Get(':id')
   @Roles('admin')
   findOne(@Param('id') id: string, @CurrentUser() user: any) {
