@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, FileText, Search } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { FileText, Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -187,7 +186,14 @@ export function SubmissionsList() {
                       </TableCell>
                       <TableCell>
                         <Link to={`/view-submission/${submission.id}`}>
-                          <Button variant="ghost" size="sm">View</Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4 mr-1.5" />
+                            View
+                          </Button>
                         </Link>
                       </TableCell>
                     </TableRow>

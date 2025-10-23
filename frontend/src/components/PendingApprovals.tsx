@@ -7,7 +7,7 @@ import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { CheckCircle, XCircle, Eye, Clock, Search } from 'lucide-react';
+import { CheckCircle, Eye, Clock, Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -189,9 +189,13 @@ export function PendingApprovals() {
                       <TableCell>
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                           <Link to={`/view-submission/${submission.id}`}>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4 mr-1" />
-                              View
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Eye className="w-4 h-4 mr-1.5" />
+                              Review
                             </Button>
                           </Link>
                           {/* <Button
@@ -203,7 +207,7 @@ export function PendingApprovals() {
                               setSelectedSubmission(submission);
                             }}
                           >
-                            <CheckCircle className="w-4 h-4 mr-1" />
+                            <CheckCircle className="w-4 h-4 mr-1.5" />
                             Approve
                           </Button> */}
                           {/* <Button
@@ -215,7 +219,7 @@ export function PendingApprovals() {
                               setSelectedSubmission(submission);
                             }}
                           >
-                            <XCircle className="w-4 h-4 mr-1" />
+                            <XCircle className="w-4 h-4 mr-1.5" />
                             Reject
                           </Button> */}
                         </div>

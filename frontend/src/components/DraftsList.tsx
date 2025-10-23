@@ -7,7 +7,7 @@ import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { FileEdit, Search, Trash2 } from 'lucide-react';
+import { Edit, FileEdit, Search, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -150,7 +150,14 @@ export function DraftsList() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Link to={`/draft/${draft.id}`}>
-                            <Button variant="ghost" size="sm">Continue</Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Edit className="w-4 h-4 mr-1.5" />
+                              Continue
+                            </Button>
                           </Link>
                           <Button
                             variant="ghost"
@@ -158,7 +165,8 @@ export function DraftsList() {
                             onClick={() => setDeleteId(draft.id)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 mr-1.5" />
+                            Delete
                           </Button>
                         </div>
                       </TableCell>

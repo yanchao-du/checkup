@@ -176,27 +176,31 @@ export function RejectedSubmissions() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link to={`/view-submission/${submission.id}`}>
-                          <button className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
-                            <Eye className="w-4 h-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4 mr-1.5" />
                             View
-                          </button>
+                          </Button>
                         </Link>
                         {user?.role === 'nurse' && submission.status === 'rejected' && (
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="ghost"
                             onClick={() => handleReopen(submission.id)}
                             disabled={reopeningId === submission.id}
                             className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           >
                             {reopeningId === submission.id ? (
                               <>
-                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
                                 Reopening...
                               </>
                             ) : (
                               <>
-                                <RotateCcw className="w-3 h-3 mr-1" />
+                                <RotateCcw className="w-4 h-4 mr-1.5" />
                                 Reopen
                               </>
                             )}
