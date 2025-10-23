@@ -160,12 +160,21 @@ export class ApprovalsService {
   ) {
     const where: any = {
       clinicId,
-      status: 'rejected',
-      // Show rejections by this doctor (approvedById is set when rejecting)
-      // or assigned to this doctor
+      // Show submissions that are currently rejected OR were rejected and reopened (draft with rejectedReason)
       OR: [
-        { assignedDoctorId: doctorId },
-        { approvedById: doctorId },
+        {
+          status: 'rejected',
+          OR: [
+            { assignedDoctorId: doctorId },
+            { approvedById: doctorId },
+          ],
+        },
+        {
+          // Reopened submissions: status is draft but has rejectedReason and approvedById
+          status: 'draft',
+          rejectedReason: { not: null },
+          approvedById: doctorId,
+        },
       ],
     };
 

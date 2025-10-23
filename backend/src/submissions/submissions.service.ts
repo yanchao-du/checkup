@@ -293,8 +293,9 @@ export class SubmissionsService {
       where: { id },
       data: {
         status: 'draft',
-        rejectedReason: null,
-        approvedById: null,
+        // Keep rejectedReason and approvedById so doctors can still see it in their rejected list
+        // rejectedReason: null,  // Don't clear - keep for history
+        // approvedById: null,    // Don't clear - keep to track who rejected it
         approvedDate: null,
       },
       include: {
