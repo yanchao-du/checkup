@@ -84,7 +84,7 @@ export function ClinicManagement() {
 
   const handleSaveClinic = async () => {
     if (!formData.name) {
-      toast.error('Clinic name is required');
+      toast.warning('Clinic name is required');
       return;
     }
 
@@ -92,7 +92,7 @@ export function ClinicManagement() {
     if (formData.hciCode) {
       const hciRegex = /^[A-Z0-9]{7}$/;
       if (!hciRegex.test(formData.hciCode)) {
-        toast.error('HCI code must be 7 alphanumeric characters (e.g., HCI0001)');
+        toast.warning('HCI code must be 7 alphanumeric characters (e.g., HCI0001)');
         return;
       }
     }
@@ -101,7 +101,7 @@ export function ClinicManagement() {
     if (formData.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        toast.error('Please enter a valid email address');
+        toast.warning('Please enter a valid email address');
         return;
       }
     }

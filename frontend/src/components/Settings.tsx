@@ -56,7 +56,7 @@ export function Settings() {
 
   const handleSave = async () => {
     if (!selectedDoctorId) {
-      toast.error('Please select a doctor');
+      toast.warning('Please select a doctor');
       return;
     }
 

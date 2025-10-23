@@ -81,7 +81,7 @@ export function ViewSubmission() {
 
   const handleReject = async () => {
     if (!id || !rejectionReason.trim()) {
-      toast.error('Please provide a reason for rejection');
+      toast.warning('Please provide a reason for rejection');
       return;
     }
     

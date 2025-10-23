@@ -114,7 +114,12 @@ function AppRoutes() {
           }
         />
       </Routes>
-      <Toaster />
+      <Toaster 
+        position="top-right"
+        expand={false}
+        richColors
+        closeButton
+      />
       </UnsavedChangesProvider>
     </Router>
   );

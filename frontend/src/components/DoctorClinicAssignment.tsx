@@ -102,7 +102,7 @@ export function DoctorClinicAssignment() {
 
   const handleAssignClinic = async () => {
     if (!selectedDoctor || !selectedClinicId) {
-      toast.error('Please select a clinic');
+      toast.warning('Please select a clinic');
       return;
     }
 

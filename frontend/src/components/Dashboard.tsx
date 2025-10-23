@@ -31,7 +31,7 @@ export function Dashboard() {
     try {
       setReopeningId(submissionId);
       await submissionsApi.reopenSubmission(submissionId);
-      toast.success('Submission reopened - redirecting to edit page...');
+      toast.info('Submission reopened - redirecting to edit page...');
       
       // Navigate directly to edit page
       navigate(`/draft/${submissionId}`);

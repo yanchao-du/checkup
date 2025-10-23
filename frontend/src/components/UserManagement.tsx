@@ -84,19 +84,19 @@ export function UserManagement() {
 
   const handleSaveUser = async () => {
     if (!formData.name || !formData.email) {
-      toast.error('Please fill in all fields');
+      toast.warning('Please fill in all fields');
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      toast.error('Please enter a valid email address');
+      toast.warning('Please enter a valid email address');
       return;
     }
 
     if (!editingUser && !formData.password) {
-      toast.error('Password is required for new users');
+      toast.warning('Password is required for new users');
       return;
     }
 
@@ -104,7 +104,7 @@ export function UserManagement() {
     if (formData.role === 'doctor' && formData.mcrNumber) {
       const mcrRegex = /^[A-Z]\d{5}[A-Z]$/;
       if (!mcrRegex.test(formData.mcrNumber)) {
-        toast.error('MCR number must be in format: Letter + 5 digits + Letter (e.g., M12345A)');
+        toast.warning('MCR number must be in format: Letter + 5 digits + Letter (e.g., M12345A)');
         return;
       }
     }

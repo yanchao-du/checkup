@@ -188,7 +188,7 @@ export function NewSubmission() {
 
     // For nurses routing for approval, require a doctor to be selected
     if (user.role === 'nurse' && isRouteForApproval && !assignedDoctorId) {
-      toast.error('Please select a doctor to route this submission to');
+      toast.warning('Please select a doctor to route this submission to');
       return;
     }
 
