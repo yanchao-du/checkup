@@ -20,6 +20,18 @@ export const approvalsApi = {
     return apiClient.get<PaginatedResponse<MedicalSubmission>>(endpoint);
   },
 
+  // Get rejected submissions
+  getRejected: async (params?: ApprovalQueryParams): Promise<PaginatedResponse<MedicalSubmission>> => {
+    const queryString = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => [key, String(value)])
+    ).toString();
+    
+    const endpoint = queryString ? `/approvals/rejected?${queryString}` : '/approvals/rejected';
+    return apiClient.get<PaginatedResponse<MedicalSubmission>>(endpoint);
+  },
+
   // Get all approvals
   getAll: async (params?: ApprovalQueryParams): Promise<PaginatedResponse<MedicalSubmission>> => {
     const queryString = new URLSearchParams(

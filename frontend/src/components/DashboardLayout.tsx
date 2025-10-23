@@ -16,7 +16,8 @@ import {
   FilePlus, 
   FileText, 
   FileEdit, 
-  CheckCircle, 
+  CheckCircle,
+  XCircle,
   Users, 
   LogOut,
   Building2
@@ -38,6 +39,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/submissions', label: 'Submissions', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
+    { path: '/rejected-submissions', label: 'Rejected Submissions', icon: XCircle, roles: ['doctor', 'admin'] },
     { path: '/user-management', label: 'User Management', icon: Users, roles: ['admin'] },
   ];
 

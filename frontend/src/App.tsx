@@ -7,6 +7,7 @@ import { NewSubmission } from './components/NewSubmission';
 import { SubmissionsList } from './components/SubmissionsList';
 import { DraftsList } from './components/DraftsList';
 import { PendingApprovals } from './components/PendingApprovals';
+import { RejectedSubmissions } from './components/RejectedSubmissions';
 import { UserManagement } from './components/UserManagement';
 import { ViewSubmission } from './components/ViewSubmission';
 import { AuthProvider, useAuth } from './components/AuthContext';
@@ -75,6 +76,14 @@ function AppRoutes() {
                     element={
                       <RoleProtectedRoute allowedRoles={['doctor', 'admin']}>
                         <PendingApprovals />
+                      </RoleProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/rejected-submissions" 
+                    element={
+                      <RoleProtectedRoute allowedRoles={['doctor', 'admin']}>
+                        <RejectedSubmissions />
                       </RoleProtectedRoute>
                     } 
                   />

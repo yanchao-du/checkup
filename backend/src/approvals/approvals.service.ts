@@ -130,9 +130,11 @@ export class ApprovalsService {
       data: {
         status: 'rejected',
         rejectedReason: reason,
+        approvedById: doctorId, // Track who rejected it (reusing approvedById field)
       },
       include: {
         createdBy: { select: { name: true } },
+        approvedBy: { select: { name: true } },
       },
     });
 
@@ -147,6 +149,56 @@ export class ApprovalsService {
     });
 
     return this.formatSubmission(updated);
+  }
+
+  async findRejectedSubmissions(
+    clinicId: string,
+    doctorId: string,
+    examType?: string,
+    page: number = 1,
+    limit: number = 50
+  ) {
+    const where: any = {
+      clinicId,
+      status: 'rejected',
+      // Show rejections by this doctor (approvedById is set when rejecting)
+      // or assigned to this doctor
+      OR: [
+        { assignedDoctorId: doctorId },
+        { approvedById: doctorId },
+      ],
+    };
+
+    if (examType) {
+      where.examType = examType;
+    }
+
+    const [submissions, total] = await Promise.all([
+      this.prisma.medicalSubmission.findMany({
+        where,
+        include: {
+          createdBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+          approvedBy: { select: { name: true } },
+        },
+        orderBy: { createdDate: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.medicalSubmission.count({ where }),
+    ]);
+
+    return {
+      data: submissions.map(s => this.formatSubmission(s)),
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        hasNext: page < Math.ceil(total / limit),
+        hasPrevious: page > 1,
+      },
+    };
   }
 
   private formatSubmission(submission: any) {

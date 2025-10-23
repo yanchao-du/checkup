@@ -37,6 +37,24 @@ export class ApprovalsController {
     );
   }
 
+  @Get('rejected')
+  @Roles('doctor')
+  findRejectedSubmissions(
+    @CurrentUser() user: any,
+    @Query() query: ApprovalQueryDto,
+  ) {
+    if (user.role !== 'doctor') {
+      throw new ForbiddenException('Only doctors can view rejections');
+    }
+    return this.approvalsService.findRejectedSubmissions(
+      user.clinicId,
+      user.id,
+      query.examType,
+      query.page,
+      query.limit
+    );
+  }
+
   @Post(':id/approve')
   @Roles('doctor')
   approve(
