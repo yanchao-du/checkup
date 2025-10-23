@@ -6,6 +6,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Loader2 } from 'lucide-react';
+import { ClinicUser, UserRole } from '../types/api';
 import {
   Select,
   SelectContent,
@@ -31,16 +32,6 @@ import {
 } from './ui/dialog';
 import { Users, UserPlus, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { UserRole } from './AuthContext';
-
-interface ClinicUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  status?: 'active' | 'inactive';
-  lastLogin?: string;
-}
 
 export function UserManagement() {
   const [users, setUsers] = useState<ClinicUser[]>([]);
@@ -241,8 +232,8 @@ export function UserManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-slate-600 text-sm">
-                      {user.lastLogin 
-                        ? new Date(user.lastLogin).toLocaleDateString()
+                      {user.lastLoginAt 
+                        ? new Date(user.lastLoginAt).toLocaleDateString()
                         : 'Never'}
                     </TableCell>
                     <TableCell>

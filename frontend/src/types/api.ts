@@ -1,13 +1,14 @@
 // User Types
 export type UserRole = 'doctor' | 'nurse' | 'admin';
 
-export interface User {
+export interface ClinicUser {
   id: string;
   name: string;
   email: string;
   role: UserRole;
-  clinicId: string;
-  clinicName: string;
+  status: 'active' | 'inactive';
+  lastLoginAt?: string;
+  createdAt: string;
 }
 
 // Auth Types
@@ -18,7 +19,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user: User;
+  user: ClinicUser;
 }
 
 // Exam Types
