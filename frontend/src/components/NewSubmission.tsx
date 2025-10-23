@@ -104,7 +104,7 @@ export function NewSubmission() {
         patientName,
         patientNric,
         patientDateOfBirth,
-        examinationDate,
+        ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         routeForApproval: false,
         assignedDoctorId: assignedDoctorId || undefined,
@@ -146,7 +146,7 @@ export function NewSubmission() {
         patientName,
         patientNric,
         patientDateOfBirth,
-        examinationDate,
+        ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         routeForApproval: user.role === 'nurse' && isRouteForApproval,
         assignedDoctorId: assignedDoctorId || undefined,

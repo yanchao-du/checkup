@@ -7,6 +7,7 @@ import {
   Param, 
   Query,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { SubmissionsService } from './submissions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,6 +17,8 @@ import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './
 @Controller('submissions')
 @UseGuards(JwtAuthGuard)
 export class SubmissionsController {
+  private readonly logger = new Logger(SubmissionsController.name);
+
   constructor(private submissionsService: SubmissionsService) {}
 
   @Get()
@@ -40,6 +43,8 @@ export class SubmissionsController {
 
   @Put(':id')
   update(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: UpdateSubmissionDto) {
+    this.logger.log(`UPDATE request for submission ${id} by user ${user.id} (${user.role})`);
+    this.logger.debug(`Update DTO: ${JSON.stringify(dto)}`);
     return this.submissionsService.update(id, user.id, user.role, dto);
   }
 
@@ -50,6 +55,7 @@ export class SubmissionsController {
 
   @Post(':id/reopen')
   reopenSubmission(@Param('id') id: string, @CurrentUser() user: any) {
+    this.logger.log(`REOPEN request for submission ${id} by user ${user.id} (${user.role})`);
     return this.submissionsService.reopenSubmission(id, user.id, user.role);
   }
 

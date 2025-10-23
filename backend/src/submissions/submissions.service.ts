@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
 
 @Injectable()
 export class SubmissionsService {
+  private readonly logger = new Logger(SubmissionsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, userRole: string, clinicId: string, dto: CreateSubmissionDto) {
@@ -190,49 +192,77 @@ export class SubmissionsService {
   }
 
   async update(id: string, userId: string, userRole: string, dto: UpdateSubmissionDto) {
+    this.logger.log(`Updating submission ${id}`);
+    
     const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
 
     if (!existing) {
+      this.logger.warn(`Submission ${id} not found`);
       throw new NotFoundException('Submission not found');
     }
 
+    this.logger.debug(`Existing submission status: ${existing.status}, rejectedReason: ${existing.rejectedReason ? 'present' : 'null'}, approvedById: ${existing.approvedById || 'null'}`);
+
     if (existing.createdById !== userId && userRole !== 'admin') {
+      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById})`);
       throw new ForbiddenException('Access denied');
     }
 
+    // Allow editing drafts and pending_approval, but not submitted submissions
+    // Rejected submissions that have been reopened will have status='draft'
     if (existing.status === 'submitted') {
-      throw new ForbiddenException('Cannot edit submitted submission');
+      this.logger.warn(`Cannot edit submitted submission ${id}`);
+      throw new ForbiddenException('Cannot edit submitted submissions');
     }
 
-    const submission = await this.prisma.medicalSubmission.update({
-      where: { id },
-      data: {
-        ...(dto.examType && { examType: dto.examType as any }),
-        ...(dto.patientName && { patientName: dto.patientName }),
-        ...(dto.patientNric && { patientNric: dto.patientNric }),
-        ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
-        ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
-        ...(dto.formData && { formData: dto.formData }),
-        ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
-      },
-      include: {
-        createdBy: { select: { name: true } },
-        approvedBy: { select: { name: true } },
-        assignedDoctor: { select: { name: true } },
-      },
-    });
+    // Note: Drafts with rejectedReason and approvedById (reopened rejections) CAN be edited
+    // They have status='draft' so they pass the above check
 
-    // Audit log
-    await this.prisma.auditLog.create({
-      data: {
+    this.logger.log(`Proceeding with update for submission ${id} (status: ${existing.status})`);
+
+    try {
+      const submission = await this.prisma.medicalSubmission.update({
+        where: { id },
+        data: {
+          ...(dto.examType && { examType: dto.examType as any }),
+          ...(dto.patientName && { patientName: dto.patientName }),
+          ...(dto.patientNric && { patientNric: dto.patientNric }),
+          ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
+          ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
+          ...(dto.formData && { formData: dto.formData }),
+          ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
+        },
+        include: {
+          createdBy: { select: { name: true } },
+          approvedBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+        },
+      });
+
+      // Audit log
+      await this.prisma.auditLog.create({
+        data: {
+          submissionId: id,
+          userId,
+          eventType: 'updated',
+          changes: dto as any,
+        },
+      });
+
+      this.logger.log(`Successfully updated submission ${id}`);
+      return this.formatSubmission(submission);
+    } catch (error) {
+      this.logger.error('Error updating submission', {
+        error: error.message,
+        stack: error.stack,
         submissionId: id,
-        userId,
-        eventType: 'updated',
-        changes: dto as any,
-      },
-    });
-
-    return this.formatSubmission(submission);
+        existingStatus: existing.status,
+        existingRejectedReason: existing.rejectedReason,
+        existingApprovedById: existing.approvedById,
+        dto,
+      });
+      throw error;
+    }
   }
 
   async submitForApproval(id: string, userId: string, userRole: string) {
