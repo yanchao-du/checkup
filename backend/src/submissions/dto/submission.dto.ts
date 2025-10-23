@@ -24,6 +24,10 @@ export class CreateSubmissionDto {
   @IsOptional()
   @IsBoolean()
   routeForApproval?: boolean;
+
+  @IsOptional()
+  @IsString()
+  assignedDoctorId?: string;
 }
 
 export class UpdateSubmissionDto {
@@ -46,6 +50,10 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsObject()
   formData?: Record<string, any>;
+
+  @IsOptional()
+  @IsString()
+  assignedDoctorId?: string;
 }
 
 export class SubmissionQueryDto {

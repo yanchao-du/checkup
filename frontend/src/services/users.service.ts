@@ -6,7 +6,18 @@ import type {
   PaginatedResponse,
 } from '../types/api';
 
+export interface Doctor {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export const usersApi = {
+  // Get list of doctors (for assignment)
+  getDoctors: async (): Promise<Doctor[]> => {
+    return apiClient.get<Doctor[]>('/users/doctors/list');
+  },
+
   // Get all users (Admin only)
   getAll: async (page = 1, limit = 20): Promise<PaginatedResponse<ClinicUser>> => {
     const queryString = new URLSearchParams({

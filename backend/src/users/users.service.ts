@@ -41,6 +41,24 @@ export class UsersService {
     };
   }
 
+  async findDoctors(clinicId: string) {
+    const doctors = await this.prisma.user.findMany({
+      where: {
+        clinicId,
+        role: 'doctor',
+        status: 'active',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return doctors;
+  }
+
   async findOne(id: string, clinicId: string) {
     const user = await this.prisma.user.findFirst({
       where: { id, clinicId },

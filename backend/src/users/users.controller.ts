@@ -35,6 +35,11 @@ export class UsersController {
     return this.usersService.findAll(user.clinicId, pageNum, limitNum);
   }
 
+  @Get('doctors/list')
+  async getDoctors(@CurrentUser() user: any) {
+    return this.usersService.findDoctors(user.clinicId);
+  }
+
   @Get(':id')
   @Roles('admin')
   findOne(@Param('id') id: string, @CurrentUser() user: any) {

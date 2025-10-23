@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services';
+import { usersApi, type Doctor } from '../services/users.service';
 import type { ExamType } from '../services';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -44,6 +45,23 @@ export function NewSubmission() {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [isRouteForApproval, setIsRouteForApproval] = useState(false);
+  const [assignedDoctorId, setAssignedDoctorId] = useState('');
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+  // Load doctors list for nurse
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      if (user?.role === 'nurse') {
+        try {
+          const doctorsList = await usersApi.getDoctors();
+          setDoctors(doctorsList);
+        } catch (error) {
+          console.error('Failed to fetch doctors:', error);
+        }
+      }
+    };
+    fetchDoctors();
+  }, [user]);
 
   useEffect(() => {
     const loadSubmission = async () => {
@@ -56,6 +74,7 @@ export function NewSubmission() {
           setPatientNric(existing.patientNric);
           setPatientDateOfBirth(existing.patientDateOfBirth);
           setExaminationDate(existing.examinationDate || '');
+          setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
         } catch (error) {
           console.error('Failed to load submission:', error);
@@ -88,6 +107,7 @@ export function NewSubmission() {
         examinationDate,
         formData,
         routeForApproval: false,
+        assignedDoctorId: assignedDoctorId || undefined,
       };
 
       if (id) {
@@ -112,6 +132,12 @@ export function NewSubmission() {
   const handleSubmit = async () => {
     if (!examType || !user) return;
 
+    // For nurses routing for approval, require a doctor to be selected
+    if (user.role === 'nurse' && isRouteForApproval && !assignedDoctorId) {
+      toast.error('Please select a doctor to route this submission to');
+      return;
+    }
+
     try {
       setIsSaving(true);
 
@@ -123,6 +149,7 @@ export function NewSubmission() {
         examinationDate,
         formData,
         routeForApproval: user.role === 'nurse' && isRouteForApproval,
+        assignedDoctorId: assignedDoctorId || undefined,
       };
 
       if (id) {
@@ -481,6 +508,28 @@ export function NewSubmission() {
                 : 'This will submit the medical exam results. Please ensure all information is accurate.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          {user?.role === 'nurse' && isRouteForApproval && (
+            <div className="space-y-2 px-6 pb-4">
+              <Label htmlFor="assignedDoctor">Assign to Doctor *</Label>
+              <Select value={assignedDoctorId} onValueChange={setAssignedDoctorId}>
+                <SelectTrigger id="assignedDoctor">
+                  <SelectValue placeholder="Select a doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {doctors.map((doctor) => (
+                    <SelectItem key={doctor.id} value={doctor.id}>
+                      {doctor.name} ({doctor.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500">
+                This submission will be sent to the selected doctor for approval.
+              </p>
+            </div>
+          )}
+          
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleSubmit}>

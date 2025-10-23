@@ -51,6 +51,8 @@ export interface MedicalSubmission {
   approvedBy?: string;
   approvedByName?: string;
   approvedDate?: string;
+  assignedDoctorId?: string;
+  assignedDoctorName?: string;
   rejectedReason?: string;
 }
 
@@ -62,6 +64,7 @@ export interface CreateSubmissionRequest {
   examinationDate?: string;
   formData: Record<string, any>;
   routeForApproval?: boolean;
+  assignedDoctorId?: string;
 }
 
 export interface UpdateSubmissionRequest {
@@ -70,6 +73,7 @@ export interface UpdateSubmissionRequest {
   patientDateOfBirth?: string;
   examinationDate?: string;
   formData?: Record<string, any>;
+  assignedDoctorId?: string;
 }
 
 export interface SubmissionQueryParams {

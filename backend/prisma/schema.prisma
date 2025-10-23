@@ -41,6 +41,7 @@ model User {
   clinic              Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   createdSubmissions  MedicalSubmission[] @relation("CreatedBy")
   approvedSubmissions MedicalSubmission[] @relation("ApprovedBy")
+  assignedSubmissions MedicalSubmission[] @relation("AssignedDoctor")
   auditLogs           AuditLog[]
 
   @@index([clinicId])
@@ -49,27 +50,29 @@ model User {
 }
 
 model MedicalSubmission {
-  id              String            @id @default(uuid())
-  clinicId        String            @map("clinic_id")
-  createdById     String            @map("created_by")
-  approvedById    String?           @map("approved_by")
-  examType        ExamType          @map("exam_type")
-  patientName     String            @map("patient_name")
-  patientNric     String            @map("patient_nric")
-  patientDob      DateTime          @map("patient_dob") @db.Date
-  examinationDate DateTime?         @map("examination_date") @db.Date
-  status          SubmissionStatus  @default(draft)
-  formData        Json              @map("form_data")
-  createdDate     DateTime          @default(now()) @map("created_date")
-  submittedDate   DateTime?         @map("submitted_date")
-  approvedDate    DateTime?         @map("approved_date")
-  rejectedReason  String?           @map("rejected_reason")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
+  id               String            @id @default(uuid())
+  clinicId         String            @map("clinic_id")
+  createdById      String            @map("created_by")
+  approvedById     String?           @map("approved_by")
+  assignedDoctorId String?           @map("assigned_doctor_id")
+  examType         ExamType          @map("exam_type")
+  patientName      String            @map("patient_name")
+  patientNric      String            @map("patient_nric")
+  patientDob       DateTime          @map("patient_dob") @db.Date
+  examinationDate  DateTime?         @map("examination_date") @db.Date
+  status           SubmissionStatus  @default(draft)
+  formData         Json              @map("form_data")
+  createdDate      DateTime          @default(now()) @map("created_date")
+  submittedDate    DateTime?         @map("submitted_date")
+  approvedDate     DateTime?         @map("approved_date")
+  rejectedReason   String?           @map("rejected_reason")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
   
-  clinic          Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  createdBy       User              @relation("CreatedBy", fields: [createdById], references: [id])
-  approvedBy      User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
-  auditLogs       AuditLog[]
+  clinic           Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  createdBy        User              @relation("CreatedBy", fields: [createdById], references: [id])
+  approvedBy       User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+  assignedDoctor   User?             @relation("AssignedDoctor", fields: [assignedDoctorId], references: [id])
+  auditLogs        AuditLog[]
 
   @@index([clinicId])
   @@index([createdById])

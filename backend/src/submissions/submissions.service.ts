@@ -33,6 +33,7 @@ export class SubmissionsService {
         formData: dto.formData,
         clinicId,
         createdById: userId,
+        assignedDoctorId: dto.assignedDoctorId,
         submittedDate: status === 'submitted' ? new Date() : undefined,
         approvedById: status === 'submitted' && userRole === 'doctor' ? userId : undefined,
         approvedDate: status === 'submitted' && userRole === 'doctor' ? new Date() : undefined,
@@ -40,6 +41,7 @@ export class SubmissionsService {
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
@@ -92,6 +94,7 @@ export class SubmissionsService {
         include: {
           createdBy: { select: { name: true } },
           approvedBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
         },
         orderBy: { createdDate: 'desc' },
         skip: (page - 1) * limit,
@@ -119,6 +122,7 @@ export class SubmissionsService {
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
@@ -160,10 +164,12 @@ export class SubmissionsService {
         ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
         ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
         ...(dto.formData && { formData: dto.formData }),
+        ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
       },
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
@@ -204,6 +210,7 @@ export class SubmissionsService {
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
@@ -255,6 +262,8 @@ export class SubmissionsService {
       approvedBy: submission.approvedById,
       approvedByName: submission.approvedBy?.name,
       approvedDate: submission.approvedDate,
+      assignedDoctorId: submission.assignedDoctorId,
+      assignedDoctorName: submission.assignedDoctor?.name,
       rejectedReason: submission.rejectedReason,
       clinicId: submission.clinicId,
       formData: submission.formData,
