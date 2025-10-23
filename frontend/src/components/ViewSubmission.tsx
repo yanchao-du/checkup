@@ -294,7 +294,47 @@ export function ViewSubmission() {
             </CardHeader>
             <CardContent className="space-y-4">
               {history && history.events && history.events.length > 0 ? (
-                [...history.events].reverse().map((event: any, index: number) => {
+                [...history.events]
+                  .sort((a, b) => {
+                    // First sort by timestamp
+                    const timeCompare = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+                    
+                    // If timestamps are the same or very close (within 1 second), enforce logical order
+                    if (Math.abs(timeCompare) < 1000) {
+                      // Define event priority (lower number = earlier in timeline)
+                      const eventPriority: Record<string, number> = {
+                        'created': 1,
+                        'updated': 2,
+                        'submitted_for_approval': 3,  // Routed for approval
+                        'approved': 4,  // Approved by doctor
+                        'submitted_to_agency': 5,  // Submitted to agency (must be after approved)
+                        'rejected': 6,
+                      };
+                      
+                      // Determine event types based on eventType and details
+                      const getEventPriority = (event: any) => {
+                        if (event.eventType === 'updated' && event.details?.action === 'reopened') {
+                          return 2; // Same as updated
+                        }
+                        if (event.eventType === 'submitted' && event.details?.status === 'pending_approval') {
+                          return eventPriority['submitted_for_approval'];
+                        }
+                        if (event.eventType === 'submitted' && event.details?.status === 'submitted') {
+                          return eventPriority['submitted_to_agency'];
+                        }
+                        if (event.eventType === 'approved') {
+                          return eventPriority['approved'];
+                        }
+                        return eventPriority[event.eventType] || 99;
+                      };
+                      
+                      return getEventPriority(a) - getEventPriority(b);
+                    }
+                    
+                    return timeCompare;
+                  })
+                  .reverse()
+                  .map((event: any, index: number) => {
                   const getEventIcon = (eventType: string, details: any) => {
                     // Check if this is a reopen action
                     if (eventType === 'updated' && details?.action === 'reopened') {

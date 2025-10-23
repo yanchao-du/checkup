@@ -47,15 +47,36 @@ export class SubmissionsService {
       },
     });
 
-    // Create audit log
+    // Create audit log(s)
+    // Always create a 'created' event for draft creation
     await this.prisma.auditLog.create({
       data: {
         submissionId: submission.id,
         userId,
         eventType: 'created',
-        changes: { status, examType: dto.examType },
+        changes: { 
+          status: 'draft', 
+          examType: dto.examType,
+        },
       },
     });
+
+    // If created with pending_approval status, also create a 'submitted' event for routing
+    if (status === 'pending_approval') {
+      await this.prisma.auditLog.create({
+        data: {
+          submissionId: submission.id,
+          userId,
+          eventType: 'submitted',
+          changes: { 
+            status: 'pending_approval',
+            ...(submission.assignedDoctor && {
+              assignedDoctorName: submission.assignedDoctor.name,
+            }),
+          },
+        },
+      });
+    }
 
     return this.formatSubmission(submission);
   }
