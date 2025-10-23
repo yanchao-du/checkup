@@ -295,7 +295,12 @@ export function ViewSubmission() {
             <CardContent className="space-y-4">
               {history && history.events && history.events.length > 0 ? (
                 [...history.events].reverse().map((event: any, index: number) => {
-                  const getEventIcon = (eventType: string) => {
+                  const getEventIcon = (eventType: string, details: any) => {
+                    // Check if this is a reopen action
+                    if (eventType === 'updated' && details?.action === 'reopened') {
+                      return { icon: FileText, bgColor: 'bg-purple-100', iconColor: 'text-purple-600' };
+                    }
+                    
                     switch (eventType) {
                       case 'created':
                         return { icon: FileText, bgColor: 'bg-blue-100', iconColor: 'text-blue-600' };
@@ -306,13 +311,18 @@ export function ViewSubmission() {
                       case 'approved':
                         return { icon: CheckCircle, bgColor: 'bg-green-100', iconColor: 'text-green-600' };
                       case 'rejected':
-                        return { icon: FileText, bgColor: 'bg-red-100', iconColor: 'text-red-600' };
+                        return { icon: XCircle, bgColor: 'bg-red-100', iconColor: 'text-red-600' };
                       default:
                         return { icon: FileText, bgColor: 'bg-gray-100', iconColor: 'text-gray-600' };
                     }
                   };
 
                   const getEventLabel = (eventType: string, details: any) => {
+                    // Check if this is a reopen action
+                    if (eventType === 'updated' && details?.action === 'reopened') {
+                      return 'Reopened for Editing';
+                    }
+                    
                     switch (eventType) {
                       case 'created':
                         return 'Draft Created';
@@ -339,6 +349,11 @@ export function ViewSubmission() {
                   };
 
                   const getEventDescription = (eventType: string, details: any) => {
+                    // Check if this is a reopen action
+                    if (eventType === 'updated' && details?.action === 'reopened') {
+                      return `Changed from ${details.previousStatus} back to ${details.newStatus}`;
+                    }
+                    
                     if (eventType === 'submitted') {
                       // If routed for approval (status was pending_approval), show assigned doctor
                       if (details?.status === 'pending_approval' && details?.assignedDoctorName) {
@@ -362,7 +377,7 @@ export function ViewSubmission() {
                     return null;
                   };
 
-                  const { icon: Icon, bgColor, iconColor } = getEventIcon(event.eventType);
+                  const { icon: Icon, bgColor, iconColor } = getEventIcon(event.eventType, event.details);
 
                   return (
                     <div key={index} className="flex gap-3">

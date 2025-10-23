@@ -2,7 +2,7 @@ import { useAuth } from './AuthContext';
 import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   FileText, 
   FileEdit, 
@@ -15,14 +15,32 @@ import {
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
+import { toast } from 'sonner';
 
 export function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<MedicalSubmission[]>([]);
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<MedicalSubmission[]>([]);
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [reopeningId, setReopeningId] = useState<string | null>(null);
+
+  const handleReopenAndFix = async (submissionId: string) => {
+    try {
+      setReopeningId(submissionId);
+      await submissionsApi.reopenSubmission(submissionId);
+      toast.success('Submission reopened - redirecting to edit page...');
+      
+      // Navigate directly to edit page
+      navigate(`/draft/${submissionId}`);
+    } catch (error) {
+      console.error('Failed to reopen submission:', error);
+      toast.error('Failed to reopen submission');
+      setReopeningId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -192,6 +210,73 @@ export function Dashboard() {
         <p className="text-slate-600">Here's an overview of your medical exam submissions</p>
       </div>
 
+      {/* Rejected Submissions Alert - For Nurses */}
+      {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-red-900">
+                  {rejectedSubmissions.length} Rejected Submission{rejectedSubmissions.length !== 1 ? 's' : ''}
+                </CardTitle>
+                <CardDescription className="text-red-700">
+                  {rejectedSubmissions.length === 1 
+                    ? 'You have a submission that was rejected and needs attention'
+                    : 'You have submissions that were rejected and need attention'}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {rejectedSubmissions.slice(0, 3).map((submission) => (
+                <div 
+                  key={submission.id}
+                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-red-200"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">{submission.patientName}</p>
+                    <p className="text-sm text-slate-600">{formatExamType(submission.examType)}</p>
+                    {submission.rejectedReason && (
+                      <p className="text-xs text-red-600 mt-1">
+                        <span className="font-medium">Reason:</span> {submission.rejectedReason}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Link to={`/view-submission/${submission.id}`}>
+                      <Button variant="outline" size="sm" className="text-slate-600">
+                        View
+                      </Button>
+                    </Link>
+                    {submission.status === 'rejected' && (
+                      <Button 
+                        size="sm" 
+                        className="bg-red-600 hover:bg-red-700"
+                        onClick={() => handleReopenAndFix(submission.id)}
+                        disabled={reopeningId === submission.id}
+                      >
+                        {reopeningId === submission.id ? 'Reopening...' : 'Reopen & Fix'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {rejectedSubmissions.length > 3 && (
+                <Link to="/rejected-submissions">
+                  <Button variant="link" className="w-full text-red-700 hover:text-red-800">
+                    View all {rejectedSubmissions.length} rejected submissions →
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -215,6 +300,21 @@ export function Dashboard() {
             <p className="text-xs text-slate-500 mt-1">Pending completion</p>
           </CardContent>
         </Card>
+
+        {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+          <Link to="/rejected-submissions">
+            <Card className="border-red-200 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm text-red-900">Rejected</CardTitle>
+                <XCircle className="w-4 h-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-red-900 font-semibold">{rejectedSubmissions.length}</div>
+                <p className="text-xs text-red-700 mt-1">Needs attention</p>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {user?.role === 'doctor' && (
           <Card>
@@ -253,6 +353,14 @@ export function Dashboard() {
               <Button>
                 <FileText className="w-4 h-4 mr-2" />
                 New Submission
+              </Button>
+            </Link>
+          )}
+          {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+            <Link to="/rejected-submissions">
+              <Button className="bg-red-600 hover:bg-red-700">
+                <XCircle className="w-4 h-4 mr-2" />
+                Review Rejected ({rejectedSubmissions.length})
               </Button>
             </Link>
           )}

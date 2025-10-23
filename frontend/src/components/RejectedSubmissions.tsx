@@ -49,9 +49,16 @@ export function RejectedSubmissions() {
     try {
       setReopeningId(submissionId);
       await submissionsApi.reopenSubmission(submissionId);
-      toast.success('Submission reopened and moved to drafts');
-      // Redirect to draft edit page
-      navigate(`/draft/${submissionId}`);
+      toast.success('Submission reopened - you can now edit it');
+      
+      // Refresh the list to show updated status
+      const response = user?.role === 'doctor' 
+        ? await approvalsApi.getRejected({ page: 1, limit: 100 })
+        : await submissionsApi.getRejected({ page: 1, limit: 100 });
+      setRejectedSubmissions(response.data);
+      
+      // Redirect to draft edit page after a brief delay
+      setTimeout(() => navigate(`/draft/${submissionId}`), 1000);
     } catch (error) {
       console.error('Failed to reopen submission:', error);
       toast.error('Failed to reopen submission');
@@ -128,9 +135,17 @@ export function RejectedSubmissions() {
                       {new Date(submission.createdDate).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                        Rejected
-                      </Badge>
+                      {submission.status === 'draft' ? (
+                        <div className="flex gap-1">
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                            Reopened
+                          </Badge>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                          Rejected
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -140,7 +155,7 @@ export function RejectedSubmissions() {
                             View
                           </button>
                         </Link>
-                        {user?.role === 'nurse' && (
+                        {user?.role === 'nurse' && submission.status === 'rejected' && (
                           <Button
                             size="sm"
                             variant="outline"
