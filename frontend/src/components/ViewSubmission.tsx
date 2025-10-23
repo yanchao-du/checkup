@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -22,12 +23,13 @@ export function ViewSubmission() {
         setIsLoading(true);
         const [submissionData, historyData] = await Promise.all([
           submissionsApi.getById(id),
-          submissionsApi.getHistory(id)
+          submissionsApi.getHistory(id).catch(() => []) // History is optional
         ]);
         setSubmission(submissionData);
         setHistory(historyData);
       } catch (error) {
         console.error('Failed to fetch submission:', error);
+        toast.error('Failed to load submission details');
       } finally {
         setIsLoading(false);
       }

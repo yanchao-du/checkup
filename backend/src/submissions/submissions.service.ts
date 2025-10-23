@@ -126,7 +126,7 @@ export class SubmissionsService {
       throw new NotFoundException('Submission not found');
     }
 
-    // Check access
+    // Check access - user must be admin, creator, approver, or from same clinic
     if (userRole !== 'admin' && 
         submission.createdById !== userId && 
         submission.approvedById !== userId &&
