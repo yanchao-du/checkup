@@ -88,6 +88,11 @@ export class SubmissionsService {
       if (toDate) where.createdDate.lte = new Date(toDate);
     }
 
+    // For drafts, order by most recently updated; for others, order by created date
+    const orderBy = status === 'draft' 
+      ? { updatedAt: 'desc' as const }
+      : { createdDate: 'desc' as const };
+
     const [submissions, total] = await Promise.all([
       this.prisma.medicalSubmission.findMany({
         where,
@@ -96,7 +101,7 @@ export class SubmissionsService {
           approvedBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
         },
-        orderBy: { createdDate: 'desc' },
+        orderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),
