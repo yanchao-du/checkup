@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services/submissions.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
@@ -14,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { FileText, Search, Filter } from 'lucide-react';
+import { FileText, Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -25,7 +24,6 @@ import {
 } from './ui/table';
 
 export function SubmissionsList() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,9 +47,9 @@ export function SubmissionsList() {
     fetchSubmissions();
   }, []);
 
-  const mySubmissions = user?.role === 'admin'
-    ? submissions
-    : submissions.filter((s: any) => s.createdBy === user?.id);
+  // Backend already filters by createdBy OR approvedBy for doctors
+  // So we don't need to filter again on the frontend
+  const mySubmissions = submissions;
 
   const filteredSubmissions = mySubmissions.filter((submission: any) => {
     const matchesSearch = 
