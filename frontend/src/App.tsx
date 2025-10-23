@@ -11,6 +11,7 @@ import { RejectedSubmissions } from './components/RejectedSubmissions';
 import { UserManagement } from './components/UserManagement';
 import { ViewSubmission } from './components/ViewSubmission';
 import { AuthProvider, useAuth } from './components/AuthContext';
+import { UnsavedChangesProvider } from './components/UnsavedChangesContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -58,15 +59,16 @@ function AppRoutes() {
   
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <Routes>
+      <UnsavedChangesProvider>
+        <Routes>
+          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Routes>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/new-submission" element={<NewSubmission />} />
                   <Route path="/submissions" element={<SubmissionsList />} />
@@ -104,6 +106,7 @@ function AppRoutes() {
         />
       </Routes>
       <Toaster />
+      </UnsavedChangesProvider>
     </Router>
   );
 }

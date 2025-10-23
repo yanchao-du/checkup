@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { useUnsavedChanges } from './UnsavedChangesContext';
 import { submissionsApi } from '../services';
 import { usersApi, type Doctor } from '../services/users.service';
 import type { ExamType } from '../services';
@@ -32,8 +33,8 @@ const examTypes: { value: ExamType; label: string }[] = [
 
 export function NewSubmission() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
+  const { hasUnsavedChanges, setHasUnsavedChanges, navigate, navigateWithConfirmation } = useUnsavedChanges();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,6 +48,20 @@ export function NewSubmission() {
   const [isRouteForApproval, setIsRouteForApproval] = useState(false);
   const [assignedDoctorId, setAssignedDoctorId] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+  // Block browser navigation (refresh, close tab, etc.)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Load doctors list for nurse
   useEffect(() => {
@@ -98,6 +113,14 @@ export function NewSubmission() {
     loadSubmission();
   }, [id, navigate]);
 
+  // Track form changes
+  useEffect(() => {
+    // Mark as changed if any field has data (for new submissions) or if editing an existing draft
+    const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || 
+                    examinationDate || Object.keys(formData).length > 0);
+    setHasUnsavedChanges(hasData);
+  }, [examType, patientName, patientNric, patientDateOfBirth, examinationDate, formData, setHasUnsavedChanges]);
+
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
@@ -107,6 +130,7 @@ export function NewSubmission() {
 
     try {
       setIsSaving(true);
+      setHasUnsavedChanges(false); // Clear unsaved changes before navigation
 
       const submissionData = {
         examType,
@@ -133,6 +157,7 @@ export function NewSubmission() {
     } catch (error) {
       console.error('Failed to save draft:', error);
       toast.error('Failed to save draft');
+      setHasUnsavedChanges(true); // Restore unsaved changes flag on error
     } finally {
       setIsSaving(false);
     }
@@ -149,6 +174,7 @@ export function NewSubmission() {
 
     try {
       setIsSaving(true);
+      setHasUnsavedChanges(false); // Clear unsaved changes before navigation
 
       const submissionData = {
         examType,
@@ -187,6 +213,7 @@ export function NewSubmission() {
     } catch (error) {
       console.error('Failed to submit:', error);
       toast.error('Failed to submit medical exam');
+      setHasUnsavedChanges(true); // Restore unsaved changes flag on error
     } finally {
       setIsSaving(false);
     }
@@ -208,7 +235,11 @@ export function NewSubmission() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => navigateWithConfirmation(-1)}
+        >
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>

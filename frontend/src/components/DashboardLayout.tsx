@@ -1,16 +1,9 @@
 import { ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { ProtectedLink } from './ProtectedLink';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 import { 
   LayoutDashboard, 
   FilePlus, 
@@ -19,8 +12,7 @@ import {
   CheckCircle,
   XCircle,
   Users, 
-  LogOut,
-  Building2
+  LogOut
 } from 'lucide-react';
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
@@ -89,7 +81,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               const isActive = location.pathname === item.path;
               
               return (
-                <Link
+                <ProtectedLink
                   key={item.path}
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
@@ -100,7 +92,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
-                </Link>
+                </ProtectedLink>
               );
             })}
           </nav>
