@@ -113,22 +113,35 @@ export function UserManagement() {
       setIsSaving(true);
       
       if (editingUser) {
-        await usersApi.update(editingUser.id, {
+        const updateData: any = {
           name: formData.name,
           email: formData.email,
           role: formData.role,
-          ...(formData.password && { password: formData.password }),
-          ...(formData.role === 'doctor' && formData.mcrNumber && { mcrNumber: formData.mcrNumber }),
-        });
+        };
+        
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
+        
+        if (formData.role === 'doctor') {
+          updateData.mcrNumber = formData.mcrNumber || null;
+        }
+        
+        await usersApi.update(editingUser.id, updateData);
         toast.success('User updated successfully');
       } else {
-        await usersApi.create({
+        const createData: any = {
           name: formData.name,
           email: formData.email,
           password: formData.password,
           role: formData.role,
-          ...(formData.role === 'doctor' && formData.mcrNumber && { mcrNumber: formData.mcrNumber }),
-        });
+        };
+        
+        if (formData.role === 'doctor' && formData.mcrNumber) {
+          createData.mcrNumber = formData.mcrNumber;
+        }
+        
+        await usersApi.create(createData);
         toast.success('User added successfully');
       }
       

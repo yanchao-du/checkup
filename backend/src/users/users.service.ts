@@ -11,23 +11,55 @@ export class UsersService {
   async findAll(clinicId: string, page = 1, limit = 100) {
     const skip = (page - 1) * limit;
     
+    // For many-to-many relationship, we need to find users who work at this clinic
+    // OR users who are admin/nurse at this clinic
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
-        where: { clinicId },
+        where: {
+          OR: [
+            // Admins and nurses still have direct clinicId
+            { clinicId },
+            // Doctors are associated through DoctorClinic junction table
+            {
+              role: 'doctor',
+              doctorClinics: {
+                some: {
+                  clinicId,
+                },
+              },
+            },
+          ],
+        },
         select: {
           id: true,
           name: true,
           email: true,
           role: true,
           status: true,
+          mcrNumber: true,
           lastLoginAt: true,
           createdAt: true,
+          clinicId: true,
         },
         orderBy: { email: 'asc' },
         skip,
         take: limit,
       }),
-      this.prisma.user.count({ where: { clinicId } }),
+      this.prisma.user.count({
+        where: {
+          OR: [
+            { clinicId },
+            {
+              role: 'doctor',
+              doctorClinics: {
+                some: {
+                  clinicId,
+                },
+              },
+            },
+          ],
+        },
+      }),
     ]);
 
     return {
