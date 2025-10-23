@@ -7,10 +7,20 @@ export class SubmissionsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, userRole: string, clinicId: string, dto: CreateSubmissionDto) {
-    const routeForApproval = dto.routeForApproval !== false;
-    const status = userRole === 'doctor' || !routeForApproval 
-      ? 'submitted' 
-      : 'pending_approval';
+    // When routeForApproval is explicitly false, it's a draft
+    // When routeForApproval is true or undefined, check the logic
+    const isDraft = dto.routeForApproval === false;
+    
+    let status: string;
+    if (isDraft) {
+      status = 'draft';
+    } else if (userRole === 'doctor') {
+      status = 'submitted';
+    } else if (userRole === 'nurse' && dto.routeForApproval) {
+      status = 'pending_approval';
+    } else {
+      status = 'submitted';
+    }
 
     const submission = await this.prisma.medicalSubmission.create({
       data: {
@@ -18,13 +28,14 @@ export class SubmissionsService {
         patientName: dto.patientName,
         patientNric: dto.patientNric,
         patientDob: new Date(dto.patientDateOfBirth),
+        examinationDate: dto.examinationDate ? new Date(dto.examinationDate) : undefined,
         status: status as any,
         formData: dto.formData,
         clinicId,
         createdById: userId,
         submittedDate: status === 'submitted' ? new Date() : undefined,
-        approvedById: status === 'submitted' ? userId : undefined,
-        approvedDate: status === 'submitted' ? new Date() : undefined,
+        approvedById: status === 'submitted' && userRole === 'doctor' ? userId : undefined,
+        approvedDate: status === 'submitted' && userRole === 'doctor' ? new Date() : undefined,
       },
       include: {
         createdBy: { select: { name: true } },
@@ -147,6 +158,7 @@ export class SubmissionsService {
         ...(dto.patientName && { patientName: dto.patientName }),
         ...(dto.patientNric && { patientNric: dto.patientNric }),
         ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
+        ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
         ...(dto.formData && { formData: dto.formData }),
       },
       include: {
@@ -194,6 +206,7 @@ export class SubmissionsService {
       patientName: submission.patientName,
       patientNric: submission.patientNric,
       patientDateOfBirth: submission.patientDob.toISOString().split('T')[0],
+      examinationDate: submission.examinationDate ? submission.examinationDate.toISOString().split('T')[0] : null,
       status: submission.status,
       createdBy: submission.createdById,
       createdByName: submission.createdBy?.name,

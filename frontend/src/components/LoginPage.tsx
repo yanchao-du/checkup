@@ -4,22 +4,30 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { toast } from 'sonner@2.0.3';
-import { FileText, Shield } from 'lucide-react';
+import { toast } from 'sonner';
+import { FileText, Shield, Loader2 } from 'lucide-react';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    const success = login(email, password);
-    if (success) {
-      toast.success('Login successful');
-    } else {
-      toast.error('Invalid credentials');
+    try {
+      const success = await login(email, password);
+      if (success) {
+        toast.success('Login successful');
+      } else {
+        toast.error('Invalid credentials');
+      }
+    } catch (error) {
+      toast.error('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -30,7 +38,7 @@ export function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <FileText className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-slate-900 mb-2">Medical Exam Portal</h1>
+          <h1 className="text-slate-900 mb-2">CheckUp Medical Portal</h1>
           <p className="text-slate-600">Submit medical examinations to Singapore government agencies</p>
         </div>
 
@@ -62,8 +70,15 @@ export function LoginPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
               </Button>
             </form>
 

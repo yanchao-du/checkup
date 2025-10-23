@@ -14,6 +14,10 @@ export class CreateSubmissionDto {
   @IsDateString()
   patientDateOfBirth: string;
   
+  @IsOptional()
+  @IsDateString()
+  examinationDate?: string;
+  
   @IsObject()
   formData: Record<string, any>;
   
@@ -34,6 +38,10 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsDateString()
   patientDateOfBirth?: string;
+  
+  @IsOptional()
+  @IsDateString()
+  examinationDate?: string;
   
   @IsOptional()
   @IsObject()

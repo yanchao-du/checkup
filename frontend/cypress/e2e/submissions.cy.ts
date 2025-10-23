@@ -18,12 +18,12 @@ describe('Medical Submissions', () => {
       cy.get('input[name="dateOfBirth"]').should('be.visible')
       
       // Examination details
-      cy.get('select[name="examType"]').should('be.visible')
+      cy.get('[data-testid="examType"]').should('be.visible')
       cy.get('input[name="examinationDate"]').should('be.visible')
       
       // Buttons
       cy.contains('button', 'Save as Draft').should('be.visible')
-      cy.contains('button', 'Submit for Approval').should('be.visible')
+      cy.contains('button', 'Submit to Agency').should('be.visible')
     })
 
     it('should create a draft submission', () => {
@@ -33,7 +33,8 @@ describe('Medical Submissions', () => {
       cy.get('input[name="dateOfBirth"]').type('1990-01-01')
       
       // Select exam type
-      cy.get('select[name="examType"]').select('MDW Six-Monthly')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Six-monthly').click()
       cy.get('input[name="examinationDate"]').type('2024-06-15')
       
       // Save as draft
@@ -48,7 +49,8 @@ describe('Medical Submissions', () => {
       cy.get('input[name="patientName"]').type('Test Patient')
       cy.get('input[name="nric"]').type('S9876543B')
       cy.get('input[name="dateOfBirth"]').type('1985-05-15')
-      cy.get('select[name="examType"]').select('Work Permit Medical')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Work Permit').click()
       cy.get('input[name="examinationDate"]').type('2024-06-15')
       
       // Fill in vital signs
@@ -56,8 +58,8 @@ describe('Medical Submissions', () => {
       cy.get('input[name="weight"]').type('70')
       cy.get('input[name="bloodPressure"]').type('120/80')
       
-      // Submit for approval
-      cy.contains('button', 'Submit for Approval').click()
+      // Submit to agency (doctor)
+      cy.contains('button', 'Submit to Agency').click()
       
       // Should show success message or redirect
       cy.url().should('match', /\/(submissions|dashboard)/)
@@ -65,7 +67,7 @@ describe('Medical Submissions', () => {
 
     it('should validate required fields', () => {
       // Try to submit without filling fields
-      cy.contains('button', 'Submit for Approval').click()
+      cy.contains('button', 'Submit to Agency').click()
       
       // Should show validation errors (HTML5 or custom)
       // This test depends on your validation implementation
@@ -73,14 +75,17 @@ describe('Medical Submissions', () => {
     })
 
     it('should support all exam types', () => {
-      cy.get('select[name="examType"]').select('MDW Six-Monthly')
-      cy.get('select[name="examType"]').should('have.value', 'MDW_SIX_MONTHLY')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Six-monthly').click()
+      cy.get('[data-testid="examType"]').should('contain', 'Six-monthly')
       
-      cy.get('select[name="examType"]').select('Work Permit Medical')
-      cy.get('select[name="examType"]').should('have.value', 'WORK_PERMIT')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Work Permit').click()
+      cy.get('[data-testid="examType"]').should('contain', 'Work Permit')
       
-      cy.get('select[name="examType"]').select('Aged Drivers Medical')
-      cy.get('select[name="examType"]').should('have.value', 'AGED_DRIVERS')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Aged Drivers').click()
+      cy.get('[data-testid="examType"]').should('contain', 'Aged Drivers')
     })
   })
 
@@ -176,7 +181,8 @@ describe('Medical Submissions', () => {
       cy.get('input[name="patientName"]').type('Nurse Test Patient')
       cy.get('input[name="nric"]').type('S1111111A')
       cy.get('input[name="dateOfBirth"]').type('1995-03-20')
-      cy.get('select[name="examType"]').select('MDW Six-Monthly')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Six-monthly').click()
       cy.get('input[name="examinationDate"]').type('2024-06-15')
       
       cy.contains('button', 'Save as Draft').click()

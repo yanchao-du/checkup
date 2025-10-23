@@ -55,9 +55,8 @@ describe('Authentication Flow', () => {
   it('should logout successfully', () => {
     cy.login('doctor@clinic.sg', 'password')
     
-    // Click user menu and logout
-    cy.get('button').contains('doctor@clinic.sg').click()
-    cy.contains('Logout').click()
+    // Click logout button
+    cy.contains('button', 'Logout').click()
     
     // Should redirect to login
     cy.url().should('eq', Cypress.config().baseUrl + '/')

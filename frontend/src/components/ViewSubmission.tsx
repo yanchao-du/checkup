@@ -1,17 +1,49 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMockData } from './useMockData';
+import { submissionsApi } from '../services/submissions.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { ArrowLeft, FileText, User, Calendar, CheckCircle } from 'lucide-react';
+import { ArrowLeft, FileText, User, Calendar, CheckCircle, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getSubmissionById } = useMockData();
+  const [submission, setSubmission] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const submission = id ? getSubmissionById(id) : null;
+  useEffect(() => {
+    const fetchSubmission = async () => {
+      if (!id) return;
+      
+      try {
+        setIsLoading(true);
+        const [submissionData, historyData] = await Promise.all([
+          submissionsApi.getById(id),
+          submissionsApi.getHistory(id)
+        ]);
+        setSubmission(submissionData);
+        setHistory(historyData);
+      } catch (error) {
+        console.error('Failed to fetch submission:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubmission();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
+        <p className="text-slate-600">Loading submission...</p>
+      </div>
+    );
+  }
 
   if (!submission) {
     return (
@@ -71,9 +103,9 @@ export function ViewSubmission() {
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Exam Type</p>
                   <p className="text-slate-900 text-sm">
-                    {submission.examType.includes('Migrant') && 'Six-monthly Medical Exam for Migrant Domestic Workers'}
-                    {submission.examType.includes('Work Permit') && 'Full Medical Exam for Work Permit'}
-                    {submission.examType.includes('Aged Drivers') && 'Medical Exam for Aged Drivers'}
+                    {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Workers'}
+                    {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
+                    {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
                   </p>
                 </div>
               </div>
@@ -110,7 +142,7 @@ export function ViewSubmission() {
               <Separator />
 
               {/* Exam type specific fields */}
-              {submission.examType.includes('Migrant') && (
+              {submission.examType === 'SIX_MONTHLY_MDW' && (
                 <div className="grid grid-cols-2 gap-4">
                   {submission.formData.pregnancyTest && (
                     <div>
@@ -127,7 +159,7 @@ export function ViewSubmission() {
                 </div>
               )}
 
-              {submission.examType.includes('Work Permit') && (
+              {submission.examType === 'WORK_PERMIT' && (
                 <div className="grid grid-cols-2 gap-4">
                   {submission.formData.hivTest && (
                     <div>
@@ -144,7 +176,7 @@ export function ViewSubmission() {
                 </div>
               )}
 
-              {submission.examType.includes('Aged Drivers') && (
+              {submission.examType === 'AGED_DRIVERS' && (
                 <div className="grid grid-cols-2 gap-4">
                   {submission.formData.visualAcuity && (
                     <div>
@@ -222,7 +254,7 @@ export function ViewSubmission() {
                   <div className="flex-1">
                     <p className="text-sm text-slate-900">Submitted</p>
                     <p className="text-xs text-slate-500">
-                      {submission.examType.includes('SPF') ? 'Singapore Police Force' : 'Ministry of Manpower'}
+                      {submission.examType === 'AGED_DRIVERS' ? 'Singapore Police Force' : 'Ministry of Manpower'}
                     </p>
                     <p className="text-xs text-slate-500">
                       {new Date(submission.submittedDate).toLocaleString()}
@@ -242,7 +274,7 @@ export function ViewSubmission() {
                 <div>
                   <p className="text-sm text-slate-500">Submitted To</p>
                   <p className="text-slate-900">
-                    {submission.examType.includes('SPF') 
+                    {submission.examType === 'AGED_DRIVERS' 
                       ? 'Singapore Police Force' 
                       : 'Ministry of Manpower'}
                   </p>
@@ -250,9 +282,9 @@ export function ViewSubmission() {
                 <div>
                   <p className="text-sm text-slate-500">Exam Category</p>
                   <p className="text-slate-900 text-sm">
-                    {submission.examType.includes('Migrant') && 'Migrant Domestic Worker'}
-                    {submission.examType.includes('Work Permit') && 'Work Permit Holder'}
-                    {submission.examType.includes('Aged Drivers') && 'Aged Driver Assessment'}
+                    {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
+                    {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
+                    {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
                   </p>
                 </div>
               </div>

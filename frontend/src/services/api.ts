@@ -18,7 +18,7 @@ export interface LoginResponse {
   user: User;
 }
 
-export type ExamType = 'MDW_SIX_MONTHLY' | 'WORK_PERMIT' | 'AGED_DRIVERS';
+export type ExamType = 'SIX_MONTHLY_MDW' | 'WORK_PERMIT' | 'AGED_DRIVERS';
 export type SubmissionStatus = 'draft' | 'pending_approval' | 'submitted' | 'rejected';
 
 export interface MedicalSubmission {

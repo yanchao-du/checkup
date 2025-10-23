@@ -56,7 +56,8 @@ describe('User Management (Admin Only)', () => {
           cy.get('input[name="email"]').type(newEmail)
           cy.get('input[name="name"]').type('Test User')
           cy.get('input[name="password"]').type('Password123!')
-          cy.get('select[name="role"]').select('NURSE')
+          cy.get('[data-testid="role"]').click()
+          cy.contains('Nurse').click()
           
           cy.contains('button', /Create|Save/).click()
           
@@ -91,7 +92,8 @@ describe('User Management (Admin Only)', () => {
             cy.contains('button', 'Edit').click()
           })
           
-          cy.get('select[name="role"]').select('DOCTOR')
+          cy.get('[data-testid="role"]').click()
+          cy.contains('Doctor').click()
           cy.contains('button', /Save|Update/).click()
           
           cy.wait(1000)
@@ -126,7 +128,8 @@ describe('User Management (Admin Only)', () => {
           cy.get('input[name="email"]').type(deleteEmail)
           cy.get('input[name="name"]').type('Delete Me')
           cy.get('input[name="password"]').type('Password123!')
-          cy.get('select[name="role"]').select('NURSE')
+          cy.get('[data-testid="role"]').click()
+          cy.contains('Nurse').click()
           cy.contains('button', /Create|Save/).click()
           
           cy.wait(1000)

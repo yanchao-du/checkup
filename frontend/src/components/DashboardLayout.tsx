@@ -34,10 +34,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse'] },
+    { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/submissions', label: 'Submissions', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor'] },
+    { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
     { path: '/user-management', label: 'User Management', icon: Users, roles: ['admin'] },
   ];
 
@@ -72,7 +72,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
-              Log out
+              Logout
             </Button>
           </div>
         </div>

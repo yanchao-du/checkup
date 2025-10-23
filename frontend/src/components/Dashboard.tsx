@@ -6,42 +6,79 @@ import {
   FileText, 
   FileEdit, 
   CheckCircle, 
-  Clock, 
-  Send,
   TrendingUp,
-  Users,
   AlertCircle
 } from 'lucide-react';
 import { Badge } from './ui/badge';
-import { useMockData } from './useMockData';
+import { useState, useEffect } from 'react';
+import { submissionsApi, approvalsApi } from '../services';
+import type { MedicalSubmission } from '../services';
 
 export function Dashboard() {
   const { user } = useAuth();
-  const { submissions, drafts } = useMockData();
+  const [submissions, setSubmissions] = useState<MedicalSubmission[]>([]);
+  const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState<MedicalSubmission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const mySubmissions = user?.role === 'admin' 
-    ? submissions 
-    : submissions.filter(s => s.createdBy === user?.id);
-  
-  const myDrafts = user?.role === 'admin'
-    ? drafts
-    : drafts.filter(d => d.createdBy === user?.id);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch all submissions (not drafts)
+        const submissionsResponse = await submissionsApi.getAll({ 
+          page: 1, 
+          limit: 100 
+        });
+        setSubmissions(submissionsResponse.data.filter(s => s.status !== 'draft'));
 
-  const pendingApprovals = submissions.filter(s => 
-    s.status === 'pending_approval' && user?.role === 'doctor'
-  );
+        // Fetch drafts
+        const draftsResponse = await submissionsApi.getDrafts({ 
+          page: 1, 
+          limit: 100 
+        });
+        setDrafts(draftsResponse.data);
 
-  const submittedCount = mySubmissions.filter(s => s.status === 'submitted').length;
-  const thisMonthSubmissions = mySubmissions.filter(s => {
+        // Fetch pending approvals if user is a doctor
+        if (user?.role === 'doctor') {
+          const approvalsResponse = await approvalsApi.getPending({ 
+            page: 1, 
+            limit: 100 
+          });
+          setPendingApprovals(approvalsResponse.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user?.role]);
+
+  const thisMonthSubmissions = submissions.filter(s => {
     const date = new Date(s.submittedDate || s.createdDate);
     const now = new Date();
     return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
   }).length;
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="main">
       <div>
-        <h2 className="text-slate-900 mb-1">Welcome back, {user?.name}</h2>
+        <h2 className="text-slate-900 mb-1">Welcome, {user?.email}</h2>
         <p className="text-slate-600">Here's an overview of your medical exam submissions</p>
       </div>
 
@@ -53,7 +90,7 @@ export function Dashboard() {
             <FileText className="w-4 h-4 text-slate-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{mySubmissions.length}</div>
+            <div className="text-slate-900">{submissions.length}</div>
             <p className="text-xs text-slate-500 mt-1">All time</p>
           </CardContent>
         </Card>
@@ -64,7 +101,7 @@ export function Dashboard() {
             <FileEdit className="w-4 h-4 text-slate-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{myDrafts.length}</div>
+            <div className="text-slate-900">{drafts.length}</div>
             <p className="text-xs text-slate-500 mt-1">Pending completion</p>
           </CardContent>
         </Card>
@@ -117,11 +154,11 @@ export function Dashboard() {
               </Button>
             </Link>
           )}
-          {myDrafts.length > 0 && (
+          {drafts.length > 0 && (
             <Link to="/drafts">
               <Button variant="outline">
                 <FileEdit className="w-4 h-4 mr-2" />
-                Continue Draft ({myDrafts.length})
+                Continue Draft ({drafts.length})
               </Button>
             </Link>
           )}
@@ -135,7 +172,7 @@ export function Dashboard() {
           <CardDescription>Your latest medical exam submissions</CardDescription>
         </CardHeader>
         <CardContent>
-          {mySubmissions.length === 0 ? (
+          {submissions.length === 0 ? (
             <div className="text-center py-8 text-slate-500">
               <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <p>No submissions yet</p>
@@ -147,7 +184,7 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {mySubmissions.slice(0, 5).map((submission) => (
+              {submissions.slice(0, 5).map((submission: MedicalSubmission) => (
                 <Link 
                   key={submission.id} 
                   to={`/submission/${submission.id}`}
@@ -176,7 +213,7 @@ export function Dashboard() {
                   </div>
                 </Link>
               ))}
-              {mySubmissions.length > 5 && (
+              {submissions.length > 5 && (
                 <Link to="/submissions">
                   <Button variant="link" className="w-full">View all submissions</Button>
                 </Link>
