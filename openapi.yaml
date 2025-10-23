@@ -337,6 +337,43 @@ paths:
         '403':
           $ref: '#/components/responses/ForbiddenError'
 
+  /submissions/{id}/submit:
+    post:
+      tags:
+        - Submissions
+      summary: Submit draft for approval
+      description: |
+        Submit a draft medical exam for approval by a doctor. 
+        Only nurses can use this endpoint to route drafts to pending_approval status.
+        Changes the status from 'draft' to 'pending_approval'.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Submission ID
+          schema:
+            type: string
+            example: sub-001
+      responses:
+        '200':
+          description: Successfully submitted for approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - only drafts can be submitted for approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /drafts:
     get:
       tags:

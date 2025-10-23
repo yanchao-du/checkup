@@ -37,4 +37,9 @@ export class SubmissionsController {
   update(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: UpdateSubmissionDto) {
     return this.submissionsService.update(id, user.id, user.role, dto);
   }
+
+  @Post(':id/submit')
+  submitForApproval(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.submissionsService.submitForApproval(id, user.id, user.role);
+  }
 }

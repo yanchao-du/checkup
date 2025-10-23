@@ -180,6 +180,46 @@ export class SubmissionsService {
     return this.formatSubmission(submission);
   }
 
+  async submitForApproval(id: string, userId: string, userRole: string) {
+    const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    if (existing.createdById !== userId && userRole !== 'admin') {
+      throw new ForbiddenException('Access denied');
+    }
+
+    if (existing.status !== 'draft') {
+      throw new ForbiddenException('Only drafts can be submitted for approval');
+    }
+
+    const submission = await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        status: 'pending_approval',
+        submittedDate: new Date(),
+      },
+      include: {
+        createdBy: { select: { name: true } },
+        approvedBy: { select: { name: true } },
+      },
+    });
+
+    // Audit log
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'submitted',
+        changes: { status: 'pending_approval' },
+      },
+    });
+
+    return this.formatSubmission(submission);
+  }
+
   async getAuditTrail(submissionId: string) {
     const logs = await this.prisma.auditLog.findMany({
       where: { submissionId },
