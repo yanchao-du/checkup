@@ -14,6 +14,13 @@ describe('UsersController', () => {
     create: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
+    findDoctors: jest.fn(),
+    getDefaultDoctor: jest.fn(),
+    setDefaultDoctor: jest.fn(),
+    getDoctorClinics: jest.fn(),
+    assignDoctorToClinic: jest.fn(),
+    removeDoctorFromClinic: jest.fn(),
+    setPrimaryClinic: jest.fn(),
   };
 
   const mockUser = {
@@ -163,6 +170,120 @@ describe('UsersController', () => {
       expect(mockUsersService.remove).toHaveBeenCalledWith(
         mockUser.id,
         mockCurrentUser.clinicId,
+      );
+    });
+  });
+
+  describe('getDoctorClinics', () => {
+    it('should return clinics for a doctor', async () => {
+      const clinics = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          name: 'HealthFirst Medical Clinic',
+          hciCode: 'HCI0001',
+          isPrimary: true,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          name: 'CareWell Medical Centre',
+          hciCode: 'HCI0002',
+          isPrimary: false,
+        },
+      ];
+      mockUsersService.getDoctorClinics.mockResolvedValue(clinics);
+
+      const result = await controller.getDoctorClinics(mockUser.id);
+
+      expect(result).toEqual(clinics);
+      expect(mockUsersService.getDoctorClinics).toHaveBeenCalledWith(
+        mockUser.id,
+      );
+    });
+  });
+
+  describe('assignDoctorToClinic', () => {
+    it('should assign doctor to clinic', async () => {
+      const clinicId = '550e8400-e29b-41d4-a716-446655440002';
+      const body = { clinicId, isPrimary: false };
+      const assignment = {
+        doctorId: mockUser.id,
+        clinicId,
+        isPrimary: false,
+        doctor: mockUser,
+        clinic: {
+          id: clinicId,
+          name: 'New Clinic',
+          hciCode: 'HCI0003',
+        },
+      };
+      mockUsersService.assignDoctorToClinic.mockResolvedValue(assignment);
+
+      const result = await controller.assignDoctorToClinic(mockUser.id, body);
+
+      expect(result).toEqual(assignment);
+      expect(mockUsersService.assignDoctorToClinic).toHaveBeenCalledWith(
+        mockUser.id,
+        clinicId,
+        false,
+      );
+    });
+
+    it('should assign doctor to clinic as primary', async () => {
+      const clinicId = '550e8400-e29b-41d4-a716-446655440002';
+      const body = { clinicId, isPrimary: true };
+      mockUsersService.assignDoctorToClinic.mockResolvedValue({});
+
+      await controller.assignDoctorToClinic(mockUser.id, body);
+
+      expect(mockUsersService.assignDoctorToClinic).toHaveBeenCalledWith(
+        mockUser.id,
+        clinicId,
+        true,
+      );
+    });
+  });
+
+  describe('removeDoctorFromClinic', () => {
+    it('should remove doctor from clinic', async () => {
+      const clinicId = '550e8400-e29b-41d4-a716-446655440002';
+      const result = { message: 'Doctor removed from clinic successfully' };
+      mockUsersService.removeDoctorFromClinic.mockResolvedValue(result);
+
+      const response = await controller.removeDoctorFromClinic(
+        mockUser.id,
+        clinicId,
+      );
+
+      expect(response).toEqual(result);
+      expect(mockUsersService.removeDoctorFromClinic).toHaveBeenCalledWith(
+        mockUser.id,
+        clinicId,
+      );
+    });
+  });
+
+  describe('setPrimaryClinic', () => {
+    it('should set primary clinic for doctor', async () => {
+      const clinicId = '550e8400-e29b-41d4-a716-446655440002';
+      const result = {
+        doctorId: mockUser.id,
+        clinicId,
+        isPrimary: true,
+        doctor: mockUser,
+        clinic: {
+          id: clinicId,
+          name: 'Primary Clinic',
+          hciCode: 'HCI0003',
+        },
+      };
+      mockUsersService.setPrimaryClinic.mockResolvedValue(result);
+
+      const response = await controller.setPrimaryClinic(mockUser.id, clinicId);
+
+      expect(response).toEqual(result);
+      expect(mockUsersService.setPrimaryClinic).toHaveBeenCalledWith(
+        mockUser.id,
+        clinicId,
       );
     });
   });

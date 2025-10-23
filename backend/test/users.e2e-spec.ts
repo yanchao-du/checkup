@@ -433,4 +433,269 @@ describe('Users (e2e)', () => {
         .expect(200);
     });
   });
+
+  describe('Doctor-Clinic Relationships', () => {
+    let testDoctorId: string;
+    let secondClinicId: string;
+
+    beforeAll(async () => {
+      // Create a test doctor
+      const doctorResponse = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Dr. Test E2E',
+          email: `doctor-e2e-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'doctor',
+          mcrNumber: 'T99999Z',
+        })
+        .expect(201);
+      testDoctorId = doctorResponse.body.id;
+
+      // Create a second clinic
+      const clinicResponse = await request(app.getHttpServer())
+        .post('/v1/clinics')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Second E2E Clinic',
+          hciCode: 'E2E0002',
+        })
+        .expect(201);
+      secondClinicId = clinicResponse.body.id;
+    });
+
+    afterAll(async () => {
+      // Cleanup
+      if (testDoctorId) {
+        await prisma.user.delete({ where: { id: testDoctorId } }).catch(() => {});
+      }
+      if (secondClinicId) {
+        await prisma.clinic.delete({ where: { id: secondClinicId } }).catch(() => {});
+      }
+    });
+
+    describe('GET /v1/users/:id/clinics', () => {
+      it('should return clinics for a doctor', async () => {
+        const response = await request(app.getHttpServer())
+          .get(`/v1/users/${testDoctorId}/clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body.length).toBeGreaterThan(0);
+        
+        const clinic = response.body[0];
+        expect(clinic).toHaveProperty('id');
+        expect(clinic).toHaveProperty('name');
+        expect(clinic).toHaveProperty('hciCode');
+        expect(clinic).toHaveProperty('isPrimary');
+        expect(clinic.isPrimary).toBe(true); // First clinic is primary
+      });
+    });
+
+    describe('POST /v1/users/:id/clinics', () => {
+      it('should assign doctor to a clinic', async () => {
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${testDoctorId}/clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: secondClinicId,
+            isPrimary: false,
+          })
+          .expect(201);
+
+        expect(response.body.doctorId).toBe(testDoctorId);
+        expect(response.body.clinicId).toBe(secondClinicId);
+        expect(response.body.isPrimary).toBe(false);
+        expect(response.body).toHaveProperty('doctor');
+        expect(response.body).toHaveProperty('clinic');
+      });
+
+      it('should reject duplicate assignment', async () => {
+        // Try to assign again
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${testDoctorId}/clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: secondClinicId,
+            isPrimary: false,
+          })
+          .expect(409);
+
+        expect(response.body.message).toContain('already assigned');
+      });
+
+      it('should deny access to non-admin', async () => {
+        await request(app.getHttpServer())
+          .post(`/v1/users/${testDoctorId}/clinics`)
+          .set('Authorization', `Bearer ${nurseToken}`)
+          .send({
+            clinicId: secondClinicId,
+            isPrimary: false,
+          })
+          .expect(403);
+      });
+    });
+
+    describe('PUT /v1/users/:id/clinics/:clinicId/primary', () => {
+      it('should set a clinic as primary', async () => {
+        const response = await request(app.getHttpServer())
+          .put(`/v1/users/${testDoctorId}/clinics/${secondClinicId}/primary`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        expect(response.body.isPrimary).toBe(true);
+        expect(response.body.clinicId).toBe(secondClinicId);
+
+        // Verify the change
+        const clinicsResponse = await request(app.getHttpServer())
+          .get(`/v1/users/${testDoctorId}/clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        const primaryClinic = clinicsResponse.body.find(
+          (c: any) => c.isPrimary === true,
+        );
+        expect(primaryClinic.id).toBe(secondClinicId);
+      });
+
+      it('should return 404 for unassigned clinic', async () => {
+        const fakeClinicId = '00000000-0000-0000-0000-000000000000';
+        await request(app.getHttpServer())
+          .put(`/v1/users/${testDoctorId}/clinics/${fakeClinicId}/primary`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(404);
+      });
+    });
+
+    describe('DELETE /v1/users/:id/clinics/:clinicId', () => {
+      it('should prevent removing the only clinic', async () => {
+        // First, remove the original clinic to have only one
+        const clinicsResponse = await request(app.getHttpServer())
+          .get(`/v1/users/${testDoctorId}/clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        const nonPrimaryClinic = clinicsResponse.body.find(
+          (c: any) => c.isPrimary === false,
+        );
+
+        if (nonPrimaryClinic) {
+          await request(app.getHttpServer())
+            .delete(`/v1/users/${testDoctorId}/clinics/${nonPrimaryClinic.id}`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+        }
+
+        // Now try to remove the last clinic
+        const primaryClinic = clinicsResponse.body.find(
+          (c: any) => c.isPrimary === true,
+        );
+
+        const response = await request(app.getHttpServer())
+          .delete(`/v1/users/${testDoctorId}/clinics/${primaryClinic.id}`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(409);
+
+        expect(response.body.message).toContain(
+          'Doctor must have at least one clinic',
+        );
+      });
+    });
+  });
+
+  describe('MCR Number Validation', () => {
+    it('should accept valid MCR number format', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Dr. Valid MCR',
+          email: `valid-mcr-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'doctor',
+          mcrNumber: 'V12345A',
+        })
+        .expect(201);
+
+      expect(response.body.mcrNumber).toBe('V12345A');
+
+      // Cleanup
+      await prisma.user.delete({ where: { id: response.body.id } });
+    });
+
+    it('should reject invalid MCR number formats', async () => {
+      const invalidMCRs = [
+        'M12345',    // Missing last letter
+        '12345AB',   // Missing first letter
+        'M1234AB',   // Only 4 digits
+        'm12345a',   // Lowercase
+        'M-12345-A', // Contains hyphens
+      ];
+
+      for (const mcrNumber of invalidMCRs) {
+        await request(app.getHttpServer())
+          .post('/v1/users')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            name: 'Dr. Invalid MCR',
+            email: `invalid-mcr-${Date.now()}-${Math.random()}@clinic.sg`,
+            password: 'password123',
+            role: 'doctor',
+            mcrNumber,
+          })
+          .expect(400);
+      }
+    });
+
+    it('should reject duplicate MCR number', async () => {
+      const mcrNumber = 'D55555E';
+      
+      // Create first doctor
+      const first = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Dr. First',
+          email: `first-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'doctor',
+          mcrNumber,
+        })
+        .expect(201);
+
+      // Try to create second doctor with same MCR
+      const response = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Dr. Second',
+          email: `second-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'doctor',
+          mcrNumber,
+        })
+        .expect(409);
+
+      expect(response.body.message).toContain('MCR Number already exists');
+
+      // Cleanup
+      await prisma.user.delete({ where: { id: first.body.id } });
+    });
+
+    it('should require MCR number for doctors', async () => {
+      await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Dr. No MCR',
+          email: `no-mcr-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'doctor',
+          // mcrNumber missing
+        })
+        .expect(400);
+    });
+  });
 });

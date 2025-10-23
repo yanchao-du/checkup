@@ -82,4 +82,42 @@ export class UsersController {
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.usersService.remove(id, user.clinicId);
   }
+
+  // Doctor-Clinic relationship endpoints
+  @Get(':id/clinics')
+  @Roles('admin', 'doctor')
+  getDoctorClinics(@Param('id') id: string) {
+    return this.usersService.getDoctorClinics(id);
+  }
+
+  @Post(':id/clinics')
+  @Roles('admin')
+  assignDoctorToClinic(
+    @Param('id') doctorId: string,
+    @Body() body: { clinicId: string; isPrimary?: boolean },
+  ) {
+    return this.usersService.assignDoctorToClinic(
+      doctorId,
+      body.clinicId,
+      body.isPrimary,
+    );
+  }
+
+  @Delete(':id/clinics/:clinicId')
+  @Roles('admin')
+  removeDoctorFromClinic(
+    @Param('id') doctorId: string,
+    @Param('clinicId') clinicId: string,
+  ) {
+    return this.usersService.removeDoctorFromClinic(doctorId, clinicId);
+  }
+
+  @Put(':id/clinics/:clinicId/primary')
+  @Roles('admin')
+  setPrimaryClinic(
+    @Param('id') doctorId: string,
+    @Param('clinicId') clinicId: string,
+  ) {
+    return this.usersService.setPrimaryClinic(doctorId, clinicId);
+  }
 }

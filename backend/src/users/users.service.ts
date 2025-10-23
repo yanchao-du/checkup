@@ -42,21 +42,36 @@ export class UsersService {
   }
 
   async findDoctors(clinicId: string) {
-    const doctors = await this.prisma.user.findMany({
+    // Find all doctors who work at this clinic (either as primary or secondary)
+    const doctorClinics = await this.prisma.doctorClinic.findMany({
       where: {
         clinicId,
-        role: 'doctor',
-        status: 'active',
+        doctor: {
+          status: 'active',
+        },
       },
       select: {
-        id: true,
-        name: true,
-        email: true,
+        isPrimary: true,
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            mcrNumber: true,
+          },
+        },
       },
-      orderBy: { name: 'asc' },
+      orderBy: {
+        doctor: {
+          name: 'asc',
+        },
+      },
     });
 
-    return doctors;
+    return doctorClinics.map(dc => ({
+      ...dc.doctor,
+      isPrimary: dc.isPrimary,
+    }));
   }
 
   async findOne(id: string, clinicId: string) {
@@ -67,14 +82,42 @@ export class UsersService {
         name: true,
         email: true,
         role: true,
+        mcrNumber: true,
         status: true,
         lastLoginAt: true,
         createdAt: true,
+        doctorClinics: {
+          select: {
+            isPrimary: true,
+            clinic: {
+              select: {
+                id: true,
+                name: true,
+                hciCode: true,
+              },
+            },
+          },
+          orderBy: {
+            isPrimary: 'desc', // Primary clinic first
+          },
+        },
       },
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    // Transform the response for cleaner structure
+    if (user.role === 'doctor' && user.doctorClinics) {
+      return {
+        ...user,
+        clinics: user.doctorClinics.map(dc => ({
+          ...dc.clinic,
+          isPrimary: dc.isPrimary,
+        })),
+        doctorClinics: undefined,
+      };
     }
 
     return user;
@@ -90,6 +133,17 @@ export class UsersService {
       throw new ConflictException('Email already exists');
     }
 
+    // Check if MCR number already exists (if provided for doctor)
+    if (createUserDto.mcrNumber) {
+      const existingMCR = await this.prisma.user.findUnique({
+        where: { mcrNumber: createUserDto.mcrNumber },
+      });
+
+      if (existingMCR) {
+        throw new ConflictException('MCR Number already exists');
+      }
+    }
+
     // Hash password
     const passwordHash = await bcrypt.hash(createUserDto.password, 10);
 
@@ -100,6 +154,7 @@ export class UsersService {
         email: createUserDto.email,
         passwordHash,
         role: createUserDto.role,
+        mcrNumber: createUserDto.mcrNumber,
         status: 'active',
       },
       select: {
@@ -107,11 +162,23 @@ export class UsersService {
         name: true,
         email: true,
         role: true,
+        mcrNumber: true,
         status: true,
         lastLoginAt: true,
         createdAt: true,
       },
     });
+
+    // If creating a doctor, automatically create DoctorClinic relationship with primary clinic
+    if (createUserDto.role === 'doctor') {
+      await this.prisma.doctorClinic.create({
+        data: {
+          doctorId: user.id,
+          clinicId: clinicId,
+          isPrimary: true,
+        },
+      });
+    }
 
     return user;
   }
@@ -131,11 +198,23 @@ export class UsersService {
       }
     }
 
+    // If MCR number is being updated, check for conflicts
+    if (updateUserDto.mcrNumber) {
+      const existingMCR = await this.prisma.user.findUnique({
+        where: { mcrNumber: updateUserDto.mcrNumber },
+      });
+
+      if (existingMCR && existingMCR.id !== id) {
+        throw new ConflictException('MCR Number already exists');
+      }
+    }
+
     const updateData: any = {
       name: updateUserDto.name,
       email: updateUserDto.email,
       role: updateUserDto.role,
       status: updateUserDto.status,
+      mcrNumber: updateUserDto.mcrNumber,
     };
 
     // Hash password if provided
@@ -151,6 +230,7 @@ export class UsersService {
         name: true,
         email: true,
         role: true,
+        mcrNumber: true,
         status: true,
         lastLoginAt: true,
         createdAt: true,
@@ -244,5 +324,217 @@ export class UsersService {
       defaultDoctorId: updatedUser.defaultDoctorId,
       defaultDoctor: updatedUser.defaultDoctor,
     };
+  }
+
+  // Doctor-Clinic relationship management
+  async assignDoctorToClinic(
+    doctorId: string,
+    clinicId: string,
+    isPrimary: boolean = false,
+  ) {
+    // Verify the doctor exists
+    const doctor = await this.prisma.user.findFirst({
+      where: {
+        id: doctorId,
+        role: 'doctor',
+      },
+    });
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor not found');
+    }
+
+    // Verify the clinic exists
+    const clinic = await this.prisma.clinic.findUnique({
+      where: { id: clinicId },
+    });
+
+    if (!clinic) {
+      throw new NotFoundException('Clinic not found');
+    }
+
+    // Check if relationship already exists
+    const existing = await this.prisma.doctorClinic.findUnique({
+      where: {
+        doctorId_clinicId: {
+          doctorId,
+          clinicId,
+        },
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException('Doctor is already assigned to this clinic');
+    }
+
+    // If setting as primary, unset other primary clinics
+    if (isPrimary) {
+      await this.prisma.doctorClinic.updateMany({
+        where: { doctorId, isPrimary: true },
+        data: { isPrimary: false },
+      });
+    }
+
+    const doctorClinic = await this.prisma.doctorClinic.create({
+      data: {
+        doctorId,
+        clinicId,
+        isPrimary,
+      },
+      select: {
+        doctorId: true,
+        clinicId: true,
+        isPrimary: true,
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            mcrNumber: true,
+          },
+        },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            hciCode: true,
+          },
+        },
+      },
+    });
+
+    return doctorClinic;
+  }
+
+  async removeDoctorFromClinic(doctorId: string, clinicId: string) {
+    // Verify the relationship exists
+    const doctorClinic = await this.prisma.doctorClinic.findUnique({
+      where: {
+        doctorId_clinicId: {
+          doctorId,
+          clinicId,
+        },
+      },
+    });
+
+    if (!doctorClinic) {
+      throw new NotFoundException('Doctor is not assigned to this clinic');
+    }
+
+    // Prevent removal if it's the primary clinic and the only clinic
+    if (doctorClinic.isPrimary) {
+      const clinicCount = await this.prisma.doctorClinic.count({
+        where: { doctorId },
+      });
+
+      if (clinicCount === 1) {
+        throw new ConflictException(
+          'Cannot remove primary clinic. Doctor must have at least one clinic assignment.',
+        );
+      }
+    }
+
+    await this.prisma.doctorClinic.delete({
+      where: {
+        doctorId_clinicId: {
+          doctorId,
+          clinicId,
+        },
+      },
+    });
+
+    return { message: 'Doctor removed from clinic successfully' };
+  }
+
+  async setPrimaryClinic(doctorId: string, clinicId: string) {
+    // Verify the relationship exists
+    const doctorClinic = await this.prisma.doctorClinic.findUnique({
+      where: {
+        doctorId_clinicId: {
+          doctorId,
+          clinicId,
+        },
+      },
+    });
+
+    if (!doctorClinic) {
+      throw new NotFoundException('Doctor is not assigned to this clinic');
+    }
+
+    // Unset all other primary clinics for this doctor
+    await this.prisma.doctorClinic.updateMany({
+      where: { doctorId, isPrimary: true },
+      data: { isPrimary: false },
+    });
+
+    // Set the new primary clinic
+    const updated = await this.prisma.doctorClinic.update({
+      where: {
+        doctorId_clinicId: {
+          doctorId,
+          clinicId,
+        },
+      },
+      data: { isPrimary: true },
+      select: {
+        doctorId: true,
+        clinicId: true,
+        isPrimary: true,
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            mcrNumber: true,
+          },
+        },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            hciCode: true,
+          },
+        },
+      },
+    });
+
+    return updated;
+  }
+
+  async getDoctorClinics(doctorId: string) {
+    const doctor = await this.prisma.user.findFirst({
+      where: {
+        id: doctorId,
+        role: 'doctor',
+      },
+    });
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor not found');
+    }
+
+    const doctorClinics = await this.prisma.doctorClinic.findMany({
+      where: { doctorId },
+      select: {
+        isPrimary: true,
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            hciCode: true,
+            address: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: {
+        isPrimary: 'desc', // Primary clinic first
+      },
+    });
+
+    return doctorClinics.map(dc => ({
+      ...dc.clinic,
+      isPrimary: dc.isPrimary,
+    }));
   }
 }

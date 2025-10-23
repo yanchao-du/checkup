@@ -13,6 +13,7 @@ async function main() {
     create: {
       id: '550e8400-e29b-41d4-a716-446655440000',
       name: 'HealthFirst Medical Clinic',
+      hciCode: 'HCI0001',  // Healthcare Institution Code (7 alphanumeric)
       registrationNumber: 'RC001234',
       address: '123 Orchard Road, #01-01, Singapore 238858',
       phone: '+65 6123 4567',
@@ -37,6 +38,7 @@ async function main() {
       passwordHash,
       name: 'Dr. Sarah Tan',
       role: 'doctor',
+      mcrNumber: 'M12345A',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
       updatedAt: new Date(),
     },
@@ -85,6 +87,7 @@ async function main() {
       passwordHash,
       name: 'Dr. James Lee',
       role: 'doctor',
+      mcrNumber: 'M23456B',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
       updatedAt: new Date(),
     },
@@ -100,6 +103,7 @@ async function main() {
       passwordHash,
       name: 'Dr. Emily Chen',
       role: 'doctor',
+      mcrNumber: 'M34567C',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
       updatedAt: new Date(),
     },
@@ -115,6 +119,7 @@ async function main() {
       passwordHash,
       name: 'Dr. Michael Tan',
       role: 'doctor',
+      mcrNumber: 'M45678D',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
       updatedAt: new Date(),
     },
@@ -136,6 +141,124 @@ async function main() {
   });
 
   console.log('✅ Created additional test users (4 doctors total, 2 nurses total)');
+
+  // Create a second clinic to demonstrate many-to-many relationship
+  const clinic2 = await prisma.clinic.upsert({
+    where: { hciCode: 'HCI0002' },
+    update: {},
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440100',
+      name: 'CareWell Medical Centre',
+      hciCode: 'HCI0002',  // HCI format: 7 alphanumeric characters
+      registrationNumber: 'RC002345',
+      address: '456 Thomson Road, #02-03, Singapore 307591',
+      phone: '+65 6234 5678',
+      email: 'info@carewell.sg',
+    },
+  });
+
+  console.log('✅ Created second clinic:', clinic2.name);
+
+  // Create doctor-clinic relationships (many-to-many)
+  // Dr. Sarah Tan - works at both clinics (primary at HealthFirst)
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor.id,
+      clinicId: clinic.id,
+      isPrimary: true,  // Primary clinic
+    },
+  });
+
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor.id,
+      clinicId: clinic2.id,
+      isPrimary: false,  // Secondary clinic
+    },
+  });
+
+  // Dr. James Lee - works only at HealthFirst
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor2.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor2.id,
+      clinicId: clinic.id,
+      isPrimary: true,
+    },
+  });
+
+  // Dr. Emily Chen - works at both clinics (primary at CareWell)
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor3.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor3.id,
+      clinicId: clinic.id,
+      isPrimary: false,
+    },
+  });
+
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor3.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor3.id,
+      clinicId: clinic2.id,
+      isPrimary: true,  // Primary clinic
+    },
+  });
+
+  // Dr. Michael Tan - works only at CareWell
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor4.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor4.id,
+      clinicId: clinic2.id,
+      isPrimary: true,
+    },
+  });
+
+  console.log('✅ Created doctor-clinic relationships');
+  console.log('   - Dr. Sarah Tan: HealthFirst (primary) + CareWell');
+  console.log('   - Dr. James Lee: HealthFirst only');
+  console.log('   - Dr. Emily Chen: HealthFirst + CareWell (primary)');
+  console.log('   - Dr. Michael Tan: CareWell only');
 
   // Create sample submissions
   const submission1 = await prisma.medicalSubmission.create({

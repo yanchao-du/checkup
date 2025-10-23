@@ -13,6 +13,7 @@ datasource db {
 model Clinic {
   id                 String              @id @default(uuid())
   name               String
+  hciCode            String?             @unique @map("hci_code")  // Healthcare Institution Code
   registrationNumber String?             @unique @map("registration_number")
   address            String?
   phone              String?
@@ -20,7 +21,8 @@ model Clinic {
   createdAt          DateTime            @default(now()) @map("created_at")
   updatedAt          DateTime            @updatedAt @map("updated_at")
   
-  users              User[]
+  users              User[]              // Keep for backward compatibility (primary clinic)
+  doctorClinics      DoctorClinic[]      // Many-to-many with doctors
   submissions        MedicalSubmission[]
 
   @@map("clinics")
@@ -28,11 +30,12 @@ model Clinic {
 
 model User {
   id                  String              @id @default(uuid())
-  clinicId            String              @map("clinic_id")
+  clinicId            String              @map("clinic_id")  // Primary clinic for users
   email               String              @unique
   passwordHash        String              @map("password_hash")
   name                String
   role                UserRole
+  mcrNumber           String?             @unique @map("mcr_number")  // Medical Council Registration Number (doctors only)
   status              UserStatus          @default(active)
   defaultDoctorId     String?             @map("default_doctor_id")
   lastLoginAt         DateTime?           @map("last_login_at")
@@ -40,6 +43,7 @@ model User {
   updatedAt           DateTime            @updatedAt @map("updated_at")
   
   clinic              Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  doctorClinics       DoctorClinic[]      // Many-to-many with clinics (doctors only)
   defaultDoctor       User?               @relation("DefaultDoctor", fields: [defaultDoctorId], references: [id], onDelete: SetNull)
   nursesUsingAsDefault User[]             @relation("DefaultDoctor")
   createdSubmissions  MedicalSubmission[] @relation("CreatedBy")
@@ -49,7 +53,25 @@ model User {
 
   @@index([clinicId])
   @@index([email])
+  @@index([defaultDoctorId])
   @@map("users")
+}
+
+// Junction table for many-to-many relationship between doctors and clinics
+model DoctorClinic {
+  id        String   @id @default(uuid())
+  doctorId  String   @map("doctor_id")
+  clinicId  String   @map("clinic_id")
+  isPrimary Boolean  @default(false) @map("is_primary")  // Indicates if this is the doctor's primary clinic
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  doctor    User     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, clinicId])
+  @@index([doctorId])
+  @@index([clinicId])
+  @@map("doctor_clinics")
 }
 
 model MedicalSubmission {

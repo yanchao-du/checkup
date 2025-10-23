@@ -20,6 +20,18 @@ describe('UsersService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    doctorClinic: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    clinic: {
+      findUnique: jest.fn(),
+    },
   };
 
   const clinicId = '550e8400-e29b-41d4-a716-446655440000';
@@ -151,10 +163,70 @@ describe('UsersService', () => {
           email: createUserDto.email,
           passwordHash: 'hashedPassword',
           role: createUserDto.role,
+          mcrNumber: undefined,
           status: 'active',
         },
         select: expect.any(Object),
       });
+    });
+
+    it('should create doctor with MCR number and auto-create DoctorClinic', async () => {
+      const doctorDto = {
+        name: 'Dr. Sarah Tan',
+        email: 'sarah.tan@clinic.sg',
+        password: 'password123',
+        role: 'doctor' as const,
+        mcrNumber: 'M12345A',
+      };
+      mockPrismaService.user.findUnique.mockResolvedValue(null); // email check
+      mockPrismaService.user.create.mockResolvedValue({
+        ...mockUser,
+        ...doctorDto,
+      });
+      mockPrismaService.doctorClinic.create.mockResolvedValue({
+        doctorId: userId,
+        clinicId,
+        isPrimary: true,
+      });
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
+
+      const result = await service.create(clinicId, doctorDto);
+
+      expect(result.mcrNumber).toBe('M12345A');
+      expect(mockPrismaService.doctorClinic.create).toHaveBeenCalledWith({
+        data: {
+          doctorId: result.id,
+          clinicId,
+          isPrimary: true,
+        },
+      });
+    });
+
+    it('should throw ConflictException if MCR number already exists', async () => {
+      const doctorDto = {
+        name: 'Dr. Sarah Tan',
+        email: 'sarah.tan@clinic.sg',
+        password: 'password123',
+        role: 'doctor' as const,
+        mcrNumber: 'M12345A',
+      };
+      mockPrismaService.user.findUnique
+        .mockResolvedValueOnce(null) // email check passes
+        .mockResolvedValueOnce(mockUser); // MCR check fails
+
+      await expect(service.create(clinicId, doctorDto)).rejects.toThrow(
+        ConflictException,
+      );
+      
+      // Reset mocks for second assertion
+      jest.clearAllMocks();
+      mockPrismaService.user.findUnique
+        .mockResolvedValueOnce(null) // email check passes
+        .mockResolvedValueOnce(mockUser); // MCR check fails
+        
+      await expect(service.create(clinicId, doctorDto)).rejects.toThrow(
+        'MCR Number already exists',
+      );
     });
 
     it('should throw ConflictException if email already exists', async () => {
@@ -228,6 +300,22 @@ describe('UsersService', () => {
         service.update(userId, clinicId, { email: 'taken@clinic.sg' }),
       ).rejects.toThrow(ConflictException);
     });
+
+    it('should throw ConflictException if MCR number already taken', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(mockUser);
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        id: 'different-id',
+        mcrNumber: 'M99999Z',
+      });
+
+      await expect(
+        service.update(userId, clinicId, { mcrNumber: 'M99999Z' }),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.update(userId, clinicId, { mcrNumber: 'M99999Z' }),
+      ).rejects.toThrow('MCR Number already exists');
+    });
   });
 
   describe('remove', () => {
@@ -248,6 +336,303 @@ describe('UsersService', () => {
 
       await expect(service.remove(userId, clinicId)).rejects.toThrow(
         NotFoundException,
+      );
+    });
+  });
+
+  describe('assignDoctorToClinic', () => {
+    const doctorId = '550e8400-e29b-41d4-a716-446655440002';
+    const secondClinicId = '550e8400-e29b-41d4-a716-446655440003';
+
+    const mockDoctor = {
+      id: doctorId,
+      name: 'Dr. Sarah Tan',
+      email: 'sarah.tan@clinic.sg',
+      role: 'doctor',
+      mcrNumber: 'M12345A',
+    };
+
+    const mockClinic = {
+      id: secondClinicId,
+      name: 'CareWell Medical Centre',
+      hciCode: 'HCI0002',
+    };
+
+    it('should assign doctor to clinic', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(mockDoctor);
+      mockPrismaService.clinic.findUnique.mockResolvedValue(mockClinic);
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue(null);
+      mockPrismaService.doctorClinic.create.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: false,
+        doctor: mockDoctor,
+        clinic: mockClinic,
+      });
+
+      const result = await service.assignDoctorToClinic(
+        doctorId,
+        secondClinicId,
+        false,
+      );
+
+      expect(result.doctorId).toBe(doctorId);
+      expect(result.clinicId).toBe(secondClinicId);
+      expect(result.isPrimary).toBe(false);
+      expect(mockPrismaService.doctorClinic.create).toHaveBeenCalled();
+    });
+
+    it('should set as primary and unset others when isPrimary is true', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(mockDoctor);
+      mockPrismaService.clinic.findUnique.mockResolvedValue(mockClinic);
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue(null);
+      mockPrismaService.doctorClinic.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.doctorClinic.create.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: true,
+        doctor: mockDoctor,
+        clinic: mockClinic,
+      });
+
+      await service.assignDoctorToClinic(doctorId, secondClinicId, true);
+
+      expect(mockPrismaService.doctorClinic.updateMany).toHaveBeenCalledWith({
+        where: { doctorId, isPrimary: true },
+        data: { isPrimary: false },
+      });
+      expect(mockPrismaService.doctorClinic.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            isPrimary: true,
+          }),
+        }),
+      );
+    });
+
+    it('should throw NotFoundException when doctor not found', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.assignDoctorToClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.assignDoctorToClinic(doctorId, secondClinicId),
+      ).rejects.toThrow('Doctor not found');
+    });
+
+    it('should throw NotFoundException when clinic not found', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(mockDoctor);
+      mockPrismaService.clinic.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.assignDoctorToClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.assignDoctorToClinic(doctorId, secondClinicId),
+      ).rejects.toThrow('Clinic not found');
+    });
+
+    it('should throw ConflictException when relationship already exists', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(mockDoctor);
+      mockPrismaService.clinic.findUnique.mockResolvedValue(mockClinic);
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: false,
+      });
+
+      await expect(
+        service.assignDoctorToClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.assignDoctorToClinic(doctorId, secondClinicId),
+      ).rejects.toThrow('Doctor is already assigned to this clinic');
+    });
+  });
+
+  describe('removeDoctorFromClinic', () => {
+    const doctorId = '550e8400-e29b-41d4-a716-446655440002';
+    const secondClinicId = '550e8400-e29b-41d4-a716-446655440003';
+
+    it('should remove doctor from clinic', async () => {
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: false,
+      });
+      mockPrismaService.doctorClinic.delete.mockResolvedValue({});
+
+      const result = await service.removeDoctorFromClinic(
+        doctorId,
+        secondClinicId,
+      );
+
+      expect(result).toEqual({
+        message: 'Doctor removed from clinic successfully',
+      });
+      expect(mockPrismaService.doctorClinic.delete).toHaveBeenCalledWith({
+        where: { doctorId_clinicId: { doctorId, clinicId: secondClinicId } },
+      });
+    });
+
+    it('should throw NotFoundException when relationship not found', async () => {
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.removeDoctorFromClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.removeDoctorFromClinic(doctorId, secondClinicId),
+      ).rejects.toThrow('Doctor is not assigned to this clinic');
+    });
+
+    it('should throw ConflictException when removing last primary clinic', async () => {
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: true,
+      });
+      mockPrismaService.doctorClinic.count.mockResolvedValue(1);
+
+      await expect(
+        service.removeDoctorFromClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.removeDoctorFromClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(
+        'Cannot remove primary clinic. Doctor must have at least one clinic assignment.',
+      );
+    });
+
+    it('should allow removing primary clinic if doctor has multiple clinics', async () => {
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: true,
+      });
+      mockPrismaService.doctorClinic.count.mockResolvedValue(2);
+      mockPrismaService.doctorClinic.delete.mockResolvedValue({});
+
+      const result = await service.removeDoctorFromClinic(
+        doctorId,
+        secondClinicId,
+      );
+
+      expect(result.message).toBe('Doctor removed from clinic successfully');
+    });
+  });
+
+  describe('setPrimaryClinic', () => {
+    const doctorId = '550e8400-e29b-41d4-a716-446655440002';
+    const secondClinicId = '550e8400-e29b-41d4-a716-446655440003';
+
+    const mockDoctor = {
+      id: doctorId,
+      name: 'Dr. Sarah Tan',
+      email: 'sarah.tan@clinic.sg',
+      mcrNumber: 'M12345A',
+    };
+
+    const mockClinic = {
+      id: secondClinicId,
+      name: 'CareWell Medical Centre',
+      hciCode: 'HCI0002',
+    };
+
+    it('should set primary clinic', async () => {
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: false,
+      });
+      mockPrismaService.doctorClinic.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.doctorClinic.update.mockResolvedValue({
+        doctorId,
+        clinicId: secondClinicId,
+        isPrimary: true,
+        doctor: mockDoctor,
+        clinic: mockClinic,
+      });
+
+      const result = await service.setPrimaryClinic(doctorId, secondClinicId);
+
+      expect(result.isPrimary).toBe(true);
+      expect(mockPrismaService.doctorClinic.updateMany).toHaveBeenCalledWith({
+        where: { doctorId, isPrimary: true },
+        data: { isPrimary: false },
+      });
+      expect(mockPrismaService.doctorClinic.update).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when relationship not found', async () => {
+      mockPrismaService.doctorClinic.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.setPrimaryClinic(doctorId, secondClinicId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.setPrimaryClinic(doctorId, secondClinicId),
+      ).rejects.toThrow('Doctor is not assigned to this clinic');
+    });
+  });
+
+  describe('getDoctorClinics', () => {
+    const doctorId = '550e8400-e29b-41d4-a716-446655440002';
+
+    const mockDoctor = {
+      id: doctorId,
+      name: 'Dr. Sarah Tan',
+      email: 'sarah.tan@clinic.sg',
+      role: 'doctor',
+    };
+
+    it('should return doctor clinics', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(mockDoctor);
+      mockPrismaService.doctorClinic.findMany.mockResolvedValue([
+        {
+          isPrimary: true,
+          clinic: {
+            id: clinicId,
+            name: 'HealthFirst Medical Clinic',
+            hciCode: 'HCI0001',
+            address: '123 Medical Street',
+            phone: '+65 6123 4567',
+          },
+        },
+        {
+          isPrimary: false,
+          clinic: {
+            id: '550e8400-e29b-41d4-a716-446655440003',
+            name: 'CareWell Medical Centre',
+            hciCode: 'HCI0002',
+            address: '456 Health Avenue',
+            phone: '+65 6234 5678',
+          },
+        },
+      ]);
+
+      const result = await service.getDoctorClinics(doctorId);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].isPrimary).toBe(true);
+      expect(result[1].isPrimary).toBe(false);
+      expect(mockPrismaService.doctorClinic.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { doctorId },
+          orderBy: { isPrimary: 'desc' },
+        }),
+      );
+    });
+
+    it('should throw NotFoundException when doctor not found', async () => {
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
+
+      await expect(service.getDoctorClinics(doctorId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.getDoctorClinics(doctorId)).rejects.toThrow(
+        'Doctor not found',
       );
     });
   });
