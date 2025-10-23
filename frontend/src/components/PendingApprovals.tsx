@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
+import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -148,12 +149,12 @@ export function PendingApprovals() {
                       <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {submission.examType.includes('Migrant') && 'MDW Six-monthly (MOM)'}
-                          {submission.examType.includes('Work Permit') && 'Work Permit (MOM)'}
-                          {submission.examType.includes('Aged Drivers') && 'Aged Drivers (SPF)'}
+                          {formatExamType(submission.examType)}
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-600">{submission.createdBy}</TableCell>
+                      <TableCell className="text-slate-600">
+                        {submission.createdByName || submission.createdBy}
+                      </TableCell>
                       <TableCell className="text-slate-600">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />

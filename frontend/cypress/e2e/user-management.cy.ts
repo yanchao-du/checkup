@@ -52,12 +52,16 @@ describe('User Management (Admin Only)', () => {
         if ($body.find('button:contains("Add User"), button:contains("New User")').length > 0) {
           cy.contains('button', /Add User|New User/).click()
           
+          // Wait for dialog to be fully visible and interactive
+          cy.get('[role="dialog"]').should('be.visible')
+          cy.wait(300) // Wait for animation to complete
+          
           const newEmail = `testuser-${Date.now()}@clinic.sg`
-          cy.get('input[name="email"]').type(newEmail)
-          cy.get('input[name="name"]').type('Test User')
-          cy.get('input[name="password"]').type('Password123!')
-          cy.get('[data-testid="role"]').click()
-          cy.contains('Nurse').click()
+          cy.get('input[name="email"]').should('be.visible').type(newEmail)
+          cy.get('input[name="name"]').should('be.visible').type('Test User')
+          cy.get('input[name="password"]').should('be.visible').type('Password123!')
+          cy.get('[data-testid="role"]').should('be.visible').click()
+          cy.get('[data-testid="role-option-nurse"]').click()
           
           cy.contains('button', /Create|Save/).click()
           
@@ -76,7 +80,11 @@ describe('User Management (Admin Only)', () => {
             cy.contains('button', 'Edit').click()
           })
           
-          cy.get('input[name="name"]').clear().type('Updated Nurse Name')
+          // Wait for dialog to be fully visible and interactive
+          cy.get('[role="dialog"]').should('be.visible')
+          cy.wait(300) // Wait for animation to complete
+          
+          cy.get('input[name="name"]').should('be.visible').clear().type('Updated Nurse Name')
           cy.contains('button', /Save|Update/).click()
           
           cy.wait(1000)
@@ -92,8 +100,12 @@ describe('User Management (Admin Only)', () => {
             cy.contains('button', 'Edit').click()
           })
           
-          cy.get('[data-testid="role"]').click()
-          cy.contains('Doctor').click()
+          // Wait for dialog to be fully visible and interactive
+          cy.get('[role="dialog"]').should('be.visible')
+          cy.wait(300) // Wait for animation to complete
+          
+          cy.get('[data-testid="role"]').should('be.visible').click()
+          cy.get('[data-testid="role-option-doctor"]').click()
           cy.contains('button', /Save|Update/).click()
           
           cy.wait(1000)
@@ -124,12 +136,16 @@ describe('User Management (Admin Only)', () => {
         if ($body.find('button:contains("Add User"), button:contains("New User")').length > 0) {
           cy.contains('button', /Add User|New User/).click()
           
+          // Wait for dialog to be fully visible and interactive
+          cy.get('[role="dialog"]').should('be.visible')
+          cy.wait(300) // Wait for animation to complete
+          
           const deleteEmail = `delete-${Date.now()}@clinic.sg`
-          cy.get('input[name="email"]').type(deleteEmail)
-          cy.get('input[name="name"]').type('Delete Me')
-          cy.get('input[name="password"]').type('Password123!')
-          cy.get('[data-testid="role"]').click()
-          cy.contains('Nurse').click()
+          cy.get('input[name="email"]').should('be.visible').type(deleteEmail)
+          cy.get('input[name="name"]').should('be.visible').type('Delete Me')
+          cy.get('input[name="password"]').should('be.visible').type('Password123!')
+          cy.get('[data-testid="role"]').should('be.visible').click()
+          cy.get('[data-testid="role-option-nurse"]').click()
           cy.contains('button', /Create|Save/).click()
           
           cy.wait(1000)
@@ -153,9 +169,13 @@ describe('User Management (Admin Only)', () => {
         if ($body.find('button:contains("Add User"), button:contains("New User")').length > 0) {
           cy.contains('button', /Add User|New User/).click()
           
-          cy.get('input[name="email"]').type('invalid-email')
-          cy.get('input[name="name"]').type('Test')
-          cy.get('input[name="password"]').type('Password123!')
+          // Wait for dialog to be fully visible and interactive
+          cy.get('[role="dialog"]').should('be.visible')
+          cy.wait(300) // Wait for animation to complete
+          
+          cy.get('input[name="email"]').should('be.visible').type('invalid-email')
+          cy.get('input[name="name"]').should('be.visible').type('Test')
+          cy.get('input[name="password"]').should('be.visible').type('Password123!')
           cy.contains('button', /Create|Save/).click()
           
           // Should show validation error
@@ -169,9 +189,13 @@ describe('User Management (Admin Only)', () => {
         if ($body.find('button:contains("Add User"), button:contains("New User")').length > 0) {
           cy.contains('button', /Add User|New User/).click()
           
-          cy.get('input[name="email"]').type('test@clinic.sg')
-          cy.get('input[name="name"]').type('Test')
-          cy.get('input[name="password"]').type('123') // Weak password
+          // Wait for dialog to be fully visible and interactive
+          cy.get('[role="dialog"]').should('be.visible')
+          cy.wait(300) // Wait for animation to complete
+          
+          cy.get('input[name="email"]').should('be.visible').type('test@clinic.sg')
+          cy.get('input[name="name"]').should('be.visible').type('Test')
+          cy.get('input[name="password"]').should('be.visible').type('123') // Weak password
           cy.contains('button', /Create|Save/).click()
           
           // Should show password validation error

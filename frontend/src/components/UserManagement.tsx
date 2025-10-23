@@ -317,9 +317,9 @@ export function UserManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="doctor">Doctor</SelectItem>
-                  <SelectItem value="nurse">Nurse</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="doctor" data-testid="role-option-doctor">Doctor</SelectItem>
+                  <SelectItem value="nurse" data-testid="role-option-nurse">Nurse</SelectItem>
+                  <SelectItem value="admin" data-testid="role-option-admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-slate-500 mt-1">

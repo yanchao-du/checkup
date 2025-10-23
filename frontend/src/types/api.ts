@@ -43,10 +43,12 @@ export interface MedicalSubmission {
   clinicId: string;
   createdById: string;
   createdBy: string;
+  createdByName?: string;
   createdDate: string;
   submittedDate?: string;
   approvedById?: string;
   approvedBy?: string;
+  approvedByName?: string;
   approvedDate?: string;
   rejectedReason?: string;
 }

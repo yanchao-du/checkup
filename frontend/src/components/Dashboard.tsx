@@ -1,4 +1,5 @@
 import { useAuth } from './AuthContext';
+import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
@@ -196,7 +197,7 @@ export function Dashboard() {
                     </div>
                     <div>
                       <p className="text-slate-900">{submission.patientName}</p>
-                      <p className="text-sm text-slate-500">{submission.examType}</p>
+                      <p className="text-sm text-slate-500">{formatExamType(submission.examType)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

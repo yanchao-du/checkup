@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
+import { formatExamType } from '../lib/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -137,12 +138,12 @@ export function DraftsList() {
                       <TableCell className="text-slate-600">{draft.patientNric}</TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {draft.examType.includes('Migrant') && 'MDW Six-monthly (MOM)'}
-                          {draft.examType.includes('Work Permit') && 'Work Permit (MOM)'}
-                          {draft.examType.includes('Aged Drivers') && 'Aged Drivers (SPF)'}
+                          {formatExamType(draft.examType)}
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-600">{draft.createdBy}</TableCell>
+                      <TableCell className="text-slate-600">
+                        {draft.createdByName || draft.createdBy}
+                      </TableCell>
                       <TableCell className="text-slate-600">
                         {new Date(draft.createdDate).toLocaleDateString()}
                       </TableCell>
