@@ -1,19 +1,39 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
+import { approvalsApi } from '../services/approvals.service';
+import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { ArrowLeft, FileText, CheckCircle, Loader2 } from 'lucide-react';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { ArrowLeft, FileText, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog';
 
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [submission, setSubmission] = useState<any>(null);
   const [history, setHistory] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [approvalNotes, setApprovalNotes] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -37,6 +57,51 @@ export function ViewSubmission() {
 
     fetchSubmission();
   }, [id]);
+
+  const handleApprove = async () => {
+    if (!id) return;
+    
+    try {
+      setIsSubmitting(true);
+      await approvalsApi.approve(id, { notes: approvalNotes || undefined });
+      toast.success('Submission approved successfully');
+      setShowApproveDialog(false);
+      // Refresh submission data
+      const submissionData = await submissionsApi.getById(id);
+      setSubmission(submissionData);
+      // Optionally navigate back to pending approvals
+      setTimeout(() => navigate('/pending-approvals'), 1000);
+    } catch (error) {
+      console.error('Failed to approve submission:', error);
+      toast.error('Failed to approve submission');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!id || !rejectionReason.trim()) {
+      toast.error('Please provide a reason for rejection');
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      await approvalsApi.reject(id, { reason: rejectionReason });
+      toast.success('Submission rejected');
+      setShowRejectDialog(false);
+      // Refresh submission data
+      const submissionData = await submissionsApi.getById(id);
+      setSubmission(submissionData);
+      // Optionally navigate back to pending approvals
+      setTimeout(() => navigate('/pending-approvals'), 1000);
+    } catch (error) {
+      console.error('Failed to reject submission:', error);
+      toast.error('Failed to reject submission');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -357,6 +422,130 @@ export function ViewSubmission() {
           )}
         </div>
       </div>
+
+      {/* Doctor Action Buttons - only show for doctors viewing pending approvals */}
+      {user?.role === 'doctor' && submission.status === 'pending_approval' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Doctor Actions</CardTitle>
+            <CardDescription>
+              Review the submission and approve or reject with remarks
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                className="text-red-600 border-red-300 hover:bg-red-50"
+                onClick={() => setShowRejectDialog(true)}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Reject with Remarks
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => setShowApproveDialog(true)}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Approve Submission
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Approve Dialog */}
+      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve Medical Submission</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to approve this medical examination for <strong>{submission?.patientName}</strong>.
+              This will submit it to the relevant agency.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-2 py-4">
+            <Label htmlFor="approval-notes">Additional Notes (Optional)</Label>
+            <Textarea
+              id="approval-notes"
+              placeholder="Add any additional notes or comments..."
+              value={approvalNotes}
+              onChange={(e) => setApprovalNotes(e.target.value)}
+              rows={4}
+            />
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleApprove}
+              disabled={isSubmitting}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Approve & Submit
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reject Dialog */}
+      <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject Medical Submission</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to reject this medical examination for <strong>{submission?.patientName}</strong>.
+              Please provide a reason for rejection.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-2 py-4">
+            <Label htmlFor="rejection-reason">
+              Reason for Rejection <span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="rejection-reason"
+              placeholder="Please explain why this submission is being rejected..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={4}
+              required
+            />
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReject}
+              disabled={isSubmitting || !rejectionReason.trim()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Rejecting...
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Reject Submission
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
