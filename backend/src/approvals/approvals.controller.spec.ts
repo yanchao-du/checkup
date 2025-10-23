@@ -61,13 +61,14 @@ describe('ApprovalsController', () => {
   });
 
   describe('findPendingApprovals', () => {
-    it('should return pending approvals for clinic', async () => {
+    it('should return pending approvals for assigned doctor', async () => {
       mockService.findPendingApprovals.mockResolvedValue(mockApprovalResult);
 
       const result = await controller.findPendingApprovals(mockUser, {});
 
       expect(service.findPendingApprovals).toHaveBeenCalledWith(
         mockUser.clinicId,
+        mockUser.id,
         undefined,
         undefined,
         undefined,
@@ -75,7 +76,7 @@ describe('ApprovalsController', () => {
       expect(result).toEqual(mockApprovalResult);
     });
 
-    it('should filter by exam type', async () => {
+    it('should filter by exam type and assigned doctor', async () => {
       mockService.findPendingApprovals.mockResolvedValue(mockApprovalResult);
 
       await controller.findPendingApprovals(mockUser, {
@@ -84,6 +85,7 @@ describe('ApprovalsController', () => {
 
       expect(service.findPendingApprovals).toHaveBeenCalledWith(
         mockUser.clinicId,
+        mockUser.id,
         'MDW_SIX_MONTHLY',
         undefined,
         undefined,
@@ -100,6 +102,7 @@ describe('ApprovalsController', () => {
 
       expect(service.findPendingApprovals).toHaveBeenCalledWith(
         mockUser.clinicId,
+        mockUser.id,
         undefined,
         2,
         10,

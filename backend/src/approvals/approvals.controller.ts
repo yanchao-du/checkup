@@ -30,6 +30,7 @@ export class ApprovalsController {
     }
     return this.approvalsService.findPendingApprovals(
       user.clinicId, 
+      user.id, // Pass doctor's ID for filtering
       query.examType, 
       query.page, 
       query.limit

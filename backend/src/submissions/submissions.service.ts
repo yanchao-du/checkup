@@ -220,7 +220,10 @@ export class SubmissionsService {
         submissionId: id,
         userId,
         eventType: 'submitted',
-        changes: { status: 'pending_approval' },
+        changes: { 
+          status: 'pending_approval',
+          assignedDoctorName: submission.assignedDoctor?.name,
+        },
       },
     });
 

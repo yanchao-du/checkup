@@ -5,13 +5,20 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ApprovalsService {
   constructor(private prisma: PrismaService) {}
 
-  async findPendingApprovals(clinicId: string, examType?: string, pageParam?: number, limitParam?: number) {
-    const page = Number(pageParam) || 1;
-    const limit = Number(limitParam) || 20;
-    
+  async findPendingApprovals(
+    clinicId: string, 
+    doctorId: string,
+    examType?: string,
+    page: number = 1,
+    limit: number = 50
+  ) {
     const where: any = {
       clinicId,
       status: 'pending_approval',
+      OR: [
+        { assignedDoctorId: doctorId },
+        { assignedDoctorId: null }, // backwards compatibility
+      ],
     };
 
     if (examType) {
@@ -23,6 +30,7 @@ export class ApprovalsService {
         where,
         include: {
           createdBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
         },
         orderBy: { createdDate: 'desc' },
         skip: (page - 1) * limit,
@@ -140,6 +148,8 @@ export class ApprovalsService {
       approvedBy: submission.approvedById,
       approvedByName: submission.approvedBy?.name,
       approvedDate: submission.approvedDate,
+      assignedDoctorId: submission.assignedDoctorId,
+      assignedDoctorName: submission.assignedDoctor?.name,
       rejectedReason: submission.rejectedReason,
       clinicId: submission.clinicId,
       formData: submission.formData,

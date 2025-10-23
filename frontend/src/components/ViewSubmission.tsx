@@ -5,14 +5,14 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { ArrowLeft, FileText, User, Calendar, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<any>(null);
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export function ViewSubmission() {
         setIsLoading(true);
         const [submissionData, historyData] = await Promise.all([
           submissionsApi.getById(id),
-          submissionsApi.getHistory(id).catch(() => []) // History is optional
+          submissionsApi.getHistory(id).catch(() => null) // History is optional
         ]);
         setSubmission(submissionData);
         setHistory(historyData);
@@ -228,46 +228,99 @@ export function ViewSubmission() {
               <CardTitle>Submission Timeline</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-4 h-4 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-slate-900">Created</p>
-                  <p className="text-xs text-slate-500">{submission.createdByName}</p>
-                  <p className="text-xs text-slate-500">
-                    {new Date(submission.createdDate).toLocaleString()}
-                  </p>
-                </div>
-              </div>
+              {history && history.events && history.events.length > 0 ? (
+                [...history.events].reverse().map((event: any, index: number) => {
+                  const getEventIcon = (eventType: string) => {
+                    switch (eventType) {
+                      case 'created':
+                        return { icon: FileText, bgColor: 'bg-blue-100', iconColor: 'text-blue-600' };
+                      case 'updated':
+                        return { icon: FileText, bgColor: 'bg-amber-100', iconColor: 'text-amber-600' };
+                      case 'submitted':
+                        return { icon: CheckCircle, bgColor: 'bg-green-100', iconColor: 'text-green-600' };
+                      case 'approved':
+                        return { icon: CheckCircle, bgColor: 'bg-green-100', iconColor: 'text-green-600' };
+                      case 'rejected':
+                        return { icon: FileText, bgColor: 'bg-red-100', iconColor: 'text-red-600' };
+                      default:
+                        return { icon: FileText, bgColor: 'bg-gray-100', iconColor: 'text-gray-600' };
+                    }
+                  };
 
-              {submission.approvedDate && (
+                  const getEventLabel = (eventType: string, details: any) => {
+                    switch (eventType) {
+                      case 'created':
+                        return 'Draft Created';
+                      case 'updated':
+                        return 'Draft Updated';
+                      case 'submitted':
+                        // Only show "Submitted to Agency" if status is actually submitted (not pending_approval)
+                        if (details?.status === 'submitted' || submission.status === 'submitted') {
+                          return 'Submitted to Agency';
+                        }
+                        // If status is pending_approval, this means routed for approval
+                        return 'Routed for Approval';
+                      case 'approved':
+                        return 'Approved by Doctor';
+                      case 'rejected':
+                        return 'Rejected';
+                      default:
+                        return eventType.charAt(0).toUpperCase() + eventType.slice(1);
+                    }
+                  };
+
+                  const getEventDescription = (eventType: string, details: any) => {
+                    if (eventType === 'submitted') {
+                      // If routed for approval, show assigned doctor
+                      if (details?.assignedDoctorName || submission.assignedDoctorName) {
+                        return `Assigned to: ${details?.assignedDoctorName || submission.assignedDoctorName}`;
+                      }
+                      // If actually submitted to agency, show agency name
+                      if (details?.status === 'submitted' || submission.status === 'submitted') {
+                        return submission.examType === 'AGED_DRIVERS' 
+                          ? 'Singapore Police Force' 
+                          : 'Ministry of Manpower';
+                      }
+                    }
+                    if (eventType === 'approved' && submission.approvedByName) {
+                      return `By: ${submission.approvedByName}`;
+                    }
+                    if (eventType === 'rejected' && details?.reason) {
+                      return `Reason: ${details.reason}`;
+                    }
+                    return null;
+                  };
+
+                  const { icon: Icon, bgColor, iconColor } = getEventIcon(event.eventType);
+
+                  return (
+                    <div key={index} className="flex gap-3">
+                      <div className={`w-8 h-8 ${bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`w-4 h-4 ${iconColor}`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-slate-900">{getEventLabel(event.eventType, event.details)}</p>
+                        {getEventDescription(event.eventType, event.details) && (
+                          <p className="text-xs text-slate-600">{getEventDescription(event.eventType, event.details)}</p>
+                        )}
+                        <p className="text-xs text-slate-500">{event.userName}</p>
+                        <p className="text-xs text-slate-500">
+                          {new Date(event.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4 h-4 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-slate-900">Approved</p>
-                    <p className="text-xs text-slate-500">{submission.approvedByName}</p>
+                    <p className="text-sm text-slate-900">Created</p>
+                    <p className="text-xs text-slate-500">{submission.createdByName}</p>
                     <p className="text-xs text-slate-500">
-                      {new Date(submission.approvedDate).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {submission.submittedDate && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-slate-900">Submitted</p>
-                    <p className="text-xs text-slate-500">
-                      {submission.examType === 'AGED_DRIVERS' ? 'Singapore Police Force' : 'Ministry of Manpower'}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {new Date(submission.submittedDate).toLocaleString()}
+                      {new Date(submission.createdDate).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -275,31 +328,33 @@ export function ViewSubmission() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Agency Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-slate-500">Submitted To</p>
-                  <p className="text-slate-900">
-                    {submission.examType === 'AGED_DRIVERS' 
-                      ? 'Singapore Police Force' 
-                      : 'Ministry of Manpower'}
-                  </p>
+          {submission.status === 'submitted' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Agency Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-slate-500">Submitted To</p>
+                    <p className="text-slate-900">
+                      {submission.examType === 'AGED_DRIVERS' 
+                        ? 'Singapore Police Force' 
+                        : 'Ministry of Manpower'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Exam Category</p>
+                    <p className="text-slate-900 text-sm">
+                      {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
+                      {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
+                      {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500">Exam Category</p>
-                  <p className="text-slate-900 text-sm">
-                    {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
-                    {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
-                    {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
