@@ -188,7 +188,7 @@ export function Dashboard() {
               {submissions.slice(0, 5).map((submission: MedicalSubmission) => (
                 <Link 
                   key={submission.id} 
-                  to={`/submission/${submission.id}`}
+                  to={`/view-submission/${submission.id}`}
                   className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
