@@ -11,7 +11,6 @@ import {
   FileEdit, 
   CheckCircle,
   XCircle,
-  Users, 
   Settings,
   LogOut
 } from 'lucide-react';
@@ -33,8 +32,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
     { path: '/rejected-submissions', label: 'Rejected Submissions', icon: XCircle, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/settings', label: 'Settings', icon: Settings, roles: ['nurse'] },
-    { path: '/user-management', label: 'User Management', icon: Users, roles: ['admin'] },
+    { path: '/settings', label: 'Settings', icon: Settings, roles: ['nurse', 'admin'] },
   ];
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || ''));

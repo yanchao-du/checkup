@@ -8,7 +8,6 @@ import { SubmissionsList } from './components/SubmissionsList';
 import { DraftsList } from './components/DraftsList';
 import { PendingApprovals } from './components/PendingApprovals';
 import { RejectedSubmissions } from './components/RejectedSubmissions';
-import { UserManagement } from './components/UserManagement';
 import { ViewSubmission } from './components/ViewSubmission';
 import { Settings } from './components/Settings';
 import { AuthProvider, useAuth } from './components/AuthContext';
@@ -93,16 +92,17 @@ function AppRoutes() {
                   <Route 
                     path="/settings" 
                     element={
-                      <RoleProtectedRoute allowedRoles={['nurse']}>
+                      <RoleProtectedRoute allowedRoles={['nurse', 'admin']}>
                         <Settings />
                       </RoleProtectedRoute>
                     } 
                   />
+                  {/* Legacy route for user management - redirects to settings */}
                   <Route 
                     path="/user-management" 
                     element={
                       <RoleProtectedRoute allowedRoles={['admin']}>
-                        <UserManagement />
+                        <Settings />
                       </RoleProtectedRoute>
                     } 
                   />

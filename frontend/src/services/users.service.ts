@@ -4,12 +4,16 @@ import type {
   CreateUserRequest,
   UpdateUserRequest,
   PaginatedResponse,
+  DoctorClinic,
+  AssignDoctorToClinicRequest,
+  Clinic,
 } from '../types/api';
 
 export interface Doctor {
   id: string;
   name: string;
   email: string;
+  mcrNumber?: string;
 }
 
 export const usersApi = {
@@ -66,5 +70,48 @@ export const usersApi = {
   // Set default doctor (Nurse only)
   setDefaultDoctor: async (defaultDoctorId: string): Promise<{ message: string; defaultDoctorId: string | null; defaultDoctor: Doctor | null }> => {
     return apiClient.put('/users/me/default-doctor', { defaultDoctorId });
+  },
+
+  // Doctor-Clinic Relationship Management (Admin only)
+  
+  /**
+   * Get all clinics for a specific doctor
+   */
+  getDoctorClinics: async (doctorId: string): Promise<Clinic[]> => {
+    return apiClient.get<Clinic[]>(`/users/${doctorId}/clinics`);
+  },
+
+  /**
+   * Assign a doctor to a clinic
+   */
+  assignDoctorToClinic: async (
+    doctorId: string, 
+    data: AssignDoctorToClinicRequest
+  ): Promise<DoctorClinic> => {
+    return apiClient.post<DoctorClinic>(`/users/${doctorId}/clinics`, data);
+  },
+
+  /**
+   * Remove a doctor from a clinic
+   * Note: Cannot remove if it's the doctor's only clinic
+   */
+  removeDoctorFromClinic: async (
+    doctorId: string, 
+    clinicId: string
+  ): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/users/${doctorId}/clinics/${clinicId}`);
+  },
+
+  /**
+   * Set a clinic as the primary clinic for a doctor
+   */
+  setPrimaryClinic: async (
+    doctorId: string, 
+    clinicId: string
+  ): Promise<{ message: string }> => {
+    return apiClient.put<{ message: string }>(
+      `/users/${doctorId}/clinics/${clinicId}/primary`,
+      {}
+    );
   },
 };

@@ -6,7 +6,10 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
-import { Settings as SettingsIcon, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Users, Building2, UserCog } from 'lucide-react';
+import { UserManagement } from './UserManagement';
+import { ClinicManagement } from './ClinicManagement';
+import { DoctorClinicAssignment } from './DoctorClinicAssignment';
 
 export function Settings() {
   const { user } = useAuth();
@@ -15,6 +18,15 @@ export function Settings() {
   const [currentDefaultDoctorId, setCurrentDefaultDoctorId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  // Default to 'users' tab for admin, 'settings' for others
+  const [activeTab, setActiveTab] = useState<'users' | 'clinics' | 'assignments' | 'settings'>('users');
+
+  // Set the correct default tab based on user role
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      setActiveTab('users');
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -61,6 +73,82 @@ export function Settings() {
     }
   };
 
+  if (user?.role !== 'nurse' && user?.role !== 'admin') {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <SettingsIcon className="w-8 h-8 text-slate-600" />
+          <div>
+            <h1 className="text-slate-900">Settings</h1>
+            <p className="text-slate-600">No settings available for your role</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin role - show management tabs
+  if (user?.role === 'admin') {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <SettingsIcon className="w-8 h-8 text-slate-600" />
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
+            <p className="text-slate-600">Manage users, clinics, and assignments</p>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="border-b border-slate-200">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'users'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Users className="w-4 h-4 inline mr-2" />
+              User Management
+            </button>
+            <button
+              onClick={() => setActiveTab('clinics')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'clinics'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Building2 className="w-4 h-4 inline mr-2" />
+              Clinic Management
+            </button>
+            <button
+              onClick={() => setActiveTab('assignments')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'assignments'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <UserCog className="w-4 h-4 inline mr-2" />
+              Doctor-Clinic Assignments
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div>
+          {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'clinics' && <ClinicManagement />}
+          {activeTab === 'assignments' && <DoctorClinicAssignment />}
+        </div>
+      </div>
+    );
+  }
+
+  // Nurse role - show default doctor settings
   if (user?.role !== 'nurse') {
     return (
       <div className="space-y-6">
@@ -116,7 +204,8 @@ export function Settings() {
               <SelectContent>
                 {doctors.map((doctor) => (
                   <SelectItem key={doctor.id} value={doctor.id}>
-                    {doctor.name} ({doctor.email})
+                    {doctor.name}
+                    {doctor.mcrNumber && ` (MCR: ${doctor.mcrNumber})`}
                   </SelectItem>
                 ))}
               </SelectContent>

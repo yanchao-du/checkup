@@ -590,7 +590,8 @@ export function NewSubmission() {
                 <SelectContent>
                   {doctors.map((doctor) => (
                     <SelectItem key={doctor.id} value={doctor.id}>
-                      {doctor.name} ({doctor.email})
+                      {doctor.name}
+                      {doctor.mcrNumber && ` (MCR: ${doctor.mcrNumber})`}
                     </SelectItem>
                   ))}
                 </SelectContent>

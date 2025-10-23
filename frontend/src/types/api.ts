@@ -1,14 +1,40 @@
 // User Types
 export type UserRole = 'doctor' | 'nurse' | 'admin';
 
+// Clinic Types
+export interface Clinic {
+  id: string;
+  name: string;
+  hciCode?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  registrationNumber?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DoctorClinic {
+  doctorId: string;
+  clinicId: string;
+  isPrimary: boolean;
+  clinic?: Clinic;
+  doctor?: ClinicUser;
+}
+
 export interface ClinicUser {
   id: string;
   name: string;
   email: string;
   role: UserRole;
   status: 'active' | 'inactive';
+  mcrNumber?: string; // Medical Council Registration number (for doctors)
+  clinicId?: string; // Primary clinic ID (legacy field)
   lastLoginAt?: string;
   createdAt: string;
+  // Many-to-many relationships
+  clinics?: DoctorClinic[]; // For doctors: list of clinics they work at
+  primaryClinic?: Clinic; // For doctors: their primary clinic
 }
 
 // Auth Types
@@ -121,6 +147,7 @@ export interface CreateUserRequest {
   password: string;
   role: UserRole;
   clinicId?: string;
+  mcrNumber?: string; // Required for doctors
 }
 
 export interface UpdateUserRequest {
@@ -129,6 +156,36 @@ export interface UpdateUserRequest {
   password?: string;
   role?: UserRole;
   status?: 'active' | 'inactive';
+  mcrNumber?: string;
+}
+
+// Clinic Management Types (Admin only)
+export interface CreateClinicRequest {
+  name: string;
+  hciCode?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  registrationNumber?: string;
+}
+
+export interface UpdateClinicRequest {
+  name?: string;
+  hciCode?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  registrationNumber?: string;
+}
+
+// Doctor-Clinic Assignment Types
+export interface AssignDoctorToClinicRequest {
+  clinicId: string;
+  isPrimary?: boolean;
+}
+
+export interface SetPrimaryClinicRequest {
+  clinicId: string;
 }
 
 // Audit Log Types

@@ -44,6 +44,7 @@ export function UserManagement() {
     email: '',
     password: '',
     role: 'nurse' as UserRole,
+    mcrNumber: '',
   });
 
   useEffect(() => {
@@ -65,13 +66,19 @@ export function UserManagement() {
 
   const handleAddUser = () => {
     setEditingUser(null);
-    setFormData({ name: '', email: '', password: '', role: 'nurse' });
+    setFormData({ name: '', email: '', password: '', role: 'nurse', mcrNumber: '' });
     setShowDialog(true);
   };
 
   const handleEditUser = (user: ClinicUser) => {
     setEditingUser(user);
-    setFormData({ name: user.name, email: user.email, password: '', role: user.role });
+    setFormData({ 
+      name: user.name, 
+      email: user.email, 
+      password: '', 
+      role: user.role,
+      mcrNumber: user.mcrNumber || '',
+    });
     setShowDialog(true);
   };
 
@@ -93,6 +100,15 @@ export function UserManagement() {
       return;
     }
 
+    // Validate MCR number for doctors
+    if (formData.role === 'doctor' && formData.mcrNumber) {
+      const mcrRegex = /^[A-Z]\d{5}[A-Z]$/;
+      if (!mcrRegex.test(formData.mcrNumber)) {
+        toast.error('MCR number must be in format: Letter + 5 digits + Letter (e.g., M12345A)');
+        return;
+      }
+    }
+
     try {
       setIsSaving(true);
       
@@ -102,6 +118,7 @@ export function UserManagement() {
           email: formData.email,
           role: formData.role,
           ...(formData.password && { password: formData.password }),
+          ...(formData.role === 'doctor' && formData.mcrNumber && { mcrNumber: formData.mcrNumber }),
         });
         toast.success('User updated successfully');
       } else {
@@ -110,6 +127,7 @@ export function UserManagement() {
           email: formData.email,
           password: formData.password,
           role: formData.role,
+          ...(formData.role === 'doctor' && formData.mcrNumber && { mcrNumber: formData.mcrNumber }),
         });
         toast.success('User added successfully');
       }
@@ -208,6 +226,7 @@ export function UserManagement() {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>MCR Number</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead>Actions</TableHead>
@@ -222,15 +241,18 @@ export function UserManagement() {
                         <Badge variant="outline" className="capitalize">
                           {user.role}
                         </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.status === 'active' ? 'default' : 'secondary'}
-                        className="capitalize"
-                      >
-                        {user.status}
-                      </Badge>
-                    </TableCell>
+                      </TableCell>
+                      <TableCell className="text-slate-600 text-sm font-mono">
+                        {user.role === 'doctor' ? (user.mcrNumber || '-') : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={user.status === 'active' ? 'default' : 'secondary'}
+                          className="capitalize"
+                        >
+                          {user.status}
+                        </Badge>
+                      </TableCell>
                     <TableCell className="text-slate-600 text-sm">
                       {user.lastLoginAt 
                         ? new Date(user.lastLoginAt).toLocaleDateString()
@@ -328,6 +350,23 @@ export function UserManagement() {
                 {formData.role === 'admin' && 'Can manage users and view all clinic submissions'}
               </p>
             </div>
+            
+            {formData.role === 'doctor' && (
+              <div className="space-y-2">
+                <Label htmlFor="mcrNumber">MCR Number (Optional)</Label>
+                <Input
+                  id="mcrNumber"
+                  name="mcrNumber"
+                  value={formData.mcrNumber}
+                  onChange={(e) => setFormData({ ...formData, mcrNumber: e.target.value.toUpperCase() })}
+                  placeholder="M12345A"
+                  maxLength={7}
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Format: Letter + 5 digits + Letter (e.g., M12345A)
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)} disabled={isSaving}>
