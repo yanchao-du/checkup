@@ -37,7 +37,8 @@ export interface MedicalSubmission {
   examType: ExamType;
   patientName: string;
   patientNric: string;
-  patientDob: string;
+  patientDateOfBirth: string;
+  examinationDate?: string;
   status: SubmissionStatus;
   formData: Record<string, any>;
   clinicId: string;
@@ -58,6 +59,7 @@ export interface CreateSubmissionRequest {
   patientName: string;
   patientNric: string;
   patientDateOfBirth: string;
+  examinationDate?: string;
   formData: Record<string, any>;
   routeForApproval?: boolean;
 }
@@ -66,6 +68,7 @@ export interface UpdateSubmissionRequest {
   patientName?: string;
   patientNric?: string;
   patientDateOfBirth?: string;
+  examinationDate?: string;
   formData?: Record<string, any>;
 }
 

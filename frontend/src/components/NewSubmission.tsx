@@ -54,7 +54,8 @@ export function NewSubmission() {
           setExamType(existing.examType);
           setPatientName(existing.patientName);
           setPatientNric(existing.patientNric);
-          setPatientDateOfBirth(existing.patientDob);
+          setPatientDateOfBirth(existing.patientDateOfBirth);
+          setExaminationDate(existing.examinationDate || '');
           setFormData(existing.formData);
         } catch (error) {
           console.error('Failed to load submission:', error);

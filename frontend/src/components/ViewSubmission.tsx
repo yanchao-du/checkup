@@ -101,13 +101,21 @@ export function ViewSubmission() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 mb-1">Exam Type</p>
-                  <p className="text-slate-900 text-sm">
-                    {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Workers'}
-                    {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
-                    {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
+                  <p className="text-sm text-slate-500 mb-1">Examination Date</p>
+                  <p className="text-slate-900">
+                    {submission.examinationDate 
+                      ? new Date(submission.examinationDate).toLocaleDateString()
+                      : 'Not specified'}
                   </p>
                 </div>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 mb-1">Exam Type</p>
+                <p className="text-slate-900 text-sm">
+                  {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Workers'}
+                  {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
+                  {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
+                </p>
               </div>
             </CardContent>
           </Card>
