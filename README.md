@@ -90,6 +90,8 @@ After seeding the database:
 - **Nurse**: `nurse@clinic.sg` / `password`
 - **Admin**: `admin@clinic.sg` / `password`
 
+For CorpPass/MockPass development and testing, see the list of seeded NRICs and roles: `docs/guides/MOCKPASS_TEST_IDS.md`
+
 ## 📡 API Endpoints
 
 ### Authentication

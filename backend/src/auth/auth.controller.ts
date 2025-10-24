@@ -26,13 +26,21 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  async logout() {
+  async logout(@CurrentUser() user: any) {
+    // Delete the session
+    if (user.sessionId) {
+      this.userSessionService.deleteSession(user.sessionId);
+    }
     return { message: 'Logged out successfully' };
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getMe(@CurrentUser() user: any) {
+  async getMe(@CurrentUser() user: any, @Res({ passthrough: true }) res: Response) {
+    // Prevent caching of this endpoint to ensure session validation happens
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     return user;
   }
 
@@ -108,12 +116,22 @@ export class AuthController {
     // User is attached by CorpPassStrategy after successful validation
     const user = req.user as any;
 
-    // Generate CheckUp JWT token
+    // Create user session for CorpPass authentication
+    const userSessionId = this.userSessionService.createSession(
+      user.id,
+      user.email,
+      user.role,
+      user.clinicId,
+      'corppass',
+    );
+
+    // Generate CheckUp JWT token with session ID
     const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
       clinicId: user.clinicId,
+      sessionId: userSessionId,  // Include session ID
     };
 
     const token = this.authService['jwtService'].sign(payload);

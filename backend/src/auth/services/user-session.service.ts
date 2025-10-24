@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 interface UserSession {
-  userId: number;
+  userId: string;  // Changed from number to string (UUID)
   email: string;
   role: string;
-  clinicId: number | null;
+  clinicId: string | null;  // Changed from number to string (UUID)
   authMethod: 'email' | 'corppass';
   createdAt: number;
   lastActivity: number;
@@ -69,18 +69,18 @@ export class UserSessionService {
 
   /**
    * Create a new user session after successful authentication
-   * @param userId - User ID
+   * @param userId - User ID (UUID string)
    * @param email - User email
    * @param role - User role
-   * @param clinicId - Clinic ID (optional)
+   * @param clinicId - Clinic ID (UUID string, optional)
    * @param authMethod - Authentication method used
    * @returns sessionId to be used in JWT
    */
   createSession(
-    userId: number,
+    userId: string,
     email: string,
     role: string,
-    clinicId: number | null,
+    clinicId: string | null,
     authMethod: 'email' | 'corppass',
   ): string {
     const sessionId = this.generateSecureToken();
@@ -106,13 +106,16 @@ export class UserSessionService {
   /**
    * Validate session and update last activity (keep-alive)
    * @param sessionId - Session ID from JWT
-   * @returns User session data if valid, null if expired/invalid
+   * @param isHeartbeat - If true, don't update lastActivity (just check validity)
+   * @returns User session data if valid
+   * @throws UnauthorizedException if session is expired or invalid
    */
-  validateAndRefreshSession(sessionId: string): UserSession | null {
+  validateAndRefreshSession(sessionId: string, isHeartbeat = false): UserSession {
     const session = this.sessions.get(sessionId);
 
     if (!session) {
-      return null; // Session not found
+      // Session not found - user needs to log in again
+      throw new UnauthorizedException('Session not found. Please sign in again.');
     }
 
     const now = Date.now();
@@ -121,20 +124,27 @@ export class UserSessionService {
     if (now > session.expiresAt) {
       this.sessions.delete(sessionId);
       console.log(`⏰ Session ${sessionId} expired (max lifetime exceeded)`);
-      return null;
+      throw new UnauthorizedException('Session expired (maximum lifetime reached). Please sign in again.');
     }
 
     // Check inactivity timeout
     const inactiveFor = now - session.lastActivity;
     if (inactiveFor > this.INACTIVITY_TIMEOUT_MS) {
       this.sessions.delete(sessionId);
-      console.log(`⏰ Session ${sessionId} expired (${Math.round(inactiveFor / 1000 / 60)}min inactive)`);
-      return null;
+      const inactiveSeconds = Math.round(inactiveFor / 1000);
+      console.log(`⏰ Session ${sessionId} expired (${inactiveSeconds}s inactive, threshold: ${this.INACTIVITY_TIMEOUT_MS / 1000}s)`);
+      throw new UnauthorizedException('Session expired due to inactivity. Please sign in again.');
     }
 
-    // Update last activity (keep-alive)
-    session.lastActivity = now;
-    this.sessions.set(sessionId, session);
+    // Update last activity ONLY if this is NOT a heartbeat check
+    // Heartbeat checks should not keep the session alive
+    if (!isHeartbeat) {
+      session.lastActivity = now;
+      this.sessions.set(sessionId, session);
+      console.log(`🔄 Session ${sessionId} activity updated (${session.email})`);
+    } else {
+      console.log(`💓 Heartbeat check for session ${sessionId} - not updating activity`);
+    }
 
     return session;
   }
@@ -153,9 +163,9 @@ export class UserSessionService {
 
   /**
    * Delete all sessions for a specific user (e.g., password change, security breach)
-   * @param userId - User ID
+   * @param userId - User ID (UUID string)
    */
-  deleteAllUserSessions(userId: number): number {
+  deleteAllUserSessions(userId: string): number {
     let deleted = 0;
     for (const [sessionId, session] of this.sessions.entries()) {
       if (session.userId === userId) {
@@ -171,9 +181,9 @@ export class UserSessionService {
 
   /**
    * Get active sessions for a user (for security audit)
-   * @param userId - User ID
+   * @param userId - User ID (UUID string)
    */
-  getUserSessions(userId: number): Array<{
+  getUserSessions(userId: string): Array<{
     sessionId: string;
     createdAt: Date;
     lastActivity: Date;

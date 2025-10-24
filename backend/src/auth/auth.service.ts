@@ -4,12 +4,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { CorpPassUserInfo } from './services/corppass-validator.service';
+import { UserSessionService } from './services/user-session.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private userSessionService: UserSessionService,
   ) {}
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
@@ -41,11 +43,21 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
+    // Create user session
+    const sessionId = this.userSessionService.createSession(
+      user.id,
+      user.email,
+      user.role,
+      user.clinicId,
+      'email',
+    );
+
     const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
       clinicId: user.clinicId,
+      sessionId,  // Include session ID in JWT
     };
 
     const token = this.jwtService.sign(payload);
