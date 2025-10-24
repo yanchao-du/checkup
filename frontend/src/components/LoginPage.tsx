@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
-import { FileText, Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2 } from 'lucide-react';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,8 +35,8 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <FileText className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
+            <img src="/public/logo.svg" alt="CheckUp logo" className="w-16 h-16" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">CheckUp Medical Portal</h1>
           <p className="text-slate-600">Submit medical examinations to Singapore government agencies</p>
