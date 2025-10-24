@@ -22,6 +22,14 @@ export interface DoctorClinic {
   doctor?: ClinicUser;
 }
 
+export interface NurseClinic {
+  nurseId: string;
+  clinicId: string;
+  isPrimary: boolean;
+  clinic?: Clinic;
+  nurse?: ClinicUser;
+}
+
 export interface ClinicUser {
   id: string;
   name: string;
@@ -33,8 +41,8 @@ export interface ClinicUser {
   lastLoginAt?: string;
   createdAt: string;
   // Many-to-many relationships
-  clinics?: DoctorClinic[]; // For doctors: list of clinics they work at
-  primaryClinic?: Clinic; // For doctors: their primary clinic
+  clinics?: (DoctorClinic | NurseClinic)[]; // For doctors/nurses: list of clinics they work at
+  primaryClinic?: Clinic; // For doctors/nurses: their primary clinic
 }
 
 // Auth Types

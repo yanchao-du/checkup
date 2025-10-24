@@ -29,6 +29,15 @@ describe('UsersService', () => {
       delete: jest.fn(),
       count: jest.fn(),
     },
+    nurseClinic: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
     clinic: {
       findUnique: jest.fn(),
     },
@@ -86,14 +95,46 @@ describe('UsersService', () => {
         },
       });
       expect(mockPrismaService.user.findMany).toHaveBeenCalledWith({
-        where: { clinicId },
+        where: {
+          OR: [
+            { clinicId, role: 'admin' },
+            {
+              role: 'doctor',
+              doctorClinics: {
+                some: { clinicId },
+              },
+            },
+            {
+              role: 'nurse',
+              nurseClinics: {
+                some: { clinicId },
+              },
+            },
+          ],
+        },
         select: expect.any(Object),
         orderBy: { email: 'asc' },
         skip: 0,
         take: 20,
       });
       expect(mockPrismaService.user.count).toHaveBeenCalledWith({
-        where: { clinicId },
+        where: {
+          OR: [
+            { clinicId, role: 'admin' },
+            {
+              role: 'doctor',
+              doctorClinics: {
+                some: { clinicId },
+              },
+            },
+            {
+              role: 'nurse',
+              nurseClinics: {
+                some: { clinicId },
+              },
+            },
+          ],
+        },
       });
     });
 
@@ -122,7 +163,24 @@ describe('UsersService', () => {
 
       expect(result).toEqual(mockUser);
       expect(mockPrismaService.user.findFirst).toHaveBeenCalledWith({
-        where: { id: userId, clinicId },
+        where: {
+          id: userId,
+          OR: [
+            { clinicId, role: 'admin' },
+            {
+              role: 'doctor',
+              doctorClinics: {
+                some: { clinicId },
+              },
+            },
+            {
+              role: 'nurse',
+              nurseClinics: {
+                some: { clinicId },
+              },
+            },
+          ],
+        },
         select: expect.any(Object),
       });
     });
@@ -634,6 +692,313 @@ describe('UsersService', () => {
       await expect(service.getDoctorClinics(doctorId)).rejects.toThrow(
         'Doctor not found',
       );
+    });
+  });
+
+  describe('Nurse-Clinic Management', () => {
+    const nurseId = '550e8400-e29b-41d4-a716-446655440004';
+    const clinic2Id = '550e8400-e29b-41d4-a716-446655440005';
+
+    const mockNurse = {
+      id: nurseId,
+      name: 'Nurse Jane Smith',
+      email: 'jane.smith@clinic.sg',
+      role: 'nurse',
+      status: 'active',
+    };
+
+    const mockClinic = {
+      id: clinicId,
+      name: 'HealthFirst Medical Clinic',
+      hciCode: 'HCI0001',
+    };
+
+    const mockClinic2 = {
+      id: clinic2Id,
+      name: 'CareWell Medical Centre',
+      hciCode: 'HCI0002',
+    };
+
+    describe('assignNurseToClinic', () => {
+      it('should assign nurse to clinic', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(mockNurse);
+        mockPrismaService.clinic.findUnique.mockResolvedValue(mockClinic);
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue(null);
+        mockPrismaService.nurseClinic.create.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: false,
+          nurse: mockNurse,
+          clinic: mockClinic,
+        });
+
+        const result = await service.assignNurseToClinic(
+          nurseId,
+          clinicId,
+          false,
+        );
+
+        expect(result).toBeDefined();
+        expect(result.nurseId).toBe(nurseId);
+        expect(result.clinicId).toBe(clinicId);
+        expect(mockPrismaService.nurseClinic.create).toHaveBeenCalledWith({
+          data: {
+            nurseId,
+            clinicId,
+            isPrimary: false,
+          },
+          select: expect.any(Object),
+        });
+      });
+
+      it('should assign nurse as primary clinic', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(mockNurse);
+        mockPrismaService.clinic.findUnique.mockResolvedValue(mockClinic);
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue(null);
+        mockPrismaService.nurseClinic.updateMany.mockResolvedValue({ count: 1 });
+        mockPrismaService.nurseClinic.create.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: true,
+          nurse: mockNurse,
+          clinic: mockClinic,
+        });
+
+        const result = await service.assignNurseToClinic(
+          nurseId,
+          clinicId,
+          true,
+        );
+
+        expect(result.isPrimary).toBe(true);
+        expect(mockPrismaService.nurseClinic.updateMany).toHaveBeenCalledWith({
+          where: { nurseId, isPrimary: true },
+          data: { isPrimary: false },
+        });
+      });
+
+      it('should throw NotFoundException when nurse not found', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(null);
+
+        await expect(
+          service.assignNurseToClinic(nurseId, clinicId, false),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          service.assignNurseToClinic(nurseId, clinicId, false),
+        ).rejects.toThrow('Nurse not found');
+      });
+
+      it('should throw NotFoundException when clinic not found', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(mockNurse);
+        mockPrismaService.clinic.findUnique.mockResolvedValue(null);
+
+        await expect(
+          service.assignNurseToClinic(nurseId, clinicId, false),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          service.assignNurseToClinic(nurseId, clinicId, false),
+        ).rejects.toThrow('Clinic not found');
+      });
+
+      it('should throw ConflictException when relationship already exists', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(mockNurse);
+        mockPrismaService.clinic.findUnique.mockResolvedValue(mockClinic);
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: false,
+        });
+
+        await expect(
+          service.assignNurseToClinic(nurseId, clinicId, false),
+        ).rejects.toThrow(ConflictException);
+        await expect(
+          service.assignNurseToClinic(nurseId, clinicId, false),
+        ).rejects.toThrow('Nurse is already assigned to this clinic');
+      });
+    });
+
+    describe('removeNurseFromClinic', () => {
+      it('should remove nurse from clinic', async () => {
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: false,
+        });
+        mockPrismaService.nurseClinic.delete.mockResolvedValue({
+          nurseId,
+          clinicId,
+        });
+
+        const result = await service.removeNurseFromClinic(nurseId, clinicId);
+
+        expect(result).toEqual({
+          message: 'Nurse removed from clinic successfully',
+        });
+        expect(mockPrismaService.nurseClinic.delete).toHaveBeenCalledWith({
+          where: {
+            nurseId_clinicId: {
+              nurseId,
+              clinicId,
+            },
+          },
+        });
+      });
+
+      it('should throw NotFoundException when relationship not found', async () => {
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue(null);
+
+        await expect(
+          service.removeNurseFromClinic(nurseId, clinicId),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          service.removeNurseFromClinic(nurseId, clinicId),
+        ).rejects.toThrow('Nurse is not assigned to this clinic');
+      });
+
+      it('should throw ConflictException when removing last clinic', async () => {
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: true,
+        });
+        mockPrismaService.nurseClinic.count.mockResolvedValue(1);
+
+        await expect(
+          service.removeNurseFromClinic(nurseId, clinicId),
+        ).rejects.toThrow(ConflictException);
+        await expect(
+          service.removeNurseFromClinic(nurseId, clinicId),
+        ).rejects.toThrow(
+          'Cannot remove primary clinic. Nurse must have at least one clinic assignment.',
+        );
+      });
+
+      it('should allow removing primary clinic when other clinics exist', async () => {
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: true,
+        });
+        mockPrismaService.nurseClinic.count.mockResolvedValue(2);
+        mockPrismaService.nurseClinic.delete.mockResolvedValue({
+          nurseId,
+          clinicId,
+        });
+
+        const result = await service.removeNurseFromClinic(nurseId, clinicId);
+
+        expect(result).toEqual({
+          message: 'Nurse removed from clinic successfully',
+        });
+      });
+    });
+
+    describe('setNursePrimaryClinic', () => {
+      it('should set primary clinic for nurse', async () => {
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: false,
+        });
+        mockPrismaService.nurseClinic.updateMany.mockResolvedValue({ count: 1 });
+        mockPrismaService.nurseClinic.update.mockResolvedValue({
+          nurseId,
+          clinicId,
+          isPrimary: true,
+          nurse: mockNurse,
+          clinic: mockClinic,
+        });
+
+        const result = await service.setNursePrimaryClinic(nurseId, clinicId);
+
+        expect(result.isPrimary).toBe(true);
+        expect(mockPrismaService.nurseClinic.updateMany).toHaveBeenCalledWith({
+          where: { nurseId, isPrimary: true },
+          data: { isPrimary: false },
+        });
+        expect(mockPrismaService.nurseClinic.update).toHaveBeenCalledWith({
+          where: {
+            nurseId_clinicId: {
+              nurseId,
+              clinicId,
+            },
+          },
+          data: { isPrimary: true },
+          select: expect.any(Object),
+        });
+      });
+
+      it('should throw NotFoundException when relationship not found', async () => {
+        mockPrismaService.nurseClinic.findUnique.mockResolvedValue(null);
+
+        await expect(
+          service.setNursePrimaryClinic(nurseId, clinicId),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          service.setNursePrimaryClinic(nurseId, clinicId),
+        ).rejects.toThrow('Nurse is not assigned to this clinic');
+      });
+    });
+
+    describe('getNurseClinics', () => {
+      it('should return nurse clinics', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(mockNurse);
+        mockPrismaService.nurseClinic.findMany.mockResolvedValue([
+          {
+            isPrimary: true,
+            clinic: {
+              id: clinicId,
+              name: 'HealthFirst Medical Clinic',
+              hciCode: 'HCI0001',
+              address: '123 Medical Street',
+              phone: '+65 6123 4567',
+            },
+          },
+          {
+            isPrimary: false,
+            clinic: {
+              id: clinic2Id,
+              name: 'CareWell Medical Centre',
+              hciCode: 'HCI0002',
+              address: '456 Health Avenue',
+              phone: '+65 6234 5678',
+            },
+          },
+        ]);
+
+        const result = await service.getNurseClinics(nurseId);
+
+        expect(result).toHaveLength(2);
+        expect(result[0].isPrimary).toBe(true);
+        expect(result[1].isPrimary).toBe(false);
+        expect(mockPrismaService.nurseClinic.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { nurseId },
+            orderBy: { isPrimary: 'desc' },
+          }),
+        );
+      });
+
+      it('should throw NotFoundException when nurse not found', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(null);
+
+        await expect(service.getNurseClinics(nurseId)).rejects.toThrow(
+          NotFoundException,
+        );
+        await expect(service.getNurseClinics(nurseId)).rejects.toThrow(
+          'Nurse not found',
+        );
+      });
+
+      it('should return empty array when nurse has no clinics', async () => {
+        mockPrismaService.user.findFirst.mockResolvedValue(mockNurse);
+        mockPrismaService.nurseClinic.findMany.mockResolvedValue([]);
+
+        const result = await service.getNurseClinics(nurseId);
+
+        expect(result).toEqual([]);
+      });
     });
   });
 });

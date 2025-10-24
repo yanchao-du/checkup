@@ -122,6 +122,7 @@ describe('ClinicsService', () => {
             doctor: mockDoctor,
           },
         ],
+        nurseClinics: [],
       };
       mockPrismaService.clinic.findUnique.mockResolvedValue(clinicWithDoctors);
 
@@ -135,6 +136,7 @@ describe('ClinicsService', () => {
             isPrimary: true,
           },
         ],
+        nurses: [],
       });
       expect(prisma.clinic.findUnique).toHaveBeenCalledWith({
         where: { id: clinicId },
@@ -233,6 +235,7 @@ describe('ClinicsService', () => {
       const clinicWithDoctors = {
         ...mockClinic,
         doctorClinics: [],
+        nurseClinics: [],
       };
       mockPrismaService.clinic.findUnique
         .mockResolvedValueOnce(clinicWithDoctors) // findOne check
@@ -240,6 +243,8 @@ describe('ClinicsService', () => {
       mockPrismaService.clinic.update.mockResolvedValue({
         ...mockClinic,
         ...updateClinicDto,
+        doctorClinics: [],
+        nurseClinics: [],
       });
 
       const result = await service.update(clinicId, updateClinicDto);
@@ -265,6 +270,7 @@ describe('ClinicsService', () => {
       const clinicWithDoctors = {
         ...mockClinic,
         doctorClinics: [],
+        nurseClinics: [],
       };
       mockPrismaService.clinic.findUnique
         .mockResolvedValueOnce(clinicWithDoctors) // findOne check
@@ -289,11 +295,16 @@ describe('ClinicsService', () => {
       const clinicWithDoctors = {
         ...mockClinic,
         doctorClinics: [],
+        nurseClinics: [],
       };
       mockPrismaService.clinic.findUnique
         .mockResolvedValueOnce(clinicWithDoctors)
         .mockResolvedValueOnce(mockClinic); // Same clinic
-      mockPrismaService.clinic.update.mockResolvedValue(mockClinic);
+      mockPrismaService.clinic.update.mockResolvedValue({
+        ...mockClinic,
+        doctorClinics: [],
+        nurseClinics: [],
+      });
 
       await service.update(clinicId, { hciCode: mockClinic.hciCode });
 
@@ -306,6 +317,7 @@ describe('ClinicsService', () => {
       const clinicWithDoctors = {
         ...mockClinic,
         doctorClinics: [],
+        nurseClinics: [],
       };
       mockPrismaService.clinic.findUnique.mockResolvedValue(clinicWithDoctors);
       mockPrismaService.user.count.mockResolvedValue(0);
@@ -331,6 +343,7 @@ describe('ClinicsService', () => {
       const clinicWithDoctors = {
         ...mockClinic,
         doctorClinics: [],
+        nurseClinics: [],
       };
       mockPrismaService.clinic.findUnique.mockResolvedValue(clinicWithDoctors);
       mockPrismaService.user.count.mockResolvedValue(5);

@@ -45,6 +45,12 @@ export class ClinicsController {
     return this.clinicsService.getDoctors(id);
   }
 
+  @Get(':id/nurses')
+  @Roles('admin')
+  getNurses(@Param('id') id: string) {
+    return this.clinicsService.getNurses(id);
+  }
+
   @Post()
   @Roles('admin')
   create(@Body() createClinicDto: CreateClinicDto) {

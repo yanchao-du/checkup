@@ -698,4 +698,347 @@ describe('Users (e2e)', () => {
         .expect(400);
     });
   });
+
+  describe('Nurse-Clinic Management (e2e)', () => {
+    let testNurseId: string;
+    let testClinic2Id: string;
+
+    beforeAll(async () => {
+      // Create a test nurse
+      const nurseResponse = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Test Nurse for Clinic Assignment',
+          email: `test-nurse-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'nurse',
+        })
+        .expect(201);
+
+      testNurseId = nurseResponse.body.id;
+
+      // Create a second clinic for testing
+      const clinicResponse = await request(app.getHttpServer())
+        .post('/v1/clinics')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Test Clinic for Nurse Assignment',
+          hciCode: `HCI${Date.now()}`,
+          address: '789 Test Street',
+          phone: '+65 6789 0123',
+        })
+        .expect(201);
+
+      testClinic2Id = clinicResponse.body.id;
+    });
+
+    afterAll(async () => {
+      // Clean up test data
+      if (testNurseId) {
+        await prisma.nurseClinic
+          .deleteMany({ where: { nurseId: testNurseId } })
+          .catch(() => {});
+        await prisma.user.delete({ where: { id: testNurseId } }).catch(() => {});
+      }
+      if (testClinic2Id) {
+        await prisma.clinic
+          .delete({ where: { id: testClinic2Id } })
+          .catch(() => {});
+      }
+    });
+
+    describe('GET /v1/users/:id/nurse-clinics', () => {
+      it('should return nurse clinics for admin', async () => {
+        const response = await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        expect(Array.isArray(response.body)).toBe(true);
+        // Nurse should have at least their primary clinic
+        expect(response.body.length).toBeGreaterThanOrEqual(1);
+        
+        const primaryClinic = response.body.find(c => c.isPrimary === true);
+        expect(primaryClinic).toBeDefined();
+        expect(primaryClinic).toHaveProperty('id');
+        expect(primaryClinic).toHaveProperty('name');
+        expect(primaryClinic).toHaveProperty('hciCode');
+      });
+
+      it('should return 401 for unauthenticated request', async () => {
+        await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .expect(401);
+      });
+    });
+
+    describe('POST /v1/users/:id/nurse-clinics', () => {
+      it('should assign nurse to a new clinic', async () => {
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: testClinic2Id,
+            isPrimary: false,
+          })
+          .expect(201);
+
+        expect(response.body).toHaveProperty('nurseId', testNurseId);
+        expect(response.body).toHaveProperty('clinicId', testClinic2Id);
+        expect(response.body).toHaveProperty('isPrimary', false);
+        expect(response.body).toHaveProperty('nurse');
+        expect(response.body).toHaveProperty('clinic');
+      });
+
+      it('should reject duplicate assignment', async () => {
+        // Try to assign to same clinic again
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: testClinic2Id,
+            isPrimary: false,
+          })
+          .expect(409);
+
+        expect(response.body.message).toContain(
+          'Nurse is already assigned to this clinic',
+        );
+      });
+
+      it('should assign nurse as primary clinic', async () => {
+        // Create another clinic for this test
+        const clinicResponse = await request(app.getHttpServer())
+          .post('/v1/clinics')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            name: 'Primary Test Clinic',
+            hciCode: `HCI${Date.now()}`,
+            address: '999 Primary Street',
+            phone: '+65 6999 9999',
+          })
+          .expect(201);
+
+        const newClinicId = clinicResponse.body.id;
+
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: newClinicId,
+            isPrimary: true,
+          })
+          .expect(201);
+
+        expect(response.body.isPrimary).toBe(true);
+
+        // Verify old primary is no longer primary
+        const clinicsResponse = await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        const primaryClinics = clinicsResponse.body.filter(c => c.isPrimary);
+        expect(primaryClinics).toHaveLength(1);
+        expect(primaryClinics[0].id).toBe(newClinicId);
+
+        // Cleanup
+        await prisma.nurseClinic
+          .deleteMany({ where: { nurseId: testNurseId, clinicId: newClinicId } })
+          .catch(() => {});
+        await prisma.clinic.delete({ where: { id: newClinicId } }).catch(() => {});
+      });
+
+      it('should return 404 for non-existent nurse', async () => {
+        const fakeNurseId = '550e8400-e29b-41d4-a716-446655440999';
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${fakeNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: testClinic2Id,
+            isPrimary: false,
+          })
+          .expect(404);
+
+        expect(response.body.message).toContain('Nurse not found');
+      });
+
+      it('should return 404 for non-existent clinic', async () => {
+        const fakeClinicId = '550e8400-e29b-41d4-a716-446655440888';
+        const response = await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: fakeClinicId,
+            isPrimary: false,
+          })
+          .expect(404);
+
+        expect(response.body.message).toContain('Clinic not found');
+      });
+
+      it('should return 403 for non-admin users', async () => {
+        await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${doctorToken}`)
+          .send({
+            clinicId: testClinic2Id,
+            isPrimary: false,
+          })
+          .expect(403);
+
+        await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${nurseToken}`)
+          .send({
+            clinicId: testClinic2Id,
+            isPrimary: false,
+          })
+          .expect(403);
+      });
+    });
+
+    describe('PUT /v1/users/:id/nurse-clinics/:clinicId/primary', () => {
+      it('should set primary clinic for nurse', async () => {
+        await request(app.getHttpServer())
+          .put(`/v1/users/${testNurseId}/nurse-clinics/${testClinic2Id}/primary`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        // Verify it's now primary
+        const clinicsResponse = await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        const targetClinic = clinicsResponse.body.find(
+          c => c.id === testClinic2Id,
+        );
+        expect(targetClinic.isPrimary).toBe(true);
+
+        // Verify only one primary clinic exists
+        const primaryClinics = clinicsResponse.body.filter(c => c.isPrimary);
+        expect(primaryClinics).toHaveLength(1);
+      });
+
+      it('should return 404 for non-assigned clinic', async () => {
+        const fakeClinicId = '550e8400-e29b-41d4-a716-446655440777';
+        const response = await request(app.getHttpServer())
+          .put(`/v1/users/${testNurseId}/nurse-clinics/${fakeClinicId}/primary`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(404);
+
+        expect(response.body.message).toContain(
+          'Nurse is not assigned to this clinic',
+        );
+      });
+
+      it('should return 403 for non-admin users', async () => {
+        await request(app.getHttpServer())
+          .put(`/v1/users/${testNurseId}/nurse-clinics/${testClinic2Id}/primary`)
+          .set('Authorization', `Bearer ${doctorToken}`)
+          .expect(403);
+      });
+    });
+
+    describe('DELETE /v1/users/:id/nurse-clinics/:clinicId', () => {
+      it('should not allow removing last clinic', async () => {
+        // First, get all clinics for the nurse
+        const clinicsResponse = await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        // Remove all but one
+        const clinics = clinicsResponse.body;
+        for (let i = 0; i < clinics.length - 1; i++) {
+          await request(app.getHttpServer())
+            .delete(`/v1/users/${testNurseId}/nurse-clinics/${clinics[i].id}`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+        }
+
+        // Try to remove the last one
+        const lastClinic = clinics[clinics.length - 1];
+        const response = await request(app.getHttpServer())
+          .delete(`/v1/users/${testNurseId}/nurse-clinics/${lastClinic.id}`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(409);
+
+        expect(response.body.message).toContain(
+          'Cannot remove primary clinic',
+        );
+        expect(response.body.message).toContain('at least one clinic');
+      });
+
+      it('should remove nurse from non-primary clinic', async () => {
+        // First assign nurse to another clinic
+        const clinicResponse = await request(app.getHttpServer())
+          .post('/v1/clinics')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            name: 'Removable Test Clinic',
+            hciCode: `HCI${Date.now()}`,
+            address: '111 Remove Street',
+            phone: '+65 6111 1111',
+          })
+          .expect(201);
+
+        const removeClinicId = clinicResponse.body.id;
+
+        // Assign nurse to this clinic
+        await request(app.getHttpServer())
+          .post(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            clinicId: removeClinicId,
+            isPrimary: false,
+          })
+          .expect(201);
+
+        // Now remove it
+        const response = await request(app.getHttpServer())
+          .delete(`/v1/users/${testNurseId}/nurse-clinics/${removeClinicId}`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('successfully');
+
+        // Verify it's removed
+        const clinicsResponse = await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        const removed = clinicsResponse.body.find(c => c.id === removeClinicId);
+        expect(removed).toBeUndefined();
+
+        // Cleanup
+        await prisma.clinic
+          .delete({ where: { id: removeClinicId } })
+          .catch(() => {});
+      });
+
+      it('should return 404 for non-assigned clinic', async () => {
+        const fakeClinicId = '550e8400-e29b-41d4-a716-446655440666';
+        const response = await request(app.getHttpServer())
+          .delete(`/v1/users/${testNurseId}/nurse-clinics/${fakeClinicId}`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(404);
+
+        expect(response.body.message).toContain(
+          'Nurse is not assigned to this clinic',
+        );
+      });
+
+      it('should return 403 for non-admin users', async () => {
+        await request(app.getHttpServer())
+          .delete(`/v1/users/${testNurseId}/nurse-clinics/${testClinic2Id}`)
+          .set('Authorization', `Bearer ${doctorToken}`)
+          .expect(403);
+      });
+    });
+  });
 });

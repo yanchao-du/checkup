@@ -10,6 +10,7 @@ import { Settings as SettingsIcon, Save, Users, Building2, UserCog } from 'lucid
 import { UserManagement } from './UserManagement';
 import { ClinicManagement } from './ClinicManagement';
 import { DoctorClinicAssignment } from './DoctorClinicAssignment';
+import { NurseClinicAssignment } from './NurseClinicAssignment';
 
 export function Settings() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export function Settings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   // Default to 'users' tab for admin, 'settings' for others
-  const [activeTab, setActiveTab] = useState<'users' | 'clinics' | 'assignments' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'clinics' | 'doctor-assignments' | 'nurse-assignments' | 'settings'>('users');
 
   // Set the correct default tab based on user role
   useEffect(() => {
@@ -125,15 +126,26 @@ export function Settings() {
               Clinic Management
             </button>
             <button
-              onClick={() => setActiveTab('assignments')}
+              onClick={() => setActiveTab('doctor-assignments')}
               className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === 'assignments'
+                activeTab === 'doctor-assignments'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-slate-600 hover:text-slate-900'
               }`}
             >
               <UserCog className="w-4 h-4 inline mr-2" />
-              Doctor Clinic Assignments
+              Doctor Assignments
+            </button>
+            <button
+              onClick={() => setActiveTab('nurse-assignments')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'nurse-assignments'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <UserCog className="w-4 h-4 inline mr-2" />
+              Nurse Assignments
             </button>
           </div>
         </div>
@@ -142,7 +154,8 @@ export function Settings() {
         <div>
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'clinics' && <ClinicManagement />}
-          {activeTab === 'assignments' && <DoctorClinicAssignment />}
+          {activeTab === 'doctor-assignments' && <DoctorClinicAssignment />}
+          {activeTab === 'nurse-assignments' && <NurseClinicAssignment />}
         </div>
       </div>
     );

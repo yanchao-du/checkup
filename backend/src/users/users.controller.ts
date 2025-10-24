@@ -40,6 +40,11 @@ export class UsersController {
     return this.usersService.findDoctors(user.clinicId);
   }
 
+  @Get('nurses/list')
+  async getNurses(@CurrentUser() user: any) {
+    return this.usersService.findNurses(user.clinicId);
+  }
+
   @Get('me/default-doctor')
   @Roles('nurse')
   async getDefaultDoctor(@CurrentUser() user: any) {
@@ -119,5 +124,43 @@ export class UsersController {
     @Param('clinicId') clinicId: string,
   ) {
     return this.usersService.setPrimaryClinic(doctorId, clinicId);
+  }
+
+  // Nurse-Clinic relationship endpoints
+  @Post(':id/nurse-clinics')
+  @Roles('admin')
+  assignNurseToClinic(
+    @Param('id') nurseId: string,
+    @Body() body: { clinicId: string; isPrimary?: boolean },
+  ) {
+    return this.usersService.assignNurseToClinic(
+      nurseId,
+      body.clinicId,
+      body.isPrimary,
+    );
+  }
+
+  @Delete(':id/nurse-clinics/:clinicId')
+  @Roles('admin')
+  removeNurseFromClinic(
+    @Param('id') nurseId: string,
+    @Param('clinicId') clinicId: string,
+  ) {
+    return this.usersService.removeNurseFromClinic(nurseId, clinicId);
+  }
+
+  @Put(':id/nurse-clinics/:clinicId/primary')
+  @Roles('admin')
+  setNursePrimaryClinic(
+    @Param('id') nurseId: string,
+    @Param('clinicId') clinicId: string,
+  ) {
+    return this.usersService.setNursePrimaryClinic(nurseId, clinicId);
+  }
+
+  @Get(':id/nurse-clinics')
+  @Roles('admin', 'nurse')
+  getNurseClinics(@Param('id') id: string) {
+    return this.usersService.getNurseClinics(id);
   }
 }

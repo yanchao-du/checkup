@@ -73,6 +73,24 @@ export class ClinicsService {
             },
           },
         },
+        nurseClinics: {
+          select: {
+            isPrimary: true,
+            nurse: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                status: true,
+              },
+            },
+          },
+          orderBy: {
+            nurse: {
+              name: 'asc',
+            },
+          },
+        },
       },
     });
 
@@ -87,7 +105,12 @@ export class ClinicsService {
         ...dc.doctor,
         isPrimary: dc.isPrimary,
       })),
+      nurses: clinic.nurseClinics.map(nc => ({
+        ...nc.nurse,
+        isPrimary: nc.isPrimary,
+      })),
       doctorClinics: undefined,
+      nurseClinics: undefined,
     };
   }
 
@@ -247,6 +270,42 @@ export class ClinicsService {
     return doctorClinics.map(dc => ({
       ...dc.doctor,
       isPrimary: dc.isPrimary,
+    }));
+  }
+
+  async getNurses(id: string) {
+    // Check if clinic exists
+    const clinic = await this.prisma.clinic.findUnique({
+      where: { id },
+    });
+
+    if (!clinic) {
+      throw new NotFoundException('Clinic not found');
+    }
+
+    const nurseClinics = await this.prisma.nurseClinic.findMany({
+      where: { clinicId: id },
+      select: {
+        isPrimary: true,
+        nurse: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        nurse: {
+          name: 'asc',
+        },
+      },
+    });
+
+    return nurseClinics.map(nc => ({
+      ...nc.nurse,
+      isPrimary: nc.isPrimary,
     }));
   }
 }

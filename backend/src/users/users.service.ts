@@ -12,17 +12,25 @@ export class UsersService {
     const skip = (page - 1) * limit;
     
     // For many-to-many relationship, we need to find users who work at this clinic
-    // OR users who are admin/nurse at this clinic
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         where: {
           OR: [
-            // Admins and nurses still have direct clinicId
-            { clinicId },
+            // Admins still have direct clinicId
+            { clinicId, role: 'admin' },
             // Doctors are associated through DoctorClinic junction table
             {
               role: 'doctor',
               doctorClinics: {
+                some: {
+                  clinicId,
+                },
+              },
+            },
+            // Nurses are associated through NurseClinic junction table
+            {
+              role: 'nurse',
+              nurseClinics: {
                 some: {
                   clinicId,
                 },
@@ -48,10 +56,18 @@ export class UsersService {
       this.prisma.user.count({
         where: {
           OR: [
-            { clinicId },
+            { clinicId, role: 'admin' },
             {
               role: 'doctor',
               doctorClinics: {
+                some: {
+                  clinicId,
+                },
+              },
+            },
+            {
+              role: 'nurse',
+              nurseClinics: {
                 some: {
                   clinicId,
                 },
@@ -106,9 +122,58 @@ export class UsersService {
     }));
   }
 
+  async findNurses(clinicId: string) {
+    // Find all nurses who work at this clinic (either as primary or secondary)
+    const nurseClinics = await this.prisma.nurseClinic.findMany({
+      where: {
+        clinicId,
+        nurse: {
+          status: 'active',
+        },
+      },
+      select: {
+        isPrimary: true,
+        nurse: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        nurse: {
+          name: 'asc',
+        },
+      },
+    });
+
+    return nurseClinics.map(nc => ({
+      ...nc.nurse,
+      isPrimary: nc.isPrimary,
+    }));
+  }
+
   async findOne(id: string, clinicId: string) {
     const user = await this.prisma.user.findFirst({
-      where: { id, clinicId },
+      where: {
+        id,
+        OR: [
+          { clinicId, role: 'admin' },
+          {
+            role: 'doctor',
+            doctorClinics: {
+              some: { clinicId },
+            },
+          },
+          {
+            role: 'nurse',
+            nurseClinics: {
+              some: { clinicId },
+            },
+          },
+        ],
+      },
       select: {
         id: true,
         name: true,
@@ -119,6 +184,21 @@ export class UsersService {
         lastLoginAt: true,
         createdAt: true,
         doctorClinics: {
+          select: {
+            isPrimary: true,
+            clinic: {
+              select: {
+                id: true,
+                name: true,
+                hciCode: true,
+              },
+            },
+          },
+          orderBy: {
+            isPrimary: 'desc', // Primary clinic first
+          },
+        },
+        nurseClinics: {
           select: {
             isPrimary: true,
             clinic: {
@@ -149,10 +229,27 @@ export class UsersService {
           isPrimary: dc.isPrimary,
         })),
         doctorClinics: undefined,
+        nurseClinics: undefined,
       };
     }
 
-    return user;
+    if (user.role === 'nurse' && user.nurseClinics) {
+      return {
+        ...user,
+        clinics: user.nurseClinics.map(nc => ({
+          ...nc.clinic,
+          isPrimary: nc.isPrimary,
+        })),
+        doctorClinics: undefined,
+        nurseClinics: undefined,
+      };
+    }
+
+    return {
+      ...user,
+      doctorClinics: undefined,
+      nurseClinics: undefined,
+    };
   }
 
   async create(clinicId: string, createUserDto: CreateUserDto) {
@@ -206,6 +303,17 @@ export class UsersService {
       await this.prisma.doctorClinic.create({
         data: {
           doctorId: user.id,
+          clinicId: clinicId,
+          isPrimary: true,
+        },
+      });
+    }
+
+    // If creating a nurse, automatically create NurseClinic relationship with primary clinic
+    if (createUserDto.role === 'nurse') {
+      await this.prisma.nurseClinic.create({
+        data: {
+          nurseId: user.id,
           clinicId: clinicId,
           isPrimary: true,
         },
@@ -567,6 +675,216 @@ export class UsersService {
     return doctorClinics.map(dc => ({
       ...dc.clinic,
       isPrimary: dc.isPrimary,
+    }));
+  }
+
+  // Nurse-Clinic relationship management
+  async assignNurseToClinic(
+    nurseId: string,
+    clinicId: string,
+    isPrimary: boolean = false,
+  ) {
+    // Verify the nurse exists
+    const nurse = await this.prisma.user.findFirst({
+      where: {
+        id: nurseId,
+        role: 'nurse',
+      },
+    });
+
+    if (!nurse) {
+      throw new NotFoundException('Nurse not found');
+    }
+
+    // Verify the clinic exists
+    const clinic = await this.prisma.clinic.findUnique({
+      where: { id: clinicId },
+    });
+
+    if (!clinic) {
+      throw new NotFoundException('Clinic not found');
+    }
+
+    // Check if relationship already exists
+    const existing = await this.prisma.nurseClinic.findUnique({
+      where: {
+        nurseId_clinicId: {
+          nurseId,
+          clinicId,
+        },
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException('Nurse is already assigned to this clinic');
+    }
+
+    // If setting as primary, unset other primary clinics
+    if (isPrimary) {
+      await this.prisma.nurseClinic.updateMany({
+        where: { nurseId, isPrimary: true },
+        data: { isPrimary: false },
+      });
+    }
+
+    const nurseClinic = await this.prisma.nurseClinic.create({
+      data: {
+        nurseId,
+        clinicId,
+        isPrimary,
+      },
+      select: {
+        nurseId: true,
+        clinicId: true,
+        isPrimary: true,
+        nurse: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            hciCode: true,
+          },
+        },
+      },
+    });
+
+    return nurseClinic;
+  }
+
+  async removeNurseFromClinic(nurseId: string, clinicId: string) {
+    // Verify the relationship exists
+    const nurseClinic = await this.prisma.nurseClinic.findUnique({
+      where: {
+        nurseId_clinicId: {
+          nurseId,
+          clinicId,
+        },
+      },
+    });
+
+    if (!nurseClinic) {
+      throw new NotFoundException('Nurse is not assigned to this clinic');
+    }
+
+    // Prevent removal if it's the primary clinic and the only clinic
+    if (nurseClinic.isPrimary) {
+      const clinicCount = await this.prisma.nurseClinic.count({
+        where: { nurseId },
+      });
+
+      if (clinicCount === 1) {
+        throw new ConflictException(
+          'Cannot remove primary clinic. Nurse must have at least one clinic assignment.',
+        );
+      }
+    }
+
+    await this.prisma.nurseClinic.delete({
+      where: {
+        nurseId_clinicId: {
+          nurseId,
+          clinicId,
+        },
+      },
+    });
+
+    return { message: 'Nurse removed from clinic successfully' };
+  }
+
+  async setNursePrimaryClinic(nurseId: string, clinicId: string) {
+    // Verify the relationship exists
+    const nurseClinic = await this.prisma.nurseClinic.findUnique({
+      where: {
+        nurseId_clinicId: {
+          nurseId,
+          clinicId,
+        },
+      },
+    });
+
+    if (!nurseClinic) {
+      throw new NotFoundException('Nurse is not assigned to this clinic');
+    }
+
+    // Unset all other primary clinics for this nurse
+    await this.prisma.nurseClinic.updateMany({
+      where: { nurseId, isPrimary: true },
+      data: { isPrimary: false },
+    });
+
+    // Set the new primary clinic
+    const updated = await this.prisma.nurseClinic.update({
+      where: {
+        nurseId_clinicId: {
+          nurseId,
+          clinicId,
+        },
+      },
+      data: { isPrimary: true },
+      select: {
+        nurseId: true,
+        clinicId: true,
+        isPrimary: true,
+        nurse: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            hciCode: true,
+          },
+        },
+      },
+    });
+
+    return updated;
+  }
+
+  async getNurseClinics(nurseId: string) {
+    const nurse = await this.prisma.user.findFirst({
+      where: {
+        id: nurseId,
+        role: 'nurse',
+      },
+    });
+
+    if (!nurse) {
+      throw new NotFoundException('Nurse not found');
+    }
+
+    const nurseClinics = await this.prisma.nurseClinic.findMany({
+      where: { nurseId },
+      select: {
+        isPrimary: true,
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            hciCode: true,
+            address: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: {
+        isPrimary: 'desc', // Primary clinic first
+      },
+    });
+
+    return nurseClinics.map(nc => ({
+      ...nc.clinic,
+      isPrimary: nc.isPrimary,
     }));
   }
 }

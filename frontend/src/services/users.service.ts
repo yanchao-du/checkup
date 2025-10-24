@@ -22,6 +22,11 @@ export const usersApi = {
     return apiClient.get<Doctor[]>('/users/doctors/list');
   },
 
+  // Get list of nurses (for assignment)
+  getNurses: async (): Promise<Doctor[]> => {
+    return apiClient.get<Doctor[]>('/users/nurses/list');
+  },
+
   // Get all users (Admin only)
   getAll: async (page = 1, limit = 20): Promise<PaginatedResponse<ClinicUser>> => {
     const queryString = new URLSearchParams({
@@ -111,6 +116,49 @@ export const usersApi = {
   ): Promise<{ message: string }> => {
     return apiClient.put<{ message: string }>(
       `/users/${doctorId}/clinics/${clinicId}/primary`,
+      {}
+    );
+  },
+
+  // Nurse-Clinic Relationship Management (Admin only)
+  
+  /**
+   * Get all clinics for a specific nurse
+   */
+  getNurseClinics: async (nurseId: string): Promise<Clinic[]> => {
+    return apiClient.get<Clinic[]>(`/users/${nurseId}/nurse-clinics`);
+  },
+
+  /**
+   * Assign a nurse to a clinic
+   */
+  assignNurseToClinic: async (
+    nurseId: string, 
+    data: AssignDoctorToClinicRequest
+  ): Promise<DoctorClinic> => {
+    return apiClient.post<DoctorClinic>(`/users/${nurseId}/nurse-clinics`, data);
+  },
+
+  /**
+   * Remove a nurse from a clinic
+   * Note: Cannot remove if it's the nurse's only clinic
+   */
+  removeNurseFromClinic: async (
+    nurseId: string, 
+    clinicId: string
+  ): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/users/${nurseId}/nurse-clinics/${clinicId}`);
+  },
+
+  /**
+   * Set a clinic as the primary clinic for a nurse
+   */
+  setNursePrimaryClinic: async (
+    nurseId: string, 
+    clinicId: string
+  ): Promise<{ message: string }> => {
+    return apiClient.put<{ message: string }>(
+      `/users/${nurseId}/nurse-clinics/${clinicId}/primary`,
       {}
     );
   },

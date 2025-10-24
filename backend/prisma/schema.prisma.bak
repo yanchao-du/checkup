@@ -1,4 +1,21 @@
-// This is your Prisma schema file,
+// This is ymodel Clinic {
+  id                 String              @id @default(uuid())
+  name               String
+  hciCode            String?             @unique @map("hci_code")  // Healthcare Institution Code
+  registrationNumber String?             @unique @map("registration_number")
+  address            String?
+  phone              String?
+  email              String?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  
+  users              User[]              // Keep for backward compatibility (primary clinic)
+  doctorClinics      DoctorClinic[]      // Many-to-many with doctors
+  nurseClinics       NurseClinic[]       // Many-to-many with nurses
+  submissions        MedicalSubmission[]
+
+  @@map("clinics")
+} file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -23,7 +40,6 @@ model Clinic {
   
   users              User[]              // Keep for backward compatibility (primary clinic)
   doctorClinics      DoctorClinic[]      // Many-to-many with doctors
-  nurseClinics       NurseClinic[]       // Many-to-many with nurses
   submissions        MedicalSubmission[]
 
   @@map("clinics")
