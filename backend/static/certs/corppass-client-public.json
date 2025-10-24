@@ -1,0 +1,22 @@
+{
+  "keys": [
+    {
+      "kty": "EC",
+      "x": "JCY4dcC34HzS56dCM64NgRX3jyrlEyNfOkWi71ZUckk",
+      "y": "c6y4Lrr6K_T-D5KUDS3GqiDaykEAFP_poJ17s5HXc7U",
+      "crv": "P-256",
+      "use": "sig",
+      "alg": "ES256",
+      "kid": "checkup-app-sig-2024"
+    },
+    {
+      "kty": "EC",
+      "x": "APcI9qilrCh0HlzeKFjpY-1tZstmZRONhfV4AV9IOF5Eg_hlULaNQqf8efiDkmm39UOuCYr7ogEK3i48xlkbSHfe",
+      "y": "AAMD7ZRcDpYOz9JrT0rqNzKqBDPiFIXhS1ogt3vL5Llx6Js4mVcHFLaNj5qXAw9S62ol_Lug9_4gQajZQsoHpNBj",
+      "crv": "P-521",
+      "use": "enc",
+      "alg": "ECDH-ES+A256KW",
+      "kid": "checkup-app-enc-2024"
+    }
+  ]
+}

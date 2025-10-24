@@ -35,6 +35,7 @@ model User {
   email               String              @unique
   passwordHash        String              @map("password_hash")
   name                String
+  nric                String?             @unique  // National Registration Identity Card (Singapore) - temporarily nullable for migration
   role                UserRole
   mcrNumber           String?             @unique @map("mcr_number")  // Medical Council Registration Number (doctors only)
   status              UserStatus          @default(active)
@@ -56,6 +57,7 @@ model User {
 
   @@index([clinicId])
   @@index([email])
+  @@index([nric])
   @@index([defaultDoctorId])
   @@map("users")
 }

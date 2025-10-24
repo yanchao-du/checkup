@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from './components/ui/sonner';
 import { LoginPage } from './components/LoginPage';
+import { CorpPassCallback } from './components/CorpPassCallback';
 import { DashboardLayout } from './components/DashboardLayout';
 import { Dashboard } from './components/Dashboard';
 import { NewSubmission } from './components/NewSubmission';
@@ -63,6 +64,7 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route path="/auth/corppass/callback" element={<CorpPassCallback />} />
           <Route
             path="/*"
             element={

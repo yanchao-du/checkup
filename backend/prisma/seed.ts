@@ -30,13 +30,17 @@ async function main() {
   // Create users
   const doctor = await prisma.user.upsert({
     where: { email: 'doctor@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S1234567D',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440001',
       clinicId: clinic.id,
       email: 'doctor@clinic.sg',
       passwordHash,
       name: 'Dr. Sarah Tan',
+      nric: 'S1234567D',  // Valid Singapore NRIC
       role: 'doctor',
       mcrNumber: 'M12345A',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
@@ -46,13 +50,17 @@ async function main() {
 
   const nurse = await prisma.user.upsert({
     where: { email: 'nurse@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S2345678H',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440002',
       clinicId: clinic.id,
       email: 'nurse@clinic.sg',
       passwordHash,
       name: 'Nurse Mary Lim',
+      nric: 'S2345678H',  // Valid Singapore NRIC
       role: 'nurse',
       status: 'active',
       updatedAt: new Date(),
@@ -61,13 +69,17 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S3456789A',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440003',
       clinicId: clinic.id,
       email: 'admin@clinic.sg',
       passwordHash,
       name: 'Admin John Wong',
+      nric: 'S3456789A',  // Valid Singapore NRIC
       role: 'admin',
       status: 'active',
       updatedAt: new Date(),
@@ -79,13 +91,17 @@ async function main() {
   // Create additional test users for comprehensive testing
   const doctor2 = await prisma.user.upsert({
     where: { email: 'doctor2@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S4567890C',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440011',
       clinicId: clinic.id,
       email: 'doctor2@clinic.sg',
       passwordHash,
       name: 'Dr. James Lee',
+      nric: 'S4567890C',  // Valid Singapore NRIC
       role: 'doctor',
       mcrNumber: 'M23456B',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
@@ -95,13 +111,17 @@ async function main() {
 
   const doctor3 = await prisma.user.upsert({
     where: { email: 'doctor3@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S5678901D',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440012',
       clinicId: clinic.id,
       email: 'doctor3@clinic.sg',
       passwordHash,
       name: 'Dr. Emily Chen',
+      nric: 'S5678901D',  // Valid Singapore NRIC
       role: 'doctor',
       mcrNumber: 'M34567C',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
@@ -111,13 +131,17 @@ async function main() {
 
   const doctor4 = await prisma.user.upsert({
     where: { email: 'doctor4@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S6789012D',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440013',
       clinicId: clinic.id,
       email: 'doctor4@clinic.sg',
       passwordHash,
       name: 'Dr. Michael Tan',
+      nric: 'S6789012D',  // Valid Singapore NRIC
       role: 'doctor',
       mcrNumber: 'M45678D',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
@@ -127,13 +151,17 @@ async function main() {
 
   const nurse2 = await prisma.user.upsert({
     where: { email: 'nurse2@clinic.sg' },
-    update: {},
+    update: {
+      nric: 'S7890123C',  // Valid Singapore NRIC - update existing user
+      updatedAt: new Date(),
+    },
     create: {
       id: '550e8400-e29b-41d4-a716-446655440014',
       clinicId: clinic.id,
       email: 'nurse2@clinic.sg',
       passwordHash,
       name: 'Nurse Linda Koh',
+      nric: 'S7890123C',  // Valid Singapore NRIC
       role: 'nurse',
       status: 'active',
       updatedAt: new Date(),

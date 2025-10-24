@@ -82,6 +82,29 @@ export function LoginPage() {
               </Button>
             </form>
 
+            {/* OR Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* CorpPass Login Button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                window.location.href = 'http://localhost:3344/v1/auth/corppass/authorize';
+              }}
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Login with CorpPass
+            </Button>
+
             <div className="mt-6 p-4 bg-slate-50 rounded-lg">
               <p className="text-sm text-slate-600 mb-2">Demo Accounts:</p>
               <div className="space-y-1 text-xs text-slate-500">

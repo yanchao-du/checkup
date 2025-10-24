@@ -1,5 +1,5 @@
 {
-      "name": "Doctor and Nurse Portal",
+      "name": "MedicalExamPortal",
       "version": "0.1.0",
       "private": true,
       "dependencies": {
