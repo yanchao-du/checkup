@@ -59,17 +59,21 @@ describe('ApprovalsService', () => {
   });
 
   describe('findPendingApprovals', () => {
-    it('should return paginated pending approvals', async () => {
+    it('should return paginated pending approvals for assigned doctor', async () => {
       mockPrismaService.medicalSubmission.findMany.mockResolvedValue([mockSubmission]);
       mockPrismaService.medicalSubmission.count.mockResolvedValue(1);
 
-      const result = await service.findPendingApprovals('clinic-1');
+      const result = await service.findPendingApprovals('clinic-1', 'doctor-1');
 
       expect(prismaService.medicalSubmission.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
             clinicId: 'clinic-1',
             status: 'pending_approval',
+            OR: [
+              { assignedDoctorId: 'doctor-1' },
+              { assignedDoctorId: null },
+            ],
           },
           include: expect.any(Object),
           orderBy: { createdDate: 'desc' },
@@ -79,17 +83,21 @@ describe('ApprovalsService', () => {
       expect(result.pagination).toBeDefined();
     });
 
-    it('should filter by exam type', async () => {
+    it('should filter by exam type and assigned doctor', async () => {
       mockPrismaService.medicalSubmission.findMany.mockResolvedValue([mockSubmission]);
       mockPrismaService.medicalSubmission.count.mockResolvedValue(1);
 
-      await service.findPendingApprovals('clinic-1', 'MDW_SIX_MONTHLY');
+      await service.findPendingApprovals('clinic-1', 'doctor-1', 'MDW_SIX_MONTHLY');
 
       expect(prismaService.medicalSubmission.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
             clinicId: 'clinic-1',
             status: 'pending_approval',
+            OR: [
+              { assignedDoctorId: 'doctor-1' },
+              { assignedDoctorId: null },
+            ],
             examType: 'MDW_SIX_MONTHLY',
           },
         }),
@@ -100,7 +108,7 @@ describe('ApprovalsService', () => {
       mockPrismaService.medicalSubmission.findMany.mockResolvedValue([mockSubmission]);
       mockPrismaService.medicalSubmission.count.mockResolvedValue(50);
 
-      const result = await service.findPendingApprovals('clinic-1', undefined, 2, 10);
+      const result = await service.findPendingApprovals('clinic-1', 'doctor-1', undefined, 2, 10);
 
       expect(prismaService.medicalSubmission.findMany).toHaveBeenCalledWith(
         expect.objectContaining({

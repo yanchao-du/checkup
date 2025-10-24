@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from './components/ui/sonner';
 import { LoginPage } from './components/LoginPage';
@@ -8,15 +7,48 @@ import { NewSubmission } from './components/NewSubmission';
 import { SubmissionsList } from './components/SubmissionsList';
 import { DraftsList } from './components/DraftsList';
 import { PendingApprovals } from './components/PendingApprovals';
-import { UserManagement } from './components/UserManagement';
+import { RejectedSubmissions } from './components/RejectedSubmissions';
 import { ViewSubmission } from './components/ViewSubmission';
+import { Settings } from './components/Settings';
 import { AuthProvider, useAuth } from './components/AuthContext';
+import { UnsavedChangesProvider } from './components/UnsavedChangesContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/" />;
+  }
+  
+  return <>{children}</>;
+}
+
+function RoleProtectedRoute({ 
+  children, 
+  allowedRoles 
+}: { 
+  children: React.ReactNode;
+  allowedRoles: ('doctor' | 'nurse' | 'admin')[];
+}) {
   const { user } = useAuth();
   
   if (!user) {
     return <Navigate to="/login" />;
+  }
+  
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -27,21 +59,54 @@ function AppRoutes() {
   
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
+      <UnsavedChangesProvider>
+        <Routes>
+          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Routes>
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/new-submission" element={<NewSubmission />} />
                   <Route path="/submissions" element={<SubmissionsList />} />
                   <Route path="/drafts" element={<DraftsList />} />
-                  <Route path="/pending-approvals" element={<PendingApprovals />} />
-                  <Route path="/user-management" element={<UserManagement />} />
-                  <Route path="/submission/:id" element={<ViewSubmission />} />
+                  <Route 
+                    path="/pending-approvals" 
+                    element={
+                      <RoleProtectedRoute allowedRoles={['doctor', 'admin']}>
+                        <PendingApprovals />
+                      </RoleProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/rejected-submissions" 
+                    element={
+                      <RoleProtectedRoute allowedRoles={['doctor', 'nurse', 'admin']}>
+                        <RejectedSubmissions />
+                      </RoleProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/settings" 
+                    element={
+                      <RoleProtectedRoute allowedRoles={['nurse', 'admin']}>
+                        <Settings />
+                      </RoleProtectedRoute>
+                    } 
+                  />
+                  {/* Legacy route for user management - redirects to settings */}
+                  <Route 
+                    path="/user-management" 
+                    element={
+                      <RoleProtectedRoute allowedRoles={['admin']}>
+                        <Settings />
+                      </RoleProtectedRoute>
+                    } 
+                  />
+                  <Route path="/view-submission/:id" element={<ViewSubmission />} />
                   <Route path="/draft/:id" element={<NewSubmission />} />
                 </Routes>
               </DashboardLayout>
@@ -49,7 +114,13 @@ function AppRoutes() {
           }
         />
       </Routes>
-      <Toaster />
+      <Toaster 
+        position="top-right"
+        expand={false}
+        richColors
+        closeButton
+      />
+      </UnsavedChangesProvider>
     </Router>
   );
 }

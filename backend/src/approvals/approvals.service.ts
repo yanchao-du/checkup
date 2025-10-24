@@ -5,13 +5,20 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ApprovalsService {
   constructor(private prisma: PrismaService) {}
 
-  async findPendingApprovals(clinicId: string, examType?: string, pageParam?: number, limitParam?: number) {
-    const page = Number(pageParam) || 1;
-    const limit = Number(limitParam) || 20;
-    
+  async findPendingApprovals(
+    clinicId: string, 
+    doctorId: string,
+    examType?: string,
+    page: number = 1,
+    limit: number = 50
+  ) {
     const where: any = {
       clinicId,
       status: 'pending_approval',
+      OR: [
+        { assignedDoctorId: doctorId },
+        { assignedDoctorId: null }, // backwards compatibility
+      ],
     };
 
     if (examType) {
@@ -23,6 +30,7 @@ export class ApprovalsService {
         where,
         include: {
           createdBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
         },
         orderBy: { createdDate: 'desc' },
         skip: (page - 1) * limit,
@@ -73,14 +81,30 @@ export class ApprovalsService {
       },
     });
 
-    // Audit log
-    await this.prisma.auditLog.create({
-      data: {
-        submissionId: id,
-        userId: doctorId,
-        eventType: 'approved',
-        changes: { notes },
-      },
+    // Determine agency based on exam type
+    const agency = updated.examType === 'AGED_DRIVERS' 
+      ? 'Singapore Police Force' 
+      : 'Ministry of Manpower';
+
+    // Create audit logs for both approval and agency submission
+    await this.prisma.auditLog.createMany({
+      data: [
+        {
+          submissionId: id,
+          userId: doctorId,
+          eventType: 'approved',
+          changes: { notes },
+        },
+        {
+          submissionId: id,
+          userId: doctorId,
+          eventType: 'submitted',
+          changes: { 
+            status: 'submitted',
+            agency,
+          },
+        },
+      ],
     });
 
     return this.formatSubmission(updated);
@@ -106,9 +130,11 @@ export class ApprovalsService {
       data: {
         status: 'rejected',
         rejectedReason: reason,
+        approvedById: doctorId, // Track who rejected it (reusing approvedById field)
       },
       include: {
         createdBy: { select: { name: true } },
+        approvedBy: { select: { name: true } },
       },
     });
 
@@ -123,6 +149,65 @@ export class ApprovalsService {
     });
 
     return this.formatSubmission(updated);
+  }
+
+  async findRejectedSubmissions(
+    clinicId: string,
+    doctorId: string,
+    examType?: string,
+    page: number = 1,
+    limit: number = 50
+  ) {
+    const where: any = {
+      clinicId,
+      // Show submissions that are currently rejected OR were rejected and reopened (draft with rejectedReason)
+      OR: [
+        {
+          status: 'rejected',
+          OR: [
+            { assignedDoctorId: doctorId },
+            { approvedById: doctorId },
+          ],
+        },
+        {
+          // Reopened submissions: status is draft but has rejectedReason and approvedById
+          status: 'draft',
+          rejectedReason: { not: null },
+          approvedById: doctorId,
+        },
+      ],
+    };
+
+    if (examType) {
+      where.examType = examType;
+    }
+
+    const [submissions, total] = await Promise.all([
+      this.prisma.medicalSubmission.findMany({
+        where,
+        include: {
+          createdBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+          approvedBy: { select: { name: true } },
+        },
+        orderBy: { createdDate: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.medicalSubmission.count({ where }),
+    ]);
+
+    return {
+      data: submissions.map(s => this.formatSubmission(s)),
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        hasNext: page < Math.ceil(total / limit),
+        hasPrevious: page > 1,
+      },
+    };
   }
 
   private formatSubmission(submission: any) {
@@ -140,6 +225,8 @@ export class ApprovalsService {
       approvedBy: submission.approvedById,
       approvedByName: submission.approvedBy?.name,
       approvedDate: submission.approvedDate,
+      assignedDoctorId: submission.assignedDoctorId,
+      assignedDoctorName: submission.assignedDoctor?.name,
       rejectedReason: submission.rejectedReason,
       clinicId: submission.clinicId,
       formData: submission.formData,

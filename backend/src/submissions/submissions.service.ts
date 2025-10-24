@@ -1,16 +1,28 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
 
 @Injectable()
 export class SubmissionsService {
+  private readonly logger = new Logger(SubmissionsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, userRole: string, clinicId: string, dto: CreateSubmissionDto) {
-    const routeForApproval = dto.routeForApproval !== false;
-    const status = userRole === 'doctor' || !routeForApproval 
-      ? 'submitted' 
-      : 'pending_approval';
+    // When routeForApproval is explicitly false, it's a draft
+    // When routeForApproval is true or undefined, check the logic
+    const isDraft = dto.routeForApproval === false;
+    
+    let status: string;
+    if (isDraft) {
+      status = 'draft';
+    } else if (userRole === 'doctor') {
+      status = 'submitted';
+    } else if (userRole === 'nurse' && dto.routeForApproval) {
+      status = 'pending_approval';
+    } else {
+      status = 'submitted';
+    }
 
     const submission = await this.prisma.medicalSubmission.create({
       data: {
@@ -18,29 +30,53 @@ export class SubmissionsService {
         patientName: dto.patientName,
         patientNric: dto.patientNric,
         patientDob: new Date(dto.patientDateOfBirth),
+        examinationDate: dto.examinationDate ? new Date(dto.examinationDate) : undefined,
         status: status as any,
         formData: dto.formData,
         clinicId,
         createdById: userId,
+        assignedDoctorId: dto.assignedDoctorId,
         submittedDate: status === 'submitted' ? new Date() : undefined,
-        approvedById: status === 'submitted' ? userId : undefined,
-        approvedDate: status === 'submitted' ? new Date() : undefined,
+        approvedById: status === 'submitted' && userRole === 'doctor' ? userId : undefined,
+        approvedDate: status === 'submitted' && userRole === 'doctor' ? new Date() : undefined,
       },
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
-    // Create audit log
+    // Create audit log(s)
+    // Always create a 'created' event for draft creation
     await this.prisma.auditLog.create({
       data: {
         submissionId: submission.id,
         userId,
         eventType: 'created',
-        changes: { status, examType: dto.examType },
+        changes: { 
+          status: 'draft', 
+          examType: dto.examType,
+        },
       },
     });
+
+    // If created with pending_approval status, also create a 'submitted' event for routing
+    if (status === 'pending_approval') {
+      await this.prisma.auditLog.create({
+        data: {
+          submissionId: submission.id,
+          userId,
+          eventType: 'submitted',
+          changes: { 
+            status: 'pending_approval',
+            ...(submission.assignedDoctor && {
+              assignedDoctorName: submission.assignedDoctor.name,
+            }),
+          },
+        },
+      });
+    }
 
     return this.formatSubmission(submission);
   }
@@ -75,12 +111,61 @@ export class SubmissionsService {
       if (toDate) where.createdDate.lte = new Date(toDate);
     }
 
+    // For drafts, order by most recently updated; for others, order by created date
+    const orderBy = status === 'draft' 
+      ? { updatedAt: 'desc' as const }
+      : { createdDate: 'desc' as const };
+
     const [submissions, total] = await Promise.all([
       this.prisma.medicalSubmission.findMany({
         where,
         include: {
           createdBy: { select: { name: true } },
           approvedBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+        },
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.medicalSubmission.count({ where }),
+    ]);
+
+    return {
+      data: submissions.map(s => this.formatSubmission(s)),
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        hasNext: page < Math.ceil(total / limit),
+        hasPrevious: page > 1,
+      },
+    };
+  }
+
+  async findRejectedSubmissions(userId: string, clinicId: string, query: SubmissionQueryDto) {
+    const { examType } = query;
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 50;
+
+    const where: any = {
+      clinicId,
+      status: 'rejected',
+      createdById: userId, // Nurses see only their own rejected submissions
+    };
+
+    if (examType) {
+      where.examType = examType;
+    }
+
+    const [submissions, total] = await Promise.all([
+      this.prisma.medicalSubmission.findMany({
+        where,
+        include: {
+          createdBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+          approvedBy: { select: { name: true } }, // This will be the rejector
         },
         orderBy: { createdDate: 'desc' },
         skip: (page - 1) * limit,
@@ -108,6 +193,7 @@ export class SubmissionsService {
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
@@ -115,7 +201,7 @@ export class SubmissionsService {
       throw new NotFoundException('Submission not found');
     }
 
-    // Check access
+    // Check access - user must be admin, creator, approver, or from same clinic
     if (userRole !== 'admin' && 
         submission.createdById !== userId && 
         submission.approvedById !== userId &&
@@ -127,6 +213,80 @@ export class SubmissionsService {
   }
 
   async update(id: string, userId: string, userRole: string, dto: UpdateSubmissionDto) {
+    this.logger.log(`Updating submission ${id}`);
+    
+    const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
+
+    if (!existing) {
+      this.logger.warn(`Submission ${id} not found`);
+      throw new NotFoundException('Submission not found');
+    }
+
+    this.logger.debug(`Existing submission status: ${existing.status}, rejectedReason: ${existing.rejectedReason ? 'present' : 'null'}, approvedById: ${existing.approvedById || 'null'}`);
+
+    if (existing.createdById !== userId && userRole !== 'admin') {
+      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById})`);
+      throw new ForbiddenException('Access denied');
+    }
+
+    // Allow editing drafts and pending_approval, but not submitted submissions
+    // Rejected submissions that have been reopened will have status='draft'
+    if (existing.status === 'submitted') {
+      this.logger.warn(`Cannot edit submitted submission ${id}`);
+      throw new ForbiddenException('Cannot edit submitted submissions');
+    }
+
+    // Note: Drafts with rejectedReason and approvedById (reopened rejections) CAN be edited
+    // They have status='draft' so they pass the above check
+
+    this.logger.log(`Proceeding with update for submission ${id} (status: ${existing.status})`);
+
+    try {
+      const submission = await this.prisma.medicalSubmission.update({
+        where: { id },
+        data: {
+          ...(dto.examType && { examType: dto.examType as any }),
+          ...(dto.patientName && { patientName: dto.patientName }),
+          ...(dto.patientNric && { patientNric: dto.patientNric }),
+          ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
+          ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
+          ...(dto.formData && { formData: dto.formData }),
+          ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
+        },
+        include: {
+          createdBy: { select: { name: true } },
+          approvedBy: { select: { name: true } },
+          assignedDoctor: { select: { name: true } },
+        },
+      });
+
+      // Audit log
+      await this.prisma.auditLog.create({
+        data: {
+          submissionId: id,
+          userId,
+          eventType: 'updated',
+          changes: dto as any,
+        },
+      });
+
+      this.logger.log(`Successfully updated submission ${id}`);
+      return this.formatSubmission(submission);
+    } catch (error) {
+      this.logger.error('Error updating submission', {
+        error: error.message,
+        stack: error.stack,
+        submissionId: id,
+        existingStatus: existing.status,
+        existingRejectedReason: existing.rejectedReason,
+        existingApprovedById: existing.approvedById,
+        dto,
+      });
+      throw error;
+    }
+  }
+
+  async submitForApproval(id: string, userId: string, userRole: string) {
     const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
 
     if (!existing) {
@@ -137,21 +297,78 @@ export class SubmissionsService {
       throw new ForbiddenException('Access denied');
     }
 
-    if (existing.status === 'submitted') {
-      throw new ForbiddenException('Cannot edit submitted submission');
+    if (existing.status !== 'draft') {
+      throw new ForbiddenException('Only drafts can be submitted for approval');
+    }
+
+    // Doctors submit directly to 'submitted' status
+    // Nurses submit to 'pending_approval' status
+    const status = userRole === 'doctor' ? 'submitted' : 'pending_approval';
+
+    const submission = await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        status: status as any,
+        submittedDate: new Date(),
+        // If doctor, auto-approve
+        ...(userRole === 'doctor' && {
+          approvedById: userId,
+          approvedDate: new Date(),
+        }),
+      },
+      include: {
+        createdBy: { select: { name: true } },
+        approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
+      },
+    });
+
+    // Audit log
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'submitted',
+        changes: { 
+          status,
+          ...(status === 'pending_approval' && submission.assignedDoctor && {
+            assignedDoctorName: submission.assignedDoctor.name,
+          }),
+        },
+      },
+    });
+
+    return this.formatSubmission(submission);
+  }
+
+  async reopenSubmission(id: string, userId: string, userRole: string) {
+    const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    if (existing.createdById !== userId && userRole !== 'admin') {
+      throw new ForbiddenException('Access denied: You can only reopen your own submissions');
+    }
+
+    if (existing.status !== 'rejected') {
+      throw new ForbiddenException('Only rejected submissions can be reopened');
     }
 
     const submission = await this.prisma.medicalSubmission.update({
       where: { id },
       data: {
-        ...(dto.patientName && { patientName: dto.patientName }),
-        ...(dto.patientNric && { patientNric: dto.patientNric }),
-        ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
-        ...(dto.formData && { formData: dto.formData }),
+        status: 'draft',
+        // Keep rejectedReason and approvedById so doctors can still see it in their rejected list
+        // rejectedReason: null,  // Don't clear - keep for history
+        // approvedById: null,    // Don't clear - keep to track who rejected it
+        approvedDate: null,
       },
       include: {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
       },
     });
 
@@ -161,7 +378,11 @@ export class SubmissionsService {
         submissionId: id,
         userId,
         eventType: 'updated',
-        changes: dto as any,
+        changes: { 
+          action: 'reopened',
+          previousStatus: 'rejected',
+          newStatus: 'draft',
+        },
       },
     });
 
@@ -194,6 +415,7 @@ export class SubmissionsService {
       patientName: submission.patientName,
       patientNric: submission.patientNric,
       patientDateOfBirth: submission.patientDob.toISOString().split('T')[0],
+      examinationDate: submission.examinationDate ? submission.examinationDate.toISOString().split('T')[0] : null,
       status: submission.status,
       createdBy: submission.createdById,
       createdByName: submission.createdBy?.name,
@@ -202,6 +424,8 @@ export class SubmissionsService {
       approvedBy: submission.approvedById,
       approvedByName: submission.approvedBy?.name,
       approvedDate: submission.approvedDate,
+      assignedDoctorId: submission.assignedDoctorId,
+      assignedDoctorName: submission.assignedDoctor?.name,
       rejectedReason: submission.rejectedReason,
       clinicId: submission.clinicId,
       formData: submission.formData,

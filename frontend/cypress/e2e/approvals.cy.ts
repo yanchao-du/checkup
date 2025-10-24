@@ -24,7 +24,7 @@ describe('Approval Workflow', () => {
           
           // Should show submission details
           cy.url().should('include', '/view-submission')
-          cy.contains('Patient Details').should('be.visible')
+          cy.contains('Patient Information').should('be.visible')
         }
       })
     })
@@ -83,7 +83,7 @@ describe('Approval Workflow', () => {
     it('should filter approvals by exam type', () => {
       cy.get('body').then($body => {
         if ($body.find('select[name="examTypeFilter"]').length > 0) {
-          cy.get('select[name="examTypeFilter"]').select('MDW_SIX_MONTHLY')
+          cy.get('select[name="examTypeFilter"]').select('SIX_MONTHLY_MDW')
           cy.get('table, [role="table"]').should('be.visible')
           
           cy.get('select[name="examTypeFilter"]').select('WORK_PERMIT')
@@ -162,7 +162,8 @@ describe('Approval Workflow', () => {
       cy.get('input[name="patientName"]').type(patientName)
       cy.get('input[name="nric"]').type('S9999999Z')
       cy.get('input[name="dateOfBirth"]').type('1980-12-31')
-      cy.get('select[name="examType"]').select('Work Permit Medical')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('Work Permit').click()
       cy.get('input[name="examinationDate"]').type('2024-06-15')
       
       // Fill vital signs

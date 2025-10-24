@@ -13,6 +13,7 @@ datasource db {
 model Clinic {
   id                 String              @id @default(uuid())
   name               String
+  hciCode            String?             @unique @map("hci_code")  // Healthcare Institution Code
   registrationNumber String?             @unique @map("registration_number")
   address            String?
   phone              String?
@@ -20,7 +21,9 @@ model Clinic {
   createdAt          DateTime            @default(now()) @map("created_at")
   updatedAt          DateTime            @updatedAt @map("updated_at")
   
-  users              User[]
+  users              User[]              // Keep for backward compatibility (primary clinic)
+  doctorClinics      DoctorClinic[]      // Many-to-many with doctors
+  nurseClinics       NurseClinic[]       // Many-to-many with nurses
   submissions        MedicalSubmission[]
 
   @@map("clinics")
@@ -28,47 +31,92 @@ model Clinic {
 
 model User {
   id                  String              @id @default(uuid())
-  clinicId            String              @map("clinic_id")
+  clinicId            String              @map("clinic_id")  // Primary clinic for users
   email               String              @unique
   passwordHash        String              @map("password_hash")
   name                String
   role                UserRole
+  mcrNumber           String?             @unique @map("mcr_number")  // Medical Council Registration Number (doctors only)
   status              UserStatus          @default(active)
+  defaultDoctorId     String?             @map("default_doctor_id")
   lastLoginAt         DateTime?           @map("last_login_at")
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
   
   clinic              Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  doctorClinics       DoctorClinic[]      // Many-to-many with clinics (doctors only)
+  nurseClinics        NurseClinic[]       // Many-to-many with clinics (nurses only)
+  defaultDoctor       User?               @relation("DefaultDoctor", fields: [defaultDoctorId], references: [id], onDelete: SetNull)
+  nursesUsingAsDefault User[]             @relation("DefaultDoctor")
   createdSubmissions  MedicalSubmission[] @relation("CreatedBy")
   approvedSubmissions MedicalSubmission[] @relation("ApprovedBy")
+  assignedSubmissions MedicalSubmission[] @relation("AssignedDoctor")
   auditLogs           AuditLog[]
 
   @@index([clinicId])
   @@index([email])
+  @@index([defaultDoctorId])
   @@map("users")
 }
 
-model MedicalSubmission {
-  id              String            @id @default(uuid())
-  clinicId        String            @map("clinic_id")
-  createdById     String            @map("created_by")
-  approvedById    String?           @map("approved_by")
-  examType        ExamType          @map("exam_type")
-  patientName     String            @map("patient_name")
-  patientNric     String            @map("patient_nric")
-  patientDob      DateTime          @map("patient_dob") @db.Date
-  status          SubmissionStatus  @default(draft)
-  formData        Json              @map("form_data")
-  createdDate     DateTime          @default(now()) @map("created_date")
-  submittedDate   DateTime?         @map("submitted_date")
-  approvedDate    DateTime?         @map("approved_date")
-  rejectedReason  String?           @map("rejected_reason")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
+// Junction table for many-to-many relationship between doctors and clinics
+model DoctorClinic {
+  id        String   @id @default(uuid())
+  doctorId  String   @map("doctor_id")
+  clinicId  String   @map("clinic_id")
+  isPrimary Boolean  @default(false) @map("is_primary")  // Indicates if this is the doctor's primary clinic
+  createdAt DateTime @default(now()) @map("created_at")
   
-  clinic          Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  createdBy       User              @relation("CreatedBy", fields: [createdById], references: [id])
-  approvedBy      User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
-  auditLogs       AuditLog[]
+  doctor    User     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, clinicId])
+  @@index([doctorId])
+  @@index([clinicId])
+  @@map("doctor_clinics")
+}
+
+// Junction table for many-to-many relationship between nurses and clinics
+model NurseClinic {
+  id        String   @id @default(uuid())
+  nurseId   String   @map("nurse_id")
+  clinicId  String   @map("clinic_id")
+  isPrimary Boolean  @default(false) @map("is_primary")  // Indicates if this is the nurse's primary clinic
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  nurse     User     @relation(fields: [nurseId], references: [id], onDelete: Cascade)
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@unique([nurseId, clinicId])
+  @@index([nurseId])
+  @@index([clinicId])
+  @@map("nurse_clinics")
+}
+
+model MedicalSubmission {
+  id               String            @id @default(uuid())
+  clinicId         String            @map("clinic_id")
+  createdById      String            @map("created_by")
+  approvedById     String?           @map("approved_by")
+  assignedDoctorId String?           @map("assigned_doctor_id")
+  examType         ExamType          @map("exam_type")
+  patientName      String            @map("patient_name")
+  patientNric      String            @map("patient_nric")
+  patientDob       DateTime          @map("patient_dob") @db.Date
+  examinationDate  DateTime?         @map("examination_date") @db.Date
+  status           SubmissionStatus  @default(draft)
+  formData         Json              @map("form_data")
+  createdDate      DateTime          @default(now()) @map("created_date")
+  submittedDate    DateTime?         @map("submitted_date")
+  approvedDate     DateTime?         @map("approved_date")
+  rejectedReason   String?           @map("rejected_reason")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  
+  clinic           Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  createdBy        User              @relation("CreatedBy", fields: [createdById], references: [id])
+  approvedBy       User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+  assignedDoctor   User?             @relation("AssignedDoctor", fields: [assignedDoctorId], references: [id])
+  auditLogs        AuditLog[]
 
   @@index([clinicId])
   @@index([createdById])

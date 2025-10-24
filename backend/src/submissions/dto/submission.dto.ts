@@ -14,15 +14,27 @@ export class CreateSubmissionDto {
   @IsDateString()
   patientDateOfBirth: string;
   
+  @IsOptional()
+  @IsDateString()
+  examinationDate?: string;
+  
   @IsObject()
   formData: Record<string, any>;
   
   @IsOptional()
   @IsBoolean()
   routeForApproval?: boolean;
+
+  @IsOptional()
+  @IsString()
+  assignedDoctorId?: string;
 }
 
 export class UpdateSubmissionDto {
+  @IsOptional()
+  @IsString()
+  examType?: string;
+
   @IsOptional()
   @IsString()
   patientName?: string;
@@ -36,8 +48,20 @@ export class UpdateSubmissionDto {
   patientDateOfBirth?: string;
   
   @IsOptional()
+  @IsDateString()
+  examinationDate?: string;
+  
+  @IsOptional()
   @IsObject()
   formData?: Record<string, any>;
+
+  @IsOptional()
+  @IsString()
+  assignedDoctorId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  routeForApproval?: boolean;
 }
 
 export class SubmissionQueryDto {

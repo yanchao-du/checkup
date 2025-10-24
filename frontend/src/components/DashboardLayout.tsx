@@ -1,25 +1,18 @@
 import { ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { ProtectedLink } from './ProtectedLink';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 import { 
   LayoutDashboard, 
   FilePlus, 
   FileText, 
   FileEdit, 
-  CheckCircle, 
-  Users, 
-  LogOut,
-  Building2
+  CheckCircle,
+  XCircle,
+  Settings,
+  LogOut
 } from 'lucide-react';
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
@@ -34,11 +27,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse'] },
+    { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/submissions', label: 'Submissions', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor'] },
-    { path: '/user-management', label: 'User Management', icon: Users, roles: ['admin'] },
+    { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
+    { path: '/rejected-submissions', label: 'Rejected Submissions', icon: XCircle, roles: ['doctor', 'nurse', 'admin'] },
+    { path: '/settings', label: 'Settings', icon: Settings, roles: ['nurse', 'admin'] },
   ];
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || ''));
@@ -72,7 +66,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
-              Log out
+              Logout
             </Button>
           </div>
         </div>
@@ -87,7 +81,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               const isActive = location.pathname === item.path;
               
               return (
-                <Link
+                <ProtectedLink
                   key={item.path}
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
@@ -98,7 +92,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
-                </Link>
+                </ProtectedLink>
               );
             })}
           </nav>

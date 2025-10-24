@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usersApi } from '../services/users.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
+import { Loader2 } from 'lucide-react';
+import { ClinicUser, UserRole } from '../types/api';
+import { getUserStatusBadgeVariant, getUserStatusLabel } from '../lib/badge-utils';
 import {
   Select,
   SelectContent,
@@ -28,111 +32,148 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Users, UserPlus, Edit2, Trash2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
-import { UserRole } from './AuthContext';
-
-interface ClinicUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  status: 'active' | 'inactive';
-  lastLogin?: string;
-}
-
-const mockUsers: ClinicUser[] = [
-  {
-    id: '1',
-    name: 'Dr. Sarah Tan',
-    email: 'doctor@clinic.sg',
-    role: 'doctor',
-    status: 'active',
-    lastLogin: '2025-10-22T09:30:00',
-  },
-  {
-    id: '2',
-    name: 'Nurse Mary Lim',
-    email: 'nurse@clinic.sg',
-    role: 'nurse',
-    status: 'active',
-    lastLogin: '2025-10-22T08:15:00',
-  },
-  {
-    id: '3',
-    name: 'Admin John Wong',
-    email: 'admin@clinic.sg',
-    role: 'admin',
-    status: 'active',
-    lastLogin: '2025-10-22T10:00:00',
-  },
-  {
-    id: '4',
-    name: 'Nurse Lisa Chen',
-    email: 'lisa.chen@clinic.sg',
-    role: 'nurse',
-    status: 'active',
-    lastLogin: '2025-10-21T14:20:00',
-  },
-];
+import { toast } from 'sonner';
 
 export function UserManagement() {
-  const [users, setUsers] = useState<ClinicUser[]>(mockUsers);
+  const [users, setUsers] = useState<ClinicUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<ClinicUser | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     role: 'nurse' as UserRole,
+    mcrNumber: '',
   });
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await usersApi.getAll();
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddUser = () => {
     setEditingUser(null);
-    setFormData({ name: '', email: '', role: 'nurse' });
+    setFormData({ name: '', email: '', password: '', role: 'nurse', mcrNumber: '' });
     setShowDialog(true);
   };
 
   const handleEditUser = (user: ClinicUser) => {
     setEditingUser(user);
-    setFormData({ name: user.name, email: user.email, role: user.role });
+    setFormData({ 
+      name: user.name, 
+      email: user.email, 
+      password: '', 
+      role: user.role,
+      mcrNumber: user.mcrNumber || '',
+    });
     setShowDialog(true);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (!formData.name || !formData.email) {
-      toast.error('Please fill in all fields');
+      toast.warning('Please fill in all fields');
       return;
     }
 
-    if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u));
-      toast.success('User updated successfully');
-    } else {
-      const newUser: ClinicUser = {
-        id: `user-${Date.now()}`,
-        ...formData,
-        status: 'active',
-      };
-      setUsers([...users, newUser]);
-      toast.success('User added successfully');
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.warning('Please enter a valid email address');
+      return;
     }
-    
-    setShowDialog(false);
+
+    if (!editingUser && !formData.password) {
+      toast.warning('Password is required for new users');
+      return;
+    }
+
+    // Validate MCR number for doctors
+    if (formData.role === 'doctor' && formData.mcrNumber) {
+      const mcrRegex = /^[A-Z]\d{5}[A-Z]$/;
+      if (!mcrRegex.test(formData.mcrNumber)) {
+        toast.warning('MCR number must be in format: Letter + 5 digits + Letter (e.g., M12345A)');
+        return;
+      }
+    }
+
+    try {
+      setIsSaving(true);
+      
+      if (editingUser) {
+        const updateData: any = {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+        };
+        
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
+        
+        if (formData.role === 'doctor') {
+          updateData.mcrNumber = formData.mcrNumber || null;
+        }
+        
+        await usersApi.update(editingUser.id, updateData);
+        toast.success('User updated successfully');
+      } else {
+        const createData: any = {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        };
+        
+        if (formData.role === 'doctor' && formData.mcrNumber) {
+          createData.mcrNumber = formData.mcrNumber;
+        }
+        
+        await usersApi.create(createData);
+        toast.success('User added successfully');
+      }
+      
+      setShowDialog(false);
+      await fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save user');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleToggleStatus = (userId: string) => {
-    setUsers(users.map(u => 
-      u.id === userId 
-        ? { ...u, status: u.status === 'active' ? 'inactive' : 'active' } 
-        : u
-    ));
-    toast.success('User status updated');
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) {
+      return;
+    }
+
+    try {
+      await usersApi.delete(userId);
+      toast.success('User deleted successfully');
+      await fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete user');
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-slate-900 mb-1">User Management</h2>
+          <h2 className="text-slate-900 mb-1 text-2xl font-semibold">User Management</h2>
           <p className="text-slate-600">Manage clinic staff access and permissions</p>
         </div>
         <Button onClick={handleAddUser}>
@@ -186,39 +227,48 @@ export function UserManagement() {
           <CardDescription>Manage user roles and access permissions</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell className="text-slate-600">{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.status === 'active' ? 'default' : 'secondary'}
-                        className="capitalize"
-                      >
-                        {user.status}
-                      </Badge>
-                    </TableCell>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
+              <p className="text-slate-600">Loading users...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table role="table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>MCR Number</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Login</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell className="text-slate-600">{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-600 text-sm font-mono">
+                        {user.role === 'doctor' ? (user.mcrNumber || '-') : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={getUserStatusBadgeVariant(user.status)}
+                        >
+                          {getUserStatusLabel(user.status)}
+                        </Badge>
+                      </TableCell>
                     <TableCell className="text-slate-600 text-sm">
-                      {user.lastLogin 
-                        ? new Date(user.lastLogin).toLocaleDateString()
+                      {user.lastLoginAt 
+                        ? new Date(user.lastLoginAt).toLocaleDateString()
                         : 'Never'}
                     </TableCell>
                     <TableCell>
@@ -233,10 +283,10 @@ export function UserManagement() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleToggleStatus(user.id)}
-                          className={user.status === 'active' ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-700"
                         >
-                          {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -245,6 +295,7 @@ export function UserManagement() {
               </TableBody>
             </Table>
           </div>
+          )}
         </CardContent>
       </Card>
 
@@ -263,6 +314,7 @@ export function UserManagement() {
               <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
+                name="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter full name"
@@ -272,10 +324,22 @@ export function UserManagement() {
               <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="user@clinic.sg"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password {editingUser && '(leave blank to keep current)'}</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder={editingUser ? "Leave blank to keep current password" : "Enter password"}
               />
             </div>
             <div className="space-y-2">
@@ -284,13 +348,13 @@ export function UserManagement() {
                 value={formData.role} 
                 onValueChange={(value: UserRole) => setFormData({ ...formData, role: value })}
               >
-                <SelectTrigger id="role">
+                <SelectTrigger id="role" data-testid="role">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="doctor">Doctor</SelectItem>
-                  <SelectItem value="nurse">Nurse</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="doctor" data-testid="role-option-doctor">Doctor</SelectItem>
+                  <SelectItem value="nurse" data-testid="role-option-nurse">Nurse</SelectItem>
+                  <SelectItem value="admin" data-testid="role-option-admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-slate-500 mt-1">
@@ -299,13 +363,37 @@ export function UserManagement() {
                 {formData.role === 'admin' && 'Can manage users and view all clinic submissions'}
               </p>
             </div>
+            
+            {formData.role === 'doctor' && (
+              <div className="space-y-2">
+                <Label htmlFor="mcrNumber">MCR Number (Optional)</Label>
+                <Input
+                  id="mcrNumber"
+                  name="mcrNumber"
+                  value={formData.mcrNumber}
+                  onChange={(e) => setFormData({ ...formData, mcrNumber: e.target.value.toUpperCase() })}
+                  placeholder="M12345A"
+                  maxLength={7}
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Format: Letter + 5 digits + Letter (e.g., M12345A)
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDialog(false)}>
+            <Button variant="outline" onClick={() => setShowDialog(false)} disabled={isSaving}>
               Cancel
             </Button>
-            <Button onClick={handleSaveUser}>
-              {editingUser ? 'Update User' : 'Add User'}
+            <Button onClick={handleSaveUser} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                editingUser ? 'Save' : 'Create'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

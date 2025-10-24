@@ -337,6 +337,91 @@ paths:
         '403':
           $ref: '#/components/responses/ForbiddenError'
 
+  /submissions/{id}/submit:
+    post:
+      tags:
+        - Submissions
+      summary: Submit draft for approval
+      description: |
+        Submit a draft medical exam for approval by a doctor. 
+        Only nurses can use this endpoint to route drafts to pending_approval status.
+        Changes the status from 'draft' to 'pending_approval'.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Submission ID
+          schema:
+            type: string
+            example: sub-001
+      responses:
+        '200':
+          description: Successfully submitted for approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalSubmission'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - only drafts can be submitted for approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /submissions/{id}/history:
+    get:
+      tags:
+        - Submissions
+      summary: Get submission audit history
+      description: |
+        Retrieve the audit trail for a specific submission, including all status changes,
+        updates, and approval actions.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Submission ID
+          schema:
+            type: string
+            example: sub-001
+      responses:
+        '200':
+          description: Audit history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  submissionId:
+                    type: string
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                        eventType:
+                          type: string
+                          enum: [created, updated, submitted, approved, rejected, deleted]
+                        userId:
+                          type: string
+                        userName:
+                          type: string
+                        details:
+                          type: object
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   /drafts:
     get:
       tags:

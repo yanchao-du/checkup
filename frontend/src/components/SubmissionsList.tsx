@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import { useMockData } from './useMockData';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { submissionsApi } from '../services/submissions.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { Loader2, Eye, FileText, Search } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { FileText, Search, Filter } from 'lucide-react';
+import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import {
   Table,
   TableBody,
@@ -24,17 +24,34 @@ import {
 } from './ui/table';
 
 export function SubmissionsList() {
-  const { user } = useAuth();
-  const { submissions } = useMockData();
+  const navigate = useNavigate();
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterExamType, setFilterExamType] = useState<string>('all');
 
-  const mySubmissions = user?.role === 'admin'
-    ? submissions
-    : submissions.filter(s => s.createdBy === user?.id);
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        setIsLoading(true);
+        const response = await submissionsApi.getAll();
+        setSubmissions(response.data);
+      } catch (error) {
+        console.error('Failed to fetch submissions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const filteredSubmissions = mySubmissions.filter(submission => {
+    fetchSubmissions();
+  }, []);
+
+  // Backend already filters by createdBy OR approvedBy for doctors
+  // So we don't need to filter again on the frontend
+  const mySubmissions = submissions;
+
+  const filteredSubmissions = mySubmissions.filter((submission: any) => {
     const matchesSearch = 
       submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
@@ -48,7 +65,7 @@ export function SubmissionsList() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-slate-900 mb-1">Submissions</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examinations</h2>
         <p className="text-slate-600">View and search all submitted medical examinations</p>
       </div>
 
@@ -91,13 +108,13 @@ export function SubmissionsList() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Six-monthly Medical Exam for Migrant Domestic Workers (MOM)">
+                  <SelectItem value="SIX_MONTHLY_MDW">
                     MDW Six-monthly (MOM)
                   </SelectItem>
-                  <SelectItem value="Full Medical Exam for Work Permit (MOM)">
+                  <SelectItem value="WORK_PERMIT">
                     Work Permit (MOM)
                   </SelectItem>
-                  <SelectItem value="Medical Exam for Aged Drivers (SPF)">
+                  <SelectItem value="AGED_DRIVERS">
                     Aged Drivers (SPF)
                   </SelectItem>
                 </SelectContent>
@@ -112,7 +129,12 @@ export function SubmissionsList() {
           <CardTitle>Results ({filteredSubmissions.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredSubmissions.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
+              <p className="text-slate-600">Loading submissions...</p>
+            </div>
+          ) : filteredSubmissions.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <p>No submissions found</p>
@@ -133,26 +155,26 @@ export function SubmissionsList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSubmissions.map((submission) => (
-                    <TableRow key={submission.id}>
+                  {filteredSubmissions.map((submission: any) => (
+                    <TableRow 
+                      key={submission.id}
+                      className="cursor-pointer hover:bg-slate-50"
+                      onClick={() => navigate(`/view-submission/${submission.id}`)}
+                    >
                       <TableCell>{submission.patientName}</TableCell>
                       <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {submission.examType.includes('Migrant') && 'MDW Six-monthly (MOM)'}
-                          {submission.examType.includes('Work Permit') && 'Work Permit (MOM)'}
-                          {submission.examType.includes('Aged Drivers') && 'Aged Drivers (SPF)'}
+                          {submission.examType === 'SIX_MONTHLY_MDW' && 'MDW Six-monthly (MOM)'}
+                          {submission.examType === 'WORK_PERMIT' && 'Work Permit (MOM)'}
+                          {submission.examType === 'AGED_DRIVERS' && 'Aged Drivers (SPF)'}
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            submission.status === 'submitted' ? 'default' :
-                            submission.status === 'pending_approval' ? 'secondary' :
-                            'outline'
-                          }
+                          variant={getSubmissionStatusBadgeVariant(submission.status)}
                         >
-                          {submission.status.replace('_', ' ')}
+                          {getSubmissionStatusLabel(submission.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-slate-600">{submission.createdByName}</TableCell>
@@ -160,8 +182,15 @@ export function SubmissionsList() {
                         {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Link to={`/submission/${submission.id}`}>
-                          <Button variant="ghost" size="sm">View</Button>
+                        <Link to={`/view-submission/${submission.id}`}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4 mr-1.5" />
+                            View
+                          </Button>
                         </Link>
                       </TableCell>
                     </TableRow>

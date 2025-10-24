@@ -13,10 +13,12 @@ async function main() {
     create: {
       id: '550e8400-e29b-41d4-a716-446655440000',
       name: 'HealthFirst Medical Clinic',
+      hciCode: 'HCI0001',  // Healthcare Institution Code (7 alphanumeric)
       registrationNumber: 'RC001234',
       address: '123 Orchard Road, #01-01, Singapore 238858',
       phone: '+65 6123 4567',
       email: 'info@healthfirst.sg',
+      updatedAt: new Date(),
     },
   });
 
@@ -36,7 +38,9 @@ async function main() {
       passwordHash,
       name: 'Dr. Sarah Tan',
       role: 'doctor',
+      mcrNumber: 'M12345A',  // MCR format: 1 letter + 5 numbers + 1 letter
       status: 'active',
+      updatedAt: new Date(),
     },
   });
 
@@ -51,6 +55,7 @@ async function main() {
       name: 'Nurse Mary Lim',
       role: 'nurse',
       status: 'active',
+      updatedAt: new Date(),
     },
   });
 
@@ -65,10 +70,195 @@ async function main() {
       name: 'Admin John Wong',
       role: 'admin',
       status: 'active',
+      updatedAt: new Date(),
     },
   });
 
   console.log('✅ Created users: Doctor, Nurse, Admin');
+
+  // Create additional test users for comprehensive testing
+  const doctor2 = await prisma.user.upsert({
+    where: { email: 'doctor2@clinic.sg' },
+    update: {},
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440011',
+      clinicId: clinic.id,
+      email: 'doctor2@clinic.sg',
+      passwordHash,
+      name: 'Dr. James Lee',
+      role: 'doctor',
+      mcrNumber: 'M23456B',  // MCR format: 1 letter + 5 numbers + 1 letter
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor3 = await prisma.user.upsert({
+    where: { email: 'doctor3@clinic.sg' },
+    update: {},
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440012',
+      clinicId: clinic.id,
+      email: 'doctor3@clinic.sg',
+      passwordHash,
+      name: 'Dr. Emily Chen',
+      role: 'doctor',
+      mcrNumber: 'M34567C',  // MCR format: 1 letter + 5 numbers + 1 letter
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor4 = await prisma.user.upsert({
+    where: { email: 'doctor4@clinic.sg' },
+    update: {},
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440013',
+      clinicId: clinic.id,
+      email: 'doctor4@clinic.sg',
+      passwordHash,
+      name: 'Dr. Michael Tan',
+      role: 'doctor',
+      mcrNumber: 'M45678D',  // MCR format: 1 letter + 5 numbers + 1 letter
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse2 = await prisma.user.upsert({
+    where: { email: 'nurse2@clinic.sg' },
+    update: {},
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440014',
+      clinicId: clinic.id,
+      email: 'nurse2@clinic.sg',
+      passwordHash,
+      name: 'Nurse Linda Koh',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  console.log('✅ Created additional test users (4 doctors total, 2 nurses total)');
+
+  // Create a second clinic to demonstrate many-to-many relationship
+  const clinic2 = await prisma.clinic.upsert({
+    where: { hciCode: 'HCI0002' },
+    update: {},
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440100',
+      name: 'CareWell Medical Centre',
+      hciCode: 'HCI0002',  // HCI format: 7 alphanumeric characters
+      registrationNumber: 'RC002345',
+      address: '456 Thomson Road, #02-03, Singapore 307591',
+      phone: '+65 6234 5678',
+      email: 'info@carewell.sg',
+    },
+  });
+
+  console.log('✅ Created second clinic:', clinic2.name);
+
+  // Create doctor-clinic relationships (many-to-many)
+  // Dr. Sarah Tan - works at both clinics (primary at HealthFirst)
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor.id,
+      clinicId: clinic.id,
+      isPrimary: true,  // Primary clinic
+    },
+  });
+
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor.id,
+      clinicId: clinic2.id,
+      isPrimary: false,  // Secondary clinic
+    },
+  });
+
+  // Dr. James Lee - works only at HealthFirst
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor2.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor2.id,
+      clinicId: clinic.id,
+      isPrimary: true,
+    },
+  });
+
+  // Dr. Emily Chen - works at both clinics (primary at CareWell)
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor3.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor3.id,
+      clinicId: clinic.id,
+      isPrimary: false,
+    },
+  });
+
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor3.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor3.id,
+      clinicId: clinic2.id,
+      isPrimary: true,  // Primary clinic
+    },
+  });
+
+  // Dr. Michael Tan - works only at CareWell
+  await prisma.doctorClinic.upsert({
+    where: { 
+      doctorId_clinicId: {
+        doctorId: doctor4.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      doctorId: doctor4.id,
+      clinicId: clinic2.id,
+      isPrimary: true,
+    },
+  });
+
+  console.log('✅ Created doctor-clinic relationships');
+  console.log('   - Dr. Sarah Tan: HealthFirst (primary) + CareWell');
+  console.log('   - Dr. James Lee: HealthFirst only');
+  console.log('   - Dr. Emily Chen: HealthFirst + CareWell (primary)');
+  console.log('   - Dr. Michael Tan: CareWell only');
 
   // Create sample submissions
   const submission1 = await prisma.medicalSubmission.create({
@@ -77,6 +267,7 @@ async function main() {
       patientName: 'Maria Santos',
       patientNric: 'S1234567A',
       patientDob: new Date('1990-05-15'),
+      examinationDate: new Date('2025-10-15'),
       status: 'submitted',
       formData: {
         height: '160',
@@ -91,6 +282,7 @@ async function main() {
       createdDate: new Date('2025-10-15T10:30:00'),
       submittedDate: new Date('2025-10-15T14:20:00'),
       approvedDate: new Date('2025-10-15T14:00:00'),
+      updatedAt: new Date('2025-10-15T14:20:00'),
     },
   });
 
@@ -100,6 +292,7 @@ async function main() {
       patientName: 'John Tan',
       patientNric: 'S2345678B',
       patientDob: new Date('1985-08-22'),
+      examinationDate: new Date('2025-10-18'),
       status: 'submitted',
       formData: {
         height: '175',
@@ -114,6 +307,7 @@ async function main() {
       createdDate: new Date('2025-10-18T09:15:00'),
       submittedDate: new Date('2025-10-18T09:15:00'),
       approvedDate: new Date('2025-10-18T09:15:00'),
+      updatedAt: new Date('2025-10-18T09:15:00'),
     },
   });
 
@@ -123,6 +317,7 @@ async function main() {
       patientName: 'Lim Ah Kow',
       patientNric: 'S3456789C',
       patientDob: new Date('1955-03-10'),
+      examinationDate: new Date('2025-10-20'),
       status: 'pending_approval',
       formData: {
         visualAcuity: '6/6',
@@ -133,6 +328,52 @@ async function main() {
       clinicId: clinic.id,
       createdById: nurse.id,
       createdDate: new Date('2025-10-20T11:00:00'),
+      updatedAt: new Date('2025-10-20T11:00:00'),
+    },
+  });
+
+  // Add more pending approvals for testing
+  const submission4 = await prisma.medicalSubmission.create({
+    data: {
+      examType: 'SIX_MONTHLY_MDW',
+      patientName: 'Chen Li Hua',
+      patientNric: 'S4567890D',
+      patientDob: new Date('1992-11-20'),
+      examinationDate: new Date('2025-10-21'),
+      status: 'pending_approval',
+      formData: {
+        height: '158',
+        weight: '52',
+        bloodPressure: '115/75',
+        pregnancyTest: 'Negative',
+        chestXray: 'Normal',
+      },
+      clinicId: clinic.id,
+      createdById: nurse.id,
+      createdDate: new Date('2025-10-21T09:30:00'),
+      updatedAt: new Date('2025-10-21T09:30:00'),
+    },
+  });
+
+  const submission5 = await prisma.medicalSubmission.create({
+    data: {
+      examType: 'WORK_PERMIT',
+      patientName: 'Kumar Ravi',
+      patientNric: 'S6789012F',
+      patientDob: new Date('1987-04-18'),
+      examinationDate: new Date('2025-10-22'),
+      status: 'pending_approval',
+      formData: {
+        height: '172',
+        weight: '75',
+        bloodPressure: '122/78',
+        hivTest: 'Negative',
+        tbTest: 'Negative',
+      },
+      clinicId: clinic.id,
+      createdById: nurse.id,
+      createdDate: new Date('2025-10-22T14:15:00'),
+      updatedAt: new Date('2025-10-22T14:15:00'),
     },
   });
 
@@ -142,6 +383,7 @@ async function main() {
       patientName: 'Wang Wei',
       patientNric: 'S5678901E',
       patientDob: new Date('1988-07-14'),
+      examinationDate: new Date('2025-10-23'),
       status: 'draft',
       formData: {
         height: '170',
@@ -150,6 +392,7 @@ async function main() {
       clinicId: clinic.id,
       createdById: nurse.id,
       createdDate: new Date('2025-10-22T08:30:00'),
+      updatedAt: new Date('2025-10-22T08:30:00'),
     },
   });
 
