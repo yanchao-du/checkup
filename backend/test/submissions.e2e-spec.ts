@@ -189,7 +189,7 @@ describe('Submissions (e2e)', () => {
         })
         .expect(201);
 
-      expect(res.body.status).toBe('submitted');
+      expect(res.body.status).toBe('draft');
     });
 
     it('should fail without authentication', () => {

@@ -28,12 +28,16 @@ export class ApprovalsController {
     if (user.role !== 'doctor') {
       throw new ForbiddenException('Only doctors can view approvals');
     }
+    // Coerce query params to numbers (ValidationPipe in tests may not enable transform)
+    const page = query.page ? Number(query.page) : undefined;
+    const limit = query.limit ? Number(query.limit) : undefined;
+
     return this.approvalsService.findPendingApprovals(
-      user.clinicId, 
+      user.clinicId,
       user.id, // Pass doctor's ID for filtering
-      query.examType, 
-      query.page, 
-      query.limit
+      query.examType,
+      page,
+      limit,
     );
   }
 
@@ -46,12 +50,15 @@ export class ApprovalsController {
     if (user.role !== 'doctor') {
       throw new ForbiddenException('Only doctors can view rejections');
     }
+    const page = query.page ? Number(query.page) : undefined;
+    const limit = query.limit ? Number(query.limit) : undefined;
+
     return this.approvalsService.findRejectedSubmissions(
       user.clinicId,
       user.id,
       query.examType,
-      query.page,
-      query.limit
+      page,
+      limit,
     );
   }
 
