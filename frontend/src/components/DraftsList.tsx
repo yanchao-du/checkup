@@ -85,7 +85,7 @@ export function DraftsList() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-slate-900 mb-1">Draft Submissions</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Draft Submissions</h2>
         <p className="text-slate-600">Resume editing your saved medical exam drafts</p>
       </div>
 

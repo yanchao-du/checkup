@@ -86,7 +86,7 @@ export function RejectedSubmissions() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-slate-900 mb-1">Rejected Submissions</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Rejected Submissions</h2>
         <p className="text-slate-600">
           {user?.role === 'doctor' 
             ? 'Review submissions you have rejected'

@@ -115,7 +115,7 @@ export function PendingApprovals() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-slate-900 mb-1">Pending Approvals</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Pending Approvals</h2>
         <p className="text-slate-600">Review and approve medical exam submissions</p>
       </div>
 

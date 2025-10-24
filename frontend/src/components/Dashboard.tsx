@@ -206,7 +206,7 @@ export function Dashboard() {
   return (
     <div className="space-y-6" role="main">
       <div>
-        <h2 className="text-slate-900 mb-1">Welcome, {user?.email}</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Welcome, {user?.name}</h2>
         <p className="text-slate-600">Here's an overview of your medical exam submissions</p>
       </div>
 

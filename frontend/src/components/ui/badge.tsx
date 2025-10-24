@@ -17,17 +17,25 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        // Status badge variants
+        success:
+          "bg-green-50 text-green-700 border-green-300 [a&]:hover:bg-green-100",
+        warning:
+          "bg-yellow-50 text-yellow-700 border-yellow-300 [a&]:hover:bg-yellow-100",
+        error:
+          "bg-red-50 text-red-700 border-red-300 [a&]:hover:bg-red-100",
+        info:
+          "bg-blue-50 text-blue-700 border-blue-300 [a&]:hover:bg-blue-100",
+        inactive:
+          "bg-slate-100 text-slate-700 border-slate-300 [a&]:hover:bg-slate-200",
       },
-    },
-    defaultVariants: {
-      variant: "default",
     },
   },
 );
 
 function Badge({
   className,
-  variant,
+  variant = undefined,
   asChild = false,
   ...props
 }: React.ComponentProps<"span"> &

@@ -182,7 +182,7 @@ export function DoctorClinicAssignment() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Doctor-Clinic Assignments</h2>
+        <h2 className="text-2xl font-semibold text-slate-900 mb-1">Doctor Clinic Assignments</h2>
         <p className="text-slate-600">Manage which doctors work at which clinics</p>
       </div>
 

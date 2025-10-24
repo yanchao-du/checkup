@@ -7,6 +7,7 @@ import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Loader2 } from 'lucide-react';
 import { ClinicUser, UserRole } from '../types/api';
+import { getUserStatusBadgeVariant, getUserStatusLabel } from '../lib/badge-utils';
 import {
   Select,
   SelectContent,
@@ -172,7 +173,7 @@ export function UserManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-slate-900 mb-1">User Management</h2>
+          <h2 className="text-slate-900 mb-1 text-2xl font-semibold">User Management</h2>
           <p className="text-slate-600">Manage clinic staff access and permissions</p>
         </div>
         <Button onClick={handleAddUser}>
@@ -260,10 +261,9 @@ export function UserManagement() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={user.status === 'active' ? 'default' : 'secondary'}
-                          className="capitalize"
+                          variant={getUserStatusBadgeVariant(user.status)}
                         >
-                          {user.status}
+                          {getUserStatusLabel(user.status)}
                         </Badge>
                       </TableCell>
                     <TableCell className="text-slate-600 text-sm">

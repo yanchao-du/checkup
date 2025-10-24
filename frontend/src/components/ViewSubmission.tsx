@@ -11,6 +11,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { ArrowLeft, FileText, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -130,18 +131,14 @@ export function ViewSubmission() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">
-          <h2 className="text-slate-900 mb-1">Medical Exam Details</h2>
+          <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Exam Details</h2>
           <p className="text-slate-600">View submission information</p>
         </div>
         <Badge
-          variant={
-            submission.status === 'submitted' ? 'default' :
-            submission.status === 'pending_approval' ? 'secondary' :
-            'outline'
-          }
+          variant={getSubmissionStatusBadgeVariant(submission.status)}
           className="text-sm px-3 py-1"
         >
-          {submission.status.replace('_', ' ')}
+          {getSubmissionStatusLabel(submission.status)}
         </Badge>
       </div>
 

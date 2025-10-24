@@ -269,7 +269,7 @@ export function NewSubmission() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-slate-900">{id ? 'Edit Submission' : 'New Medical Examination'}</h1>
+          <h1 className="text-slate-900 text-2xl font-semibold">{id ? 'Edit Submission' : 'New Medical Examination'}</h1>
           <p className="text-slate-600">Complete the form to submit medical examination results</p>
         </div>
       </div>

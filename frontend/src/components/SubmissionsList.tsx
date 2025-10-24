@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import {
   Table,
   TableBody,
@@ -64,7 +65,7 @@ export function SubmissionsList() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-slate-900 mb-1">Medical Examinations</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examinations</h2>
         <p className="text-slate-600">View and search all submitted medical examinations</p>
       </div>
 
@@ -171,13 +172,9 @@ export function SubmissionsList() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            submission.status === 'submitted' ? 'default' :
-                            submission.status === 'pending_approval' ? 'secondary' :
-                            'outline'
-                          }
+                          variant={getSubmissionStatusBadgeVariant(submission.status)}
                         >
-                          {submission.status.replace('_', ' ')}
+                          {getSubmissionStatusLabel(submission.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-slate-600">{submission.createdByName}</TableCell>

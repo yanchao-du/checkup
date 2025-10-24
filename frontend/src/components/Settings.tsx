@@ -91,13 +91,13 @@ export function Settings() {
   if (user?.role === 'admin') {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <SettingsIcon className="w-8 h-8 text-slate-600" />
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
             <p className="text-slate-600">Manage users, clinics, and assignments</p>
           </div>
-        </div>
+        </div> */}
 
         {/* Tab Navigation */}
         <div className="border-b border-slate-200">
@@ -133,7 +133,7 @@ export function Settings() {
               }`}
             >
               <UserCog className="w-4 h-4 inline mr-2" />
-              Doctor-Clinic Assignments
+              Doctor Clinic Assignments
             </button>
           </div>
         </div>
