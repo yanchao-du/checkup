@@ -398,6 +398,33 @@ async function main() {
 
   console.log('✅ Created sample submissions and drafts');
 
+  // Create CorpPass user associations
+  // Link doctor@clinic.sg to CorpPass account
+  await prisma.corpPassUser.upsert({
+    where: { corpPassSub: 'S1234567A' },
+    update: {},
+    create: {
+      userId: doctor.id,
+      corpPassSub: 'S1234567A',  // CorpPass subject (unique identifier)
+      uen: '201912345A',  // Unique Entity Number (business)
+      nric: 'S1234567A',  // National Registration ID
+    },
+  });
+
+  // Link nurse@clinic.sg to CorpPass account
+  await prisma.corpPassUser.upsert({
+    where: { corpPassSub: 'S2345678B' },
+    update: {},
+    create: {
+      userId: nurse.id,
+      corpPassSub: 'S2345678B',
+      uen: '201912345A',  // Same UEN (same business)
+      nric: 'S2345678B',
+    },
+  });
+
+  console.log('✅ Created CorpPass user associations (doctor and nurse linked)');
+
   // Create audit logs
   await prisma.auditLog.create({
     data: {
