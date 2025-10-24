@@ -34,6 +34,7 @@ describe('ApprovalsService', () => {
     },
     auditLog: {
       create: jest.fn(),
+      createMany: jest.fn(),
     },
   };
 
@@ -129,7 +130,7 @@ describe('ApprovalsService', () => {
         status: 'submitted',
         approvedById: 'doctor-1',
       });
-      mockPrismaService.auditLog.create.mockResolvedValue({});
+  mockPrismaService.auditLog.createMany.mockResolvedValue({});
 
       const result = await service.approve('sub-1', 'doctor-1', 'clinic-1');
 
@@ -144,7 +145,7 @@ describe('ApprovalsService', () => {
           }),
         }),
       );
-      expect(prismaService.auditLog.create).toHaveBeenCalled();
+      expect(prismaService.auditLog.createMany).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when submission not found', async () => {
@@ -178,17 +179,21 @@ describe('ApprovalsService', () => {
         ...mockSubmission,
         status: 'submitted',
       });
-      mockPrismaService.auditLog.create.mockResolvedValue({});
+      mockPrismaService.auditLog.createMany.mockResolvedValue({});
 
       await service.approve('sub-1', 'doctor-1', 'clinic-1', 'Looks good');
 
-      expect(prismaService.auditLog.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          submissionId: 'sub-1',
-          userId: 'doctor-1',
-          eventType: 'approved',
+      expect(prismaService.auditLog.createMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.arrayContaining([
+            expect.objectContaining({
+              submissionId: 'sub-1',
+              userId: 'doctor-1',
+              eventType: 'approved',
+            }),
+          ]),
         }),
-      });
+      );
     });
   });
 
