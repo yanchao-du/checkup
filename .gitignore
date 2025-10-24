@@ -82,6 +82,12 @@ storybook-static
 *.log
 .cache/
 
+# Cypress test artifacts
+cypress/screenshots/
+cypress/videos/
+frontend/cypress/screenshots/
+frontend/cypress/videos/
+
 # API Generated files (if you generate TypeScript client)
 /src/api/generated/
 frontend/src/api/generated/
