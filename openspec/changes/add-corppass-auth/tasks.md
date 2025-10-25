@@ -44,7 +44,7 @@
 
  - [x] 6.1 Create `CorpPassCallbackDto` for callback query params (code, state)
  - [x] 6.2 Create `CorpPassUserDto` for CorpPass user data
- - [ ] 6.3 Update `LoginResponseDto` to include `authMethod: 'email' | 'corppass'`
+ - [x] 6.3 Update `LoginResponseDto` to include `authMethod: 'email' | 'corppass'`
  - [ ] 6.4 Create `CorpPassConfigDto` for frontend config (client_id, authorize_url)
 
 ## 7. Frontend - Login UI
@@ -88,7 +88,7 @@
  - [ ] 11.2 Cypress test: Complete CorpPass login flow end-to-end
  - [ ] 11.3 Cypress test: CorpPass user can access dashboard
  - [ ] 11.4 Cypress test: Email/password login still works
- - [ ] 11.5 Test error handling (callback errors, token exchange failures)
+ - [x] 11.5 Test error handling (callback errors, token exchange failures)
 
 ## 12. Configuration & Documentation
 
@@ -102,7 +102,7 @@
 ## 13. Security & Validation
 
  - [x] 13.1 Validate all CorpPass tokens with JWKS
- - [ ] 13.2 Implement state parameter for CSRF protection
+ - [x] 13.2 Implement state parameter for CSRF protection
  - [ ] 13.3 Validate redirect_uri to prevent open redirect vulnerabilities
  - [ ] 13.4 Add rate limiting to CorpPass endpoints
  - [x] 13.5 Log all CorpPass authentication attempts (success/failure)
