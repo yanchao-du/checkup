@@ -1,5 +1,11 @@
 version: '3.8'
 
+# Archived local docker-compose for backend-only development.
+# The project now uses the top-level `docker-compose.yml` which defines
+# postgres, backend, frontend and mockpass for the full local setup.
+# Keep this file for reference or for running a backend-only postgres
+# instance, but it must be run explicitly (e.g. `docker-compose -f backend/docker-compose.local.yml up`).
+
 services:
   postgres:
     image: postgres:15-alpine
