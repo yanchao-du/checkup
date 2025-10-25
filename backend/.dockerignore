@@ -53,9 +53,6 @@ Dockerfile
 .dockerignore
 docker-compose*.yml
 
-# Scripts (except what we explicitly need)
-scripts/start-mockpass.sh
-
 # Keep these files (required for build):
 # - package.json
 # - package-lock.json

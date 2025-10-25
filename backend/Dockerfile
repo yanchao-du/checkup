@@ -5,6 +5,9 @@ FROM node:22-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+
+
+
 # Copy package files
 COPY package*.json ./
 
@@ -13,6 +16,9 @@ RUN npm ci
 
 # Copy source code
 COPY . .
+
+# Copy scripts directory for mockpass
+COPY scripts ./scripts
 
 # Generate Prisma Client
 RUN npx prisma generate
@@ -31,6 +37,9 @@ RUN apk add --no-cache netcat-openbsd
 
 # Set working directory
 WORKDIR /app
+
+# Copy scripts directory for mockpass
+COPY --from=builder /app/scripts ./scripts
 
 # Copy package files for reference
 COPY package*.json ./
