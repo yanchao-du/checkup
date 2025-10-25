@@ -19,5 +19,6 @@ export class LoginResponseDto {
     role: string;
     clinicId: string;
     clinicName: string;
+    authMethod?: 'email' | 'corppass'; // Optional: authentication method used
   };
 }

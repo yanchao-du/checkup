@@ -8,6 +8,7 @@ import { SubmissionsModule } from './submissions/submissions.module';
 import { ApprovalsModule } from './approvals/approvals.module';
 import { UsersModule } from './users/users.module';
 import { ClinicsModule } from './clinics/clinics.module';
+import { WellKnownController } from './well-known/well-known.controller';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { ClinicsModule } from './clinics/clinics.module';
     UsersModule,
     ClinicsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, WellKnownController],
   providers: [AppService],
 })
 export class AppModule {}

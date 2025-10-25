@@ -35,6 +35,7 @@ model User {
   email               String              @unique
   passwordHash        String              @map("password_hash")
   name                String
+  nric                String?             @unique  // National Registration Identity Card (Singapore) - temporarily nullable for migration
   role                UserRole
   mcrNumber           String?             @unique @map("mcr_number")  // Medical Council Registration Number (doctors only)
   status              UserStatus          @default(active)
@@ -52,11 +53,30 @@ model User {
   approvedSubmissions MedicalSubmission[] @relation("ApprovedBy")
   assignedSubmissions MedicalSubmission[] @relation("AssignedDoctor")
   auditLogs           AuditLog[]
+  corpPassUsers       CorpPassUser[]      // CorpPass authentication associations
 
   @@index([clinicId])
   @@index([email])
+  @@index([nric])
   @@index([defaultDoctorId])
   @@map("users")
+}
+
+// CorpPass authentication associations
+model CorpPassUser {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  corpPassSub String   @unique @map("corppass_sub")  // CorpPass user ID (sub claim)
+  uen         String?  // Unique Entity Number (business)
+  nric        String?  // National Registration ID
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([corpPassSub])
+  @@map("corppass_users")
 }
 
 // Junction table for many-to-many relationship between doctors and clinics

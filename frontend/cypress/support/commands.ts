@@ -41,7 +41,8 @@ Cypress.Commands.add('login', (email: string, password: string) => {
 
 // Logout command
 Cypress.Commands.add('logout', () => {
-  cy.get('[data-testid="user-menu"]').click()
+  // Wait for the user menu to appear (app can be slow after API calls)
+  cy.get('[data-testid="user-menu"]').should('be.visible').click()
   cy.contains('Logout').click()
   cy.url().should('eq', Cypress.config().baseUrl + '/')
 })

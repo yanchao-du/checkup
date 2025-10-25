@@ -272,20 +272,18 @@ describe('Users (e2e)', () => {
 
   describe('PUT /v1/users/:id', () => {
     it('should update a user as admin', async () => {
-      if (!createdUserId) {
-        // Create a user first if not exists
-        const newUser = await request(app.getHttpServer())
-          .post('/v1/users')
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send({
-            name: 'User To Update',
-            email: `update-test-${Date.now()}@clinic.sg`,
-            password: 'password123',
-            role: 'nurse',
-          })
-          .expect(201);
-        createdUserId = newUser.body.id;
-      }
+      // Always create a fresh user for this test to avoid stale/deleted IDs
+      const newUser = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'User To Update',
+          email: `update-test-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'nurse',
+        })
+        .expect(201);
+      createdUserId = newUser.body.id;
 
       const updateData = {
         name: 'Updated Name',
@@ -303,22 +301,21 @@ describe('Users (e2e)', () => {
     });
 
     it('should update password', async () => {
-      if (!createdUserId) {
-        const newUser = await request(app.getHttpServer())
-          .post('/v1/users')
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send({
-            name: 'User For Password Update',
-            email: `pwd-test-${Date.now()}@clinic.sg`,
-            password: 'password123',
-            role: 'nurse',
-          })
-          .expect(201);
-        createdUserId = newUser.body.id;
-      }
+      // Create a fresh user to ensure it exists
+      const newUser = await request(app.getHttpServer())
+        .post('/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'User For Password Update',
+          email: `pwd-test-${Date.now()}@clinic.sg`,
+          password: 'password123',
+          role: 'nurse',
+        })
+        .expect(201);
+      const pwdUserId = newUser.body.id;
 
       await request(app.getHttpServer())
-        .put(`/v1/users/${createdUserId}`)
+        .put(`/v1/users/${pwdUserId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ password: 'newPassword123' })
         .expect(200);
@@ -719,12 +716,14 @@ describe('Users (e2e)', () => {
       testNurseId = nurseResponse.body.id;
 
       // Create a second clinic for testing
+      // Ensure HCI code matches required 7-char format (e.g., HCI0001)
+      const hciSuffix = String(Math.floor(Math.random() * 9000) + 1000); // 4 digits
       const clinicResponse = await request(app.getHttpServer())
         .post('/v1/clinics')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Clinic for Nurse Assignment',
-          hciCode: `HCI${Date.now()}`,
+          hciCode: `HCI${hciSuffix}`,
           address: '789 Test Street',
           phone: '+65 6789 0123',
         })
@@ -809,12 +808,13 @@ describe('Users (e2e)', () => {
 
       it('should assign nurse as primary clinic', async () => {
         // Create another clinic for this test
+        const hciSuffix2 = String(Math.floor(Math.random() * 9000) + 1000);
         const clinicResponse = await request(app.getHttpServer())
           .post('/v1/clinics')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
             name: 'Primary Test Clinic',
-            hciCode: `HCI${Date.now()}`,
+            hciCode: `HCI${hciSuffix2}`,
             address: '999 Primary Street',
             phone: '+65 6999 9999',
           })
@@ -952,15 +952,22 @@ describe('Users (e2e)', () => {
 
         // Remove all but one
         const clinics = clinicsResponse.body;
-        for (let i = 0; i < clinics.length - 1; i++) {
+        // Remove all non-primary clinics, leaving only the primary
+        const nonPrimary = clinics.filter((c: any) => !c.isPrimary);
+        for (const c of nonPrimary) {
           await request(app.getHttpServer())
-            .delete(`/v1/users/${testNurseId}/nurse-clinics/${clinics[i].id}`)
+            .delete(`/v1/users/${testNurseId}/nurse-clinics/${c.id}`)
             .set('Authorization', `Bearer ${adminToken}`)
             .expect(200);
         }
 
-        // Try to remove the last one
-        const lastClinic = clinics[clinics.length - 1];
+        // Now find the remaining primary clinic
+        const remainingClinics = await request(app.getHttpServer())
+          .get(`/v1/users/${testNurseId}/nurse-clinics`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        const lastClinic = remainingClinics.body.find((c: any) => c.isPrimary === true);
         const response = await request(app.getHttpServer())
           .delete(`/v1/users/${testNurseId}/nurse-clinics/${lastClinic.id}`)
           .set('Authorization', `Bearer ${adminToken}`)
@@ -974,12 +981,13 @@ describe('Users (e2e)', () => {
 
       it('should remove nurse from non-primary clinic', async () => {
         // First assign nurse to another clinic
+        const hciSuffix3 = String(Math.floor(Math.random() * 9000) + 1000);
         const clinicResponse = await request(app.getHttpServer())
           .post('/v1/clinics')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
             name: 'Removable Test Clinic',
-            hciCode: `HCI${Date.now()}`,
+            hciCode: `HCI${hciSuffix3}`,
             address: '111 Remove Street',
             phone: '+65 6111 1111',
           })

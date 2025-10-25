@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
-import { FileText, Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2 } from 'lucide-react';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,10 +35,10 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <FileText className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
+            <img src="/public/logo.svg" alt="CheckUp logo" className="w-16 h-16" />
           </div>
-          <h1 className="text-slate-900 mb-2">CheckUp Medical Portal</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">CheckUp Medical Portal</h1>
           <p className="text-slate-600">Submit medical examinations to Singapore government agencies</p>
         </div>
 
@@ -81,6 +81,29 @@ export function LoginPage() {
                 )}
               </Button>
             </form>
+
+            {/* OR Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* CorpPass Login Button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                window.location.href = 'http://localhost:3344/v1/auth/corppass/authorize';
+              }}
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Login with CorpPass
+            </Button>
 
             <div className="mt-6 p-4 bg-slate-50 rounded-lg">
               <p className="text-sm text-slate-600 mb-2">Demo Accounts:</p>

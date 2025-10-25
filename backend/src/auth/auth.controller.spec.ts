@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { ConfigService } from '@nestjs/config';
+import { SessionService } from './services/session.service';
+import { UserSessionService } from './services/user-session.service';
 import { LoginDto } from './dto/login.dto';
 import { UnauthorizedException } from '@nestjs/common';
 
@@ -28,13 +31,25 @@ describe('AuthController', () => {
   };
 
   beforeEach(async () => {
+    // Provide minimal mocks for injected services used by the controller
+    const configMock = { get: jest.fn().mockReturnValue('') };
+    const sessionServiceMock = {
+      createOAuthSession: jest.fn().mockReturnValue({ sessionId: 'sess', state: 'st', nonce: 'n' }),
+      verifyOAuthSession: jest.fn().mockReturnValue('n'),
+      deleteOAuthSession: jest.fn(),
+    };
+    const userSessionServiceMock = {
+      deleteSession: jest.fn(),
+      createSession: jest.fn().mockReturnValue('user-sess'),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
-        {
-          provide: AuthService,
-          useValue: mockAuthService,
-        },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: ConfigService, useValue: configMock },
+        { provide: SessionService, useValue: sessionServiceMock },
+        { provide: UserSessionService, useValue: userSessionServiceMock },
       ],
     }).compile();
 
@@ -124,13 +139,14 @@ describe('AuthController', () => {
 
   describe('logout', () => {
     it('should successfully logout', async () => {
-      const result = await controller.logout();
+      // pass an empty user object so controller doesn't try to access sessionId
+      const result = await controller.logout({} as any);
 
       expect(result).toEqual({ message: 'Logged out successfully' });
     });
 
     it('should return success message', async () => {
-      const result = await controller.logout();
+      const result = await controller.logout({} as any);
 
       expect(result.message).toBe('Logged out successfully');
     });
@@ -138,7 +154,9 @@ describe('AuthController', () => {
 
   describe('getMe', () => {
     it('should return current user information', async () => {
-      const result = await controller.getMe(mockUser);
+      // provide a minimal response object with setHeader used by controller
+      const res: any = { setHeader: jest.fn() };
+      const result = await controller.getMe(mockUser as any, res);
 
       expect(result).toEqual(mockUser);
       expect(result.id).toBe('1');
@@ -147,7 +165,8 @@ describe('AuthController', () => {
     });
 
     it('should return user with clinic information', async () => {
-      const result = await controller.getMe(mockUser);
+      const res: any = { setHeader: jest.fn() };
+      const result = await controller.getMe(mockUser as any, res);
 
       expect(result.clinicName).toBe('Test Clinic');
       expect(result.clinicId).toBe('1');
@@ -155,7 +174,8 @@ describe('AuthController', () => {
 
     it('should handle different user roles', async () => {
       const nurseUser = { ...mockUser, role: 'nurse', email: 'nurse@clinic.sg' };
-      const result = await controller.getMe(nurseUser);
+      const res: any = { setHeader: jest.fn() };
+      const result = await controller.getMe(nurseUser as any, res);
 
       expect(result.role).toBe('nurse');
       expect(result.email).toBe('nurse@clinic.sg');

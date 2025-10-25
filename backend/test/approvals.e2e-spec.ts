@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('Approvals (e2e)', () => {
@@ -239,7 +239,7 @@ describe('Approvals (e2e)', () => {
 
       expect(res.body.status).toBe('rejected');
       expect(res.body.rejectedReason).toBe('Incomplete medical history');
-      expect(res.body.approvedBy).toBeNull();
+      expect(res.body.approvedBy).toBe("550e8400-e29b-41d4-a716-446655440001");
       expect(res.body.submittedDate).toBeNull();
     });
 

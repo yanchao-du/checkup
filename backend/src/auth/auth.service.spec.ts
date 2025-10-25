@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
+import { UserSessionService } from './services/user-session.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
@@ -48,6 +49,10 @@ describe('AuthService', () => {
     verify: jest.fn(),
   };
 
+  const mockUserSessionService = {
+    createSession: jest.fn().mockReturnValue('mock-session-id'),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -59,6 +64,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: UserSessionService,
+          useValue: mockUserSessionService,
         },
       ],
     }).compile();
@@ -106,6 +115,7 @@ describe('AuthService', () => {
         email: mockUser.email,
         role: mockUser.role,
         clinicId: mockUser.clinicId,
+        sessionId: 'mock-session-id',
       });
       expect(result).toEqual({
         token: 'mock-jwt-token',
@@ -116,6 +126,7 @@ describe('AuthService', () => {
           role: mockUser.role,
           clinicId: mockUser.clinicId,
           clinicName: mockUser.clinic.name,
+          authMethod: 'email',
         },
       });
     });

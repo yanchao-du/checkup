@@ -31,6 +31,11 @@ export const authApi = {
     return apiClient.get<User>('/auth/me');
   },
 
+  // Get current user (heartbeat - doesn't refresh session)
+  getMeHeartbeat: async (): Promise<User> => {
+    return apiClient.get<User>('/auth/me', { isHeartbeat: true });
+  },
+
   // Check if user is authenticated
   isAuthenticated: (): boolean => {
     return !!localStorage.getItem('token');

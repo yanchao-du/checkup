@@ -20,38 +20,47 @@ export class ApprovalsController {
   constructor(private approvalsService: ApprovalsService) {}
 
   @Get()
-  @Roles('doctor')
+  @Roles('doctor', 'admin')
   findPendingApprovals(
     @CurrentUser() user: any,
     @Query() query: ApprovalQueryDto,
   ) {
-    if (user.role !== 'doctor') {
-      throw new ForbiddenException('Only doctors can view approvals');
+    // Allow doctors and admins to view pending approvals (admins are read-only)
+    if (user.role !== 'doctor' && user.role !== 'admin') {
+      throw new ForbiddenException('Only doctors or admins can view approvals');
     }
+    // Coerce query params to numbers (ValidationPipe in tests may not enable transform)
+    const page = query.page ? Number(query.page) : undefined;
+    const limit = query.limit ? Number(query.limit) : undefined;
+
     return this.approvalsService.findPendingApprovals(
-      user.clinicId, 
+      user.clinicId,
       user.id, // Pass doctor's ID for filtering
-      query.examType, 
-      query.page, 
-      query.limit
+      query.examType,
+      page,
+      limit,
     );
   }
 
   @Get('rejected')
-  @Roles('doctor')
+  @Roles('doctor', 'admin')
   findRejectedSubmissions(
     @CurrentUser() user: any,
     @Query() query: ApprovalQueryDto,
   ) {
-    if (user.role !== 'doctor') {
-      throw new ForbiddenException('Only doctors can view rejections');
+    // Allow doctors and admins to view rejected submissions
+    if (user.role !== 'doctor' && user.role !== 'admin') {
+      throw new ForbiddenException('Only doctors or admins can view rejections');
     }
+    const page = query.page ? Number(query.page) : undefined;
+    const limit = query.limit ? Number(query.limit) : undefined;
+
     return this.approvalsService.findRejectedSubmissions(
       user.clinicId,
       user.id,
       query.examType,
-      query.page,
-      query.limit
+      page,
+      limit,
     );
   }
 

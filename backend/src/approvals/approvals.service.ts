@@ -25,6 +25,10 @@ export class ApprovalsService {
       where.examType = examType;
     }
 
+    // Ensure page/limit are sane numbers (in case controller passed strings or NaN)
+    const pageNum = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const limitNum = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 50;
+
     const [submissions, total] = await Promise.all([
       this.prisma.medicalSubmission.findMany({
         where,
@@ -33,8 +37,8 @@ export class ApprovalsService {
           assignedDoctor: { select: { name: true } },
         },
         orderBy: { createdDate: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
       }),
       this.prisma.medicalSubmission.count({ where }),
     ]);
@@ -42,12 +46,12 @@ export class ApprovalsService {
     return {
       data: submissions.map(s => this.formatSubmission(s)),
       pagination: {
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
         totalItems: total,
-        hasNext: page < Math.ceil(total / limit),
-        hasPrevious: page > 1,
+        hasNext: pageNum < Math.ceil(total / limitNum),
+        hasPrevious: pageNum > 1,
       },
     };
   }
@@ -182,6 +186,9 @@ export class ApprovalsService {
       where.examType = examType;
     }
 
+    const pageNum = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const limitNum = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 50;
+
     const [submissions, total] = await Promise.all([
       this.prisma.medicalSubmission.findMany({
         where,
@@ -191,8 +198,8 @@ export class ApprovalsService {
           approvedBy: { select: { name: true } },
         },
         orderBy: { createdDate: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
       }),
       this.prisma.medicalSubmission.count({ where }),
     ]);
@@ -200,12 +207,12 @@ export class ApprovalsService {
     return {
       data: submissions.map(s => this.formatSubmission(s)),
       pagination: {
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
         totalItems: total,
-        hasNext: page < Math.ceil(total / limit),
-        hasPrevious: page > 1,
+        hasNext: pageNum < Math.ceil(total / limitNum),
+        hasPrevious: pageNum > 1,
       },
     };
   }
@@ -216,7 +223,8 @@ export class ApprovalsService {
       examType: submission.examType,
       patientName: submission.patientName,
       patientNric: submission.patientNric,
-      patientDateOfBirth: submission.patientDob.toISOString().split('T')[0],
+      // patientDob may occasionally be null; guard against calling toISOString on null
+      patientDateOfBirth: submission.patientDob ? submission.patientDob.toISOString().split('T')[0] : null,
       status: submission.status,
       createdBy: submission.createdById,
       createdByName: submission.createdBy?.name,
