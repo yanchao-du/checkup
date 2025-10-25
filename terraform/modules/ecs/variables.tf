@@ -128,7 +128,7 @@ variable "enable_mockpass" {
 }
 
 variable "mockpass_cpu" {
-  description = "CPU units for MockPass task"
+  description = "CPU units for MockPass task - not used in EC2 mode"
   type        = number
   default     = 256
 }
@@ -136,7 +136,7 @@ variable "mockpass_cpu" {
 variable "mockpass_memory" {
   description = "Memory for MockPass task in MB"
   type        = number
-  default     = 512
+  default     = 256  # Reduced for t2.micro free tier (1 GB total)
 }
 
 # Container Images
@@ -169,7 +169,7 @@ variable "backend_api_url" {
 
 # Backend Task Configuration
 variable "backend_cpu" {
-  description = "CPU units for backend task (256, 512, 1024, etc.)"
+  description = "CPU units for backend task (256, 512, 1024, etc.) - not used in EC2 mode"
   type        = number
   default     = 256
 }
@@ -177,7 +177,7 @@ variable "backend_cpu" {
 variable "backend_memory" {
   description = "Memory for backend task in MB"
   type        = number
-  default     = 512
+  default     = 256  # Reduced for t2.micro free tier (1 GB total)
 }
 
 variable "backend_desired_count" {
@@ -200,7 +200,7 @@ variable "backend_max_count" {
 
 # Frontend Task Configuration
 variable "frontend_cpu" {
-  description = "CPU units for frontend task"
+  description = "CPU units for frontend task - not used in EC2 mode"
   type        = number
   default     = 256
 }
@@ -208,7 +208,7 @@ variable "frontend_cpu" {
 variable "frontend_memory" {
   description = "Memory for frontend task in MB"
   type        = number
-  default     = 512
+  default     = 256  # Reduced for t2.micro free tier (1 GB total)
 }
 
 variable "frontend_desired_count" {
@@ -246,6 +246,31 @@ variable "autoscaling_memory_threshold" {
   description = "Memory utilization threshold for scaling"
   type        = number
   default     = 80
+}
+
+# ECS EC2 Instance Configuration
+variable "ecs_instance_type" {
+  description = "EC2 instance type for ECS container instances"
+  type        = string
+  default     = "t2.micro" # Free tier eligible
+}
+
+variable "ecs_instance_desired_count" {
+  description = "Desired number of EC2 instances in the ECS cluster"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_instance_min_count" {
+  description = "Minimum number of EC2 instances in the ECS cluster"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_instance_max_count" {
+  description = "Maximum number of EC2 instances in the ECS cluster"
+  type        = number
+  default     = 2
 }
 
 # Logging and Monitoring

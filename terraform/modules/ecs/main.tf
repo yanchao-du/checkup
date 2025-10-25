@@ -16,16 +16,158 @@ resource "aws_ecs_cluster" "main" {
   )
 }
 
+# IAM Role for ECS EC2 Instances
+resource "aws_iam_role" "ecs_instance" {
+  name_prefix = "${var.project_name}-ecs-instance-"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance" {
+  role       = aws_iam_role.ecs_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_instance_profile" "ecs" {
+  name_prefix = "${var.project_name}-ecs-"
+  role        = aws_iam_role.ecs_instance.name
+
+  tags = var.tags
+}
+
+# Get latest ECS-optimized AMI
+data "aws_ami" "ecs" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# Launch Template for ECS EC2 Instances
+resource "aws_launch_template" "ecs" {
+  name_prefix   = "${var.project_name}-ecs-"
+  image_id      = data.aws_ami.ecs.id
+  instance_type = var.ecs_instance_type
+
+  iam_instance_profile {
+    arn = aws_iam_instance_profile.ecs.arn
+  }
+
+  vpc_security_group_ids = [var.ecs_security_group_id]
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+    echo ECS_ENABLE_CONTAINER_METADATA=true >> /etc/ecs/ecs.config
+  EOF
+  )
+
+  monitoring {
+    enabled = true
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(
+      var.tags,
+      {
+        Name        = "${var.project_name}-ecs-instance"
+        Environment = var.environment
+      }
+    )
+  }
+
+  tags = var.tags
+}
+
+# Auto Scaling Group for ECS EC2 Instances
+resource "aws_autoscaling_group" "ecs" {
+  name_prefix         = "${var.project_name}-ecs-"
+  vpc_zone_identifier = var.private_subnet_ids
+  desired_capacity    = var.ecs_instance_desired_count
+  max_size            = var.ecs_instance_max_count
+  min_size            = var.ecs_instance_min_count
+
+  launch_template {
+    id      = aws_launch_template.ecs.id
+    version = "$Latest"
+  }
+
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
+
+  tag {
+    key                 = "Name"
+    value               = "${var.project_name}-ecs-instance"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = "true"
+    propagate_at_launch = true
+  }
+
+  dynamic "tag" {
+    for_each = var.tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+}
+
+# ECS Capacity Provider for EC2 Auto Scaling
+resource "aws_ecs_capacity_provider" "ec2" {
+  name = "${var.project_name}-ec2"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_autoscaling_group.ecs.arn
+    managed_termination_protection = "ENABLED"
+
+    managed_scaling {
+      maximum_scaling_step_size = 2
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 100
+    }
+  }
+
+  tags = var.tags
+}
+
 # ECS Cluster Capacity Providers
 resource "aws_ecs_cluster_capacity_providers" "main" {
   cluster_name = aws_ecs_cluster.main.name
 
-  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+  capacity_providers = [aws_ecs_capacity_provider.ec2.name]
 
   default_capacity_provider_strategy {
     base              = 1
     weight            = 100
-    capacity_provider = "FARGATE"
+    capacity_provider = aws_ecs_capacity_provider.ec2.name
   }
 }
 
@@ -119,10 +261,8 @@ resource "aws_iam_role" "ecs_task" {
 # Task definition for Backend
 resource "aws_ecs_task_definition" "backend" {
   family                   = "${var.project_name}-backend-${var.environment}"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = var.backend_cpu
-  memory                   = var.backend_memory
+  network_mode             = "bridge"
+  requires_compatibilities = ["EC2"]
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
 
@@ -131,10 +271,12 @@ resource "aws_ecs_task_definition" "backend" {
       name      = "backend"
       image     = "${var.backend_image_url}:${var.backend_image_tag}"
       essential = true
+      memory    = var.backend_memory
 
       portMappings = [
         {
           containerPort = 3344
+          hostPort      = 0 # Dynamic port mapping
           protocol      = "tcp"
         }
       ]
@@ -229,10 +371,8 @@ resource "aws_ecs_task_definition" "backend" {
 # Task definition for Frontend
 resource "aws_ecs_task_definition" "frontend" {
   family                   = "${var.project_name}-frontend-${var.environment}"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = var.frontend_cpu
-  memory                   = var.frontend_memory
+  network_mode             = "bridge"
+  requires_compatibilities = ["EC2"]
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
 
@@ -241,10 +381,12 @@ resource "aws_ecs_task_definition" "frontend" {
       name      = "frontend"
       image     = "${var.frontend_image_url}:${var.frontend_image_tag}"
       essential = true
+      memory    = var.frontend_memory
 
       portMappings = [
         {
           containerPort = 8080
+          hostPort      = 0 # Dynamic port mapping
           protocol      = "tcp"
         }
       ]
@@ -290,10 +432,8 @@ resource "aws_ecs_task_definition" "mockpass" {
   count = var.enable_mockpass ? 1 : 0
 
   family                   = "${var.project_name}-mockpass-${var.environment}"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = var.mockpass_cpu
-  memory                   = var.mockpass_memory
+  network_mode             = "bridge"
+  requires_compatibilities = ["EC2"]
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
 
@@ -302,6 +442,7 @@ resource "aws_ecs_task_definition" "mockpass" {
       name      = "mockpass"
       image     = "${var.backend_image_url}:${var.backend_image_tag}"
       essential = true
+      memory    = var.mockpass_memory
       
       entryPoint = ["sh"]
       command    = ["/app/scripts/start-mockpass.sh"]
@@ -309,6 +450,7 @@ resource "aws_ecs_task_definition" "mockpass" {
       portMappings = [
         {
           containerPort = 5156
+          hostPort      = 0 # Dynamic port mapping
           protocol      = "tcp"
         }
       ]
@@ -361,21 +503,14 @@ resource "aws_ecs_service" "backend" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.backend.arn
   desired_count   = var.backend_desired_count
-  launch_type     = "FARGATE"
 
-  network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = [var.ecs_security_group_id]
-    assign_public_ip = false
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "memory"
   }
 
   service_registries {
     registry_arn = aws_service_discovery_service.backend.arn
-  }
-
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 100
   }
 
   enable_execute_command = var.enable_ecs_exec
@@ -396,21 +531,14 @@ resource "aws_ecs_service" "frontend" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.frontend.arn
   desired_count   = var.frontend_desired_count
-  launch_type     = "FARGATE"
 
-  network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = [var.ecs_security_group_id]
-    assign_public_ip = false
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "memory"
   }
 
   service_registries {
     registry_arn = aws_service_discovery_service.frontend.arn
-  }
-
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 100
   }
 
   enable_execute_command = var.enable_ecs_exec
@@ -525,21 +653,14 @@ resource "aws_ecs_service" "mockpass" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.mockpass[0].arn
   desired_count   = 1
-  launch_type     = "FARGATE"
 
-  network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = [var.ecs_security_group_id]
-    assign_public_ip = false
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "memory"
   }
 
   service_registries {
     registry_arn = aws_service_discovery_service.mockpass[0].arn
-  }
-
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 100
   }
 
   enable_execute_command = var.enable_ecs_exec
