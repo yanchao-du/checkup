@@ -27,19 +27,19 @@ services:
     ports:
       - "3344:3344"
     environment:
-      DATABASE_URL: postgresql://checkup:checkup@postgres:5432/checkup
-      JWT_SECRET: dev-secret-change-in-production
-      CORS_ORIGIN: http://localhost:8080
-      PORT: 3344
+      - DATABASE_URL=postgresql://checkup:checkup@postgres:5432/checkup
+      - JWT_SECRET=dev-secret-change-in-production
+      - CORS_ORIGIN=http://localhost:8080
+      - PORT=3344
       # CorpPass MockPass settings (for local dev)
-      CORPPASS_ISSUER: http://host.docker.internal:5156/corppass/v2
-      CORPPASS_AUTHORIZE_URL: http://localhost:5156/corppass/v2/auth
-      CORPPASS_TOKEN_URL: http://host.docker.internal:5156/corppass/v2/token
-      CORPPASS_JWKS_URL: http://host.docker.internal:5156/corppass/v2/.well-known/keys
-      CORPPASS_CLIENT_ID: checkup-app
-      CORPPASS_CLIENT_SECRET: mockpass-secret
-      CORPPASS_CALLBACK_URL: http://localhost:3344/v1/auth/corppass/callback
-      CORPPASS_FRONTEND_CALLBACK_URL: http://localhost:8080/auth/corppass/callback
+      - CORPPASS_ISSUER=http://mockpass:5156/corppass/v2
+      - CORPPASS_AUTHORIZE_URL=http://localhost:5156/corppass/v2/auth
+      - CORPPASS_TOKEN_URL=http://mockpass:5156/corppass/v2/token
+      - CORPPASS_JWKS_URL=http://mockpass:5156/corppass/v2/.well-known/keys
+      - CORPPASS_CLIENT_ID=checkup-app
+      - CORPPASS_CLIENT_SECRET=mockpass-secret
+      - CORPPASS_CALLBACK_URL=http://localhost:3344/v1/auth/corppass/callback
+      - CORPPASS_FRONTEND_CALLBACK_URL=http://localhost:8080/auth/corppass/callback
     depends_on:
       postgres:
         condition: service_healthy
