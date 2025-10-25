@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Res, Query, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Res, Query, HttpCode, UseFilters } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -9,6 +9,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { ConfigService } from '@nestjs/config';
 import { SessionService } from './services/session.service';
 import { UserSessionService } from './services/user-session.service';
+import { CorpPassExceptionFilter } from './filters/corppass-exception.filter';
 
 @Controller('auth')
 export class AuthController {
@@ -89,66 +90,95 @@ export class AuthController {
    */
   @Get('corppass/callback')
   @UseGuards(AuthGuard('corppass'))
+  @UseFilters(CorpPassExceptionFilter)
   async corppassCallback(
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    // Verify state to prevent CSRF attacks
-    const stateFromQuery = req.query.state as string;
-    const sessionId = (req as any).cookies?.corppass_oauth_session;
+    try {
+      // Verify state to prevent CSRF attacks
+      const stateFromQuery = req.query.state as string;
+      const sessionId = (req as any).cookies?.corppass_oauth_session;
 
-    if (!sessionId || !stateFromQuery) {
-      return res.status(403).send({ error: 'Missing session or state parameter' });
+      if (!sessionId || !stateFromQuery) {
+        const frontendUrl = this.configService.get<string>('CORPPASS_FRONTEND_CALLBACK_URL')?.split('/auth/corppass')[0] || 'http://localhost:6688';
+        const errorUrl = new URL('/auth/error', frontendUrl);
+        errorUrl.searchParams.set('message', 'Missing session or state parameter. Please try again.');
+        return res.redirect(errorUrl.toString());
+      }
+
+      // Verify OAuth session and get nonce
+      const nonce = this.sessionService.verifyOAuthSession(sessionId, stateFromQuery);
+      
+      if (!nonce) {
+        const frontendUrl = this.configService.get<string>('CORPPASS_FRONTEND_CALLBACK_URL')?.split('/auth/corppass')[0] || 'http://localhost:6688';
+        const errorUrl = new URL('/auth/error', frontendUrl);
+        errorUrl.searchParams.set('message', 'Invalid or expired OAuth session. Please try again.');
+        return res.redirect(errorUrl.toString());
+      }
+
+      // Delete the OAuth session (one-time use)
+      this.sessionService.deleteOAuthSession(sessionId);
+      
+      // Clear the OAuth session cookie
+      res.clearCookie('corppass_oauth_session');
+
+      // User is attached by CorpPassStrategy after successful validation
+      const user = req.user as any;
+
+      if (!user) {
+        const frontendUrl = this.configService.get<string>('CORPPASS_FRONTEND_CALLBACK_URL')?.split('/auth/corppass')[0] || 'http://localhost:6688';
+        const errorUrl = new URL('/auth/error', frontendUrl);
+        errorUrl.searchParams.set('message', 'Authentication failed. Please contact your administrator.');
+        return res.redirect(errorUrl.toString());
+      }
+
+      // Create user session for CorpPass authentication
+      const userSessionId = this.userSessionService.createSession(
+        user.id,
+        user.email,
+        user.role,
+        user.clinicId,
+        'corppass',
+      );
+
+      // Generate CheckUp JWT token with session ID
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        clinicId: user.clinicId,
+        sessionId: userSessionId,  // Include session ID
+      };
+
+      const token = this.authService['jwtService'].sign(payload);
+
+      // Redirect to frontend with token
+      const frontendCallbackUrl = this.configService.get<string>('CORPPASS_FRONTEND_CALLBACK_URL');
+      
+      if (!frontendCallbackUrl) {
+        throw new Error('CORPPASS_FRONTEND_CALLBACK_URL not configured');
+      }
+
+      const redirectUrl = new URL(frontendCallbackUrl);
+      redirectUrl.searchParams.set('token', token);
+      redirectUrl.searchParams.set('user', JSON.stringify(user));
+
+      return res.redirect(redirectUrl.toString());
+    } catch (error) {
+      console.error('CorpPass callback error:', error);
+      const frontendUrl = this.configService.get<string>('CORPPASS_FRONTEND_CALLBACK_URL')?.split('/auth/corppass')[0] || 'http://localhost:6688';
+      const errorUrl = new URL('/auth/error', frontendUrl);
+      
+      // Extract meaningful error message
+      let errorMessage = 'Authentication failed. Please contact your administrator.';
+      if (error instanceof Error && error.message) {
+        errorMessage = error.message;
+      }
+      
+      errorUrl.searchParams.set('message', errorMessage);
+      return res.redirect(errorUrl.toString());
     }
-
-    // Verify OAuth session and get nonce
-    const nonce = this.sessionService.verifyOAuthSession(sessionId, stateFromQuery);
-    
-    if (!nonce) {
-      return res.status(403).send({ error: 'Invalid or expired OAuth session' });
-    }
-
-    // Delete the OAuth session (one-time use)
-    this.sessionService.deleteOAuthSession(sessionId);
-    
-    // Clear the OAuth session cookie
-    res.clearCookie('corppass_oauth_session');
-
-    // User is attached by CorpPassStrategy after successful validation
-    const user = req.user as any;
-
-    // Create user session for CorpPass authentication
-    const userSessionId = this.userSessionService.createSession(
-      user.id,
-      user.email,
-      user.role,
-      user.clinicId,
-      'corppass',
-    );
-
-    // Generate CheckUp JWT token with session ID
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      clinicId: user.clinicId,
-      sessionId: userSessionId,  // Include session ID
-    };
-
-    const token = this.authService['jwtService'].sign(payload);
-
-    // Redirect to frontend with token
-    const frontendCallbackUrl = this.configService.get<string>('CORPPASS_FRONTEND_CALLBACK_URL');
-    
-    if (!frontendCallbackUrl) {
-      throw new Error('CORPPASS_FRONTEND_CALLBACK_URL not configured');
-    }
-
-    const redirectUrl = new URL(frontendCallbackUrl);
-    redirectUrl.searchParams.set('token', token);
-    redirectUrl.searchParams.set('user', JSON.stringify(user));
-
-    return res.redirect(redirectUrl.toString());
   }
 
   /**

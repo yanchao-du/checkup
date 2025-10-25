@@ -230,7 +230,14 @@ export class CorpPassStrategy extends PassportStrategy(Strategy, 'corppass') {
       // Return user to Passport
       done(null, user);
     } catch (error) {
-      done(error, null);
+      // Pass the error back to the controller with the full message
+      // This will be caught in the AuthGuard and we can handle it in the controller
+      if (error instanceof UnauthorizedException) {
+        // Return the error to Passport, which will trigger the controller's catch block
+        done(error, null);
+      } else {
+        done(error, null);
+      }
     }
   }
 }

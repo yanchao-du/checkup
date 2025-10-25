@@ -9,6 +9,7 @@ import { CorpPassStrategy } from './strategies/corppass.strategy';
 import { CorpPassValidatorService } from './services/corppass-validator.service';
 import { SessionService } from './services/session.service';
 import { UserSessionService } from './services/user-session.service';
+import { CorpPassExceptionFilter } from './filters/corppass-exception.filter';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     CorpPassValidatorService,
     SessionService,
     UserSessionService,
+    CorpPassExceptionFilter,
   ],
   exports: [AuthService, SessionService, UserSessionService],
 })
