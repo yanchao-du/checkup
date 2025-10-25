@@ -1,0 +1,484 @@
+# ECS Cluster
+resource "aws_ecs_cluster" "main" {
+  name = "${var.project_name}-${var.environment}"
+
+  setting {
+    name  = "containerInsights"
+    value = var.enable_container_insights ? "enabled" : "disabled"
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-${var.environment}-cluster"
+      Environment = var.environment
+    }
+  )
+}
+
+# ECS Cluster Capacity Providers
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  cluster_name = aws_ecs_cluster.main.name
+
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+
+  default_capacity_provider_strategy {
+    base              = 1
+    weight            = 100
+    capacity_provider = "FARGATE"
+  }
+}
+
+# CloudWatch Log Group for ECS
+resource "aws_cloudwatch_log_group" "ecs" {
+  name              = "/ecs/${var.project_name}-${var.environment}"
+  retention_in_days = var.log_retention_days
+
+  tags = var.tags
+}
+
+# IAM Role for ECS Task Execution
+resource "aws_iam_role" "ecs_task_execution" {
+  name_prefix = "${var.project_name}-ecs-exec-"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
+  role       = aws_iam_role.ecs_task_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+# Additional permissions for task execution role (SSM, Secrets Manager)
+resource "aws_iam_role_policy" "ecs_task_execution_ssm" {
+  name_prefix = "${var.project_name}-ecs-exec-ssm-"
+  role        = aws_iam_role.ecs_task_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameters",
+          "ssm:GetParameter",
+          "ssm:GetParametersByPath"
+        ]
+        Resource = "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/${var.project_name}/${var.environment}/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:${var.project_name}/${var.environment}/*"
+      }
+    ]
+  })
+}
+
+# Attach ECR read policy to execution role
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_ecr" {
+  role       = aws_iam_role.ecs_task_execution.name
+  policy_arn = var.ecr_read_policy_arn
+}
+
+# IAM Role for ECS Tasks (application runtime permissions)
+resource "aws_iam_role" "ecs_task" {
+  name_prefix = "${var.project_name}-ecs-task-"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# Task definition for Backend
+resource "aws_ecs_task_definition" "backend" {
+  family                   = "${var.project_name}-backend-${var.environment}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.backend_cpu
+  memory                   = var.backend_memory
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "backend"
+      image     = "${var.backend_image_url}:${var.backend_image_tag}"
+      essential = true
+
+      portMappings = [
+        {
+          containerPort = 3000
+          protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "NODE_ENV"
+          value = "production"
+        },
+        {
+          name  = "PORT"
+          value = "3000"
+        }
+      ]
+
+      secrets = [
+        {
+          name      = "DATABASE_HOST"
+          valueFrom = var.db_host_ssm_parameter
+        },
+        {
+          name      = "DATABASE_PORT"
+          valueFrom = var.db_port_ssm_parameter
+        },
+        {
+          name      = "DATABASE_NAME"
+          valueFrom = var.db_name_ssm_parameter
+        },
+        {
+          name      = "DATABASE_USER"
+          valueFrom = var.db_username_ssm_parameter
+        },
+        {
+          name      = "DATABASE_PASSWORD"
+          valueFrom = var.db_password_ssm_parameter
+        },
+        {
+          name      = "JWT_SECRET"
+          valueFrom = var.jwt_secret_ssm_parameter
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "backend"
+        }
+      }
+
+      healthCheck = {
+        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api || exit 1"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 60
+      }
+    }
+  ])
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-backend-${var.environment}"
+      Environment = var.environment
+      Component   = "backend"
+    }
+  )
+}
+
+# Task definition for Frontend
+resource "aws_ecs_task_definition" "frontend" {
+  family                   = "${var.project_name}-frontend-${var.environment}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.frontend_cpu
+  memory                   = var.frontend_memory
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "frontend"
+      image     = "${var.frontend_image_url}:${var.frontend_image_tag}"
+      essential = true
+
+      portMappings = [
+        {
+          containerPort = 8080
+          protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "VITE_API_URL"
+          value = var.backend_api_url
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "frontend"
+        }
+      }
+
+      healthCheck = {
+        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 40
+      }
+    }
+  ])
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-frontend-${var.environment}"
+      Environment = var.environment
+      Component   = "frontend"
+    }
+  )
+}
+
+# ECS Service for Backend
+resource "aws_ecs_service" "backend" {
+  name            = "${var.project_name}-backend-${var.environment}"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.backend.arn
+  desired_count   = var.backend_desired_count
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_security_group_id]
+    assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.backend.arn
+  }
+
+  deployment_configuration {
+    maximum_percent         = 200
+    minimum_healthy_percent = 100
+  }
+
+  enable_execute_command = var.enable_ecs_exec
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-backend-${var.environment}"
+      Environment = var.environment
+      Component   = "backend"
+    }
+  )
+}
+
+# ECS Service for Frontend
+resource "aws_ecs_service" "frontend" {
+  name            = "${var.project_name}-frontend-${var.environment}"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.frontend.arn
+  desired_count   = var.frontend_desired_count
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_security_group_id]
+    assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.frontend.arn
+  }
+
+  deployment_configuration {
+    maximum_percent         = 200
+    minimum_healthy_percent = 100
+  }
+
+  enable_execute_command = var.enable_ecs_exec
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-frontend-${var.environment}"
+      Environment = var.environment
+      Component   = "frontend"
+    }
+  )
+}
+
+# Service Discovery Namespace
+resource "aws_service_discovery_private_dns_namespace" "main" {
+  name        = "${var.project_name}.local"
+  description = "Private DNS namespace for ${var.project_name}"
+  vpc         = var.vpc_id
+
+  tags = var.tags
+}
+
+# Service Discovery Service for Backend
+resource "aws_service_discovery_service" "backend" {
+  name = "backend"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Component = "backend"
+    }
+  )
+}
+
+# Service Discovery Service for Frontend
+resource "aws_service_discovery_service" "frontend" {
+  name = "frontend"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Component = "frontend"
+    }
+  )
+}
+
+# Auto Scaling Target for Backend
+resource "aws_appautoscaling_target" "backend" {
+  count = var.enable_autoscaling ? 1 : 0
+
+  max_capacity       = var.backend_max_count
+  min_capacity       = var.backend_min_count
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.backend.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+# Auto Scaling Policy for Backend (CPU)
+resource "aws_appautoscaling_policy" "backend_cpu" {
+  count = var.enable_autoscaling ? 1 : 0
+
+  name               = "${var.project_name}-backend-cpu-${var.environment}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.backend[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.backend[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.backend[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value       = var.autoscaling_cpu_threshold
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}
+
+# Auto Scaling Policy for Backend (Memory)
+resource "aws_appautoscaling_policy" "backend_memory" {
+  count = var.enable_autoscaling ? 1 : 0
+
+  name               = "${var.project_name}-backend-memory-${var.environment}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.backend[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.backend[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.backend[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+
+    target_value       = var.autoscaling_memory_threshold
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}
+
+# Auto Scaling Target for Frontend
+resource "aws_appautoscaling_target" "frontend" {
+  count = var.enable_autoscaling ? 1 : 0
+
+  max_capacity       = var.frontend_max_count
+  min_capacity       = var.frontend_min_count
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.frontend.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+# Auto Scaling Policy for Frontend (CPU)
+resource "aws_appautoscaling_policy" "frontend_cpu" {
+  count = var.enable_autoscaling ? 1 : 0
+
+  name               = "${var.project_name}-frontend-cpu-${var.environment}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.frontend[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.frontend[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.frontend[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value       = var.autoscaling_cpu_threshold
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}

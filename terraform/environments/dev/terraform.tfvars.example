@@ -1,0 +1,68 @@
+# General Configuration
+project_name = "checkup"
+environment  = "dev"
+aws_region   = "us-east-1"
+owner_email  = "du.yanchao@gt.tech.gov.sg"
+
+# SSH Key (you must create this in AWS EC2 console first)
+key_name = "checkup-dev" # Change to your actual key pair name
+
+# SSH Access (restrict to your IP for security)
+# Get your IP: curl -s https://checkip.amazonaws.com
+ssh_cidr_blocks = [
+  # "1.2.3.4/32" # Replace with your actual IP address
+]
+
+# Networking (using default values, can override here)
+# vpc_cidr             = "10.0.0.0/16"
+# availability_zones   = ["us-east-1a", "us-east-1b"]
+
+# RDS Configuration (optimized for free tier / minimal cost)
+rds_instance_class          = "db.t3.micro"
+rds_allocated_storage       = 20
+rds_multi_az                = false # Set to true for production
+rds_skip_final_snapshot     = true  # Set to false for production
+rds_deletion_protection     = false # Set to true for production
+enable_rds_performance_insights = false
+
+# ECS Configuration (optimized for free tier)
+backend_cpu            = 256  # 0.25 vCPU
+backend_memory         = 512  # 0.5 GB
+backend_desired_count  = 1
+backend_min_count      = 1
+backend_max_count      = 3    # Limit for cost control
+
+frontend_cpu           = 256
+frontend_memory        = 512
+frontend_desired_count = 1
+frontend_min_count     = 1
+frontend_max_count     = 3
+
+# Auto-scaling (per decision worksheet)
+enable_ecs_autoscaling          = true
+ecs_autoscaling_cpu_threshold   = 70
+ecs_autoscaling_memory_threshold = 80
+
+# Monitoring (free tier optimized)
+enable_container_insights  = false # Additional cost
+enable_detailed_monitoring = false # Additional cost
+enable_cloudwatch_alarms   = true  # Free tier includes 10 alarms
+enable_ecs_exec           = false  # Enable only when debugging needed
+
+# ECR
+enable_ecr_scanning = true
+ecr_retention_count = 10
+
+# VPC Flow Logs
+enable_vpc_flow_logs = false # Enable if needed for security auditing
+
+# Domain (optional)
+# domain_name = "your-domain.com"
+
+# Common Tags
+common_tags = {
+  Project     = "checkup"
+  Environment = "Development"
+  ManagedBy   = "Terraform"
+  CostCenter  = "Engineering"
+}
