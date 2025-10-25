@@ -58,3 +58,8 @@ output "db_username_ssm_parameter" {
   description = "SSM parameter name containing database username"
   value       = aws_ssm_parameter.db_username.name
 }
+
+output "database_url_ssm_parameter" {
+  description = "SSM parameter name containing full DATABASE_URL connection string"
+  value       = aws_ssm_parameter.database_url.name
+}

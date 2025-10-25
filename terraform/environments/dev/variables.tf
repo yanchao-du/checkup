@@ -308,3 +308,58 @@ variable "enable_cloudwatch_alarms" {
   type        = bool
   default     = true
 }
+
+# CorpPass Configuration
+variable "enable_mockpass" {
+  description = "Enable MockPass for CorpPass simulation (dev/test only, disable for production)"
+  type        = bool
+  default     = true # Enable by default for dev environment
+}
+
+variable "cors_origin" {
+  description = "CORS origin URL for frontend (e.g., https://your-domain.com)"
+  type        = string
+  default     = "" # Will be set based on nginx public DNS if empty
+}
+
+variable "corppass_client_id" {
+  description = "CorpPass OAuth client ID (register your app with Singapore CorpPass)"
+  type        = string
+  default     = "checkup-app"
+}
+
+variable "corppass_issuer" {
+  description = "CorpPass OIDC issuer URL (production: https://corppass.gov.sg)"
+  type        = string
+  default     = "https://corppass.gov.sg/corppass/v2"
+}
+
+variable "corppass_authorize_url" {
+  description = "CorpPass authorization endpoint URL"
+  type        = string
+  default     = "https://corppass.gov.sg/corppass/v2/auth"
+}
+
+variable "corppass_token_url" {
+  description = "CorpPass token endpoint URL"
+  type        = string
+  default     = "https://corppass.gov.sg/corppass/v2/token"
+}
+
+variable "corppass_jwks_url" {
+  description = "CorpPass JWKS endpoint URL"
+  type        = string
+  default     = "https://corppass.gov.sg/corppass/v2/.well-known/keys"
+}
+
+variable "corppass_callback_url" {
+  description = "CorpPass OAuth callback URL for backend (will be constructed from nginx DNS)"
+  type        = string
+  default     = "" # Will be set based on nginx public DNS
+}
+
+variable "corppass_frontend_callback_url" {
+  description = "CorpPass frontend callback URL (will be constructed from nginx DNS)"
+  type        = string
+  default     = "" # Will be set based on nginx public DNS
+}

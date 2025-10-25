@@ -69,6 +69,76 @@ variable "jwt_secret_ssm_parameter" {
   type        = string
 }
 
+variable "database_url_ssm_parameter" {
+  description = "SSM parameter name for full DATABASE_URL connection string"
+  type        = string
+}
+
+variable "corppass_client_secret_ssm_parameter" {
+  description = "SSM parameter name for CorpPass client secret"
+  type        = string
+}
+
+# CorpPass Configuration
+variable "cors_origin" {
+  description = "CORS origin URL for frontend"
+  type        = string
+}
+
+variable "corppass_client_id" {
+  description = "CorpPass OAuth client ID"
+  type        = string
+}
+
+variable "corppass_issuer" {
+  description = "CorpPass OIDC issuer URL"
+  type        = string
+}
+
+variable "corppass_authorize_url" {
+  description = "CorpPass authorization endpoint URL"
+  type        = string
+}
+
+variable "corppass_token_url" {
+  description = "CorpPass token endpoint URL"
+  type        = string
+}
+
+variable "corppass_jwks_url" {
+  description = "CorpPass JWKS (JSON Web Key Set) endpoint URL"
+  type        = string
+}
+
+variable "corppass_callback_url" {
+  description = "CorpPass OAuth callback URL for backend"
+  type        = string
+}
+
+variable "corppass_frontend_callback_url" {
+  description = "CorpPass callback URL for frontend redirect"
+  type        = string
+}
+
+# MockPass Configuration (for dev/testing environments)
+variable "enable_mockpass" {
+  description = "Enable MockPass service for CorpPass simulation (dev/test only)"
+  type        = bool
+  default     = false
+}
+
+variable "mockpass_cpu" {
+  description = "CPU units for MockPass task"
+  type        = number
+  default     = 256
+}
+
+variable "mockpass_memory" {
+  description = "Memory for MockPass task in MB"
+  type        = number
+  default     = 512
+}
+
 # Container Images
 variable "backend_image_url" {
   description = "URL of backend container image"

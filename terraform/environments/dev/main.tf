@@ -40,6 +40,27 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+# Local values for computed URLs
+locals {
+  # Use nginx public DNS or domain_name if provided
+  app_base_url = var.domain_name != "" ? "https://${var.domain_name}" : "http://${module.ec2_nginx.public_dns}"
+
+  # For dev environment with MockPass enabled, use mockpass service discovery DNS
+  # For prod or when mockpass disabled, use real CorpPass endpoints from variables
+  mockpass_base_url = var.enable_mockpass ? "http://mockpass.${var.project_name}.local:5156" : ""
+
+  # CorpPass URLs - use MockPass in dev, real endpoints in prod
+  corppass_issuer        = var.enable_mockpass ? "${local.mockpass_base_url}/corppass/v2" : var.corppass_issuer
+  corppass_authorize_url = var.enable_mockpass ? "${local.mockpass_base_url}/corppass/v2/auth" : var.corppass_authorize_url
+  corppass_token_url     = var.enable_mockpass ? "${local.mockpass_base_url}/corppass/v2/token" : var.corppass_token_url
+  corppass_jwks_url      = var.enable_mockpass ? "${local.mockpass_base_url}/corppass/v2/.well-known/keys" : var.corppass_jwks_url
+
+  # CorpPass callback URLs
+  corppass_callback_url          = var.corppass_callback_url != "" ? var.corppass_callback_url : "${local.app_base_url}/v1/auth/corppass/callback"
+  corppass_frontend_callback_url = var.corppass_frontend_callback_url != "" ? var.corppass_frontend_callback_url : "${local.app_base_url}/auth/corppass/callback"
+  cors_origin                    = var.cors_origin != "" ? var.cors_origin : local.app_base_url
+}
+
 # JWT Secret in SSM Parameter Store
 resource "random_password" "jwt_secret" {
   length  = 64
@@ -57,15 +78,32 @@ resource "aws_ssm_parameter" "jwt_secret" {
   }
 }
 
+# CorpPass Client Secret in SSM Parameter Store
+resource "random_password" "corppass_client_secret" {
+  length  = 64
+  special = true
+}
+
+resource "aws_ssm_parameter" "corppass_client_secret" {
+  name        = "/${var.project_name}/${var.environment}/corppass/client_secret"
+  description = "CorpPass OAuth client secret"
+  type        = "SecureString"
+  value       = random_password.corppass_client_secret.result
+
+  tags = {
+    Component = "corppass"
+  }
+}
+
 # Networking Module
 module "networking" {
   source = "../../modules/networking"
 
-  project_name         = var.project_name
-  vpc_cidr             = var.vpc_cidr
-  availability_zones   = var.availability_zones
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  private_subnet_cidrs = var.private_subnet_cidrs
+  project_name          = var.project_name
+  vpc_cidr              = var.vpc_cidr
+  availability_zones    = var.availability_zones
+  public_subnet_cidrs   = var.public_subnet_cidrs
+  private_subnet_cidrs  = var.private_subnet_cidrs
   database_subnet_cidrs = var.database_subnet_cidrs
 
   nat_instance_type = var.nat_instance_type
@@ -82,9 +120,9 @@ module "networking" {
 module "ecr" {
   source = "../../modules/ecr"
 
-  project_name           = var.project_name
-  enable_image_scanning  = var.enable_ecr_scanning
-  image_retention_count  = var.ecr_retention_count
+  project_name          = var.project_name
+  enable_image_scanning = var.enable_ecr_scanning
+  image_retention_count = var.ecr_retention_count
 
   tags = var.common_tags
 }
@@ -93,20 +131,20 @@ module "ecr" {
 module "rds" {
   source = "../../modules/rds"
 
-  project_name         = var.project_name
-  environment          = var.environment
-  database_subnet_ids  = module.networking.database_subnet_ids
-  security_group_id    = module.networking.security_group_rds
+  project_name        = var.project_name
+  environment         = var.environment
+  database_subnet_ids = module.networking.database_subnet_ids
+  security_group_id   = module.networking.security_group_rds
 
-  instance_class          = var.rds_instance_class
-  allocated_storage       = var.rds_allocated_storage
-  postgres_version        = var.rds_postgres_version
-  database_name           = var.database_name
-  database_username       = var.database_username
-  backup_retention_days   = var.rds_backup_retention_days
-  multi_az                = var.rds_multi_az
-  skip_final_snapshot     = var.rds_skip_final_snapshot
-  deletion_protection     = var.rds_deletion_protection
+  instance_class        = var.rds_instance_class
+  allocated_storage     = var.rds_allocated_storage
+  postgres_version      = var.rds_postgres_version
+  database_name         = var.database_name
+  database_username     = var.database_username
+  backup_retention_days = var.rds_backup_retention_days
+  multi_az              = var.rds_multi_az
+  skip_final_snapshot   = var.rds_skip_final_snapshot
+  deletion_protection   = var.rds_deletion_protection
 
   enable_cloudwatch_logs      = var.enable_rds_cloudwatch_logs
   enable_performance_insights = var.enable_rds_performance_insights
@@ -121,22 +159,37 @@ module "rds" {
 module "ecs" {
   source = "../../modules/ecs"
 
-  project_name       = var.project_name
-  environment        = var.environment
-  aws_region         = data.aws_region.current.name
-  aws_account_id     = data.aws_caller_identity.current.account_id
-  vpc_id             = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
+  project_name          = var.project_name
+  environment           = var.environment
+  aws_region            = data.aws_region.current.name
+  aws_account_id        = data.aws_caller_identity.current.account_id
+  vpc_id                = module.networking.vpc_id
+  private_subnet_ids    = module.networking.private_subnet_ids
   ecs_security_group_id = module.networking.security_group_ecs_tasks
   ecr_read_policy_arn   = module.ecr.ecr_read_policy_arn
 
   # Database SSM parameters
-  db_host_ssm_parameter     = module.rds.db_host_ssm_parameter
-  db_port_ssm_parameter     = module.rds.db_port_ssm_parameter
-  db_name_ssm_parameter     = module.rds.db_name_ssm_parameter
-  db_username_ssm_parameter = module.rds.db_username_ssm_parameter
-  db_password_ssm_parameter = module.rds.db_password_ssm_parameter
-  jwt_secret_ssm_parameter  = aws_ssm_parameter.jwt_secret.name
+  db_host_ssm_parameter                = module.rds.db_host_ssm_parameter
+  db_port_ssm_parameter                = module.rds.db_port_ssm_parameter
+  db_name_ssm_parameter                = module.rds.db_name_ssm_parameter
+  db_username_ssm_parameter            = module.rds.db_username_ssm_parameter
+  db_password_ssm_parameter            = module.rds.db_password_ssm_parameter
+  database_url_ssm_parameter           = module.rds.database_url_ssm_parameter
+  jwt_secret_ssm_parameter             = aws_ssm_parameter.jwt_secret.name
+  corppass_client_secret_ssm_parameter = aws_ssm_parameter.corppass_client_secret.name
+
+  # CorpPass Configuration
+  cors_origin                    = local.cors_origin
+  corppass_client_id             = var.corppass_client_id
+  corppass_issuer                = local.corppass_issuer
+  corppass_authorize_url         = local.corppass_authorize_url
+  corppass_token_url             = local.corppass_token_url
+  corppass_jwks_url              = local.corppass_jwks_url
+  corppass_callback_url          = local.corppass_callback_url
+  corppass_frontend_callback_url = local.corppass_frontend_callback_url
+
+  # MockPass (dev/test only)
+  enable_mockpass = var.enable_mockpass
 
   # Container images
   backend_image_url  = module.ecr.backend_repository_url
@@ -146,11 +199,11 @@ module "ecs" {
   backend_api_url    = "http://${module.ec2_nginx.public_dns}"
 
   # Task configuration
-  backend_cpu            = var.backend_cpu
-  backend_memory         = var.backend_memory
-  backend_desired_count  = var.backend_desired_count
-  backend_min_count      = var.backend_min_count
-  backend_max_count      = var.backend_max_count
+  backend_cpu           = var.backend_cpu
+  backend_memory        = var.backend_memory
+  backend_desired_count = var.backend_desired_count
+  backend_min_count     = var.backend_min_count
+  backend_max_count     = var.backend_max_count
 
   frontend_cpu           = var.frontend_cpu
   frontend_memory        = var.frontend_memory
@@ -164,9 +217,9 @@ module "ecs" {
   autoscaling_memory_threshold = var.ecs_autoscaling_memory_threshold
 
   # Monitoring
-  log_retention_days       = var.ecs_log_retention_days
+  log_retention_days        = var.ecs_log_retention_days
   enable_container_insights = var.enable_container_insights
-  enable_ecs_exec          = var.enable_ecs_exec
+  enable_ecs_exec           = var.enable_ecs_exec
 
   tags = var.common_tags
 
@@ -183,11 +236,11 @@ module "ec2_nginx" {
   security_group_id = module.networking.security_group_nginx
   key_name          = var.key_name
 
-  instance_type          = var.nginx_instance_type
-  root_volume_size       = var.nginx_root_volume_size
-  backend_service_dns    = "backend.${module.ecs.service_discovery_namespace_name}"
-  frontend_service_dns   = "frontend.${module.ecs.service_discovery_namespace_name}"
-  domain_name            = var.domain_name
+  instance_type        = var.nginx_instance_type
+  root_volume_size     = var.nginx_root_volume_size
+  backend_service_dns  = "backend.${module.ecs.service_discovery_namespace_name}"
+  frontend_service_dns = "frontend.${module.ecs.service_discovery_namespace_name}"
+  domain_name          = var.domain_name
 
   enable_detailed_monitoring = var.enable_detailed_monitoring
   enable_cloudwatch_alarms   = var.enable_cloudwatch_alarms

@@ -134,7 +134,7 @@ resource "aws_ecs_task_definition" "backend" {
 
       portMappings = [
         {
-          containerPort = 3000
+          containerPort = 3344
           protocol      = "tcp"
         }
       ]
@@ -146,34 +146,54 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           name  = "PORT"
-          value = "3000"
+          value = "3344"
+        },
+        {
+          name  = "CORS_ORIGIN"
+          value = var.cors_origin
+        },
+        {
+          name  = "CORPPASS_CLIENT_ID"
+          value = var.corppass_client_id
+        },
+        {
+          name  = "CORPPASS_ISSUER"
+          value = var.corppass_issuer
+        },
+        {
+          name  = "CORPPASS_AUTHORIZE_URL"
+          value = var.corppass_authorize_url
+        },
+        {
+          name  = "CORPPASS_TOKEN_URL"
+          value = var.corppass_token_url
+        },
+        {
+          name  = "CORPPASS_JWKS_URL"
+          value = var.corppass_jwks_url
+        },
+        {
+          name  = "CORPPASS_CALLBACK_URL"
+          value = var.corppass_callback_url
+        },
+        {
+          name  = "CORPPASS_FRONTEND_CALLBACK_URL"
+          value = var.corppass_frontend_callback_url
         }
       ]
 
       secrets = [
         {
-          name      = "DATABASE_HOST"
-          valueFrom = var.db_host_ssm_parameter
-        },
-        {
-          name      = "DATABASE_PORT"
-          valueFrom = var.db_port_ssm_parameter
-        },
-        {
-          name      = "DATABASE_NAME"
-          valueFrom = var.db_name_ssm_parameter
-        },
-        {
-          name      = "DATABASE_USER"
-          valueFrom = var.db_username_ssm_parameter
-        },
-        {
-          name      = "DATABASE_PASSWORD"
-          valueFrom = var.db_password_ssm_parameter
+          name      = "DATABASE_URL"
+          valueFrom = var.database_url_ssm_parameter
         },
         {
           name      = "JWT_SECRET"
           valueFrom = var.jwt_secret_ssm_parameter
+        },
+        {
+          name      = "CORPPASS_CLIENT_SECRET"
+          valueFrom = var.corppass_client_secret_ssm_parameter
         }
       ]
 
@@ -187,7 +207,7 @@ resource "aws_ecs_task_definition" "backend" {
       }
 
       healthCheck = {
-        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api || exit 1"]
+        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3344/v1/health || exit 1"]
         interval    = 30
         timeout     = 5
         retries     = 3
@@ -265,7 +285,77 @@ resource "aws_ecs_task_definition" "frontend" {
   )
 }
 
-# ECS Service for Backend
+# Task definition for MockPass (dev/test only)
+resource "aws_ecs_task_definition" "mockpass" {
+  count = var.enable_mockpass ? 1 : 0
+
+  family                   = "${var.project_name}-mockpass-${var.environment}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.mockpass_cpu
+  memory                   = var.mockpass_memory
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "mockpass"
+      image     = "${var.backend_image_url}:${var.backend_image_tag}"
+      essential = true
+      
+      entryPoint = ["sh"]
+      command    = ["/app/scripts/start-mockpass.sh"]
+
+      portMappings = [
+        {
+          containerPort = 5156
+          protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "NODE_ENV"
+          value = "development"
+        },
+        {
+          name  = "PORT"
+          value = "5156"
+        },
+        {
+          name  = "SHOW_LOGIN_PAGE"
+          value = "true"
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "mockpass"
+        }
+      }
+
+      healthCheck = {
+        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5156/corppass/v2/.well-known/keys || exit 1"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 40
+      }
+    }
+  ])
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-mockpass-${var.environment}"
+      Environment = var.environment
+      Component   = "mockpass"
+    }
+  )
+}
 resource "aws_ecs_service" "backend" {
   name            = "${var.project_name}-backend-${var.environment}"
   cluster         = aws_ecs_cluster.main.id
@@ -398,7 +488,71 @@ resource "aws_service_discovery_service" "frontend" {
   )
 }
 
-# Auto Scaling Target for Backend
+# Service Discovery Service for MockPass (dev/test only)
+resource "aws_service_discovery_service" "mockpass" {
+  count = var.enable_mockpass ? 1 : 0
+  
+  name = "mockpass"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Component = "mockpass"
+    }
+  )
+}
+
+# ECS Service for MockPass (dev/test only)
+resource "aws_ecs_service" "mockpass" {
+  count = var.enable_mockpass ? 1 : 0
+
+  name            = "${var.project_name}-mockpass-${var.environment}"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.mockpass[0].arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_security_group_id]
+    assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.mockpass[0].arn
+  }
+
+  deployment_configuration {
+    maximum_percent         = 200
+    minimum_healthy_percent = 100
+  }
+
+  enable_execute_command = var.enable_ecs_exec
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.project_name}-mockpass-${var.environment}"
+      Environment = var.environment
+      Component   = "mockpass"
+    }
+  )
+}
 resource "aws_appautoscaling_target" "backend" {
   count = var.enable_autoscaling ? 1 : 0
 

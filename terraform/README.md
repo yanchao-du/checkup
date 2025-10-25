@@ -16,6 +16,109 @@ The infrastructure includes:
 - **Auto-scaling**: Target tracking auto-scaling based on CPU and memory
 - **CloudWatch**: Logs and alarms for monitoring
 
+## CorpPass Configuration
+
+### Overview
+The application supports two CorpPass authentication modes:
+- **Dev/Test**: MockPass (simulated CorpPass for development)
+- **Production**: Real Singapore CorpPass integration
+
+### Dev Environment (MockPass Enabled)
+
+The dev environment deploys a **MockPass ECS service** that simulates Singapore's CorpPass authentication system. This allows testing the full authentication flow without requiring real CorpPass credentials.
+
+#### Dev Deployment Configuration
+```hcl
+# In environments/dev/terraform.tfvars
+enable_mockpass = true  # Deploys MockPass service
+
+# MockPass URLs (automatically configured via locals)
+corppass_issuer        = "http://mockpass.checkup.local:5156/corppass/v2"
+corppass_authorize_url = "http://mockpass.checkup.local:5156/corppass/v2/auth"
+corppass_token_url     = "http://mockpass.checkup.local:5156/corppass/v2/token"
+corppass_jwks_url      = "http://mockpass.checkup.local:5156/corppass/v2/.well-known/keys"
+corppass_client_id     = "checkup-app"
+```
+
+#### What Gets Deployed (Dev)
+- ✅ **MockPass ECS Service**: Runs `mockpass:5156` container with service discovery DNS `mockpass.checkup.local:5156`
+- ✅ **Backend**: Configured to use MockPass endpoints via service discovery
+- ✅ **Frontend**: Points to backend on port 3344
+- ✅ **Database**: RDS PostgreSQL with DATABASE_URL SSM parameter
+
+#### Testing with MockPass
+1. Access the application via nginx public DNS or custom domain
+2. Click "Login with CorpPass"
+3. MockPass login screen appears (simulated CorpPass UI)
+4. Select test user (S1234567A, S1234567B, S1234567C, S1234567D)
+5. Authentication flow completes using MockPass tokens
+
+### Production Environment (Real CorpPass)
+
+For production deployment, disable MockPass and configure real CorpPass endpoints.
+
+#### Production Deployment Configuration
+```hcl
+# In environments/prod/terraform.tfvars (or pass as CLI variables)
+enable_mockpass = false  # CRITICAL: Disable MockPass for production
+
+# Real CorpPass URLs (Singapore government endpoints)
+corppass_issuer        = "https://corppass.gov.sg/corppass/v2"
+corppass_authorize_url = "https://corppass.gov.sg/corppass/v2/auth"
+corppass_token_url     = "https://corppass.gov.sg/corppass/v2/token"
+corppass_jwks_url      = "https://corppass.gov.sg/corppass/v2/.well-known/keys"
+corppass_client_id     = "your-registered-corppass-client-id"
+```
+
+#### What Gets Deployed (Production)
+- ❌ **MockPass**: NOT deployed (enable_mockpass=false)
+- ✅ **Backend**: Configured to use real CorpPass endpoints (`https://corppass.gov.sg`)
+- ✅ **Frontend**: Points to backend on port 3344
+- ✅ **Database**: RDS PostgreSQL with DATABASE_URL SSM parameter
+
+#### Production Prerequisites
+1. **Register with CorpPass**: Apply at https://www.corppass.gov.sg/ to obtain:
+   - Client ID
+   - Client certificates (for JWT signing)
+   - Approved callback URLs
+2. **Update Terraform variables**: Set real CorpPass URLs in `environments/prod/terraform.tfvars`
+3. **Upload certificates**: Store CorpPass client certificates in `backend/static/certs/` before building Docker images
+4. **Configure callback URLs**: Update `corppass_callback_url` and `corppass_frontend_callback_url` to match your production domain
+
+### Environment Variables Summary
+
+| Variable | Dev (MockPass) | Production (Real CorpPass) |
+|----------|---------------|---------------------------|
+| `enable_mockpass` | `true` | `false` |
+| `corppass_issuer` | `http://mockpass.checkup.local:5156/corppass/v2` | `https://corppass.gov.sg/corppass/v2` |
+| `corppass_authorize_url` | `http://mockpass.checkup.local:5156/corppass/v2/auth` | `https://corppass.gov.sg/corppass/v2/auth` |
+| `corppass_token_url` | `http://mockpass.checkup.local:5156/corppass/v2/token` | `https://corppass.gov.sg/corppass/v2/token` |
+| `corppass_jwks_url` | `http://mockpass.checkup.local:5156/corppass/v2/.well-known/keys` | `https://corppass.gov.sg/corppass/v2/.well-known/keys` |
+| `corppass_client_id` | `checkup-app` | `your-registered-client-id` |
+| `corppass_callback_url` | Auto-computed: `http://{nginx_dns}:3344/v1/auth/corppass/callback` | Auto-computed: `https://{domain}/v1/auth/corppass/callback` |
+| `corppass_frontend_callback_url` | Auto-computed: `http://{nginx_dns}:8080/auth/corppass/callback` | Auto-computed: `https://{domain}/auth/corppass/callback` |
+
+### Service Discovery (AWS Cloud Map)
+
+The ECS module creates service discovery namespaces for inter-service communication:
+- **Namespace**: `checkup.local` (private DNS)
+- **Services**:
+  - `backend.checkup.local:3344` - Backend API
+  - `frontend.checkup.local:8080` - Frontend web app
+  - `mockpass.checkup.local:5156` - MockPass (dev only, conditional)
+
+### Infrastructure Alignment
+
+The Terraform configuration has been fully aligned with the root `docker-compose.yml`:
+- **Backend port**: `3344` (matches docker-compose)
+- **Health checks**: 
+  - Backend: `/v1/health` (port 3344)
+  - Frontend: `/health` (port 8080)
+  - MockPass: `/corppass/v2/.well-known/keys` (port 5156, dev only)
+- **Database**: Single `DATABASE_URL` environment variable (Prisma connection string format)
+- **CorpPass**: All 7 CorpPass environment variables configured with conditional endpoints
+- **CORS**: `CORS_ORIGIN` dynamically computed based on nginx public DNS or custom domain
+
 ## Cost Estimate
 
 Based on decision worksheet (part-time usage: 3 days/month):

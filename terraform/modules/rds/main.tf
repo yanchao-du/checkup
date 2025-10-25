@@ -65,6 +65,16 @@ resource "aws_ssm_parameter" "db_password" {
   tags = var.tags
 }
 
+# DATABASE_URL for NestJS/Prisma (postgresql://user:pass@host:port/dbname)
+resource "aws_ssm_parameter" "database_url" {
+  name        = "/${var.project_name}/${var.environment}/db/url"
+  description = "Full DATABASE_URL connection string for Prisma/NestJS"
+  type        = "SecureString"
+  value       = "postgresql://${var.database_username}:${random_password.db_password.result}@${aws_db_instance.main.address}:${aws_db_instance.main.port}/${var.database_name}"
+
+  tags = var.tags
+}
+
 # RDS Instance
 resource "aws_db_instance" "main" {
   identifier     = "${var.project_name}-${var.environment}"
