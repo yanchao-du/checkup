@@ -3,13 +3,18 @@
 **Target**: Deploy CheckUp to AWS dev environment with MockPass (simulated CorpPass)  
 **Prerequisites**: AWS account, Terraform installed, AWS CLI configured  
 **Estimated Time**: 15-20 minutes  
-**Estimated Cost**: ~$50-60/month (can be stopped when not in use)
+**Estimated Cost**: ~$0/month (FREE TIER eligible with t2.micro EC2 instances)
 
 ## Step 1: Build and Push Docker Images
 
 ```bash
 # 1. Login to AWS ECR (replace REGION and ACCOUNT_ID)
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+
+#1.1 Create ECR repository before pushing image
+aws ecr create-repository --repository-name checkup-backend --region us-east-1
+aws ecr create-repository --repository-name checkup-frontend --region us-east-1
+aws ecr create-repository --repository-name checkup-mockpass --region us-east-1
 
 # 2. Build backend image
 cd backend
@@ -25,9 +30,31 @@ docker push ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/checkup-frontend:latest
 
 # 4. Build MockPass image (for dev only)
 cd ..
-docker build -f backend/Dockerfile.mockpass -t checkup-mockpass .
+# docker build -f backend/Dockerfile.mockpass -t checkup-mockpass .
+docker build -t checkup-mockpass ./backend
 docker tag checkup-mockpass:latest ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/checkup-mockpass:latest
 docker push ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/checkup-mockpass:latest
+```
+
+Create S3 bucket
+
+```bash
+aws s3 mb s3://checkup-terraform-state --region us-east-1
+```
+
+(Optional but recommended) Create the DynamoDB table for state locking (this will fall within free tier due to low usage)
+```bash
+aws dynamodb create-table \
+  --table-name checkup-terraform-locks \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  --region us-east-1
+  ```
+
+Run 
+```bash
+terraform init && terraform validate
 ```
 
 ## Step 2: Configure Terraform Variables
@@ -58,13 +85,17 @@ db_skip_final_snapshot = true  # Set to false for production
 # JWT Configuration (generate a strong secret)
 jwt_secret = "your-super-secret-jwt-key-min-32-chars"  # CHANGE THIS!
 
-# Resource Sizing (Dev - cost-optimized)
-backend_cpu    = 256   # 0.25 vCPU
-backend_memory = 512   # 512 MB
-frontend_cpu   = 256   # 0.25 vCPU
-frontend_memory = 512  # 512 MB
-mockpass_cpu    = 256  # 0.25 vCPU
-mockpass_memory = 512  # 512 MB
+# ECS EC2 Configuration (Free Tier)
+ecs_instance_type         = "t2.micro"  # FREE TIER: 750 hours/month for 12 months
+ecs_instance_desired_count = 1
+ecs_instance_min_count    = 1
+ecs_instance_max_count    = 2
+
+# Resource Sizing (Optimized for t2.micro 1GB RAM)
+backend_memory  = 256  # 256 MB (EC2 launch type, no CPU allocation needed)
+frontend_memory = 256  # 256 MB (EC2 launch type, no CPU allocation needed)
+mockpass_memory = 256  # 256 MB (EC2 launch type, no CPU allocation needed)
+# Total: 768 MB for 3 containers, ~256 MB for OS overhead
 ```
 
 ## Step 3: Deploy Infrastructure
@@ -132,10 +163,13 @@ aws rds describe-db-instances --db-instance-identifier checkup-dev-postgres --re
 
 ### Stop Services (when not in use)
 ```bash
-# Stop all ECS services (keeps infrastructure, stops compute)
+# Stop all ECS tasks by scaling down to 0
 aws ecs update-service --cluster checkup-dev --service checkup-dev-backend --desired-count 0 --region us-east-1
 aws ecs update-service --cluster checkup-dev --service checkup-dev-frontend --desired-count 0 --region us-east-1
 aws ecs update-service --cluster checkup-dev --service checkup-dev-mockpass --desired-count 0 --region us-east-1
+
+# Stop ECS EC2 instances (via Auto Scaling Group)
+aws autoscaling set-desired-capacity --auto-scaling-group-name checkup-dev-ecs-asg --desired-capacity 0 --region us-east-1
 
 # Stop RDS database (to save costs)
 aws rds stop-db-instance --db-instance-identifier checkup-dev-postgres --region us-east-1
@@ -152,7 +186,10 @@ aws rds start-db-instance --db-instance-identifier checkup-dev-postgres --region
 # Start nginx EC2 instance
 aws ec2 start-instances --instance-ids $(terraform output -raw nginx_instance_id) --region us-east-1
 
-# Restart ECS services
+# Start ECS EC2 instances (via Auto Scaling Group)
+aws autoscaling set-desired-capacity --auto-scaling-group-name checkup-dev-ecs-asg --desired-capacity 1 --region us-east-1
+
+# Wait for EC2 instances to join cluster, then restart ECS services
 aws ecs update-service --cluster checkup-dev --service checkup-dev-backend --desired-count 1 --region us-east-1
 aws ecs update-service --cluster checkup-dev --service checkup-dev-frontend --desired-count 1 --region us-east-1
 aws ecs update-service --cluster checkup-dev --service checkup-dev-mockpass --desired-count 1 --region us-east-1
@@ -222,9 +259,20 @@ aws servicediscovery list-services --filters Name=NAMESPACE_ID,Values=<namespace
   - Set `enable_mockpass = false`
   - Configure real CorpPass credentials
 
-- 💰 **Cost**: Estimated $50-60/month if running 24/7. Stop services when not in use to reduce costs.
+- 💰 **Cost**: 
+  - **FREE TIER**: t2.micro EC2 instances (750 hours/month for 12 months)
+  - **FREE TIER**: 30 GB EBS storage, 15 GB data transfer
+  - **PAID**: RDS db.t3.micro (~$13/month, can be stopped when not in use)
+  - **PAID**: nginx t2.micro (~$9/month if running 24/7, FREE if within 750 hours)
+  - **Total**: ~$13-22/month (vs ~$50/month with Fargate)
+  - After 12 months: ~$22/month (t2.micro becomes paid)
 
 - 🎯 **MockPass**: Only for dev/test. Never enable in production.
+
+- 🚀 **EC2 Launch Type**: Using EC2 instances instead of Fargate for free tier eligibility
+  - Containers run on t2.micro instances (1 vCPU, 1 GB RAM)
+  - Bridge networking with dynamic port allocation
+  - Auto Scaling Group manages EC2 instance lifecycle
 
 ---
 

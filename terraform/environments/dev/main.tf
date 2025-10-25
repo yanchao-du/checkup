@@ -43,7 +43,7 @@ data "aws_region" "current" {}
 # Local values for computed URLs
 locals {
   # Use nginx public DNS or domain_name if provided
-  app_base_url = var.domain_name != "" ? "https://${var.domain_name}" : "http://${module.ec2_nginx.public_dns}"
+  app_base_url = var.domain_name != "" ? "https://${var.domain_name}" : "http://${local.backend_service_dns}"
 
   # For dev environment with MockPass enabled, use mockpass service discovery DNS
   # For prod or when mockpass disabled, use real CorpPass endpoints from variables
@@ -56,9 +56,14 @@ locals {
   corppass_jwks_url      = var.enable_mockpass ? "${local.mockpass_base_url}/corppass/v2/.well-known/keys" : var.corppass_jwks_url
 
   # CorpPass callback URLs
-  corppass_callback_url          = var.corppass_callback_url != "" ? var.corppass_callback_url : "${local.app_base_url}/v1/auth/corppass/callback"
-  corppass_frontend_callback_url = var.corppass_frontend_callback_url != "" ? var.corppass_frontend_callback_url : "${local.app_base_url}/auth/corppass/callback"
+  corppass_callback_url          = var.corppass_callback_url != "" ? var.corppass_callback_url : (var.domain_name != "" ? "https://${var.domain_name}/v1/auth/corppass/callback" : "http://${local.backend_service_dns}/v1/auth/corppass/callback")
+  corppass_frontend_callback_url = var.corppass_frontend_callback_url != "" ? var.corppass_frontend_callback_url : (var.domain_name != "" ? "https://${var.domain_name}/auth/corppass/callback" : "http://${local.backend_service_dns}/auth/corppass/callback")
   cors_origin                    = var.cors_origin != "" ? var.cors_origin : local.app_base_url
+
+    # Compute service DNS names here to break cycle
+    service_discovery_namespace_name = "${var.project_name}.local"
+    backend_service_dns  = "backend.${local.service_discovery_namespace_name}"
+    frontend_service_dns = "frontend.${local.service_discovery_namespace_name}"
 }
 
 # JWT Secret in SSM Parameter Store
@@ -196,7 +201,7 @@ module "ecs" {
   backend_image_tag  = var.backend_image_tag
   frontend_image_url = module.ecr.frontend_repository_url
   frontend_image_tag = var.frontend_image_tag
-  backend_api_url    = "http://${module.ec2_nginx.public_dns}"
+  backend_api_url    = local.app_base_url
 
   # Task configuration
   backend_cpu           = var.backend_cpu
@@ -238,8 +243,8 @@ module "ec2_nginx" {
 
   instance_type        = var.nginx_instance_type
   root_volume_size     = var.nginx_root_volume_size
-  backend_service_dns  = "backend.${module.ecs.service_discovery_namespace_name}"
-  frontend_service_dns = "frontend.${module.ecs.service_discovery_namespace_name}"
+  backend_service_dns  = local.backend_service_dns
+  frontend_service_dns = local.frontend_service_dns
   domain_name          = var.domain_name
 
   enable_detailed_monitoring = var.enable_detailed_monitoring

@@ -1,3 +1,9 @@
+# Terraform state and provider files
+terraform/environments/dev/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!terraform/environments/dev/terraform.tfvars.example
 # Dependencies
 node_modules/
 /.pnp

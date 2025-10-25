@@ -443,7 +443,7 @@ resource "aws_ecs_task_definition" "mockpass" {
       image     = "${var.backend_image_url}:${var.backend_image_tag}"
       essential = true
       memory    = var.mockpass_memory
-      
+
       entryPoint = ["sh"]
       command    = ["/app/scripts/start-mockpass.sh"]
 
@@ -619,7 +619,7 @@ resource "aws_service_discovery_service" "frontend" {
 # Service Discovery Service for MockPass (dev/test only)
 resource "aws_service_discovery_service" "mockpass" {
   count = var.enable_mockpass ? 1 : 0
-  
+
   name = "mockpass"
 
   dns_config {

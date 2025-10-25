@@ -8,6 +8,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+RUN npm config set strict-ssl false
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+ENV CYPRESS_INSTALL_BINARY=0
+
 # Install dependencies
 RUN npm ci
 

@@ -5,9 +5,6 @@ FROM node:22-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-
-
-
 # Copy package files
 COPY package*.json ./
 
@@ -21,6 +18,7 @@ COPY . .
 COPY scripts ./scripts
 
 # Generate Prisma Client
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 RUN npx prisma generate
 
 # Build the application
@@ -33,6 +31,8 @@ RUN ls -la /app/dist || (echo "ERROR: dist folder not created!" && exit 1)
 FROM node:22-alpine AS production
 
 # Install netcat for health checks
+RUN sed -i 's|https://|http://|g' /etc/apk/repositories
+RUN apk update
 RUN apk add --no-cache netcat-openbsd
 
 # Set working directory

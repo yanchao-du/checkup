@@ -136,7 +136,7 @@ variable "mockpass_cpu" {
 variable "mockpass_memory" {
   description = "Memory for MockPass task in MB"
   type        = number
-  default     = 256  # Reduced for t2.micro free tier (1 GB total)
+  default     = 256 # Reduced for t2.micro free tier (1 GB total)
 }
 
 # Container Images
@@ -177,7 +177,7 @@ variable "backend_cpu" {
 variable "backend_memory" {
   description = "Memory for backend task in MB"
   type        = number
-  default     = 256  # Reduced for t2.micro free tier (1 GB total)
+  default     = 256 # Reduced for t2.micro free tier (1 GB total)
 }
 
 variable "backend_desired_count" {
@@ -208,7 +208,7 @@ variable "frontend_cpu" {
 variable "frontend_memory" {
   description = "Memory for frontend task in MB"
   type        = number
-  default     = 256  # Reduced for t2.micro free tier (1 GB total)
+  default     = 256 # Reduced for t2.micro free tier (1 GB total)
 }
 
 variable "frontend_desired_count" {
