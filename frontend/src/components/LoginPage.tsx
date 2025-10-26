@@ -98,7 +98,8 @@ export function LoginPage() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                window.location.href = 'http://localhost:3344/v1/auth/corppass/authorize';
+                // Use Vite's import.meta.env and a template literal so the variable is interpolated
+                window.location.href = `${import.meta.env.VITE_API_URL}/auth/corppass/authorize`;
               }}
             >
               <Shield className="w-4 h-4 mr-2" />

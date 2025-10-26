@@ -18,6 +18,10 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Allow passing VITE_API_URL at build time so Vite inlines it into import.meta.env
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 # Build the application
 RUN npm run build
 
