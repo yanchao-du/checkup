@@ -51,8 +51,8 @@ export function LoginPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>Enter your credentials to access the portal</CardDescription>
+            {/* <CardTitle>Sign In</CardTitle> */}
+            {/* <CardDescription>Enter your credentials to access the portal</CardDescription> */}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -114,12 +114,14 @@ export function LoginPage() {
             </Button>
 
             <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600 mb-2">Demo Accounts:</p>
+              <p className="text-sm font-semibold text-slate-600 mb-2">Demo Accounts:</p>
               <div className="space-y-1 text-xs text-slate-500">
-                <p>Doctor: doctor@clinic.sg</p>
-                <p>Nurse: nurse@clinic.sg</p>
-                <p>Admin: admin@clinic.sg</p>
-                <p className="mt-2">Password: password</p>
+                <p className="text-sm">Doctor: doctor@clinic.sg / S1234567D</p>
+                <p className="text-sm">Nurse: nurse@clinic.sg / S2345678H</p>
+                <p className="text-sm">Admin: admin@clinic.sg / S3456789A</p>
+                <p className="text-sm">Nurse 2: nurse2@clinic.sg / S7890123C</p>
+                <p className="text-sm">UEN: 123456789D</p>
+                <p className="text-sm mb-2">Password: password</p>
               </div>
             </div>
           </CardContent>
