@@ -252,7 +252,7 @@ variable "autoscaling_memory_threshold" {
 variable "ecs_instance_type" {
   description = "EC2 instance type for ECS container instances"
   type        = string
-  default     = "t2.micro" # Free tier eligible
+  default     = "t3.micro" # Free tier eligible
 }
 
 variable "ecs_instance_desired_count" {

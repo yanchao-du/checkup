@@ -226,6 +226,8 @@ module "ecs" {
   enable_container_insights = var.enable_container_insights
   enable_ecs_exec           = var.enable_ecs_exec
 
+  ecs_instance_type = var.ecs_instance_type
+
   tags = var.common_tags
 
   depends_on = [module.networking, module.ecr, module.rds]

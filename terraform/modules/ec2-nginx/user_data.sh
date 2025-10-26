@@ -13,28 +13,21 @@ rpm -U ./amazon-cloudwatch-agent.rpm
 rm ./amazon-cloudwatch-agent.rpm
 
 # Configure nginx
-cat > /etc/nginx/conf.d/app.conf <<'EOF'
-# Backend API upstream
-upstream backend {
-    server ${backend_service_dns}:3000;
-    keepalive 32;
-}
-
-# Frontend upstream
-upstream frontend {
-    server ${frontend_service_dns}:8080;
-    keepalive 32;
-}
+cat > /etc/nginx/conf.d/app.conf <<EOF
+# Use AWS VPC DNS resolver
+resolver 169.254.169.253 valid=10s;
+resolver_timeout 5s;
 
 # Rate limiting
-limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
-limit_req_zone $binary_remote_addr zone=general_limit:10m rate=50r/s;
+limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=10r/s;
+limit_req_zone \$binary_remote_addr zone=general_limit:10m rate=50r/s;
 
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
     
-    server_name ${domain_name != "" ? domain_name : "_"};
+    server_name %{ if domain_name != "" }${domain_name}%{ else }_%{ endif };
+    # server_name $${domain_name:-_};
     
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -57,14 +50,15 @@ server {
     location /api {
         limit_req zone=api_limit burst=20 nodelay;
         
-        proxy_pass http://backend;
+        set \$backend_upstream ${backend_service_dns}:3344;
+        proxy_pass http://\$backend_upstream;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
@@ -81,12 +75,13 @@ server {
     location /auth {
         limit_req zone=api_limit burst=20 nodelay;
         
-        proxy_pass http://backend;
+        set \$backend_upstream ${backend_service_dns}:3344;
+        proxy_pass http://\$backend_upstream;
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         
         proxy_no_cache 1;
         proxy_cache_bypass 1;
@@ -96,29 +91,31 @@ server {
     location /applications {
         limit_req zone=api_limit burst=20 nodelay;
         
-        proxy_pass http://backend;
+        set \$backend_upstream ${backend_service_dns}:3344;
+        proxy_pass http://\$backend_upstream;
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
     
     # Frontend (Vue SPA)
     location / {
         limit_req zone=general_limit burst=100 nodelay;
         
-        proxy_pass http://frontend;
+        set \$frontend_upstream ${frontend_service_dns}:8080;
+        proxy_pass http://\$frontend_upstream;
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         
         # Cache static assets
         proxy_cache_valid 200 1h;
-        proxy_cache_bypass $http_pragma $http_authorization;
-        add_header X-Cache-Status $upstream_cache_status;
+        proxy_cache_bypass \$http_pragma \$http_authorization;
+        add_header X-Cache-Status \$upstream_cache_status;
     }
 }
 EOF

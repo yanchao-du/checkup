@@ -137,6 +137,8 @@ resource "aws_autoscaling_group" "ecs" {
       propagate_at_launch = true
     }
   }
+
+  protect_from_scale_in = true
 }
 
 # ECS Capacity Provider for EC2 Auto Scaling
@@ -274,11 +276,12 @@ resource "aws_ecs_task_definition" "backend" {
       memory    = var.backend_memory
 
       portMappings = [
-        {
-          containerPort = 3344
-          hostPort      = 0 # Dynamic port mapping
-          protocol      = "tcp"
-        }
+          {
+            containerPort = 3344
+            containerName = "backend"
+            hostPort      = 0 # Dynamic port mapping
+            protocol      = "tcp"
+          }
       ]
 
       environment = [
@@ -384,11 +387,12 @@ resource "aws_ecs_task_definition" "frontend" {
       memory    = var.frontend_memory
 
       portMappings = [
-        {
-          containerPort = 8080
-          hostPort      = 0 # Dynamic port mapping
-          protocol      = "tcp"
-        }
+          {
+            containerPort = 8080
+            containerName = "frontend"
+            hostPort      = 80
+            protocol      = "tcp"
+          }
       ]
 
       environment = [
@@ -448,11 +452,12 @@ resource "aws_ecs_task_definition" "mockpass" {
       command    = ["/app/scripts/start-mockpass.sh"]
 
       portMappings = [
-        {
-          containerPort = 5156
-          hostPort      = 0 # Dynamic port mapping
-          protocol      = "tcp"
-        }
+          {
+            containerPort = 5156
+            containerName = "mockpass"
+            hostPort      = 0 # Dynamic port mapping
+            protocol      = "tcp"
+          }
       ]
 
       environment = [
@@ -510,7 +515,9 @@ resource "aws_ecs_service" "backend" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.backend.arn
+    registry_arn   = aws_service_discovery_service.backend.arn
+    container_name = "backend"
+    container_port = 3344
   }
 
   enable_execute_command = var.enable_ecs_exec
@@ -538,7 +545,9 @@ resource "aws_ecs_service" "frontend" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.frontend.arn
+    registry_arn   = aws_service_discovery_service.frontend.arn
+    container_name = "frontend"
+    container_port = 8080
   }
 
   enable_execute_command = var.enable_ecs_exec
@@ -571,7 +580,7 @@ resource "aws_service_discovery_service" "backend" {
 
     dns_records {
       ttl  = 10
-      type = "A"
+      type = "SRV"
     }
 
     routing_policy = "MULTIVALUE"
@@ -598,7 +607,7 @@ resource "aws_service_discovery_service" "frontend" {
 
     dns_records {
       ttl  = 10
-      type = "A"
+      type = "SRV"
     }
 
     routing_policy = "MULTIVALUE"
@@ -627,7 +636,7 @@ resource "aws_service_discovery_service" "mockpass" {
 
     dns_records {
       ttl  = 10
-      type = "A"
+      type = "SRV"
     }
 
     routing_policy = "MULTIVALUE"
@@ -660,7 +669,9 @@ resource "aws_ecs_service" "mockpass" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.mockpass[0].arn
+    registry_arn   = aws_service_discovery_service.mockpass[0].arn
+    container_name = "mockpass"
+    container_port = 5156
   }
 
   enable_execute_command = var.enable_ecs_exec

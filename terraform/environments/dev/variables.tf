@@ -363,3 +363,8 @@ variable "corppass_frontend_callback_url" {
   type        = string
   default     = "" # Will be set based on nginx public DNS
 }
+
+variable "ecs_instance_type" {
+  description = "EC2 instance type for ECS cluster nodes (e.g., t2.micro for free tier)"
+  type        = string
+}

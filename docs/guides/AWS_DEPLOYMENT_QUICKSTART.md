@@ -40,6 +40,10 @@ Create S3 bucket
 
 ```bash
 aws s3 mb s3://checkup-terraform-state --region us-east-1
+
+
+
+
 ```
 
 (Optional but recommended) Create the DynamoDB table for state locking (this will fall within free tier due to low usage)
@@ -52,9 +56,18 @@ aws dynamodb create-table \
   --region us-east-1
   ```
 
-Run 
+check what are the postgres versions available in your regaion
+```bash
+aws rds describe-db-engine-versions \
+  --engine postgres \
+  --query "DBEngineVersions[].EngineVersion" \
+  --region us-east-1 
+```
+
+Run in 'terraform/environments/dev'
 ```bash
 terraform init && terraform validate
+terraform plan
 ```
 
 ## Step 2: Configure Terraform Variables

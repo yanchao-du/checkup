@@ -70,7 +70,8 @@ resource "aws_ssm_parameter" "database_url" {
   name        = "/${var.project_name}/${var.environment}/db/url"
   description = "Full DATABASE_URL connection string for Prisma/NestJS"
   type        = "SecureString"
-  value       = "postgresql://${var.database_username}:${random_password.db_password.result}@${aws_db_instance.main.address}:${aws_db_instance.main.port}/${var.database_name}"
+  # value       = "postgresql://${var.database_username}:${random_password.db_password.result}@${aws_db_instance.main.address}:${aws_db_instance.main.port}/${var.database_name}"
+  value = "postgresql://${var.database_username}:${urlencode(random_password.db_password.result)}@${aws_db_instance.main.address}:${aws_db_instance.main.port}/${var.database_name}"
 
   tags = var.tags
 }

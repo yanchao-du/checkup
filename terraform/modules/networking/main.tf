@@ -253,11 +253,19 @@ resource "aws_security_group" "ecs_tasks" {
   }
 
   ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nginx.id]
+    description     = "Allow frontend from nginx on port 80"
+  }
+
+  ingress {
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
     security_groups = [aws_security_group.nginx.id]
-    description     = "Allow frontend from nginx"
+    description     = "Allow frontend from nginx on port 8080"
   }
 
   # Allow all outbound
@@ -331,6 +339,7 @@ resource "aws_security_group" "nginx" {
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTP from internet"
   }
+
 
   # Allow HTTPS
   ingress {
