@@ -47,11 +47,11 @@ RUN addgroup -g 1001 -S nginx-app && \
 USER nginx-app
 
 # Expose port
-EXPOSE 8080
+EXPOSE 80
 
-# Health check
+# Health check - nginx listens on port 80 inside the container
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:8080/ || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
