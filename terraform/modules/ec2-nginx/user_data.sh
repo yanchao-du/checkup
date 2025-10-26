@@ -4,6 +4,9 @@ set -e
 # Update system
 yum update -y
 
+# Install required packages
+yum install -y bind-utils jq
+
 # Install nginx
 amazon-linux-extras install nginx1 -y
 
@@ -12,12 +15,64 @@ wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/a
 rpm -U ./amazon-cloudwatch-agent.rpm
 rm ./amazon-cloudwatch-agent.rpm
 
-# Configure nginx
-cat > /etc/nginx/conf.d/app.conf <<EOF
-# Use AWS VPC DNS resolver
-resolver 169.254.169.253 valid=10s;
-resolver_timeout 5s;
+# Create script to resolve SRV records and get actual IPs
+cat > /usr/local/bin/update-upstream-ips.sh <<'RESOLVE_SCRIPT'
+#!/bin/bash
+set -e
 
+# Query ECS to get task IPs for backend
+CLUSTER="${ecs_cluster_name}"
+
+# Get backend task IPs
+aws ecs list-tasks --cluster $CLUSTER --service-name checkup-backend-${environment} --region ${aws_region} --query 'taskArns[]' --output text | \
+while read TASK_ARN; do
+  aws ecs describe-tasks --cluster $CLUSTER --tasks $TASK_ARN --region ${aws_region} --query 'tasks[0].containers[?name==`backend`].networkInterfaces[0].privateIpv4Address' --output text
+done | head -n1 > /tmp/backend_ip.txt || echo "" > /tmp/backend_ip.txt
+
+# Get frontend task IPs
+aws ecs list-tasks --cluster $CLUSTER --service-name checkup-frontend-${environment} --region ${aws_region} --query 'taskArns[]' --output text | \
+while read TASK_ARN; do
+  aws ecs describe-tasks --cluster $CLUSTER --tasks $TASK_ARN --region ${aws_region} --query 'tasks[0].containers[?name==`frontend`].networkInterfaces[0].privateIpv4Address' --output text
+done | head -n1 > /tmp/frontend_ip.txt || echo "" > /tmp/frontend_ip.txt
+
+# Update nginx upstream config
+BACKEND_IP=$(cat /tmp/backend_ip.txt)
+FRONTEND_IP=$(cat /tmp/frontend_ip.txt)
+
+if [ -n "$BACKEND_IP" ] && [ -n "$FRONTEND_IP" ]; then
+  cat > /etc/nginx/conf.d/upstreams.conf <<UPSTREAM
+upstream backend_pool {
+    server $BACKEND_IP:3344 max_fails=3 fail_timeout=30s;
+}
+
+upstream frontend_pool {
+    server $FRONTEND_IP:8080 max_fails=3 fail_timeout=30s;
+}
+UPSTREAM
+  nginx -t && systemctl reload nginx
+fi
+RESOLVE_SCRIPT
+
+chmod +x /usr/local/bin/update-upstream-ips.sh
+
+# Run the script initially (will fail first time, that's ok)
+/usr/local/bin/update-upstream-ips.sh || true
+
+# Set up cron to update IPs every minute
+echo "* * * * * root /usr/local/bin/update-upstream-ips.sh" > /etc/cron.d/update-upstream-ips
+
+# Configure nginx with initial upstream placeholders
+cat > /etc/nginx/conf.d/upstreams.conf <<'UPSTREAM'
+upstream backend_pool {
+    server 127.0.0.1:9999 down;  # Placeholder, will be updated by cron
+}
+
+upstream frontend_pool {
+    server 127.0.0.1:9998 down;  # Placeholder, will be updated by cron
+}
+UPSTREAM
+
+cat > /etc/nginx/conf.d/app.conf <<EOF
 # Rate limiting
 limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=10r/s;
 limit_req_zone \$binary_remote_addr zone=general_limit:10m rate=50r/s;
@@ -50,8 +105,7 @@ server {
     location /api {
         limit_req zone=api_limit burst=20 nodelay;
         
-        set \$backend_upstream ${backend_service_dns}:3344;
-        proxy_pass http://\$backend_upstream;
+        proxy_pass http://backend_pool;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -75,8 +129,7 @@ server {
     location /auth {
         limit_req zone=api_limit burst=20 nodelay;
         
-        set \$backend_upstream ${backend_service_dns}:3344;
-        proxy_pass http://\$backend_upstream;
+        proxy_pass http://backend_pool;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -91,8 +144,7 @@ server {
     location /applications {
         limit_req zone=api_limit burst=20 nodelay;
         
-        set \$backend_upstream ${backend_service_dns}:3344;
-        proxy_pass http://\$backend_upstream;
+        proxy_pass http://backend_pool;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -104,8 +156,7 @@ server {
     location / {
         limit_req zone=general_limit burst=100 nodelay;
         
-        set \$frontend_upstream ${frontend_service_dns}:8080;
-        proxy_pass http://\$frontend_upstream;
+        proxy_pass http://frontend_pool;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;

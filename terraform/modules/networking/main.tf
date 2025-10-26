@@ -245,11 +245,11 @@ resource "aws_security_group" "ecs_tasks" {
 
   # Allow inbound from nginx proxy
   ingress {
-    from_port       = 3000
-    to_port         = 3000
+    from_port       = 3344
+    to_port         = 3344
     protocol        = "tcp"
     security_groups = [aws_security_group.nginx.id]
-    description     = "Allow backend API from nginx"
+    description     = "Allow backend API from nginx on port 3344"
   }
 
   ingress {
@@ -266,6 +266,14 @@ resource "aws_security_group" "ecs_tasks" {
     protocol        = "tcp"
     security_groups = [aws_security_group.nginx.id]
     description     = "Allow frontend from nginx on port 8080"
+  }
+
+  ingress {
+    from_port       = 5156
+    to_port         = 5156
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nginx.id]
+    description     = "Allow MockPass from nginx on port 5156"
   }
 
   # Allow all outbound

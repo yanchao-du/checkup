@@ -248,6 +248,8 @@ module "ec2_nginx" {
   backend_service_dns  = local.backend_service_dns
   frontend_service_dns = local.frontend_service_dns
   domain_name          = var.domain_name
+  ecs_cluster_name     = module.ecs.cluster_name
+  aws_region           = var.aws_region
 
   enable_detailed_monitoring = var.enable_detailed_monitoring
   enable_cloudwatch_alarms   = var.enable_cloudwatch_alarms

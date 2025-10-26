@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Please SSH into the nginx EC2 instance and run these commands:"
+echo ""
+echo "# Check DNS resolver configuration:"
+echo "cat /etc/resolv.conf"
+echo ""
+echo "# Try to resolve the service discovery names:"
+echo "nslookup backend.checkup.local"
+echo "nslookup frontend.checkup.local"
+echo "nslookup mockpass.checkup.local"
+echo ""
+echo "# Check if AWS CLI can discover services:"
+echo "aws servicediscovery discover-instances --namespace-name checkup.local --service-name backend --region us-east-1"

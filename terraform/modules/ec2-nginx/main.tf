@@ -21,11 +21,15 @@ resource "aws_instance" "nginx" {
   subnet_id              = var.public_subnet_id
   vpc_security_group_ids = [var.security_group_id]
   key_name               = var.key_name
+  iam_instance_profile   = aws_iam_instance_profile.nginx.name
 
   user_data = templatefile("${path.module}/user_data.sh", {
     backend_service_dns  = var.backend_service_dns
     frontend_service_dns = var.frontend_service_dns
     domain_name          = var.domain_name
+    ecs_cluster_name     = var.ecs_cluster_name
+    environment          = var.environment
+    aws_region           = var.aws_region
   })
 
   root_block_device {
@@ -142,16 +146,31 @@ resource "aws_iam_role_policy_attachment" "nginx_cloudwatch" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+# ECS read-only policy for service discovery
+resource "aws_iam_role_policy" "nginx_ecs" {
+  name_prefix = "${var.project_name}-nginx-ecs-"
+  role        = aws_iam_role.nginx.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:ListTasks",
+          "ecs:DescribeTasks",
+          "ecs:DescribeContainerInstances"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Instance profile for nginx
 resource "aws_iam_instance_profile" "nginx" {
   name_prefix = "${var.project_name}-nginx-"
   role        = aws_iam_role.nginx.name
 
   tags = var.tags
-}
-
-# Update instance to use IAM instance profile
-resource "aws_ec2_instance_state" "nginx" {
-  instance_id = aws_instance.nginx.id
-  state       = "running"
 }
