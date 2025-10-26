@@ -1,0 +1,89 @@
+# Backend Docker ignore file
+# Ignore unnecessary files to reduce Docker context size
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+*.spec.ts
+*.e2e-spec.ts
+test/
+jest.config.js
+
+# Build output (will be generated in container)
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Documentation (keep README.md for reference)
+*.md
+!README.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Docker files (don't need to copy into image)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Keep these files (required for build):
+# - package.json
+# - package-lock.json
+# - tsconfig.json
+# - nest-cli.json
+# - prisma/ (schema and migrations)
+# - src/ (source code)
+# - static/ (CorpPass certs)
+
+.env.local
+.env.*.local
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# NOTE: We NEED these files for the build:
+# - package.json (required)
+# - package-lock.json (required for npm ci)
+# - tsconfig.json (required for TypeScript compilation)
+# - nest-cli.json (required for NestJS build)
+# - All source files in src/ (required)
+
