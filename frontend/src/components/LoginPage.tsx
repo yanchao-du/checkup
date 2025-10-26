@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { SgdsMasthead } from '@govtechsg/sgds-web-component/react';
+import SgdsFooter  from "@govtechsg/sgds-web-component/react/footer/index.js";
 import { useAuth } from './AuthContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -6,6 +8,9 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
 import { Shield, Loader2 } from 'lucide-react';
+import "@govtechsg/sgds-web-component/themes/day.css";
+import "@govtechsg/sgds-web-component/css/sgds.css";
+import "@govtechsg/sgds-web-component";
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,12 +37,14 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
-            <img src="/logo.svg" alt="CheckUp logo" className="w-16 h-16" />
-          </div>
+    <>
+      <SgdsMasthead />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
+              <img src="/logo.svg" alt="CheckUp logo" className="w-16 h-16" />
+            </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">CheckUp Medical Portal</h1>
           <p className="text-slate-600">Submit medical examinations to Singapore government agencies</p>
         </div>
@@ -118,11 +125,13 @@ export function LoginPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-sm">
+        {/* <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-sm">
           <Shield className="w-4 h-4" />
           <span>Secure government portal</span>
-        </div>
+        </div> */}
       </div>
-    </div>
+  </div>
+  <SgdsFooter />
+  </>
   );
 }

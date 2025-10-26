@@ -1,4 +1,7 @@
 import { ReactNode } from 'react';
+// SGDS masthead web component (top banner)
+import SgdsMasthead from '@govtechsg/sgds-web-component/react/masthead/index.js';
+import SgdsFooter from '@govtechsg/sgds-web-component/react/footer/index.js';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { ProtectedLink } from './ProtectedLink';
@@ -39,6 +42,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* SGDS Masthead (government banner) */}
+      <SgdsMasthead />
+
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -101,6 +107,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
+      <SgdsFooter />
     </div>
   );
 }
