@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateHeight, validateNricOrFin } from '../lib/validationRules';
+import { validateHeight, validateNricOrFin, validateWeight } from '../lib/validationRules';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -36,7 +36,6 @@ const examTypes: { value: ExamType; label: string }[] = [
 ];
 
 export function NewSubmission() {
-  const [heightError, setHeightError] = useState<string | null>(null);
   const { id } = useParams();
   const { user } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges, navigate, navigateWithConfirmation } = useUnsavedChanges();
@@ -56,6 +55,8 @@ export function NewSubmission() {
   const [assignedDoctorId, setAssignedDoctorId] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
+  const [heightError, setHeightError] = useState<string | null>(null);
+  const [weightError, setWeightError] = useState<string | null>(null);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -398,11 +399,26 @@ export function NewSubmission() {
                 <Input
                   id="weight"
                   name="weight"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={3}
                   value={formData.weight || ''}
-                  onChange={(e) => handleFormDataChange('weight', e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    if (val.length <= 3) {
+                      handleFormDataChange('weight', val);
+                    }
+                    if (weightError) setWeightError(null);
+                  }}
+                  onBlur={(e) => {
+                    setWeightError(validateWeight(e.target.value));
+                  }}
                   placeholder="70"
+                  className={weightError ? 'border-red-500' : ''}
                 />
+                {weightError && (
+                  <p className="text-xs text-red-600 mt-1">{weightError}</p>
+                )}
               </div>
 
               <div className="space-y-2">

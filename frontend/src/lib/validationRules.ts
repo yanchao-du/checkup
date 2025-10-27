@@ -1,3 +1,11 @@
+export function validateWeight(value: string): string | null {
+  if (!value) return null;
+  const num = Number(value);
+  if (!/^[0-9]{1,3}$/.test(value) || num < 1 || num > 500) {
+    return 'Weight must be a number between 1 and 500 (1-3 digits).';
+  }
+  return null;
+}
 // validationRules.ts
 // Centralized validation functions for NewSubmission form
 
