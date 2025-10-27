@@ -372,7 +372,7 @@ export function Dashboard() {
         <CardContent className="flex flex-wrap gap-3">
           {(user?.role === 'doctor' || user?.role === 'nurse') && (
             <Link to="/new-submission">
-              <Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">
                 <FileText className="w-4 h-4 mr-2" />
                 New Submission
               </Button>
