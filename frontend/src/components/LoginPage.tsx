@@ -47,6 +47,9 @@ export function LoginPage() {
             </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">CheckUp Medical Portal</h1>
           <p className="text-slate-600">Submit medical examinations to Singapore government agencies</p>
+          <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-sm font-semibold">
+            This website is for demo and testing purposes only. Do not submit real patient data.
+          </div>
         </div>
 
         <Card>
