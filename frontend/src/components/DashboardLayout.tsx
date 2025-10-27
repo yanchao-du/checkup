@@ -85,15 +85,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
       <div className="container mx-auto px-4 py-6 flex gap-6 flex-1">
 
-        {/* Sidebar - overlays entire screen on mobile */}
+        {/* Sidebar - overlays entire screen on mobile, modern look */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden" onClick={() => setSidebarOpen(false)}></div>
         )}
         <aside
-          className={`w-64 flex-shrink-0 md:static md:block fixed left-0 top-0 h-full z-50 bg-white border-r border-slate-200 p-2 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:rounded-lg md:border md:bg-white`}
+          className={`w-64 flex flex-col justify-between flex-shrink-0 md:static md:block fixed left-0 top-0 h-full z-50 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:rounded-lg md:border md:bg-slate-50`}
           style={{ maxWidth: '100vw' }}
         >
-          <nav>
+          {/* Navigation */}
+          <nav className="flex-1 flex flex-col gap-2 py-4">
             {filteredNavItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -104,19 +105,21 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 <ProtectedLink
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                  className={`group flex items-center gap-3 px-4 py-2 rounded-none transition-all font-medium text-base ${
                     isActive
-                      ? 'bg-blue-50 text-blue-600 font-semibold shadow'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      ? 'bg-white text-blue-700 shadow border-l-4 border-blue-600'
+                      : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-600'}`} />
                   <span>{item.label}</span>
                 </ProtectedLink>
               );
             })}
           </nav>
+          {/* User profile section at bottom */}
+            {/* ...user profile section removed for cleaner sidebar... */}
         </aside>
 
         {/* Main Content */}
