@@ -42,6 +42,7 @@ export class UsersService {
           id: true,
           name: true,
           email: true,
+          nric: true,
           role: true,
           status: true,
           mcrNumber: true,

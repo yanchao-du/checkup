@@ -7,6 +7,7 @@ export type UserRole = 'doctor' | 'nurse' | 'admin';
 
 export interface User {
   id: string;
+  nric?: string;
   name: string;
   email: string;
   role: UserRole;

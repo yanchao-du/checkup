@@ -16,6 +16,7 @@ export class LoginResponseDto {
     id: string;
     name: string;
     email: string;
+    nric?: string;
     role: string;
     clinicId: string;
     clinicName: string;
