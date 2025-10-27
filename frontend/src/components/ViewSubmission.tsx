@@ -187,7 +187,7 @@ export function ViewSubmission() {
           <Card>
             <CardHeader>
               <CardTitle>Medical Examination Results</CardTitle>
-              <CardDescription>{submission.examType}</CardDescription>
+              {/* <CardDescription>{submission.examType}</CardDescription> */}
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
