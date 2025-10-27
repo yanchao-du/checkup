@@ -50,7 +50,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* SGDS Masthead (government banner) */}
       <SgdsMasthead />
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-[40]">
         <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
           <div className="flex items-center gap-3 w-full md:w-auto">
             {/* Sidebar toggle button for mobile */}
@@ -90,7 +90,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden" onClick={() => setSidebarOpen(false)}></div>
         )}
         <aside
-          className={`w-64 flex flex-col justify-between flex-shrink-0 md:static md:block fixed left-0 top-0 h-full z-50 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:rounded-lg md:border md:bg-slate-50`}
+          className={`w-64 flex flex-col justify-between flex-shrink-0 fixed md:sticky left-0 top-0 md:top-16 h-full md:h-[calc(100vh-4rem)] z-50 md:z-10 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:rounded-lg md:border md:bg-slate-50`}
           style={{ maxWidth: '100vw' }}
         >
           {/* Navigation */}
