@@ -84,15 +84,18 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <nav className="bg-white rounded-lg border border-slate-200 p-2">
             {filteredNavItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              
+              // Highlight if current path matches or starts with item.path (for dashboard, exact match)
+              const isActive =
+                (item.path === '/' && location.pathname === '/') ||
+                (item.path !== '/' && location.pathname.startsWith(item.path));
+
               return (
                 <ProtectedLink
                   key={item.path}
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
                     isActive
-                      ? 'bg-blue-50 text-blue-600'
+                      ? 'bg-blue-50 text-blue-600 font-semibold shadow'
                       : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >

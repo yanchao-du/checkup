@@ -278,65 +278,58 @@ export function Dashboard() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl border border-blue-100 hover:shadow-xl transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-slate-600">Total Submissions</CardTitle>
-            <FileText className="w-4 h-4 text-slate-400" />
+            <CardTitle className="text-base font-semibold text-blue-900">Total Submissions</CardTitle>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shadow">
+              <FileText className="w-6 h-6 text-blue-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{submissions.length}</div>
-            <p className="text-xs text-slate-500 mt-1">All time</p>
+            <div className="text-4xl font-bold text-blue-900">{submissions.length}</div>
+            <p className="text-sm text-blue-500 mt-1">All time</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-yellow-50 to-white shadow-lg rounded-xl border border-yellow-100 hover:shadow-xl transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-slate-600">Drafts</CardTitle>
-            <FileEdit className="w-4 h-4 text-slate-400" />
+            <CardTitle className="text-base font-semibold text-yellow-900">Drafts</CardTitle>
+            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center shadow">
+              <FileEdit className="w-6 h-6 text-yellow-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{drafts.length}</div>
-            <p className="text-xs text-slate-500 mt-1">Pending completion</p>
+            <div className="text-4xl font-bold text-yellow-900">{drafts.length}</div>
+            <p className="text-sm text-yellow-500 mt-1">Pending completion</p>
           </CardContent>
         </Card>
-
-        {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
-          <Link to="/rejected-submissions">
-            <Card className="border-red-200 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm text-red-900">Rejected</CardTitle>
-                <XCircle className="w-4 h-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-red-900 font-semibold">{rejectedSubmissions.length}</div>
-                <p className="text-xs text-red-700 mt-1">Needs attention</p>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
 
         {user?.role === 'doctor' && (
-          <Card>
+          <Card className="bg-gradient-to-br from-orange-50 to-white shadow-lg rounded-xl border border-orange-100 hover:shadow-xl transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm text-slate-600">Pending Approvals</CardTitle>
-              <CheckCircle className="w-4 h-4 text-slate-400" />
+              <CardTitle className="text-base font-semibold text-orange-900">Pending Approvals</CardTitle>
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shadow">
+                <CheckCircle className="w-6 h-6 text-orange-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-slate-900">{pendingApprovals.length}</div>
-              <p className="text-xs text-slate-500 mt-1">Requires your review</p>
+              <div className="text-4xl font-bold text-orange-900">{pendingApprovals.length}</div>
+              <p className="text-sm text-orange-500 mt-1">Requires your review</p>
             </CardContent>
           </Card>
         )}
 
-        <Card>
+        <Card className="bg-gradient-to-br from-green-50 to-white shadow-lg rounded-xl border border-green-100 hover:shadow-xl transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-slate-600">This Month</CardTitle>
-            <TrendingUp className="w-4 h-4 text-slate-400" />
+            <CardTitle className="text-base font-semibold text-green-900">This Month</CardTitle>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shadow">
+              <TrendingUp className="w-6 h-6 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{thisMonthSubmissions}</div>
-            <p className="text-xs text-slate-500 mt-1">Submissions</p>
+            <div className="text-4xl font-bold text-green-900">{thisMonthSubmissions}</div>
+            <p className="text-sm text-green-500 mt-1">Submissions</p>
           </CardContent>
         </Card>
       </div>
