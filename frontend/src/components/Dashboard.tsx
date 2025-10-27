@@ -363,109 +363,132 @@ export function Dashboard() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and shortcuts</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          {(user?.role === 'doctor' || user?.role === 'nurse') && (
-            <Link to="/new-submission">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <FileText className="w-4 h-4 mr-2" />
-                New Submission
-              </Button>
-            </Link>
-          )}
-          {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
-            <Link to="/rejected-submissions">
-              <Button className="bg-red-600 hover:bg-red-700">
-                <XCircle className="w-4 h-4 mr-2" />
-                Review Rejected ({rejectedSubmissions.length})
-              </Button>
-            </Link>
-          )}
-          {user?.role === 'doctor' && pendingApprovals.length > 0 && (
-            <Link to="/pending-approvals">
-              <Button variant="outline">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Review Approvals ({pendingApprovals.length})
-              </Button>
-            </Link>
-          )}
-          {drafts.length > 0 && (
-            <Link to="/drafts">
-              <Button variant="outline">
-                <FileEdit className="w-4 h-4 mr-2" />
-                Continue Draft ({drafts.length})
-              </Button>
-            </Link>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Your latest actions and submissions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {recentActivities.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p>No recent activity</p>
-              {(user?.role === 'doctor' || user?.role === 'nurse') && (
-                <Link to="/new-submission">
-                  <Button variant="link" className="mt-2">Create your first submission</Button>
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentActivities.map((activity) => {
-                const { Icon, bgColor, iconColor } = getActivityIcon(activity.activityType);
-                const linkPath = activity.activityType === 'draft' 
-                  ? `/draft/${activity.id}` 
-                  : `/view-submission/${activity.id}`;
-                
-                return (
-                  <Link 
-                    key={activity.id} 
-                    to={linkPath}
-                    className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${bgColor} rounded flex items-center justify-center`}>
-                        <Icon className={`w-5 h-5 ${iconColor}`} />
-                      </div>
-                      <div>
-                        <p className="text-slate-900">{activity.patientName}</p>
-                        <p className="text-sm text-slate-500">{formatExamType(activity.examType)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType)}</p>
-                        {activity.activityType === 'approved' && activity.approvedByName && (
-                          <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
-                        )}
-                        {activity.activityType === 'rejected' && activity.approvedByName && (
-                          <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
-                        )}
-                      </div>
-                      <span className="text-sm text-slate-500">
-                        {activity.activityDate.toLocaleDateString()}
-                      </span>
-                    </div>
+      {/* Two Column Layout: Recent Activity (Left) and Quick Actions (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Activity - Takes 2 columns */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recent Activities</CardTitle>
+            <CardDescription>Your latest actions and submissions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recentActivities.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                <p>No recent activity</p>
+                {(user?.role === 'doctor' || user?.role === 'nurse') && (
+                  <Link to="/new-submission">
+                    <Button variant="link" className="mt-2">Create your first submission</Button>
                   </Link>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentActivities.map((activity) => {
+                  const { Icon, bgColor, iconColor } = getActivityIcon(activity.activityType);
+                  const linkPath = activity.activityType === 'draft' 
+                    ? `/draft/${activity.id}` 
+                    : `/view-submission/${activity.id}`;
+                  
+                  return (
+                    <Link 
+                      key={activity.id} 
+                      to={linkPath}
+                      className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 ${bgColor} rounded flex items-center justify-center`}>
+                          <Icon className={`w-5 h-5 ${iconColor}`} />
+                        </div>
+                        <div>
+                          <p className="text-slate-900">{activity.patientName}</p>
+                          <p className="text-sm text-slate-500">{formatExamType(activity.examType)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType)}</p>
+                          {activity.activityType === 'approved' && activity.approvedByName && (
+                            <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
+                          )}
+                          {activity.activityType === 'rejected' && activity.approvedByName && (
+                            <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
+                          )}
+                        </div>
+                        <span className="text-sm text-slate-500">
+                          {activity.activityDate.toLocaleDateString()}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions - Takes 1 column */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {(user?.role === 'doctor' || user?.role === 'nurse') && (
+              <Link to="/new-submission" className="block">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                  <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900">New Submission</p>
+                    <p className="text-xs text-slate-500">Create a new medical exam</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+            {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+              <Link to="/rejected-submissions" className="block">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
+                  <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    <XCircle className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900">Review Rejected</p>
+                    <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+            {user?.role === 'doctor' && pendingApprovals.length > 0 && (
+              <Link to="/pending-approvals" className="block">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
+                  <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    <CheckCircle className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900">Review Approvals</p>
+                    <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+            {drafts.length > 0 && (
+              <Link to="/drafts" className="block">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
+                  <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    <FileEdit className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900">Continue Draft</p>
+                    <p className="text-xs text-slate-500">{drafts.length} incomplete {drafts.length === 1 ? 'draft' : 'drafts'}</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
 
     </div>
