@@ -17,6 +17,9 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
+import "@govtechsg/sgds-web-component/themes/day.css";
+import "@govtechsg/sgds-web-component/css/sgds.css";
+import "@govtechsg/sgds-web-component";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -44,7 +47,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-slate-50">
       {/* SGDS Masthead (government banner) */}
       <SgdsMasthead />
-
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

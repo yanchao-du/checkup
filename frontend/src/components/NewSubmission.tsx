@@ -527,7 +527,6 @@ export function NewSubmission() {
         <div className="flex gap-3">
           {user?.role === 'nurse' && (
             <Button 
-              variant="outline" 
               onClick={() => {
                 // Check if default doctor is set
                 if (!hasDefaultDoctor) {
@@ -539,16 +538,19 @@ export function NewSubmission() {
               }}
               disabled={!isFormValid || isSaving}
             >
+            <>
+            <Send className="w-4 h-4 mr-2" />
               Submit for Approval
+            </>
             </Button>
           )}
           
-          <Button 
+          {user?.role === 'doctor' && (<Button 
             onClick={() => {
               setIsRouteForApproval(false);
               setShowSubmitDialog(true);
             }}
-            disabled={!isFormValid || isSaving || (user?.role === 'nurse' && !id)}
+            disabled={!isFormValid || isSaving}
           >
             {isSaving ? (
               <>
@@ -558,10 +560,10 @@ export function NewSubmission() {
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                {user?.role === 'doctor' ? 'Submit to Agency' : 'Submit'}
+                Submit to Agency
               </>
             )}
-          </Button>
+          </Button>)}
         </div>
       </div>
 
