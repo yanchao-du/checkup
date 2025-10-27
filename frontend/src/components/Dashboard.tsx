@@ -277,15 +277,37 @@ export function Dashboard() {
         </Card>
       )}
 
+            {/* Pending Approvals Alert for Doctors */}
+      {user?.role === 'doctor' && pendingApprovals.length > 0 && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-600" />
+              <CardTitle className="text-orange-900">Action Required</CardTitle>
+            </div>
+            <CardDescription className="text-orange-700">
+              You have {pendingApprovals.length} submission(s) waiting for your approval
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/pending-approvals">
+              <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
+                Review Now
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm text-slate-600">Total Submissions</CardTitle>
-            <FileText className="w-4 h-4 text-slate-400" />
+            <FileText className="w-4 h-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{submissions.length}</div>
+            <div className="text-xl font-bold text-slate-900">{submissions.length}</div>
             <p className="text-xs text-slate-500 mt-1">All time</p>
           </CardContent>
         </Card>
@@ -293,15 +315,15 @@ export function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm text-slate-600">Drafts</CardTitle>
-            <FileEdit className="w-4 h-4 text-slate-400" />
+            <FileEdit className="w-4 h-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{drafts.length}</div>
+            <div className="text-xl font-bold text-slate-900">{drafts.length}</div>
             <p className="text-xs text-slate-500 mt-1">Pending completion</p>
           </CardContent>
         </Card>
 
-        {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+        {/* {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
           <Link to="/rejected-submissions">
             <Card className="border-red-200 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -309,33 +331,33 @@ export function Dashboard() {
                 <XCircle className="w-4 h-4 text-red-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-red-900 font-semibold">{rejectedSubmissions.length}</div>
+                <div className="text-xl font-bold text-red-900">{rejectedSubmissions.length}</div>
                 <p className="text-xs text-red-700 mt-1">Needs attention</p>
               </CardContent>
             </Card>
           </Link>
-        )}
+        )} */}
 
-        {user?.role === 'doctor' && (
+        {/* {user?.role === 'doctor' && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm text-slate-600">Pending Approvals</CardTitle>
-              <CheckCircle className="w-4 h-4 text-slate-400" />
+              <CheckCircle className="w-4 h-4 text-yellow-60" />
             </CardHeader>
             <CardContent>
-              <div className="text-slate-900">{pendingApprovals.length}</div>
+              <div className="text-xl font-bold text-slate-900">{pendingApprovals.length}</div>
               <p className="text-xs text-slate-500 mt-1">Requires your review</p>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm text-slate-600">This Month</CardTitle>
-            <TrendingUp className="w-4 h-4 text-slate-400" />
+            <TrendingUp className="w-4 h-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-slate-900">{thisMonthSubmissions}</div>
+            <div className="text-xl font-bold text-slate-900">{thisMonthSubmissions}</div>
             <p className="text-xs text-slate-500 mt-1">Submissions</p>
           </CardContent>
         </Card>
@@ -445,27 +467,7 @@ export function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Pending Approvals Alert for Doctors */}
-      {user?.role === 'doctor' && pendingApprovals.length > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-orange-600" />
-              <CardTitle className="text-orange-900">Action Required</CardTitle>
-            </div>
-            <CardDescription className="text-orange-700">
-              You have {pendingApprovals.length} submission(s) waiting for your approval
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link to="/pending-approvals">
-              <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
-                Review Now
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+
     </div>
   );
 }

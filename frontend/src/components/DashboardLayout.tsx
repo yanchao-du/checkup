@@ -44,7 +44,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || ''));
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-100">
       {/* SGDS Masthead (government banner) */}
       <SgdsMasthead />
       {/* Header */}
@@ -60,13 +60,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Avatar>
+              {/* <Avatar>
                 <AvatarFallback className="bg-blue-100 text-blue-600">
                   {user?.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
-              </Avatar>
+              </Avatar> */}
               <div>
                 <div className="text-sm text-slate-900">{user?.name}</div>
+                {/* {user?.nric && (
+                  <div className="text-xs text-slate-700">{user.nric}</div>
+                )} */}
                 <div className="text-xs text-slate-500 capitalize">{user?.role}</div>
               </div>
             </div>
