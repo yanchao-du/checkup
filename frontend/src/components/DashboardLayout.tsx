@@ -75,7 +75,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              Log out
             </Button>
           </div>
         </div>
