@@ -16,6 +16,6 @@
 
 
 // Use shared NRIC validator implementation
-import { validateNRIC, generateValidNRIC } from '../../../shared/nric_validator';
+import { validateNRIC, generateValidNRIC } from '../../../../shared/nric_validator';
 
 export { validateNRIC, generateValidNRIC };
