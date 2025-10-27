@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { ProtectedLink } from './ProtectedLink';
 import { Button } from './ui/button';
-import { Avatar, AvatarFallback } from './ui/avatar';
+// import { Avatar, AvatarFallback } from './ui/avatar';
 import { 
   LayoutDashboard, 
   FilePlus, 
@@ -32,7 +32,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/submissions', label: 'Submissions', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
@@ -90,6 +90,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               // Highlight if current path matches or starts with item.path (for dashboard, exact match)
               const isActive =
                 (item.path === '/' && location.pathname === '/') ||
+                // location.pathname === item.path ||
                 (item.path !== '/' && location.pathname.startsWith(item.path));
 
               return (
