@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { validateNRIC } from '../../../shared/nric_validator';
+import { validateNRIC } from '../lib/nric_validator';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
