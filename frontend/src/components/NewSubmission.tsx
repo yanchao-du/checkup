@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
+import { validateHeight, validateNricOrFin } from '../lib/validationRules';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -35,6 +36,7 @@ const examTypes: { value: ExamType; label: string }[] = [
 ];
 
 export function NewSubmission() {
+  const [heightError, setHeightError] = useState<string | null>(null);
   const { id } = useParams();
   const { user } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges, navigate, navigateWithConfirmation } = useUnsavedChanges();
@@ -318,11 +320,7 @@ export function NewSubmission() {
                 value={patientNric}
                 onChange={(e) => setPatientNric(e.target.value)}
                 onBlur={(e) => {
-                  setNricError(
-                    e.target.value && !validateNRIC(e.target.value)
-                      ? 'Invalid NRIC/FIN format'
-                      : null
-                  );
+                  setNricError(validateNricOrFin(e.target.value, validateNRIC));
                 }}
                 placeholder="S1234567A"
                 className={nricError ? 'border-red-500' : ''}
@@ -373,11 +371,26 @@ export function NewSubmission() {
                 <Input
                   id="height"
                   name="height"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={3}
                   value={formData.height || ''}
-                  onChange={(e) => handleFormDataChange('height', e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    if (val.length <= 3) {
+                      handleFormDataChange('height', val);
+                    }
+                    if (heightError) setHeightError(null);
+                  }}
+                  onBlur={(e) => {
+                    setHeightError(validateHeight(e.target.value));
+                  }}
                   placeholder="170"
+                  className={heightError ? 'border-red-500' : ''}
                 />
+                {heightError && (
+                  <p className="text-xs text-red-600 mt-1">{heightError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
