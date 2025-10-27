@@ -300,9 +300,9 @@ export function Dashboard() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm text-slate-600">Total Submissions</CardTitle>
             <FileText className="w-4 h-4 text-green-600" />
           </CardHeader>
@@ -313,7 +313,7 @@ export function Dashboard() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm text-slate-600">Drafts</CardTitle>
             <FileEdit className="w-4 h-4 text-blue-600" />
           </CardHeader>
@@ -352,7 +352,7 @@ export function Dashboard() {
         )} */}
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm text-slate-600">This Month</CardTitle>
             <TrendingUp className="w-4 h-4 text-yellow-600" />
           </CardHeader>
