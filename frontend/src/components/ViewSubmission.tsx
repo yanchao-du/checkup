@@ -505,7 +505,7 @@ export function ViewSubmission() {
                 onClick={() => setShowApproveDialog(true)}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Approve Submission
+                Approve and Submit
               </Button>
             </div>
           </CardContent>

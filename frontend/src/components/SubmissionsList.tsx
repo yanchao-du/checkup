@@ -71,8 +71,8 @@ export function SubmissionsList() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filter Submissions</CardTitle>
-          <CardDescription>Search and filter your medical exam submissions</CardDescription>
+          <CardTitle>Search and filter your completed submissions</CardTitle>
+          <CardDescription>Find submissions by patient name, NRIC, status, or exam type</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="relative">
@@ -87,7 +87,7 @@ export function SubmissionsList() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm text-slate-700">Status</label>
+              {/* <label className="text-sm text-slate-700">Status</label> */}
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger>
                   <SelectValue />
@@ -101,13 +101,13 @@ export function SubmissionsList() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-slate-700">Exam Type</label>
+              {/* <label className="text-sm text-slate-700">Exam Type</label> */}
               <Select value={filterExamType} onValueChange={setFilterExamType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="all">All Exam Types</SelectItem>
                   <SelectItem value="SIX_MONTHLY_MDW">
                     MDW Six-monthly (MOM)
                   </SelectItem>
