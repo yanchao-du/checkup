@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { validateNRIC } from '../../../shared/nric_validator';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -43,6 +44,7 @@ export function NewSubmission() {
   const [examType, setExamType] = useState<ExamType | ''>('');
   const [patientName, setPatientName] = useState('');
   const [patientNric, setPatientNric] = useState('');
+  const [nricError, setNricError] = useState<string | null>(null);
   const [patientDateOfBirth, setPatientDateOfBirth] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -315,8 +317,19 @@ export function NewSubmission() {
                 name="nric"
                 value={patientNric}
                 onChange={(e) => setPatientNric(e.target.value)}
+                onBlur={(e) => {
+                  setNricError(
+                    e.target.value && !validateNRIC(e.target.value)
+                      ? 'Invalid NRIC/FIN format'
+                      : null
+                  );
+                }}
                 placeholder="S1234567A"
+                className={nricError ? 'border-red-500' : ''}
               />
+              {nricError && (
+                <p className="text-xs text-red-600 mt-1">{nricError}</p>
+              )}
             </div>
           </div>
 
