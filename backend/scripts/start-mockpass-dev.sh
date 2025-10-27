@@ -18,10 +18,11 @@ echo ""
 
 # Set PORT explicitly and configure JWKS endpoint for client assertion verification
 # SHOW_LOGIN_PAGE=true forces MockPass to show the login form instead of auto-login
-PORT=5156 \
-SHOW_LOGIN_PAGE=true \
-# For mockpass run on docker, use the following line
-CP_RP_JWKS_ENDPOINT=http://backend:3344/v1/.well-known/jwks.json \
+
+# Ensure PORT=5156 is set in the environment and not overridden. This is for local dev use.
+export PORT=5156
+export SHOW_LOGIN_PAGE=true
+export CP_RP_JWKS_ENDPOINT=http://localhost:3344/v1/.well-known/jwks.json
 
 npx mockpass \
   --port 5156 \
