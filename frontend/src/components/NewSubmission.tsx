@@ -487,23 +487,18 @@ export function NewSubmission() {
               <>
                 <div className="space-y-2">
                   <Label>Pregnancy Test</Label>
-                  <RadioGroup
-                    value={formData.pregnancyTest || ''}
-                    onValueChange={(value: string) => handleFormDataChange('pregnancyTest', value)}
-                  >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Positive" id="preg-pos" />
-                      <Label htmlFor="preg-pos">Positive</Label>
+                      <input
+                        type="checkbox"
+                        id="preg-positive"
+                        checked={formData.pregnancyTest === 'Positive'}
+                        onChange={(e) => handleFormDataChange('pregnancyTest', e.target.checked ? 'Positive' : 'Negative')}
+                        className="form-checkbox h-5 w-5 text-orange-500"
+                      />
+                      <Label htmlFor="preg-positive" className={formData.pregnancyTest === 'Positive' ? 'text-orange-500 font-semibold' : ''}>
+                        Positive
+                      </Label>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Negative" id="preg-neg" />
-                      <Label htmlFor="preg-neg">Negative</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="N/A" id="preg-na" />
-                      <Label htmlFor="preg-na">N/A</Label>
-                    </div>
-                  </RadioGroup>
                 </div>
 
                 <div className="space-y-2">
