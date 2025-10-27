@@ -8,7 +8,6 @@ import {
   FileEdit, 
   CheckCircle,
   XCircle,
-  TrendingUp,
   AlertCircle,
   Send
 } from 'lucide-react';
@@ -61,8 +60,8 @@ export function Dashboard() {
         });
         setDrafts(draftsResponse.data);
 
-        // Fetch pending approvals if user is a doctor
-        if (user?.role === 'doctor') {
+        // Fetch pending approvals if user is a doctor or admin
+        if (user?.role === 'doctor' || user?.role === 'admin') {
           const approvalsResponse = await approvalsApi.getPending({ 
             page: 1, 
             limit: 100 
@@ -186,12 +185,6 @@ export function Dashboard() {
     }
   };
 
-  const thisMonthSubmissions = submissions.filter(s => {
-    const date = new Date(s.submittedDate || s.createdDate);
-    const now = new Date();
-    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-  }).length;
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -299,67 +292,72 @@ export function Dashboard() {
         </Card>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm text-slate-600">Total Submissions</CardTitle>
-            <FileText className="w-4 h-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-slate-900">{submissions.length}</div>
-            <p className="text-xs text-slate-500 mt-1">All time</p>
-          </CardContent>
+      {/* Figma-style Stats Cards - Horizontal Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Submissions */}
+        <Card className="px-4 py-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+              <FileText className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-2xl text-slate-900">{submissions.length}</span>
+              <span className="text-xs text-slate-500 truncate">Total Submissions</span>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm text-slate-600">Drafts</CardTitle>
-            <FileEdit className="w-4 h-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-slate-900">{drafts.length}</div>
-            <p className="text-xs text-slate-500 mt-1">Pending completion</p>
-          </CardContent>
-        </Card>
-
-        {/* {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
-          <Link to="/rejected-submissions">
-            <Card className="border-red-200 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm text-red-900">Rejected</CardTitle>
-                <XCircle className="w-4 h-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl font-bold text-red-900">{rejectedSubmissions.length}</div>
-                <p className="text-xs text-red-700 mt-1">Needs attention</p>
-              </CardContent>
-            </Card>
-          </Link>
-        )} */}
-
-        {/* {user?.role === 'doctor' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm text-slate-600">Pending Approvals</CardTitle>
-              <CheckCircle className="w-4 h-4 text-yellow-60" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold text-slate-900">{pendingApprovals.length}</div>
-              <p className="text-xs text-slate-500 mt-1">Requires your review</p>
-            </CardContent>
+        {/* Pending Approvals (for doctors and admin) or Submitted (for nurses) */}
+        {user?.role === 'doctor' || user?.role === 'admin' ? (
+          <Card className="px-4 py-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="bg-orange-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-2xl text-slate-900">{pendingApprovals.length}</span>
+                <span className="text-xs text-slate-500 truncate">Pending Approval</span>
+              </div>
+            </div>
           </Card>
-        )} */}
+        ) : (
+          <Card className="px-4 py-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-2xl text-slate-900">{submissions.filter(s => s.status === 'submitted').length}</span>
+                <span className="text-xs text-slate-500 truncate">Submitted</span>
+              </div>
+            </div>
+          </Card>
+        )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm text-slate-600">This Month</CardTitle>
-            <TrendingUp className="w-4 h-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-slate-900">{thisMonthSubmissions}</div>
-            <p className="text-xs text-slate-500 mt-1">Submissions</p>
-          </CardContent>
+        {/* Drafts */}
+        <Card className="px-4 py-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="bg-amber-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+              <FileEdit className="w-6 h-6 text-amber-600" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-2xl text-slate-900">{drafts.length}</span>
+              <span className="text-xs text-slate-500 truncate">Drafts</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Rejected */}
+        <Card className="px-4 py-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="bg-red-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-2xl text-slate-900">{rejectedSubmissions.length}</span>
+              <span className="text-xs text-slate-500 truncate">Rejected</span>
+            </div>
+          </div>
         </Card>
       </div>
 
