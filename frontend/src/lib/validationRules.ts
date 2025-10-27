@@ -1,3 +1,20 @@
+export function validateSystolic(value: string): string | null {
+  if (!value) return null;
+  const num = Number(value);
+  if (!/^[0-9]{2,3}$/.test(value) || num < 50 || num > 250) {
+    return 'Systolic (high) must be 2-3 digits, between 50 and 250.';
+  }
+  return null;
+}
+
+export function validateDiastolic(value: string): string | null {
+  if (!value) return null;
+  const num = Number(value);
+  if (!/^[0-9]{2,3}$/.test(value) || num < 30 || num > 150) {
+    return 'Diastolic (low) must be 2-3 digits, between 30 and 150.';
+  }
+  return null;
+}
 export function validateWeight(value: string): string | null {
   if (!value) return null;
   const num = Number(value);

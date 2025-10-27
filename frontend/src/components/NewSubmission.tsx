@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateHeight, validateNricOrFin, validateWeight } from '../lib/validationRules';
+import { validateHeight, validateNricOrFin, validateWeight, validateSystolic, validateDiastolic } from '../lib/validationRules';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -57,6 +57,8 @@ export function NewSubmission() {
   const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
   const [heightError, setHeightError] = useState<string | null>(null);
   const [weightError, setWeightError] = useState<string | null>(null);
+  const [systolicError, setSystolicError] = useState<string | null>(null);
+  const [diastolicError, setDiastolicError] = useState<string | null>(null);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -422,14 +424,61 @@ export function NewSubmission() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bloodPressure">Blood Pressure</Label>
-                <Input
-                  id="bloodPressure"
-                  name="bloodPressure"
-                  value={formData.bloodPressure || ''}
-                  onChange={(e) => handleFormDataChange('bloodPressure', e.target.value)}
-                  placeholder="120/80"
-                />
+                <Label>Blood Pressure (mmHg)</Label>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      id="systolic"
+                      name="systolic"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={3}
+                      value={formData.systolic || ''}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        if (val.length <= 3) {
+                          handleFormDataChange('systolic', val);
+                        }
+                        if (systolicError) setSystolicError(null);
+                      }}
+                      onBlur={(e) => {
+                        setSystolicError(validateSystolic(e.target.value));
+                      }}
+                      placeholder="120"
+                      className={systolicError ? 'border-red-500' : ''}
+                    />
+                    <p className="text-xs text-slate-500">Systolic (high)</p>
+                    {systolicError && (
+                      <p className="text-xs text-red-600 mt-1">{systolicError}</p>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      id="diastolic"
+                      name="diastolic"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={3}
+                      value={formData.diastolic || ''}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        if (val.length <= 3) {
+                          handleFormDataChange('diastolic', val);
+                        }
+                        if (diastolicError) setDiastolicError(null);
+                      }}
+                      onBlur={(e) => {
+                        setDiastolicError(validateDiastolic(e.target.value));
+                      }}
+                      placeholder="80"
+                      className={diastolicError ? 'border-red-500' : ''}
+                    />
+                    <p className="text-xs text-slate-500">Diastolic (low)</p>
+                    {diastolicError && (
+                      <p className="text-xs text-red-600 mt-1">{diastolicError}</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
