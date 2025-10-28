@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
@@ -29,7 +28,6 @@ import {
 import { toast } from 'sonner';
 
 export function DraftsList() {
-  const { user } = useAuth();
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,12 +58,12 @@ export function DraftsList() {
   const handleDelete = async () => {
     if (deleteId) {
       try {
-        // Note: We don't have a delete endpoint in the API yet, 
-        // so we'll just remove from local state for now
+        await submissionsApi.delete(deleteId);
         setDrafts(drafts.filter(d => d.id !== deleteId));
         toast.success('Draft deleted successfully');
         setDeleteId(null);
       } catch (error) {
+        console.error('Failed to delete draft:', error);
         toast.error('Failed to delete draft');
       }
     }

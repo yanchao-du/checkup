@@ -389,6 +389,47 @@ export class SubmissionsService {
     return this.formatSubmission(submission);
   }
 
+  async delete(id: string, userId: string, userRole: string) {
+    const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Only allow deleting drafts
+    if (existing.status !== 'draft') {
+      throw new ForbiddenException('Only draft submissions can be deleted');
+    }
+
+    // Only creator or admin can delete
+    if (existing.createdById !== userId && userRole !== 'admin') {
+      throw new ForbiddenException('Access denied: You can only delete your own drafts');
+    }
+
+    // Create audit log before deleting
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'deleted',
+        changes: { 
+          status: existing.status,
+          patientName: existing.patientName,
+          examType: existing.examType,
+        },
+      },
+    });
+
+    // Delete the submission (audit logs will cascade delete)
+    await this.prisma.medicalSubmission.delete({
+      where: { id },
+    });
+
+    this.logger.log(`Deleted draft submission ${id} by user ${userId}`);
+
+    return { success: true, message: 'Draft deleted successfully' };
+  }
+
   async getAuditTrail(submissionId: string) {
     const logs = await this.prisma.auditLog.findMany({
       where: { submissionId },

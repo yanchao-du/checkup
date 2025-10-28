@@ -68,4 +68,9 @@ export const submissionsApi = {
   reopenSubmission: async (id: string): Promise<MedicalSubmission> => {
     return apiClient.post<MedicalSubmission>(`/submissions/${id}/reopen`);
   },
+
+  // Delete a draft submission
+  delete: async (id: string): Promise<{ success: boolean; message: string }> => {
+    return apiClient.delete<{ success: boolean; message: string }>(`/submissions/${id}`);
+  },
 };

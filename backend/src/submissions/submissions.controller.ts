@@ -3,6 +3,7 @@ import {
   Get, 
   Post, 
   Put, 
+  Delete,
   Body, 
   Param, 
   Query,
@@ -57,6 +58,12 @@ export class SubmissionsController {
   reopenSubmission(@Param('id') id: string, @CurrentUser() user: any) {
     this.logger.log(`REOPEN request for submission ${id} by user ${user.id} (${user.role})`);
     return this.submissionsService.reopenSubmission(id, user.id, user.role);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @CurrentUser() user: any) {
+    this.logger.log(`DELETE request for submission ${id} by user ${user.id} (${user.role})`);
+    return this.submissionsService.delete(id, user.id, user.role);
   }
 
   @Get(':id/history')
