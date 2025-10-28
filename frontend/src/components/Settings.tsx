@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { usersApi, type Doctor } from '../services/users.service';
 import { useAuth } from './AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -14,6 +15,7 @@ import { NurseClinicAssignment } from './NurseClinicAssignment';
 
 export function Settings() {
   const { user } = useAuth();
+  const location = useLocation();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [currentDefaultDoctorId, setCurrentDefaultDoctorId] = useState<string | null>(null);
@@ -21,6 +23,15 @@ export function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   // Default to 'users' tab for admin, 'settings' for others
   const [activeTab, setActiveTab] = useState<'users' | 'clinics' | 'doctor-assignments' | 'nurse-assignments' | 'settings'>('users');
+
+  // Read tab from query string on mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'clinics' || tab === 'users' || tab === 'doctor-assignments' || tab === 'nurse-assignments' || tab === 'settings') {
+      setActiveTab(tab as typeof activeTab);
+    }
+  }, [location.search]);
 
   // Set the correct default tab based on user role
   useEffect(() => {

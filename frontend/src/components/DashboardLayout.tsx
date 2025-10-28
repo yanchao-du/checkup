@@ -101,6 +101,45 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 location.pathname === item.path ||
                 (item.path !== '/' && location.pathname.startsWith(item.path));
 
+              // Only for Settings, nest admin links below
+              if (item.path === '/settings' && user?.role === 'admin') {
+                return (
+                  <div key={item.path}>
+                    <ProtectedLink
+                      to={item.path}
+                      className={`group flex items-center gap-3 px-4 py-2 rounded-none transition-all font-medium text-base ${
+                        isActive
+                          ? 'bg-white text-blue-700 shadow border-l-4 border-blue-600'
+                          : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
+                      }`}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-600'}`} />
+                      <span>{item.label}</span>
+                    </ProtectedLink>
+                    {/* Admin management links nested below Settings */}
+                    <div className="ml-8 mt-1 flex flex-col gap-1">
+                      <ProtectedLink to="/settings?tab=users" className="group flex items-center gap-3 px-4 py-2 text-base text-slate-700 hover:bg-blue-50 hover:text-blue-700">
+                        <span className="w-5 h-5"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 1115 0v.75a.75.75 0 01-.75.75h-13.5a.75.75 0 01-.75-.75v-.75z" /></svg></span>
+                        <span>User Management</span>
+                      </ProtectedLink>
+                      <ProtectedLink to="/settings?tab=clinics" className="group flex items-center gap-3 px-4 py-2 text-base text-slate-700 hover:bg-blue-50 hover:text-blue-700">
+                        <span className="w-5 h-5"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5V6a3 3 0 013-3h12a3 3 0 013 3v1.5M3 7.5v9A3 3 0 006 19.5h12a3 3 0 003-3v-9M3 7.5h18" /></svg></span>
+                        <span>Clinic Management</span>
+                      </ProtectedLink>
+                      <ProtectedLink to="/settings?tab=doctor-assignments" className="group flex items-center gap-3 px-4 py-2 text-base text-slate-700 hover:bg-blue-50 hover:text-blue-700">
+                        <span className="w-5 h-5"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 1115 0v.75a.75.75 0 01-.75.75h-13.5a.75.75 0 01-.75-.75v-.75z" /></svg></span>
+                        <span>Doctor Assignment</span>
+                      </ProtectedLink>
+                      <ProtectedLink to="/settings?tab=nurse-assignments" className="group flex items-center gap-3 px-4 py-2 text-base text-slate-700 hover:bg-blue-50 hover:text-blue-700">
+                        <span className="w-5 h-5"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 1115 0v.75a.75.75 0 01-.75.75h-13.5a.75.75 0 01-.75-.75v-.75z" /></svg></span>
+                        <span>Nurse Assignment</span>
+                      </ProtectedLink>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <ProtectedLink
                   key={item.path}

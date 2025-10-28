@@ -200,7 +200,9 @@ export function Dashboard() {
     <div className="space-y-6" role="main">
       <div>
         <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Welcome, {user?.name}</h2>
-        <p className="text-slate-600">Here's an overview of your medical exam submissions</p>
+        <p className="text-slate-600">
+          {user?.role === 'admin' ? "Here's an overview of all medical exam submissions" : "Here's an overview of your medical exam submissions"}
+        </p>
       </div>
 
       {/* Rejected Submissions Alert - For Nurses */}
@@ -367,7 +369,7 @@ export function Dashboard() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent Activities</CardTitle>
-            <CardDescription>Your latest actions and submissions</CardDescription>
+            <CardDescription>{user?.role === 'admin' ? "Latest actions by your clinics" : "Your latest actions and submissions"}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentActivities.length === 0 ? (
@@ -432,57 +434,108 @@ export function Dashboard() {
             <CardDescription>Common tasks</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            {(user?.role === 'doctor' || user?.role === 'nurse') && (
-              <Link to="/new-submission" className="block">
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
-                  <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                    <FileText className="w-5 h-5 text-blue-600" />
+            {user?.role === 'admin' ? (
+              <>
+                <Link to="/settings?tab=users" className="block">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                    <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">User Management</p>
+                      <p className="text-xs text-slate-500">Manage users and staff</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">New Submission</p>
-                    <p className="text-xs text-slate-500">Create a new medical exam</p>
+                </Link>
+                <Link to="/settings?tab=clinics" className="block">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 hover:border-green-300 hover:bg-green-50 transition-all cursor-pointer group">
+                    <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">Clinic Management</p>
+                      <p className="text-xs text-slate-500">Manage clinics and locations</p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            )}
-            {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
-              <Link to="/rejected-submissions" className="block">
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
-                  <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                    <XCircle className="w-5 h-5 text-red-600" />
+                </Link>
+                <Link to="/settings?tab=doctor-assignments" className="block">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
+                    <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                      <FileEdit className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">Doctor Assignment</p>
+                      <p className="text-xs text-slate-500">Assign doctors to clinics</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">Review Rejected</p>
-                    <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
+                </Link>
+                <Link to="/settings?tab=nurse-assignments" className="block">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer group">
+                    <div className="bg-purple-100 group-hover:bg-purple-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                      <FileEdit className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">Nurse Assignment</p>
+                      <p className="text-xs text-slate-500">Assign nurses to clinics</p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            )}
-            {user?.role === 'doctor' && pendingApprovals.length > 0 && (
-              <Link to="/pending-approvals" className="block">
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
-                  <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                    <CheckCircle className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">Review Approvals</p>
-                    <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
-                  </div>
-                </div>
-              </Link>
-            )}
-            {drafts.length > 0 && (
-              <Link to="/drafts" className="block">
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
-                  <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                    <FileEdit className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">Continue Draft</p>
-                    <p className="text-xs text-slate-500">{drafts.length} incomplete {drafts.length === 1 ? 'draft' : 'drafts'}</p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </>
+            ) : (
+              <>
+                {(user?.role === 'doctor' || user?.role === 'nurse') && (
+                  <Link to="/new-submission" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                      <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">New Submission</p>
+                        <p className="text-xs text-slate-500">Create a new medical exam</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+                  <Link to="/rejected-submissions" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
+                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Review Rejected</p>
+                        <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {user?.role === 'doctor' && pendingApprovals.length > 0 && (
+                  <Link to="/pending-approvals" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
+                      <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <CheckCircle className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Review Approvals</p>
+                        <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {drafts.length > 0 && (
+                  <Link to="/drafts" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
+                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <FileEdit className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Continue Draft</p>
+                        <p className="text-xs text-slate-500">{drafts.length} incomplete {drafts.length === 1 ? 'draft' : 'drafts'}</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
