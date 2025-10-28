@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
@@ -28,16 +29,22 @@ import {
 import { toast } from 'sonner';
 
 export function DraftsList() {
+  const { user } = useAuth();
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [includeDeleted, setIncludeDeleted] = useState(false);
 
   useEffect(() => {
     const fetchDrafts = async () => {
       try {
         setIsLoading(true);
-        const response = await submissionsApi.getDrafts({ page: 1, limit: 100 });
+        const response = await submissionsApi.getDrafts({ 
+          page: 1, 
+          limit: 100,
+          includeDeleted: user?.role === 'admin' ? includeDeleted : false
+        });
         setDrafts(response.data);
       } catch (error) {
         console.error('Failed to fetch drafts:', error);
@@ -48,7 +55,7 @@ export function DraftsList() {
     };
 
     fetchDrafts();
-  }, []);
+  }, [user?.role, includeDeleted]);
 
   const filteredDrafts = drafts.filter(draft => 
     draft.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -93,14 +100,33 @@ export function DraftsList() {
           <CardDescription>Find your saved drafts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search by patient name or NRIC..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search by patient name or NRIC..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            {user?.role === 'admin' && (
+              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="includeDeleted"
+                  checked={includeDeleted}
+                  onChange={(e) => setIncludeDeleted(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label 
+                  htmlFor="includeDeleted" 
+                  className="text-sm font-medium text-slate-700 cursor-pointer select-none"
+                >
+                  Show deleted drafts
+                </label>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -130,46 +156,74 @@ export function DraftsList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDrafts.map((draft) => (
-                    <TableRow key={draft.id}>
-                      <TableCell>{draft.patientName}</TableCell>
-                      <TableCell className="text-slate-600">{draft.patientNric}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {formatExamType(draft.examType)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-slate-600">
-                        {draft.createdByName || draft.createdBy}
-                      </TableCell>
-                      <TableCell className="text-slate-600">
-                        {new Date(draft.createdDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link to={`/draft/${draft.id}`}>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              <Edit className="w-4 h-4 mr-1.5" />
-                              Continue
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteId(draft.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1.5" />
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredDrafts.map((draft) => {
+                    const isDeleted = !!draft.deletedAt;
+                    return (
+                      <TableRow 
+                        key={draft.id} 
+                        className={isDeleted ? 'bg-red-50 opacity-60' : ''}
+                      >
+                        <TableCell>
+                          {draft.patientName}
+                          {isDeleted && (
+                            <span className="ml-2 text-xs text-red-600 font-medium">(Deleted)</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-slate-600">{draft.patientNric}</TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            {formatExamType(draft.examType)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600">
+                          {draft.createdByName || draft.createdBy}
+                        </TableCell>
+                        <TableCell className="text-slate-600">
+                          {isDeleted && draft.deletedAt
+                            ? `Deleted: ${new Date(draft.deletedAt).toLocaleDateString()}`
+                            : new Date(draft.createdDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          {!isDeleted ? (
+                            <div className="flex items-center gap-2">
+                              <Link to={`/draft/${draft.id}`}>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                >
+                                  <Edit className="w-4 h-4 mr-1.5" />
+                                  Continue
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteId(draft.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4 mr-1.5" />
+                                Delete
+                              </Button>
+                            </div>
+                          ) : user?.role === 'admin' ? (
+                            <Link to={`/view-submission/${draft.id}`}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-slate-600 hover:text-slate-700 hover:bg-slate-50"
+                              >
+                                <Edit className="w-4 h-4 mr-1.5" />
+                                View
+                              </Button>
+                            </Link>
+                          ) : (
+                            <span className="text-sm text-slate-500 italic">No actions available</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

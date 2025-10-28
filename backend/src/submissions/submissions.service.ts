@@ -82,13 +82,22 @@ export class SubmissionsService {
   }
 
   async findAll(userId: string, userRole: string, clinicId: string, query: SubmissionQueryDto) {
-    const { status, examType, patientName, patientNric, fromDate, toDate } = query;
+    const { status, examType, patientName, patientNric, fromDate, toDate, includeDeleted } = query;
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
     
     const where: any = {
       status: { not: 'draft' },
     };
+
+    // Only admins can see deleted drafts, and only if they explicitly request them
+    if (userRole === 'admin' && includeDeleted && status === 'draft') {
+      // Allow admins to see deleted drafts when specifically requested
+      delete where.deletedAt;
+    } else {
+      // Exclude soft-deleted submissions for everyone else
+      where.deletedAt = null;
+    }
 
     // Role-based filtering
     if (userRole === 'admin') {
@@ -198,6 +207,11 @@ export class SubmissionsService {
     });
 
     if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Non-admins cannot access soft-deleted submissions
+    if (submission.deletedAt && userRole !== 'admin') {
       throw new NotFoundException('Submission not found');
     }
 
@@ -406,7 +420,17 @@ export class SubmissionsService {
       throw new ForbiddenException('Access denied: You can only delete your own drafts');
     }
 
-    // Create audit log before deleting
+    const deletionTime = new Date();
+
+    // Soft delete: set deletedAt timestamp
+    await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        deletedAt: deletionTime,
+      } as any,
+    });
+
+    // Create audit log for deletion
     await this.prisma.auditLog.create({
       data: {
         submissionId: id,
@@ -416,16 +440,12 @@ export class SubmissionsService {
           status: existing.status,
           patientName: existing.patientName,
           examType: existing.examType,
+          deletedAt: deletionTime.toISOString(),
         },
       },
     });
 
-    // Delete the submission (audit logs will cascade delete)
-    await this.prisma.medicalSubmission.delete({
-      where: { id },
-    });
-
-    this.logger.log(`Deleted draft submission ${id} by user ${userId}`);
+    this.logger.log(`Soft deleted draft submission ${id} by user ${userId}`);
 
     return { success: true, message: 'Draft deleted successfully' };
   }
@@ -468,6 +488,7 @@ export class SubmissionsService {
       assignedDoctorId: submission.assignedDoctorId,
       assignedDoctorName: submission.assignedDoctor?.name,
       rejectedReason: submission.rejectedReason,
+      deletedAt: submission.deletedAt,
       clinicId: submission.clinicId,
       formData: submission.formData,
     };

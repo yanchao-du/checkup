@@ -37,7 +37,7 @@ export const submissionsApi = {
   },
 
   // Get drafts
-  getDrafts: async (params?: SubmissionQueryParams): Promise<PaginatedResponse<MedicalSubmission>> => {
+  getDrafts: async (params?: SubmissionQueryParams & { includeDeleted?: boolean }): Promise<PaginatedResponse<MedicalSubmission>> => {
     const queryParams = { ...params, status: 'draft' as const };
     return submissionsApi.getAll(queryParams);
   },

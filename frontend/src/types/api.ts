@@ -88,6 +88,7 @@ export interface MedicalSubmission {
   assignedDoctorId?: string;
   assignedDoctorName?: string;
   rejectedReason?: string;
+  deletedAt?: string;
 }
 
 export interface CreateSubmissionRequest {
