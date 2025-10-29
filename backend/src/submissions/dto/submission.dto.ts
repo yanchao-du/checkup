@@ -90,6 +90,11 @@ export class SubmissionQueryDto {
   toDate?: string;
   
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  includeDeleted?: boolean;
+  
+  @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   @Min(1)

@@ -37,7 +37,7 @@ export const submissionsApi = {
   },
 
   // Get drafts
-  getDrafts: async (params?: SubmissionQueryParams): Promise<PaginatedResponse<MedicalSubmission>> => {
+  getDrafts: async (params?: SubmissionQueryParams & { includeDeleted?: boolean }): Promise<PaginatedResponse<MedicalSubmission>> => {
     const queryParams = { ...params, status: 'draft' as const };
     return submissionsApi.getAll(queryParams);
   },
@@ -67,5 +67,10 @@ export const submissionsApi = {
   // Reopen rejected submission (convert back to draft)
   reopenSubmission: async (id: string): Promise<MedicalSubmission> => {
     return apiClient.post<MedicalSubmission>(`/submissions/${id}/reopen`);
+  },
+
+  // Delete a draft submission
+  delete: async (id: string): Promise<{ success: boolean; message: string }> => {
+    return apiClient.delete<{ success: boolean; message: string }>(`/submissions/${id}`);
   },
 };

@@ -321,4 +321,152 @@ describe('Submissions (e2e)', () => {
         .expect(401);
     });
   });
+
+  describe('/v1/submissions/:id (DELETE)', () => {
+    let draftId: string;
+
+    beforeEach(async () => {
+      // Create a draft for testing delete
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          patientName: 'Delete Test',
+          patientNric: 'S9999999Z',
+          patientDateOfBirth: '1990-01-01',
+          formData: {},
+          routeForApproval: false, // Save as draft
+        });
+      draftId = res.body.id;
+    });
+
+    it('should delete a draft submission', async () => {
+      const res = await request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      expect(res.body).toHaveProperty('success', true);
+      expect(res.body).toHaveProperty('message');
+
+      // Verify the draft appears deleted (returns 404 for non-admin)
+      await request(app.getHttpServer())
+        .get(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(404);
+
+      // Verify it's actually a soft delete - the record still exists in DB
+      const submission = await prisma.medicalSubmission.findUnique({
+        where: { id: draftId },
+      });
+      expect(submission).toBeDefined();
+      expect(submission?.deletedAt).toBeDefined();
+    });
+
+    it('should preserve audit log after soft deleting draft', async () => {
+      // Delete the draft
+      await request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      // Verify audit log still exists and contains the deletion event
+      const auditLogs = await prisma.auditLog.findMany({
+        where: { submissionId: draftId },
+        orderBy: { timestamp: 'desc' },
+      });
+
+      expect(auditLogs.length).toBeGreaterThan(0);
+      const deletionLog = auditLogs.find(log => log.eventType === 'deleted');
+      expect(deletionLog).toBeDefined();
+      expect(deletionLog?.changes).toHaveProperty('status', 'draft');
+      expect(deletionLog?.changes).toHaveProperty('patientName', 'Delete Test');
+    });
+
+    it('should hide deleted drafts from non-admin users', async () => {
+      // Delete the draft
+      await request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      // Nurse should not see it in their drafts list
+      const nurseDrafts = await request(app.getHttpServer())
+        .get('/v1/submissions?status=draft')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      const deletedDraft = nurseDrafts.body.data.find((d: any) => d.id === draftId);
+      expect(deletedDraft).toBeUndefined();
+    });
+
+    it('should show deleted drafts to admin when includeDeleted=true', async () => {
+      // Delete the draft
+      await request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      // Admin should see it when includeDeleted=true
+      const adminDrafts = await request(app.getHttpServer())
+        .get('/v1/submissions?status=draft&includeDeleted=true')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const deletedDraft = adminDrafts.body.data.find((d: any) => d.id === draftId);
+      expect(deletedDraft).toBeDefined();
+      expect(deletedDraft?.deletedAt).toBeDefined();
+    });
+
+    it('should hide deleted drafts from admin when includeDeleted=false', async () => {
+      // Delete the draft
+      await request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      // Admin should NOT see it when includeDeleted is not set
+      const adminDrafts = await request(app.getHttpServer())
+        .get('/v1/submissions?status=draft')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const deletedDraft = adminDrafts.body.data.find((d: any) => d.id === draftId);
+      expect(deletedDraft).toBeUndefined();
+    });
+
+    it('should not allow deleting a non-draft submission', async () => {
+      // Create a submitted submission
+      const submitted = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_MDW',
+          patientName: 'Submitted Exam',
+          patientNric: 'S8888888Y',
+          patientDateOfBirth: '1990-01-01',
+          formData: {},
+        });
+
+      return request(app.getHttpServer())
+        .delete(`/v1/submissions/${submitted.body.id}`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(403);
+    });
+
+    it('should not allow deleting another users draft', async () => {
+      // Try to delete nurse's draft as doctor
+      return request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(403);
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .delete(`/v1/submissions/${draftId}`)
+        .expect(401);
+    });
+  });
 });

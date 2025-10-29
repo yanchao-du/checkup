@@ -82,13 +82,28 @@ export class SubmissionsService {
   }
 
   async findAll(userId: string, userRole: string, clinicId: string, query: SubmissionQueryDto) {
-    const { status, examType, patientName, patientNric, fromDate, toDate } = query;
+    const { status, examType, patientName, patientNric, fromDate, toDate, includeDeleted } = query;
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
     
-    const where: any = {
-      status: { not: 'draft' },
-    };
+    const where: any = {};
+
+    // Only admins can see deleted drafts, and only if they explicitly request them for drafts
+    if (status === 'draft') {
+      if (userRole === 'admin' && includeDeleted) {
+        // Admins requesting deleted drafts: show all drafts (deleted and not deleted)
+        // Do not filter deletedAt
+      } else {
+        // Everyone else: only show non-deleted drafts
+        where.deletedAt = null;
+      }
+      where.status = 'draft';
+    } else {
+      // For non-draft submissions, always exclude deleted
+      where.deletedAt = null;
+      if (status) where.status = status;
+      else where.status = { not: 'draft' };
+    }
 
     // Role-based filtering
     if (userRole === 'admin') {
@@ -198,6 +213,11 @@ export class SubmissionsService {
     });
 
     if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Non-admins cannot access soft-deleted submissions
+    if (submission.deletedAt && userRole !== 'admin') {
       throw new NotFoundException('Submission not found');
     }
 
@@ -389,6 +409,53 @@ export class SubmissionsService {
     return this.formatSubmission(submission);
   }
 
+  async delete(id: string, userId: string, userRole: string) {
+    const existing = await this.prisma.medicalSubmission.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Only allow deleting drafts
+    if (existing.status !== 'draft') {
+      throw new ForbiddenException('Only draft submissions can be deleted');
+    }
+
+    // Only creator or admin can delete
+    if (existing.createdById !== userId && userRole !== 'admin') {
+      throw new ForbiddenException('Access denied: You can only delete your own drafts');
+    }
+
+    const deletionTime = new Date();
+
+    // Soft delete: set deletedAt timestamp
+    await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        deletedAt: deletionTime,
+      } as any,
+    });
+
+    // Create audit log for deletion
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'deleted',
+        changes: { 
+          status: existing.status,
+          patientName: existing.patientName,
+          examType: existing.examType,
+          deletedAt: deletionTime.toISOString(),
+        },
+      },
+    });
+
+    this.logger.log(`Soft deleted draft submission ${id} by user ${userId}`);
+
+    return { success: true, message: 'Draft deleted successfully' };
+  }
+
   async getAuditTrail(submissionId: string) {
     const logs = await this.prisma.auditLog.findMany({
       where: { submissionId },
@@ -427,6 +494,7 @@ export class SubmissionsService {
       assignedDoctorId: submission.assignedDoctorId,
       assignedDoctorName: submission.assignedDoctor?.name,
       rejectedReason: submission.rejectedReason,
+      deletedAt: submission.deletedAt,
       clinicId: submission.clinicId,
       formData: submission.formData,
     };
