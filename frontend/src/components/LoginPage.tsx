@@ -17,6 +17,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  // Feature toggle for email/password login
+  const enableEmailLogin = import.meta.env.VITE_ENABLE_EMAIL_LOGIN === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,61 +60,51 @@ export function LoginPage() {
             {/* <CardDescription>Enter your credentials to access the portal</CardDescription> */}
           </CardHeader>
           <CardContent>
-            {/* <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@clinic.sg"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
-              </Button>
-            </form> */}
-
-            {/* OR Divider */}
-            {/* <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-500">Or continue with</span>
-              </div>
-            </div> */}
-
+            {enableEmailLogin && (
+              <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@clinic.sg"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    'Sign In'
+                  )}
+                </Button>
+              </form>
+            )}
             {/* CorpPass Login Button */}
             <Button
               type="button"
-              variant="outline"
+              // variant="primary"
               className="w-full"
               onClick={() => {
-                // Use Vite's import.meta.env and a template literal so the variable is interpolated
                 window.location.href = `${import.meta.env.VITE_API_URL}/auth/corppass/authorize`;
               }}
             >
-              <Shield className="w-4 h-4 mr-2" />
+              {/* <Shield className="w-4 h-4 mr-2" /> */}
               Login with CorpPass
             </Button>
 
