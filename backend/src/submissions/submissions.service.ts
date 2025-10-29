@@ -86,17 +86,23 @@ export class SubmissionsService {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
     
-    const where: any = {
-      status: { not: 'draft' },
-    };
+    const where: any = {};
 
-    // Only admins can see deleted drafts, and only if they explicitly request them
-    if (userRole === 'admin' && includeDeleted && status === 'draft') {
-      // Allow admins to see deleted drafts when specifically requested
-      delete where.deletedAt;
+    // Only admins can see deleted drafts, and only if they explicitly request them for drafts
+    if (status === 'draft') {
+      if (userRole === 'admin' && includeDeleted) {
+        // Admins requesting deleted drafts: show all drafts (deleted and not deleted)
+        // Do not filter deletedAt
+      } else {
+        // Everyone else: only show non-deleted drafts
+        where.deletedAt = null;
+      }
+      where.status = 'draft';
     } else {
-      // Exclude soft-deleted submissions for everyone else
+      // For non-draft submissions, always exclude deleted
       where.deletedAt = null;
+      if (status) where.status = status;
+      else where.status = { not: 'draft' };
     }
 
     // Role-based filtering

@@ -110,7 +110,7 @@ export function DraftsList() {
                 className="pl-10"
               />
             </div>
-            {user?.role === 'admin' && (
+            {/* {user?.role === 'admin' && (
               <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
                 <input
                   type="checkbox"
@@ -126,7 +126,7 @@ export function DraftsList() {
                   Show deleted drafts
                 </label>
               </div>
-            )}
+            )} */}
           </div>
         </CardContent>
       </Card>
