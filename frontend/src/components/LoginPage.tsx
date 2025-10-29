@@ -58,7 +58,7 @@ export function LoginPage() {
             {/* <CardDescription>Enter your credentials to access the portal</CardDescription> */}
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -90,17 +90,17 @@ export function LoginPage() {
                   'Sign In'
                 )}
               </Button>
-            </form>
+            </form> */}
 
             {/* OR Divider */}
-            <div className="relative my-6">
+            {/* <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-white px-2 text-slate-500">Or continue with</span>
               </div>
-            </div>
+            </div> */}
 
             {/* CorpPass Login Button */}
             <Button
@@ -116,7 +116,7 @@ export function LoginPage() {
               Login with CorpPass
             </Button>
 
-            <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+            {/* <div className="mt-6 p-4 bg-slate-50 rounded-lg">
               <p className="text-sm font-semibold text-slate-600 mb-2">Demo Accounts:</p>
               <div className="space-y-1 text-xs text-slate-500">
                 <p className="text-sm">Doctor: doctor@clinic.sg / S1234567D</p>
@@ -125,6 +125,16 @@ export function LoginPage() {
                 <p className="text-sm">Nurse 2: nurse2@clinic.sg / S7890123C</p>
                 <p className="text-sm">UEN: 123456789D</p>
                 <p className="text-sm mb-2">Password: password</p>
+              </div>
+            </div> */}
+            <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+              <p className="text-sm font-semibold text-slate-600 mb-2">Demo Accounts:</p>
+              <div className="space-y-1 text-xs text-slate-500">
+                <p className="text-sm">Doctor1: S1234567D</p>
+                <p className="text-sm">Nurse1: S2345678H</p>
+                <p className="text-sm">Nurse2: S7890123C</p>
+                <p className="text-sm">Admin1: S3456789A</p>
+                <p className="text-sm">UEN: 123456789D</p>
               </div>
             </div>
           </CardContent>
