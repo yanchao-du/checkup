@@ -20,9 +20,7 @@ echo ""
 # SHOW_LOGIN_PAGE=true forces MockPass to show the login form instead of auto-login
 PORT=5156 \
 SHOW_LOGIN_PAGE=true \
-# For mockpass run on docker, use the following line
 CP_RP_JWKS_ENDPOINT=http://backend:3344/v1/.well-known/jwks.json \
-
 npx mockpass \
   --port 5156 \
   --corppass \
