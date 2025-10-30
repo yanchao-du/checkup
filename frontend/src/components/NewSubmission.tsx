@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateHeight, validateNricOrFin, validateWeight, validateSystolic, validateDiastolic } from '../lib/validationRules';
+import { validateNricOrFin } from '../lib/validationRules';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -12,8 +12,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Textarea } from './ui/textarea';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react';
 import {
@@ -28,6 +27,13 @@ import {
 } from './ui/alert-dialog';
 
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
+import { HeightField } from './submission-form/fields/HeightField';
+import { WeightField } from './submission-form/fields/WeightField';
+import { BloodPressureField } from './submission-form/fields/BloodPressureField';
+import { RemarksField } from './submission-form/fields/RemarksField';
+import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
+import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
+import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
 
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)' },
@@ -55,10 +61,6 @@ export function NewSubmission() {
   const [assignedDoctorId, setAssignedDoctorId] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
-  const [heightError, setHeightError] = useState<string | null>(null);
-  const [weightError, setWeightError] = useState<string | null>(null);
-  const [systolicError, setSystolicError] = useState<string | null>(null);
-  const [diastolicError, setDiastolicError] = useState<string | null>(null);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -366,240 +368,68 @@ export function NewSubmission() {
               {examTypes.find(t => t.value === examType)?.label || examType}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Common fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="height">Height (cm)</Label>
-                <Input
-                  id="height"
-                  name="height"
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={3}
-                  value={formData.height || ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    if (val.length <= 3) {
-                      handleFormDataChange('height', val);
-                    }
-                    if (heightError) setHeightError(null);
-                  }}
-                  onBlur={(e) => {
-                    setHeightError(validateHeight(e.target.value));
-                  }}
-                  placeholder="170"
-                  className={heightError ? 'border-red-500' : ''}
-                />
-                {heightError && (
-                  <p className="text-xs text-red-600 mt-1">{heightError}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="weight">Weight (kg)</Label>
-                <Input
-                  id="weight"
-                  name="weight"
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={3}
-                  value={formData.weight || ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    if (val.length <= 3) {
-                      handleFormDataChange('weight', val);
-                    }
-                    if (weightError) setWeightError(null);
-                  }}
-                  onBlur={(e) => {
-                    setWeightError(validateWeight(e.target.value));
-                  }}
-                  placeholder="70"
-                  className={weightError ? 'border-red-500' : ''}
-                />
-                {weightError && (
-                  <p className="text-xs text-red-600 mt-1">{weightError}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Blood Pressure (mmHg)</Label>
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <Input
-                      id="systolic"
-                      name="systolic"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={3}
-                      value={formData.systolic || ''}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, '');
-                        if (val.length <= 3) {
-                          handleFormDataChange('systolic', val);
-                        }
-                        if (systolicError) setSystolicError(null);
-                      }}
-                      onBlur={(e) => {
-                        setSystolicError(validateSystolic(e.target.value));
-                      }}
-                      placeholder="120"
-                      className={systolicError ? 'border-red-500' : ''}
+          <CardContent>
+            <Accordion type="multiple" defaultValue={['vitals', 'exam-specific', 'remarks']} className="w-full">
+              <AccordionItem value="vitals">
+                <AccordionTrigger>Common Vitals</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <HeightField
+                      value={formData.height || ''}
+                      onChange={(value) => handleFormDataChange('height', value)}
                     />
-                    <p className="text-xs text-slate-500">Systolic (high)</p>
-                    {systolicError && (
-                      <p className="text-xs text-red-600 mt-1">{systolicError}</p>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <Input
-                      id="diastolic"
-                      name="diastolic"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={3}
-                      value={formData.diastolic || ''}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, '');
-                        if (val.length <= 3) {
-                          handleFormDataChange('diastolic', val);
-                        }
-                        if (diastolicError) setDiastolicError(null);
-                      }}
-                      onBlur={(e) => {
-                        setDiastolicError(validateDiastolic(e.target.value));
-                      }}
-                      placeholder="80"
-                      className={diastolicError ? 'border-red-500' : ''}
+                    <WeightField
+                      value={formData.weight || ''}
+                      onChange={(value) => handleFormDataChange('weight', value)}
                     />
-                    <p className="text-xs text-slate-500">Diastolic (low)</p>
-                    {diastolicError && (
-                      <p className="text-xs text-red-600 mt-1">{diastolicError}</p>
-                    )}
+                    <BloodPressureField
+                      systolic={formData.systolic || ''}
+                      diastolic={formData.diastolic || ''}
+                      onSystolicChange={(value) => handleFormDataChange('systolic', value)}
+                      onDiastolicChange={(value) => handleFormDataChange('diastolic', value)}
+                    />
                   </div>
-                </div>
-              </div>
-            </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            {/* Exam type specific fields */}
-            {examType === 'SIX_MONTHLY_MDW' && (
-              <>
-                <div className="space-y-2">
-                  <Label>Pregnancy Test</Label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="preg-positive"
-                        checked={formData.pregnancyTest === 'Positive'}
-                        onChange={(e) => handleFormDataChange('pregnancyTest', e.target.checked ? 'Positive' : 'Negative')}
-                        className="form-checkbox h-5 w-5 text-orange-500"
-                      />
-                      <Label htmlFor="preg-positive" className={formData.pregnancyTest === 'Positive' ? 'text-orange-500 font-semibold' : ''}>
-                        Positive
-                      </Label>
-                    </div>
-                </div>
+              <AccordionItem value="exam-specific">
+                <AccordionTrigger>
+                  {examType === 'SIX_MONTHLY_MDW' && 'Six-Monthly MDW Specific Fields'}
+                  {examType === 'WORK_PERMIT' && 'Work Permit Specific Fields'}
+                  {examType === 'AGED_DRIVERS' && 'Aged Drivers Specific Fields'}
+                </AccordionTrigger>
+                <AccordionContent>
+                  {examType === 'SIX_MONTHLY_MDW' && (
+                    <SixMonthlyMdwFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  {examType === 'WORK_PERMIT' && (
+                    <WorkPermitFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  {examType === 'AGED_DRIVERS' && (
+                    <AgedDriversFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                </AccordionContent>
+              </AccordionItem>
 
-                <div className="space-y-2">
-                  <Label htmlFor="chestXray">Chest X-Ray Result</Label>
-                  <Input
-                    id="chestXray"
-                    value={formData.chestXray || ''}
-                    onChange={(e) => handleFormDataChange('chestXray', e.target.value)}
-                    placeholder="Normal / Abnormal findings"
+              <AccordionItem value="remarks">
+                <AccordionTrigger>Additional Remarks</AccordionTrigger>
+                <AccordionContent>
+                  <RemarksField
+                    value={formData.remarks || ''}
+                    onChange={(value) => handleFormDataChange('remarks', value)}
                   />
-                </div>
-              </>
-            )}
-
-            {examType === 'WORK_PERMIT' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="hivTest">HIV Test Result</Label>
-                  <Select
-                    value={formData.hivTest || ''}
-                    onValueChange={(value: string) => handleFormDataChange('hivTest', value)}
-                  >
-                    <SelectTrigger id="hivTest">
-                      <SelectValue placeholder="Select result" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Negative">Negative</SelectItem>
-                      <SelectItem value="Positive">Positive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tbTest">TB Test Result</Label>
-                  <Select
-                    value={formData.tbTest || ''}
-                    onValueChange={(value: string) => handleFormDataChange('tbTest', value)}
-                  >
-                    <SelectTrigger id="tbTest">
-                      <SelectValue placeholder="Select result" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Negative">Negative</SelectItem>
-                      <SelectItem value="Positive">Positive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-
-            {examType === 'AGED_DRIVERS' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="visualAcuity">Visual Acuity</Label>
-                  <Input
-                    id="visualAcuity"
-                    value={formData.visualAcuity || ''}
-                    onChange={(e) => handleFormDataChange('visualAcuity', e.target.value)}
-                    placeholder="6/6"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="hearingTest">Hearing Test</Label>
-                  <Input
-                    id="hearingTest"
-                    value={formData.hearingTest || ''}
-                    onChange={(e) => handleFormDataChange('hearingTest', e.target.value)}
-                    placeholder="Normal / Impaired"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Diabetes</Label>
-                  <RadioGroup
-                    value={formData.diabetes || ''}
-                    onValueChange={(value: string) => handleFormDataChange('diabetes', value)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Yes" id="diabetes-yes" />
-                      <Label htmlFor="diabetes-yes">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="No" id="diabetes-no" />
-                      <Label htmlFor="diabetes-no">No</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="remarks">Additional Remarks</Label>
-              <Textarea
-                id="remarks"
-                value={formData.remarks || ''}
-                onChange={(e) => handleFormDataChange('remarks', e.target.value)}
-                placeholder="Enter any additional medical findings or notes"
-                rows={4}
-              />
-            </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </CardContent>
         </Card>
       )}
