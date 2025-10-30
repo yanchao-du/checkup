@@ -11,6 +11,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { ArrowLeft, FileText, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { cn } from './ui/utils';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import {
   AlertDialog,
@@ -226,7 +227,17 @@ export function ViewSubmission() {
                             return (
                               <div>
                                 <p className="text-sm text-slate-500 mb-1">BMI</p>
-                                <p className="text-slate-900">{bmi} ({getBMICategory(parseFloat(bmi))})</p>
+                                {(() => {
+                                  const category = getBMICategory(parseFloat(bmi));
+                                  const isAlert = category === 'Underweight' || category === 'Obese';
+                                  return (
+                                    <p className="text-slate-900">
+                                      {bmi} (
+                                      <span className={isAlert ? 'font-semibold text-red-600' : ''}>{category}</span>
+                                      )
+                                    </p>
+                                  );
+                                })()}
                               </div>
                             );
                           }
@@ -254,8 +265,8 @@ export function ViewSubmission() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-slate-500 mb-1">Pregnancy Test</p>
-                        <p className={`text-slate-900 ${submission.formData.pregnancyTestPositive === 'true' ? 'font-semibold text-red-600' : ''}`}>
-                          {submission.formData.pregnancyTestPositive === 'true'
+                        <p className={cn('text-slate-900', String(submission.formData.pregnancyTestPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.pregnancyTestPositive) === 'true'
                             ? 'Positive'
                             : (submission.formData.pregnancyTest ?? 'Negative')}
                         </p>
@@ -263,8 +274,8 @@ export function ViewSubmission() {
 
                       <div>
                         <p className="text-sm text-slate-500 mb-1">Syphilis Test</p>
-                        <p className={`text-slate-900 ${submission.formData.syphilisTestPositive === 'true' ? 'font-semibold text-red-600' : ''}`}>
-                          {submission.formData.syphilisTestPositive === 'true'
+                        <p className={cn('text-slate-900', String(submission.formData.syphilisTestPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.syphilisTestPositive) === 'true'
                             ? 'Reactive'
                             : (submission.formData.syphilisTest ?? 'Non-reactive')}
                         </p>
@@ -272,8 +283,8 @@ export function ViewSubmission() {
 
                       <div>
                         <p className="text-sm text-slate-500 mb-1">HIV Test</p>
-                        <p className={`text-slate-900 ${submission.formData.hivTestPositive === 'true' ? 'font-semibold text-red-600' : ''}`}>
-                          {submission.formData.hivTestPositive === 'true'
+                        <p className={cn('text-slate-900', String(submission.formData.hivTestPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.hivTestPositive) === 'true'
                             ? 'Reactive'
                             : (submission.formData.hivTest ?? 'Non-reactive')}
                         </p>
@@ -281,8 +292,8 @@ export function ViewSubmission() {
 
                       <div>
                         <p className="text-sm text-slate-500 mb-1">Chest X-Ray</p>
-                        <p className={`text-slate-900 ${submission.formData.chestXrayPositive === 'true' ? 'font-semibold text-red-600' : ''}`}>
-                          {submission.formData.chestXrayPositive === 'true'
+                        <p className={cn('text-slate-900', String(submission.formData.chestXrayPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.chestXrayPositive) === 'true'
                             ? 'Positive'
                             : (submission.formData.chestXray ?? 'Negative')}
                         </p>
@@ -297,15 +308,15 @@ export function ViewSubmission() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <p className="text-sm text-slate-500">Signs of suspicious or unexplained injuries</p>
-                        <p className={`text-slate-900 ${submission.formData.suspiciousInjuries === 'true' ? 'font-semibold text-red-600' : ''}`}>
-                          {submission.formData.suspiciousInjuries === 'true' ? 'Yes' : 'No'}
+                        <p className={cn('text-slate-900', String(submission.formData.suspiciousInjuries) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.suspiciousInjuries) === 'true' ? 'Yes' : 'No'}
                         </p>
                       </div>
 
                       <div className="flex justify-between items-center">
                         <p className="text-sm text-slate-500">Unintentional weight loss</p>
-                        <p className={`text-slate-900 ${submission.formData.unintentionalWeightLoss === 'true' ? 'font-semibold text-red-600' : ''}`}>
-                          {submission.formData.unintentionalWeightLoss === 'true' ? 'Yes' : 'No'}
+                        <p className={cn('text-slate-900', String(submission.formData.unintentionalWeightLoss) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.unintentionalWeightLoss) === 'true' ? 'Yes' : 'No'}
                         </p>
                       </div>
 
