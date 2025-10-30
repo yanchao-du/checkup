@@ -57,7 +57,7 @@ export interface LoginResponse {
 }
 
 // Exam Types
-export type ExamType = 'SIX_MONTHLY_MDW' | 'WORK_PERMIT' | 'AGED_DRIVERS';
+export type ExamType = 'SIX_MONTHLY_MDW' | 'SIX_MONTHLY_FMW' | 'WORK_PERMIT' | 'AGED_DRIVERS';
 export type SubmissionStatus = 
   | 'draft' 
   | 'pending_approval' 

@@ -31,6 +31,7 @@ import {
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
 import { RemarksField } from './submission-form/fields/RemarksField';
 import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
+import { SixMonthlyFmwFields } from './submission-form/exam-forms/SixMonthlyFmwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
 import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
 import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
@@ -38,6 +39,7 @@ import { DeclarationSection } from './submission-form/summary/DeclarationSection
 
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
+  { value: 'SIX_MONTHLY_FMW', label: 'Six-monthly Medical Exam for Female Migrant Worker (MOM)' },
   { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
   { value: 'AGED_DRIVERS', label: 'Medical Exam for Aged Drivers (SPF)' },
 ];
@@ -192,10 +194,10 @@ export function NewSubmission() {
     };
   }, [setHasUnsavedChanges]);
 
-  // Fetch patient name from API for SIX_MONTHLY_MDW and WORK_PERMIT
+  // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW and WORK_PERMIT
   useEffect(() => {
     const shouldFetchPatientName = 
-      (examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') &&
+      (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') &&
       patientNric.length >= 9 && 
       !nricError &&
       !id; // Only auto-fetch for new submissions, not when editing
@@ -757,7 +759,8 @@ export function NewSubmission() {
   };
 
   const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
-    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true);
+    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
+    (examType === 'SIX_MONTHLY_FMW' ? true : true);
 
   if (isLoading) {
     return (
@@ -838,7 +841,7 @@ export function NewSubmission() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="patientName">Patient Name *</Label>
-                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') ? (
+                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
                           <Input
@@ -942,6 +945,12 @@ export function NewSubmission() {
                       setPoliceReportError={setPoliceReportError}
                       remarksError={remarksError}
                       setRemarksError={setRemarksError}
+                    />
+                  )}
+                  {examType === 'SIX_MONTHLY_FMW' && (
+                    <SixMonthlyFmwFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
                     />
                   )}
                   {examType === 'WORK_PERMIT' && (

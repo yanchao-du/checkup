@@ -180,6 +180,7 @@ enum UserStatus {
 
 enum ExamType {
   SIX_MONTHLY_MDW @map("Six-monthly Medical Exam for Migrant Domestic Workers (MOM)")
+  SIX_MONTHLY_FMW @map("Six-monthly Medical Exam for Female Migrant Workers (MOM)")
   WORK_PERMIT     @map("Full Medical Exam for Work Permit (MOM)")
   AGED_DRIVERS    @map("Medical Exam for Aged Drivers (SPF)")
 }

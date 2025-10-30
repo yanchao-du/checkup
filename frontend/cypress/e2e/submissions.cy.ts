@@ -67,6 +67,31 @@ describe('Medical Submissions', () => {
       cy.url().should('include', '/submissions')
       cy.contains('Complete Patient').should('be.visible')
     })
+
+    it('should create FMW submission with test results only', () => {
+      cy.get('input[name="patientName"]').type('FMW Test Patient')
+      cy.get('input[name="nric"]').type('S9988776D')
+      cy.get('input[name="dateOfBirth"]').type('1995-03-15')
+      cy.get('[data-testid="examType"]').click()
+      cy.contains('FMW').click()
+      cy.get('input[name="examinationDate"]').type('2024-10-30')
+      
+      // FMW should NOT require height/weight
+      cy.get('input[name="height"]').should('not.exist')
+      cy.get('input[name="weight"]').should('not.exist')
+      
+      // Should have test result checkboxes
+      cy.get('input[type="checkbox"][name="pregnancyTestPositive"]').should('be.visible')
+      cy.get('input[type="checkbox"][name="syphilisTestPositive"]').should('be.visible')
+      cy.get('input[type="checkbox"][name="hivTestPositive"]').should('be.visible')
+      cy.get('input[type="checkbox"][name="chestXrayPositive"]').should('be.visible')
+      
+      cy.contains('button', 'Submit to Agency').click()
+      cy.get('[data-testid="confirm-submit-button"]').click()
+      
+      cy.url().should('include', '/submissions')
+      cy.contains('FMW Test Patient').should('be.visible')
+    })
   })
 
   describe('Drafts Management', () => {

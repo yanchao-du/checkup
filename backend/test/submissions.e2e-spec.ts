@@ -215,6 +215,57 @@ describe('Submissions (e2e)', () => {
         })
         .expect(400);
     });
+
+    it('should create FMW submission with only test results (no vitals required)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'Female Worker Test',
+          patientNric: 'S8888888F',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'false',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+      expect(res.body.patientName).toBe('Female Worker Test');
+      expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
+      expect(res.body.formData.pregnancyTestPositive).toBe('false');
+      // Should not have height/weight
+      expect(res.body.formData.height).toBeUndefined();
+      expect(res.body.formData.weight).toBeUndefined();
+    });
+
+    it('should create FMW submission as nurse (pending approval)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Nurse Test',
+          patientNric: 'S7777777E',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'true',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: true,
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('pending_approval');
+      expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
+      expect(res.body.assignedDoctorId).toBeDefined();
+    });
   });
 
   describe('/v1/submissions/:id (GET)', () => {
@@ -257,6 +308,55 @@ describe('Submissions (e2e)', () => {
       return request(app.getHttpServer())
         .get(`/v1/submissions/${submissionId}`)
         .expect(401);
+    });
+
+    it('should get FMW submission by id', async () => {
+      // First create a FMW submission
+      const createRes = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Get Test',
+          patientNric: 'S5555555F',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'false',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+        });
+
+      const fmwSubmissionId = createRes.body.id;
+
+      // Then retrieve it
+      return request(app.getHttpServer())
+        .get(`/v1/submissions/${fmwSubmissionId}`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.id).toBe(fmwSubmissionId);
+          expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
+          expect(res.body.patientName).toBe('FMW Get Test');
+          expect(res.body.formData.pregnancyTestPositive).toBe('false');
+        });
+    });
+
+    it('should filter submissions by FMW exam type', async () => {
+      return request(app.getHttpServer())
+        .get('/v1/submissions?examType=SIX_MONTHLY_FMW')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body.data)).toBe(true);
+          // All results should be FMW type
+          if (res.body.data.length > 0) {
+            res.body.data.forEach((submission: any) => {
+              expect(submission.examType).toBe('SIX_MONTHLY_FMW');
+            });
+          }
+        });
     });
   });
 
@@ -319,6 +419,45 @@ describe('Submissions (e2e)', () => {
         .put(`/v1/submissions/${submissionId}`)
         .send({ patientName: 'Fail' })
         .expect(401);
+    });
+
+    it('should update FMW submission', async () => {
+      // Create FMW draft
+      const created = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Update Test',
+          patientNric: 'S3333333F',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'false',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: false,
+        });
+
+      // Update it
+      const res = await request(app.getHttpServer())
+        .put(`/v1/submissions/${created.body.id}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          patientName: 'FMW Updated Name',
+          formData: {
+            pregnancyTestPositive: 'true',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+        })
+        .expect(200);
+
+      expect(res.body.patientName).toBe('FMW Updated Name');
+      expect(res.body.formData.pregnancyTestPositive).toBe('true');
+      expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
     });
   });
 
@@ -467,6 +606,40 @@ describe('Submissions (e2e)', () => {
       return request(app.getHttpServer())
         .delete(`/v1/submissions/${draftId}`)
         .expect(401);
+    });
+
+    it('should soft delete FMW submission', async () => {
+      // Create FMW draft
+      const created = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Delete Test',
+          patientNric: 'S2222222D',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'false',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: false,
+        });
+
+      // Delete it
+      const res = await request(app.getHttpServer())
+        .delete(`/v1/submissions/${created.body.id}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(200);
+
+      expect(res.body).toHaveProperty('success', true);
+
+      // Verify it's soft deleted
+      await request(app.getHttpServer())
+        .get(`/v1/submissions/${created.body.id}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .expect(404);
     });
   });
 });

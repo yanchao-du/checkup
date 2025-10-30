@@ -86,6 +86,9 @@ describe('Approval Workflow', () => {
           cy.get('select[name="examTypeFilter"]').select('SIX_MONTHLY_MDW')
           cy.get('table, [role="table"]').should('be.visible')
           
+          cy.get('select[name="examTypeFilter"]').select('SIX_MONTHLY_FMW')
+          cy.get('table, [role="table"]').should('be.visible')
+          
           cy.get('select[name="examTypeFilter"]').select('WORK_PERMIT')
           cy.get('table, [role="table"]').should('be.visible')
         }
