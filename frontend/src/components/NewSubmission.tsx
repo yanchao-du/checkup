@@ -32,6 +32,8 @@ import { RemarksField } from './submission-form/fields/RemarksField';
 import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
 import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
+import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
+import { DeclarationSection } from './submission-form/summary/DeclarationSection';
 
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)' },
@@ -66,6 +68,8 @@ export function NewSubmission() {
   const [lastRecordedHeight, setLastRecordedHeight] = useState<string>('');
   const [lastRecordedWeight, setLastRecordedWeight] = useState<string>('');
   const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
+  const [showSummary, setShowSummary] = useState(false);
+  const [declarationChecked, setDeclarationChecked] = useState(false);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -258,6 +262,10 @@ export function NewSubmission() {
     setLastRecordedHeight('');
     setLastRecordedWeight('');
     setLastRecordedDate('');
+    
+    // Reset summary and declaration
+    setShowSummary(false);
+    setDeclarationChecked(false);
   };
 
   const validatePatientInfo = (): boolean => {
@@ -630,21 +638,73 @@ export function NewSubmission() {
                       type="button"
                       onClick={() => {
                         if (examType === 'SIX_MONTHLY_MDW') {
-                          // For MDW, mark exam-specific as complete (includes remarks)
+                          // For MDW, show summary page
                           if (validateExamSpecific()) {
                             setCompletedSections(prev => new Set(prev).add('exam-specific'));
-                            toast.success('All sections completed! You can now save or submit.');
+                            setShowSummary(true);
+                            setActiveAccordion('summary');
                           }
                         } else {
                           handleContinue('exam-specific', 'remarks');
                         }
                       }}
                     >
-                      {examType === 'SIX_MONTHLY_MDW' ? 'Mark as Complete' : 'Continue'}
+                      {examType === 'SIX_MONTHLY_MDW' ? 'Continue' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
+
+              {examType === 'SIX_MONTHLY_MDW' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!completedSections.has('exam-specific')}>
+                    <div className="flex items-center gap-2">
+                      <span>Summary & Declaration</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <SixMonthlyMdwSummary
+                        formData={formData}
+                        patientName={patientName}
+                        patientNric={patientNric}
+                        examinationDate={examinationDate}
+                        lastRecordedHeight={lastRecordedHeight}
+                        lastRecordedWeight={lastRecordedWeight}
+                        lastRecordedDate={lastRecordedDate}
+                        onEdit={(section) => {
+                          // Navigate to the requested section for editing
+                          setActiveAccordion(section);
+                          // Keep showSummary true so user can navigate back
+                        }}
+                      />
+                      
+                      <DeclarationSection
+                        checked={declarationChecked}
+                        onChange={setDeclarationChecked}
+                        userRole={user?.role || 'nurse'}
+                      />
+                      
+                      <div className="flex justify-end mt-4">
+                        <Button 
+                          type="button"
+                          onClick={() => {
+                            if (user?.role === 'doctor' && !declarationChecked) {
+                              toast.error('Please check the declaration before submitting');
+                              return;
+                            }
+                            setCompletedSections(prev => new Set(prev).add('summary'));
+                            toast.success('All sections completed! You can now save or submit.');
+                          }}
+                          disabled={user?.role === 'doctor' && !declarationChecked}
+                        >
+                          Mark as Complete
+                        </Button>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
 
               {examType !== 'SIX_MONTHLY_MDW' && (
                 <AccordionItem value="remarks">
