@@ -44,6 +44,7 @@ export function SixMonthlyMdwSummary({
   };
 
   const bmi = calculateBMI();
+  const bmiCategory = bmi ? getBMICategory(parseFloat(bmi)) : null;
 
   return (
     <div className="space-y-6">
@@ -116,7 +117,17 @@ export function SixMonthlyMdwSummary({
               <div>
                 <p className="text-slate-500">BMI</p>
                 <p className="font-medium">
-                  {bmi ? `${bmi} (${getBMICategory(parseFloat(bmi))})` : '-'}
+                  {bmi ? (
+                    <>
+                      <span>{bmi}</span>
+                      <span className=" text-slate-500"> - </span>
+                      <span className={bmiCategory === 'Underweight' || bmiCategory === 'Obese' ? 'text-red-600' : 'text-slate-700'}>
+                        {bmiCategory}
+                      </span>
+                    </>
+                  ) : (
+                    '-'
+                  )}
                 </p>
               </div>
             </div>
