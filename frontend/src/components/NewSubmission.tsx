@@ -670,15 +670,16 @@ export function NewSubmission() {
       };
 
       if (id) {
-        // Update existing draft
+        // Update existing draft - stay on the same page
         await submissionsApi.update(id, submissionData);
         toast.success('Draft updated successfully');
-        navigate('/drafts', { replace: true });
+        // Do not navigate away; remain on the draft edit page
       } else {
-        // Create new draft
-        await submissionsApi.create(submissionData);
+        // Create new draft and navigate to its draft edit URL so user stays on the page
+        const created = await submissionsApi.create(submissionData);
         toast.success('Draft saved successfully');
-        navigate('/drafts', { replace: true });
+        // Navigate to /draft/:id which will load the draft into the form
+        navigate(`/draft/${created.id}`, { replace: true });
       }
     } catch (error) {
       console.error('Failed to save draft:', error);
@@ -1025,7 +1026,26 @@ export function NewSubmission() {
                             <Send className="w-4 h-4 mr-2" />
                             Submit to Agency
                           </Button>
+                        ) : user?.role === 'nurse' ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              // For nurses, route for approval from the summary
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              if (!hasDefaultDoctor) {
+                                setShowSetDefaultDoctorDialog(true);
+                              } else {
+                                setIsRouteForApproval(true);
+                                setShowSubmitDialog(true);
+                              }
+                            }}
+                            disabled={!isPatientInfoValid || isSaving}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit for Approval
+                          </Button>
                         ) : (
+                          // Other roles (non-doctor, non-nurse) can continue
                           <Button
                             type="button"
                             onClick={() => {
