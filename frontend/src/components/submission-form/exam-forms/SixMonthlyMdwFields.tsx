@@ -16,6 +16,11 @@ interface SixMonthlyMdwFieldsProps {
   setHeightError?: (err: string | null) => void;
   weightError?: string | null;
   setWeightError?: (err: string | null) => void;
+  policeReportError?: string | null;
+  setPoliceReportError?: (err: string | null) => void;
+  remarksError?: string | null;
+  setRemarksError?: (err: string | null) => void;
+  highlightedField?: string | null;
 }
 
 export function SixMonthlyMdwFields({ 
@@ -28,6 +33,11 @@ export function SixMonthlyMdwFields({
   setHeightError,
   weightError,
   setWeightError,
+  policeReportError,
+  setPoliceReportError,
+  remarksError,
+  setRemarksError,
+  highlightedField,
 }: SixMonthlyMdwFieldsProps) {
   const handleCheckboxChange = (key: string, checked: boolean) => {
     onChange(key, checked ? 'true' : 'false');
@@ -52,6 +62,7 @@ export function SixMonthlyMdwFields({
           lastRecordedDate={lastRecordedDate}
           externalError={heightError}
           setExternalError={setHeightError}
+          highlight={highlightedField === 'height'}
         />
         <WeightField
           value={formData.weight || ''}
@@ -60,6 +71,7 @@ export function SixMonthlyMdwFields({
           lastRecordedDate={lastRecordedDate}
           externalError={weightError}
           setExternalError={setWeightError}
+          highlight={highlightedField === 'weight'}
         />
         <BmiField
           height={formData.height || ''}
@@ -141,7 +153,12 @@ export function SixMonthlyMdwFields({
           {hasPhysicalExamConcerns && (
             <PoliceReportField
               value={formData.policeReport || ''}
-              onChange={(value) => onChange('policeReport', value)}
+              onChange={(value) => {
+                onChange('policeReport', value);
+                if (setPoliceReportError) setPoliceReportError(null);
+              }}
+              externalError={policeReportError}
+              highlight={highlightedField === 'policeReport'}
             />
           )}
         </div>
@@ -161,7 +178,11 @@ export function SixMonthlyMdwFields({
               onChange('remarks', '');
             }
           }}
-          onRemarksChange={(value) => onChange('remarks', value)}
+          onRemarksChange={(value) => {
+            onChange('remarks', value);
+            if (setRemarksError) setRemarksError(null);
+          }}
+          externalError={remarksError}
           forceExpanded={hasPhysicalExamConcerns}
         />
       </div>

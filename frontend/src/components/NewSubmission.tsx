@@ -70,6 +70,8 @@ export function NewSubmission() {
   const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
   const [heightError, setHeightError] = useState<string | null>(null);
   const [weightError, setWeightError] = useState<string | null>(null);
+  const [policeReportError, setPoliceReportError] = useState<string | null>(null);
+  const [remarksError, setRemarksError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
@@ -332,16 +334,45 @@ export function NewSubmission() {
         formData.suspiciousInjuries === 'true' || 
         formData.unintentionalWeightLoss === 'true';
       
-      if (hasPhysicalExamConcerns && !formData.policeReport) {
-        toast.error('Please indicate whether you have made a police report');
-        return false;
+      if (hasPhysicalExamConcerns) {
+        if (!formData.policeReport) {
+          setPoliceReportError('Please indicate whether you have made a police report');
+        }
+        if (!formData.remarks) {
+          setRemarksError('Please provide your assessment in the remarks section');
+        }
+        if (!formData.policeReport || !formData.remarks) {
+          // scroll and focus the first invalid field
+          focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+          return false;
+        }
       }
     }
     
     // clear inline errors if validation passes
     setHeightError(null);
     setWeightError(null);
+    setPoliceReportError(null);
+    setRemarksError(null);
     return true;
+  };
+
+  // Scroll and focus the first invalid field in order: height, weight, police report, remarks
+  const focusFirstInvalidField = (states: { height: boolean; weight: boolean; policeReport: boolean; remarks: boolean; }) => {
+    const tryScroll = (elId: string) => {
+      const el = document.getElementById(elId) as HTMLElement | null;
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+        return true;
+      }
+      return false;
+    };
+
+    if (!states.height && tryScroll('height')) return;
+    if (!states.weight && tryScroll('weight')) return;
+    if (!states.policeReport && tryScroll('policeReport-yes')) return;
+    if (!states.remarks && tryScroll('remarks')) return;
   };
 
   const validateRemarks = (): boolean => {
@@ -653,6 +684,10 @@ export function NewSubmission() {
                       setHeightError={setHeightError}
                       weightError={weightError}
                       setWeightError={setWeightError}
+                      policeReportError={policeReportError}
+                      setPoliceReportError={setPoliceReportError}
+                      remarksError={remarksError}
+                      setRemarksError={setRemarksError}
                     />
                   )}
                   {examType === 'WORK_PERMIT' && (

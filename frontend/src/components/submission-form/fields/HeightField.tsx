@@ -11,9 +11,10 @@ interface HeightFieldProps {
   // Optional external error controlled by parent (inline validation)
   externalError?: string | null;
   setExternalError?: (err: string | null) => void;
+  highlight?: boolean;
 }
 
-export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedDate, externalError, setExternalError }: HeightFieldProps) {
+export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedDate, externalError, setExternalError, highlight }: HeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +37,7 @@ export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedD
   };
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${highlight ? 'animate-pulse ring-2 ring-red-300 rounded-md' : ''}`}>
       <Label htmlFor="height">Height (cm)</Label>
       <Input
         id="height"
@@ -48,7 +49,7 @@ export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedD
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder="170"
-        className={error ? 'border-red-500' : ''}
+        className={`${error || externalError ? 'border-red-500' : ''}`}
       />
       {(externalError || error) && (
         <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>

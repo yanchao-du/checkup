@@ -8,6 +8,7 @@ interface MdwRemarksFieldProps {
   onHasAdditionalRemarksChange: (checked: boolean) => void;
   onRemarksChange: (value: string) => void;
   forceExpanded?: boolean;
+  externalError?: string | null;
 }
 
 export function MdwRemarksField({ 
@@ -16,6 +17,7 @@ export function MdwRemarksField({
   onHasAdditionalRemarksChange, 
   onRemarksChange,
   forceExpanded = false
+  , externalError
 }: MdwRemarksFieldProps) {
   const maxLength = 500;
   const remainingChars = maxLength - remarks.length;
@@ -54,6 +56,9 @@ export function MdwRemarksField({
             rows={4}
             className="resize-none"
           />
+          {externalError && (
+            <p className="text-xs text-red-600 mt-1">{externalError}</p>
+          )}
           <p className="text-xs text-slate-500">
             {remainingChars} characters remaining
           </p>

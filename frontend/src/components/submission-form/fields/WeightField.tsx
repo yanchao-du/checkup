@@ -11,9 +11,10 @@ interface WeightFieldProps {
   lastRecordedDate?: string;
   externalError?: string | null;
   setExternalError?: (err: string | null) => void;
+  highlight?: boolean;
 }
 
-export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedDate, externalError, setExternalError }: WeightFieldProps) {
+export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedDate, externalError, setExternalError, highlight }: WeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
   const [showWarning, setShowWarning] = useState(false);
 
@@ -47,7 +48,7 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
   };
 
   return (
-    <div className="space-y-2">
+  <div className={`space-y-2 ${highlight ? 'animate-pulse ring-2 ring-red-300 rounded-md' : ''}`}>
       <Label htmlFor="weight">Weight (kg)</Label>
       <Input
         id="weight"
@@ -59,7 +60,7 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder="70"
-        className={error ? 'border-red-500' : ''}
+        className={`${externalError || error ? 'border-red-500' : ''}`}
       />
       {(externalError || error) && (
         <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>

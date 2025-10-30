@@ -4,11 +4,13 @@ import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 interface PoliceReportFieldProps {
   value: string;
   onChange: (value: string) => void;
+  externalError?: string | null;
+  highlight?: boolean;
 }
 
-export function PoliceReportField({ value, onChange }: PoliceReportFieldProps) {
+export function PoliceReportField({ value, onChange, externalError, highlight }: PoliceReportFieldProps) {
   return (
-    <div className="space-y-3 pt-4 border-t border-slate-200">
+    <div className={`space-y-3 pt-4 border-t border-slate-200 ${highlight ? 'animate-pulse ring-2 ring-red-300 rounded-md' : ''}`}>
       <Label className="text-sm font-medium text-slate-900">
         Have you made a police report? *
       </Label>
@@ -28,6 +30,9 @@ export function PoliceReportField({ value, onChange }: PoliceReportFieldProps) {
           </div>
         </div>
       </RadioGroup>
+      {externalError && (
+        <p className="text-xs text-red-600 mt-1">{externalError}</p>
+      )}
     </div>
   );
 }
