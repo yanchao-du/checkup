@@ -55,6 +55,7 @@ export function SixMonthlyMdwSummary({
             <Button
               variant="outline"
               size="sm"
+              className="text-blue-600"
               onClick={() => onEdit('patient-info')}
             >
               <Edit className="w-4 h-4 mr-2" />
@@ -86,6 +87,7 @@ export function SixMonthlyMdwSummary({
             <Button
               variant="outline"
               size="sm"
+              className="text-blue-600"
               onClick={() => onEdit('exam-specific')}
             >
               <Edit className="w-4 h-4 mr-2" />
