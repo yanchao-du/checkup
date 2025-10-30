@@ -284,13 +284,9 @@ export function NewSubmission() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
-          <CardDescription>Enter patient details and exam type</CardDescription>
-        </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="examType">Exam Type *</Label>
+            <Label htmlFor="examType" className="pt-4">Exam Type *</Label>
             <Select value={examType} onValueChange={(value: string) => setExamType(value as ExamType)} name="examType">
               <SelectTrigger id="examType" data-testid="examType">
                 <SelectValue placeholder="Select exam type" />
@@ -305,71 +301,70 @@ export function NewSubmission() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="patientName">Patient Name *</Label>
-              <Input
-                id="patientName"
-                name="patientName"
-                value={patientName}
-                onChange={(e) => setPatientName(e.target.value)}
-                placeholder="Enter patient name"
-              />
-            </div>
+          {examType && (
+            <Accordion type="single" collapsible defaultValue="patient-info" className="w-full">
+              <AccordionItem value="patient-info">
+                <AccordionTrigger>Patient Information</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="patientName">Patient Name *</Label>
+                        <Input
+                          id="patientName"
+                          name="patientName"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          placeholder="Enter patient name"
+                        />
+                      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="patientNric">NRIC / FIN *</Label>
-              <Input
-                id="patientNric"
-                name="nric"
-                value={patientNric}
-                onChange={(e) => setPatientNric(e.target.value)}
-                onBlur={(e) => {
-                  setNricError(validateNricOrFin(e.target.value, validateNRIC));
-                }}
-                placeholder="S1234567A"
-                className={nricError ? 'border-red-500' : ''}
-              />
-              {nricError && (
-                <p className="text-xs text-red-600 mt-1">{nricError}</p>
-              )}
-            </div>
-          </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patientNric">NRIC / FIN *</Label>
+                        <Input
+                          id="patientNric"
+                          name="nric"
+                          value={patientNric}
+                          onChange={(e) => setPatientNric(e.target.value)}
+                          onBlur={(e) => {
+                            setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                          }}
+                          placeholder="S1234567A"
+                          className={nricError ? 'border-red-500' : ''}
+                        />
+                        {nricError && (
+                          <p className="text-xs text-red-600 mt-1">{nricError}</p>
+                        )}
+                      </div>
+                    </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="dob">Date of Birth *</Label>
-            <Input
-              id="dob"
-              name="dateOfBirth"
-              type="date"
-              value={patientDateOfBirth}
-              onChange={(e) => setPatientDateOfBirth(e.target.value)}
-            />
-          </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="dob">Date of Birth *</Label>
+                        <Input
+                          id="dob"
+                          name="dateOfBirth"
+                          type="date"
+                          value={patientDateOfBirth}
+                          onChange={(e) => setPatientDateOfBirth(e.target.value)}
+                        />
+                      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="examinationDate">Examination Date *</Label>
-            <Input
-              id="examinationDate"
-              name="examinationDate"
-              type="date"
-              value={examinationDate}
-              onChange={(e) => setExaminationDate(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+                      <div className="space-y-2">
+                        <Label htmlFor="examinationDate">Examination Date *</Label>
+                        <Input
+                          id="examinationDate"
+                          name="examinationDate"
+                          type="date"
+                          value={examinationDate}
+                          onChange={(e) => setExaminationDate(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-      {examType && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Medical Examination Details</CardTitle>
-            <CardDescription>
-              {examTypes.find(t => t.value === examType)?.label || examType}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible defaultValue="vitals" className="w-full">
               <AccordionItem value="vitals">
                 <AccordionTrigger>Common Vitals</AccordionTrigger>
                 <AccordionContent>
@@ -430,9 +425,9 @@ export function NewSubmission() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       <div className="flex items-center justify-between">
         <Button variant="outline" onClick={handleSaveDraft} disabled={!isFormValid || isSaving}>
