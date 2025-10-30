@@ -23,6 +23,8 @@ export function SixMonthlyMdwFields({
     onChange(key, checked ? 'true' : 'false');
   };
 
+  const POSTIVE = 'Positive/Reactive';
+
   return (
     <div className="space-y-6">
       {/* Body Measurements */}
@@ -49,34 +51,36 @@ export function SixMonthlyMdwFields({
       {/* Test Results */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Test Results</h3>
-        <div className="space-y-3">
+        <p className="text-sm text-slate-600">Indicate <b>postive</b> test results:</p>
+        <div className="space-y-0 border border-slate-200 rounded-md p-4">
           <CheckboxField
             id="pregnancyTestPositive"
-            label="Pregnancy test - Positive"
+            label="Pregnancy test"
+            checkboxLabel={POSTIVE}
             checked={formData.pregnancyTestPositive === 'true'}
             onChange={(checked) => handleCheckboxChange('pregnancyTestPositive', checked)}
-            description="If unchecked, result is Negative"
           />
           <CheckboxField
             id="syphilisTestPositive"
-            label="Syphilis test - Reactive"
+            label="Syphilis test"
+            checkboxLabel={POSTIVE}
             checked={formData.syphilisTestPositive === 'true'}
             onChange={(checked) => handleCheckboxChange('syphilisTestPositive', checked)}
-            description="If unchecked, result is Non-reactive"
           />
           <CheckboxField
             id="hivTestPositive"
-            label="HIV test - Reactive"
+            label="HIV test"
+            checkboxLabel={POSTIVE}
             checked={formData.hivTestPositive === 'true'}
             onChange={(checked) => handleCheckboxChange('hivTestPositive', checked)}
-            description="If unchecked, result is Non-reactive"
           />
           <CheckboxField
             id="chestXrayPositive"
-            label="Chest X-ray to screen for TB - Positive"
+            label="Chest X-ray to screen for TB"
+            checkboxLabel={POSTIVE}
             checked={formData.chestXrayPositive === 'true'}
             onChange={(checked) => handleCheckboxChange('chestXrayPositive', checked)}
-            description="If unchecked, result is Negative"
+            description='Note: HIV test must be done by an MOH-approved laboratory.'
           />
         </div>
       </div>
@@ -84,20 +88,20 @@ export function SixMonthlyMdwFields({
       {/* Physical Examination Details */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Physical Examination Details</h3>
-        <div className="space-y-3">
+        <div className="space-y-0 border border-slate-200 rounded-md p-4">
           <CheckboxField
             id="suspiciousInjuries"
-            label="Signs of suspicious or unexplained injuries - Yes"
+            label="Signs of suspicious or unexplained injuries"
+            checkboxLabel="Yes"
             checked={formData.suspiciousInjuries === 'true'}
             onChange={(checked) => handleCheckboxChange('suspiciousInjuries', checked)}
-            description="If unchecked, answer is No"
           />
           <CheckboxField
             id="unintentionalWeightLoss"
-            label="Unintentional weight loss - Yes"
+            label="Unintentional weight loss (if unsure, select yes)"
+            checkboxLabel="Yes"
             checked={formData.unintentionalWeightLoss === 'true'}
             onChange={(checked) => handleCheckboxChange('unintentionalWeightLoss', checked)}
-            description="If unchecked, answer is No"
           />
         </div>
       </div>

@@ -38,7 +38,7 @@ export function MdwRemarksField({
       
       {hasAdditionalRemarks && (
         <div className="space-y-2 pl-7">
-          <Label htmlFor="remarks">Additional Remarks</Label>
+          {/* <Label htmlFor="remarks">Additional Remarks</Label> */}
           <Textarea
             id="remarks"
             name="remarks"
