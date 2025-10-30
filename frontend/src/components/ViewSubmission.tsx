@@ -267,8 +267,8 @@ export function ViewSubmission() {
                         <p className="text-sm text-slate-500 mb-1">Pregnancy Test</p>
                         <p className={cn('text-slate-900', String(submission.formData.pregnancyTestPositive) === 'true' && 'font-semibold text-red-600')}>
                           {String(submission.formData.pregnancyTestPositive) === 'true'
-                            ? 'Positive'
-                            : (submission.formData.pregnancyTest ?? 'Negative')}
+                            ? 'Positive/Reactive'
+                            : (submission.formData.pregnancyTest ?? 'Negative/Non-reactive')}
                         </p>
                       </div>
 
@@ -276,8 +276,8 @@ export function ViewSubmission() {
                         <p className="text-sm text-slate-500 mb-1">Syphilis Test</p>
                         <p className={cn('text-slate-900', String(submission.formData.syphilisTestPositive) === 'true' && 'font-semibold text-red-600')}>
                           {String(submission.formData.syphilisTestPositive) === 'true'
-                            ? 'Reactive'
-                            : (submission.formData.syphilisTest ?? 'Non-reactive')}
+                            ? 'Positive/Reactive'
+                            : (submission.formData.syphilisTest ?? 'Negative/Non-reactive')}
                         </p>
                       </div>
 
@@ -285,8 +285,8 @@ export function ViewSubmission() {
                         <p className="text-sm text-slate-500 mb-1">HIV Test</p>
                         <p className={cn('text-slate-900', String(submission.formData.hivTestPositive) === 'true' && 'font-semibold text-red-600')}>
                           {String(submission.formData.hivTestPositive) === 'true'
-                            ? 'Reactive'
-                            : (submission.formData.hivTest ?? 'Non-reactive')}
+                            ? 'Positive/Reactive'
+                            : (submission.formData.hivTest ?? 'Negative/Non-reactive')}
                         </p>
                       </div>
 
@@ -294,8 +294,8 @@ export function ViewSubmission() {
                         <p className="text-sm text-slate-500 mb-1">Chest X-Ray</p>
                         <p className={cn('text-slate-900', String(submission.formData.chestXrayPositive) === 'true' && 'font-semibold text-red-600')}>
                           {String(submission.formData.chestXrayPositive) === 'true'
-                            ? 'Positive'
-                            : (submission.formData.chestXray ?? 'Negative')}
+                            ? 'Positive/Reactive'
+                            : (submission.formData.chestXray ?? 'Negative/Non-reactive')}
                         </p>
                       </div>
                     </div>

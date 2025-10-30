@@ -129,25 +129,25 @@ export function SixMonthlyMdwSummary({
               <div className="flex justify-between items-center">
                 <span className="text-slate-700">Pregnancy test</span>
                 <span className={formData.pregnancyTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.pregnancyTestPositive === 'true' ? 'Positive' : 'Negative'}
+                  {formData.pregnancyTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-700">Syphilis test</span>
                 <span className={formData.syphilisTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.syphilisTestPositive === 'true' ? 'Reactive' : 'Non-reactive'}
+                  {formData.syphilisTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-700">HIV test</span>
                 <span className={formData.hivTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.hivTestPositive === 'true' ? 'Reactive' : 'Non-reactive'}
+                  {formData.hivTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-700">Chest X-ray to screen for TB</span>
                 <span className={formData.chestXrayPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.chestXrayPositive === 'true' ? 'Positive' : 'Negative'}
+                  {formData.chestXrayPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
                 </span>
               </div>
             </div>
