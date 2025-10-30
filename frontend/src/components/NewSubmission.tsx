@@ -1104,25 +1104,7 @@ export function NewSubmission() {
           </Button>
 
           <div className="flex gap-3">
-            {!showSummary && user?.role === 'nurse' && (
-              <Button 
-                onClick={() => {
-                  // Check if default doctor is set
-                  if (!hasDefaultDoctor) {
-                    setShowSetDefaultDoctorDialog(true);
-                  } else {
-                    setIsRouteForApproval(true);
-                    setShowSubmitDialog(true);
-                  }
-                }}
-                disabled={!isFormValid || isSaving}
-              >
-              <>
-              <Send className="w-4 h-4 mr-2" />
-                Submit for Approval
-              </>
-              </Button>
-            )}
+            {/* Nurses submit for approval from the Summary section only; no footer button here. */}
             
             {/* Doctors submit from the Summary section only; no footer button here. */}
           </div>
