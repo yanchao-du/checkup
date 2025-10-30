@@ -239,7 +239,11 @@ export function NewSubmission() {
     // Debounce the API call
     const timeoutId = setTimeout(fetchPatientName, 500);
     return () => clearTimeout(timeoutId);
-  }, [patientNric, examType, nricError, id, isNameFromApi, formData.height]);
+  // Note: we intentionally do NOT include formData.height in the deps here.
+  // The effect should run when the patient NRIC changes (or examType/id flags),
+  // but not when the local height field is edited. Including formData.height
+  // caused every height edit to re-trigger the patient lookup API.
+  }, [patientNric, examType, nricError, id, isNameFromApi]);
 
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
