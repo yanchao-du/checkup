@@ -28,9 +28,6 @@ import {
 } from './ui/alert-dialog';
 
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
-import { HeightField } from './submission-form/fields/HeightField';
-import { WeightField } from './submission-form/fields/WeightField';
-import { BloodPressureField } from './submission-form/fields/BloodPressureField';
 import { RemarksField } from './submission-form/fields/RemarksField';
 import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
@@ -131,7 +128,6 @@ export function NewSubmission() {
           
           // Mark other sections as complete if loading existing submission
           if (existing.formData && Object.keys(existing.formData).length > 0) {
-            completed.add('vitals');
             completed.add('exam-specific');
             completed.add('remarks');
           }
@@ -270,12 +266,6 @@ export function NewSubmission() {
     return true;
   };
 
-  const validateVitals = (): boolean => {
-    // Vitals are optional, so always return true
-    // You can add specific validation if needed
-    return true;
-  };
-
   const validateExamSpecific = (): boolean => {
     // Exam-specific fields are optional, so always return true
     // You can add specific validation if needed based on exam type
@@ -293,9 +283,6 @@ export function NewSubmission() {
     switch (currentSection) {
       case 'patient-info':
         isValid = validatePatientInfo();
-        break;
-      case 'vitals':
-        isValid = validateVitals();
         break;
       case 'exam-specific':
         isValid = validateExamSpecific();
@@ -547,7 +534,7 @@ export function NewSubmission() {
                           />
                         </div>
                       )}
-
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="examinationDate">Examination Date *</Label>
                         <Input
@@ -559,45 +546,12 @@ export function NewSubmission() {
                         />
                       </div>
                     </div>
+                    </div>
                   </div>
                   <div className="flex justify-end mt-4">
                     <Button 
                       type="button"
-                      onClick={() => handleContinue('patient-info', 'vitals')}
-                    >
-                      Continue
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="vitals">
-                <AccordionTrigger isCompleted={completedSections.has('vitals')} isDisabled={!completedSections.has('patient-info')}>
-                  <div className="flex items-center gap-2">
-                    <span>Common Vitals</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <HeightField
-                      value={formData.height || ''}
-                      onChange={(value) => handleFormDataChange('height', value)}
-                    />
-                    <WeightField
-                      value={formData.weight || ''}
-                      onChange={(value) => handleFormDataChange('weight', value)}
-                    />
-                    <BloodPressureField
-                      systolic={formData.systolic || ''}
-                      diastolic={formData.diastolic || ''}
-                      onSystolicChange={(value) => handleFormDataChange('systolic', value)}
-                      onDiastolicChange={(value) => handleFormDataChange('diastolic', value)}
-                    />
-                  </div>
-                  <div className="flex justify-end mt-4">
-                    <Button 
-                      type="button"
-                      onClick={() => handleContinue('vitals', 'exam-specific')}
+                      onClick={() => handleContinue('patient-info', 'exam-specific')}
                     >
                       Continue
                     </Button>
@@ -608,11 +562,7 @@ export function NewSubmission() {
               <AccordionItem value="exam-specific">
                 <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!completedSections.has('patient-info')}>
                   <div className="flex items-center gap-2">
-                    <span>
-                      {examType === 'SIX_MONTHLY_MDW' && 'Six-Monthly MDW Specific Fields'}
-                      {examType === 'WORK_PERMIT' && 'Work Permit Specific Fields'}
-                      {examType === 'AGED_DRIVERS' && 'Aged Drivers Specific Fields'}
-                    </span>
+                    <span>Examination Details</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
