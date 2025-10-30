@@ -37,11 +37,12 @@ export function DeclarationSection({
               id="declaration"
               checked={checked}
               onCheckedChange={onChange}
-              className="mt-1"
+              // size="lg"
+              className="mt-0.5 text-slate-900 bg-white"
             />
             <Label
               htmlFor="declaration"
-              className="text-sm font-medium leading-relaxed cursor-pointer"
+              className="text-sm font-semibold leading-relaxed cursor-pointer text-slate-900"
             >
               I declare that all of the above is true.
             </Label>
