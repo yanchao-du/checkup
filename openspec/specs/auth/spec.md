@@ -1,7 +1,8 @@
-# Authentication Capability - Spec Delta
+# auth Specification
 
-## ADDED Requirements
-
+## Purpose
+TBD - created by archiving change add-corppass-auth. Update Purpose after archive.
+## Requirements
 ### Requirement: CorpPass OAuth Authentication
 The system SHALL support CorpPass OpenID Connect (OIDC) authentication as an alternative login method alongside email/password authentication.
 
@@ -241,72 +242,3 @@ The system SHALL support traditional email and password authentication.
 - **AND** both methods access same user account
 - **AND** user sees same data and permissions
 
-## Cross-Capability References
-
-This capability relates to:
-- **User Management**: New CorpPass users require admin approval (pending status)
-- **Audit Logging**: All CorpPass authentication attempts should be logged
-- **Security**: CSRF protection, token validation, rate limiting
-
-## Migration Notes
-
-### Database Migration
-
-```sql
--- Create corppass_users table
-CREATE TABLE corppass_users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  corppass_sub VARCHAR(255) NOT NULL UNIQUE,
-  uen VARCHAR(50),
-  nric VARCHAR(20),
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_corppass_users_user_id ON corppass_users(user_id);
-CREATE INDEX idx_corppass_users_corppass_sub ON corppass_users(corppass_sub);
-```
-
-### Environment Variables Required
-
-```bash
-# Development
-CORPPASS_CLIENT_ID=checkup-app
-CORPPASS_AUTHORIZE_URL=http://localhost:5156/corppass/v2/auth
-CORPPASS_TOKEN_URL=http://localhost:5156/corppass/v2/token
-CORPPASS_JWKS_URL=http://localhost:5156/corppass/v2/.well-known/keys
-CORPPASS_ISSUER=http://localhost:5156/corppass/v2
-CORPPASS_CALLBACK_URL=http://localhost:3344/v1/auth/corppass/callback
-CORPPASS_FRONTEND_CALLBACK_URL=http://localhost:6688/auth/corppass/callback
-
-# Production (requires CorpPass registration)
-CORPPASS_CLIENT_ID=<your-client-id>
-CORPPASS_CLIENT_SECRET=<your-client-secret>
-CORPPASS_AUTHORIZE_URL=https://corppass.gov.sg/v2/authorize
-CORPPASS_TOKEN_URL=https://corppass.gov.sg/v2/token
-CORPPASS_JWKS_URL=https://corppass.gov.sg/v2/.well-known/jwks
-CORPPASS_ISSUER=https://corppass.gov.sg/v2
-CORPPASS_CALLBACK_URL=https://yourdomain.sg/v1/auth/corppass/callback
-CORPPASS_FRONTEND_CALLBACK_URL=https://yourdomain.sg/auth/corppass/callback
-```
-
-### Backward Compatibility
-
-- All existing email/password users continue to work without changes
-- Existing JWT tokens remain valid
-- No data migration required for existing users
-- Users can optionally link CorpPass account later (admin feature)
-
-## Testing Requirements
-
-- [ ] Unit tests for CorpPass strategy
-- [ ] Unit tests for token validation
-- [ ] Unit tests for user matching/creation logic
-- [ ] E2E tests for complete CorpPass flow
-- [ ] E2E tests for account linking scenarios
-- [ ] E2E tests for error handling (invalid token, expired token, etc.)
-- [ ] Security tests for CSRF protection
-- [ ] Security tests for token validation bypass attempts
-- [ ] Performance tests for JWKS caching
-- [ ] Cypress tests for UI flow (click button, redirect, callback)
