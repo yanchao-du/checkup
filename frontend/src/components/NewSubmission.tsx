@@ -361,12 +361,12 @@ export function NewSubmission() {
   const focusFirstInvalidField = (states: { height: boolean; weight: boolean; policeReport: boolean; remarks: boolean; }) => {
     const tryScroll = (elId: string) => {
       const el = document.getElementById(elId) as HTMLElement | null;
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.focus();
-        return true;
-      }
-      return false;
+      if (!el) return false;
+
+      // Smoothly scroll the element into view but do not focus it.
+      // This keeps the viewport stable and leaves control to the user.
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return true;
     };
 
     if (!states.height && tryScroll('height')) return;
