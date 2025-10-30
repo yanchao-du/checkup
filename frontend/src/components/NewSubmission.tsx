@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
 import { submissionsApi } from '../services';
 import { usersApi, type Doctor } from '../services/users.service';
+import { patientsApi } from '../services/patients.service';
 import type { ExamType } from '../services';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -61,6 +62,8 @@ export function NewSubmission() {
   const [assignedDoctorId, setAssignedDoctorId] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
+  const [isNameFromApi, setIsNameFromApi] = useState(false);
+  const [isLoadingPatient, setIsLoadingPatient] = useState(false);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -129,6 +132,7 @@ export function NewSubmission() {
         setExaminationDate('');
         setAssignedDoctorId('');
         setFormData({});
+        setIsNameFromApi(false);
       }
     };
 
@@ -150,8 +154,59 @@ export function NewSubmission() {
     };
   }, [setHasUnsavedChanges]);
 
+  // Fetch patient name from API for SIX_MONTHLY_MDW and WORK_PERMIT
+  useEffect(() => {
+    const shouldFetchPatientName = 
+      (examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') &&
+      patientNric.length >= 9 && 
+      !nricError &&
+      !id; // Only auto-fetch for new submissions, not when editing
+
+    if (!shouldFetchPatientName) {
+      return;
+    }
+
+    const fetchPatientName = async () => {
+      setIsLoadingPatient(true);
+      try {
+        const patient = await patientsApi.getByNric(patientNric);
+        if (patient) {
+          setPatientName(patient.name);
+          setIsNameFromApi(true);
+          toast.success(`Patient found: ${patient.name}`);
+        } else {
+          // Clear name if no patient found
+          if (isNameFromApi) {
+            setPatientName('');
+            setIsNameFromApi(false);
+            toast.info('Patient not found in system. Please enter name manually.');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch patient:', error);
+        // Don't show error toast, just allow manual entry
+      } finally {
+        setIsLoadingPatient(false);
+      }
+    };
+
+    // Debounce the API call
+    const timeoutId = setTimeout(fetchPatientName, 500);
+    return () => clearTimeout(timeoutId);
+  }, [patientNric, examType, nricError, id, isNameFromApi]);
+
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleExamTypeChange = (value: string) => {
+    const newExamType = value as ExamType;
+    setExamType(newExamType);
+    
+    // Reset name-from-API flag when switching exam types
+    if (newExamType === 'AGED_DRIVERS') {
+      setIsNameFromApi(false);
+    }
   };
 
   const handleSaveDraft = async () => {
@@ -287,7 +342,7 @@ export function NewSubmission() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="examType" className="pt-4">Exam Type *</Label>
-            <Select value={examType} onValueChange={(value: string) => setExamType(value as ExamType)} name="examType">
+            <Select value={examType} onValueChange={handleExamTypeChange} name="examType">
               <SelectTrigger id="examType" data-testid="examType">
                 <SelectValue placeholder="Select exam type" />
               </SelectTrigger>
@@ -309,17 +364,6 @@ export function NewSubmission() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="patientName">Patient Name *</Label>
-                        <Input
-                          id="patientName"
-                          name="patientName"
-                          value={patientName}
-                          onChange={(e) => setPatientName(e.target.value)}
-                          placeholder="Enter patient name"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
                         <Label htmlFor="patientNric">NRIC / FIN *</Label>
                         <Input
                           id="patientNric"
@@ -334,6 +378,22 @@ export function NewSubmission() {
                         />
                         {nricError && (
                           <p className="text-xs text-red-600 mt-1">{nricError}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="patientName">Patient Name *</Label>
+                        <Input
+                          id="patientName"
+                          name="patientName"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
+                          readOnly={(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi}
+                          className={((examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                        />
+                        {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi && (
+                          <p className="text-xs text-slate-500">Name retrieved from system based on NRIC/FIN</p>
                         )}
                       </div>
                     </div>
