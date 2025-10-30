@@ -158,12 +158,14 @@ export function ViewSubmission() {
                   <p className="text-sm text-slate-500 mb-1">NRIC / FIN</p>
                   <p className="text-slate-900">{submission.patientNric}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
-                  <p className="text-slate-900">
-                    {new Date(submission.patientDateOfBirth).toLocaleDateString()}
-                  </p>
-                </div>
+                {submission.examType === 'AGED_DRIVERS' && submission.patientDateOfBirth && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
+                    <p className="text-slate-900">
+                      {new Date(submission.patientDateOfBirth).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Examination Date</p>
                   <p className="text-slate-900">

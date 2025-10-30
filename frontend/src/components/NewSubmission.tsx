@@ -220,7 +220,7 @@ export function NewSubmission() {
         examType,
         patientName,
         patientNric,
-        patientDateOfBirth,
+        ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         routeForApproval: false,
@@ -264,7 +264,7 @@ export function NewSubmission() {
         examType,
         patientName,
         patientNric,
-        patientDateOfBirth,
+        ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         // Don't send routeForApproval: false for doctors - backend treats that as draft
@@ -309,7 +309,7 @@ export function NewSubmission() {
     }
   };
 
-  const isFormValid = examType && patientName && patientNric && patientDateOfBirth;
+  const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true);
 
   if (isLoading) {
     return (
@@ -399,16 +399,18 @@ export function NewSubmission() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="dob">Date of Birth *</Label>
-                        <Input
-                          id="dob"
-                          name="dateOfBirth"
-                          type="date"
-                          value={patientDateOfBirth}
-                          onChange={(e) => setPatientDateOfBirth(e.target.value)}
-                        />
-                      </div>
+                      {examType === 'AGED_DRIVERS' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="dob">Date of Birth *</Label>
+                          <Input
+                            id="dob"
+                            name="dateOfBirth"
+                            type="date"
+                            value={patientDateOfBirth}
+                            onChange={(e) => setPatientDateOfBirth(e.target.value)}
+                          />
+                        </div>
+                      )}
 
                       <div className="space-y-2">
                         <Label htmlFor="examinationDate">Examination Date *</Label>

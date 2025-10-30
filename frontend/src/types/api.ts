@@ -95,7 +95,7 @@ export interface CreateSubmissionRequest {
   examType: ExamType;
   patientName: string;
   patientNric: string;
-  patientDateOfBirth: string;
+  patientDateOfBirth?: string;
   examinationDate?: string;
   formData: Record<string, any>;
   routeForApproval?: boolean;
