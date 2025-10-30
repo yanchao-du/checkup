@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 
 export function Acknowledgement() {
   const { id } = useParams();
@@ -51,35 +51,51 @@ export function Acknowledgement() {
   return (
     <div className="max-w-3xl mx-auto py-12">
       <Card>
-        <CardHeader>
-          <CardTitle>Acknowledgement</CardTitle>
+        <CardHeader className="pt-6">
+          {/* Inline small icon and prominent message */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <p className="text-lg md:text-xl font-semibold text-slate-900">Medical examination results have been successfully submitted.</p>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p className="text-sm text-slate-600">Thank you. The medical submission has been successfully submitted to the agency.</p>
+            {/* main message already displayed in header */}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-slate-500">NRIC / FIN</p>
-                <p className="text-slate-900 font-medium">{submission.patientNric || '-'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500">Patient Name</p>
-                <p className="text-slate-900 font-medium">{submission.patientName || '-'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500">Reference Number</p>
-                <p className="text-slate-900 font-medium">{submission.id}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500">Date & Time</p>
-                <p className="text-slate-900 font-medium">{submittedAt.toLocaleString()}</p>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="pl-3 md:pl-4">
+                  <p className="text-xs text-slate-500">NRIC / FIN</p>
+                  <p className="text-slate-900 font-medium">{submission.patientNric || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Patient Name</p>
+                  <p className="text-slate-900 font-medium">{submission.patientName || '-'}</p>
+                </div>
+                <div className="pl-3 md:pl-4">
+                  <p className="text-xs text-slate-500">Reference Number</p>
+                  <p className="text-slate-900 font-medium">{submission.id}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Date & Time</p>
+                  <p className="text-slate-900 font-medium">{submittedAt.toLocaleString()}</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={() => navigate('/submissions')}>Back to Submissions</Button>
-            </div>
+            {/* <div className="mt-6">
+              <h4 className="text-sm font-semibold text-slate-900 mb-2">What do you want to do next?</h4>
+              <ul className="list-disc pl-5">
+                <li>
+                  <Link to="/new-submission" className="text-blue-600 hover:underline">Start a new submission</Link>
+                </li>
+                <li>
+                  <Link to="/submissions" className="text-blue-600 hover:underline">View submissions</Link>
+                </li>
+              </ul>
+            </div> */}
           </div>
         </CardContent>
       </Card>
