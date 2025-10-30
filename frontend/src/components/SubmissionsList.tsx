@@ -159,7 +159,7 @@ export function SubmissionsList() {
                     <TableRow 
                       key={submission.id}
                       className="cursor-pointer hover:bg-slate-50"
-                      onClick={() => navigate(`/view-submission/${submission.id}`)}
+                      onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/submissions' } })}
                     >
                       <TableCell>{submission.patientName}</TableCell>
                       <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
@@ -182,7 +182,7 @@ export function SubmissionsList() {
                         {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Link to={`/view-submission/${submission.id}`}>
+                        <Link to={`/view-submission/${submission.id}`} state={{ from: '/submissions' }}>
                           <Button 
                             variant="ghost" 
                             size="sm"

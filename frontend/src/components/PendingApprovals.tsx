@@ -168,7 +168,7 @@ export function PendingApprovals() {
                     <TableRow 
                       key={submission.id}
                       className="cursor-pointer hover:bg-slate-50"
-                      onClick={() => navigate(`/view-submission/${submission.id}`)}
+                      onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/pending-approvals' } })}
                     >
                       <TableCell>{submission.patientName}</TableCell>
                       <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
@@ -188,7 +188,7 @@ export function PendingApprovals() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <Link to={`/view-submission/${submission.id}`}>
+                          <Link to={`/view-submission/${submission.id}`} state={{ from: '/pending-approvals' }}>
                             <Button 
                               variant="ghost" 
                               size="sm"

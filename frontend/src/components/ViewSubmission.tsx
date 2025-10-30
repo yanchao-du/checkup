@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
 import { approvalsApi } from '../services/approvals.service';
 import { useAuth } from './AuthContext';
@@ -27,6 +27,9 @@ import {
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Originating route (if provided) so we can navigate back directly without relying on history stack
+  const origin = (location.state as any)?.from as string | undefined;
   const { user } = useAuth();
   const [submission, setSubmission] = useState<any>(null);
   const [history, setHistory] = useState<any>(null);
@@ -128,7 +131,7 @@ export function ViewSubmission() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button variant="ghost" size="icon" onClick={() => origin ? navigate(origin) : navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">
