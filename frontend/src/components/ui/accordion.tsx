@@ -48,14 +48,14 @@ const AccordionTrigger = React.forwardRef<
         </div>
         <div
           className={cn(
-            "rounded-full border-2 flex items-center justify-center transition-colors",
+            "rounded-full border-2 flex items-center justify-center transition-colors w-4 h-4",
             isCompleted &&
               !isDisabled &&
-              " group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500 group-data-[state=closed]:w-4 group-data-[state=closed]:h-4 group-data-[state=open]:w-4 group-data-[state=open]:h-4 group-date-[state=open]:text-primary group-data-[state=closed]:bg-green-400 group-data-[state=closed]:border-green-400",
+              "group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500 group-date-[state=open]:text-primary group-data-[state=closed]:bg-green-400 group-data-[state=closed]:border-green-400",
             !isCompleted &&
               !isDisabled &&
-              "w-4 h-4 border-gray-500 bg-gray-500 group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500",
-            isDisabled && "border-gray-300 bg-gray-300 w-4 h-4 mr-1"
+              "border-gray-500 bg-gray-500 group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500",
+            isDisabled && "border-gray-300 bg-gray-300"
           )}
         >
           {isCompleted ? (
