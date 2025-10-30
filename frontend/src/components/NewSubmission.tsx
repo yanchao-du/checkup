@@ -1077,54 +1077,56 @@ export function NewSubmission() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={handleSaveDraft} disabled={!isFormValid || isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save as Draft'}
-        </Button>
+      {examType && (
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={handleSaveDraft} disabled={!isFormValid || isSaving}>
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save as Draft'}
+          </Button>
 
-        <div className="flex gap-3">
-          {!showSummary && user?.role === 'nurse' && (
-            <Button 
+          <div className="flex gap-3">
+            {!showSummary && user?.role === 'nurse' && (
+              <Button 
+                onClick={() => {
+                  // Check if default doctor is set
+                  if (!hasDefaultDoctor) {
+                    setShowSetDefaultDoctorDialog(true);
+                  } else {
+                    setIsRouteForApproval(true);
+                    setShowSubmitDialog(true);
+                  }
+                }}
+                disabled={!isFormValid || isSaving}
+              >
+              <>
+              <Send className="w-4 h-4 mr-2" />
+                Submit for Approval
+              </>
+              </Button>
+            )}
+            
+            {!showSummary && user?.role === 'doctor' && (<Button 
               onClick={() => {
-                // Check if default doctor is set
-                if (!hasDefaultDoctor) {
-                  setShowSetDefaultDoctorDialog(true);
-                } else {
-                  setIsRouteForApproval(true);
-                  setShowSubmitDialog(true);
-                }
+                setIsRouteForApproval(false);
+                setShowSubmitDialog(true);
               }}
               disabled={!isFormValid || isSaving}
             >
-            <>
-            <Send className="w-4 h-4 mr-2" />
-              Submit for Approval
-            </>
-            </Button>
-          )}
-          
-          {!showSummary && user?.role === 'doctor' && (<Button 
-            onClick={() => {
-              setIsRouteForApproval(false);
-              setShowSubmitDialog(true);
-            }}
-            disabled={!isFormValid || isSaving}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                Submit to Agency
-              </>
-            )}
-          </Button>)}
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit to Agency
+                </>
+              )}
+            </Button>)}
+          </div>
         </div>
-      </div>
+      )}
 
       <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
         <AlertDialogContent>
