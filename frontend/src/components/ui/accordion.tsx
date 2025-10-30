@@ -51,7 +51,7 @@ const AccordionTrigger = React.forwardRef<
             "rounded-full border-2 flex items-center justify-center transition-colors w-4 h-4",
             isCompleted &&
               !isDisabled &&
-              "group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500 group-date-[state=open]:text-primary group-data-[state=closed]:bg-green-400 group-data-[state=closed]:border-green-400",
+              "group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500 group-date-[state=open]:text-primary group-data-[state=closed]:bg-green-600 group-data-[state=closed]:border-green-600",
             !isCompleted &&
               !isDisabled &&
               "border-gray-500 bg-gray-500 group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500",
