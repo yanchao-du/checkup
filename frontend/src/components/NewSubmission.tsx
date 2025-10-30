@@ -385,6 +385,17 @@ export function NewSubmission() {
     return true;
   };
 
+  // Compute whether the Patient Information section is complete and valid.
+  // This is used to enable/disable other accordions when patient-info is incomplete or has inline errors.
+  const isPatientInfoValid = Boolean(
+    patientNric.trim() &&
+    !nricError &&
+    patientName.trim() &&
+    (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
+    examinationDate &&
+    !examinationDateError
+  );
+
   const handleContinue = (currentSection: string, nextSection: string) => {
     let isValid = false;
     
@@ -678,7 +689,7 @@ export function NewSubmission() {
               </AccordionItem>
 
               <AccordionItem value="exam-specific">
-                <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!completedSections.has('patient-info')}>
+                <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
                   <div className="flex items-center gap-2">
                     <span>Examination Details</span>
                   </div>
@@ -737,7 +748,7 @@ export function NewSubmission() {
 
               {examType === 'SIX_MONTHLY_MDW' && showSummary && (
                 <AccordionItem value="summary">
-                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!completedSections.has('exam-specific')}>
+                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!isPatientInfoValid || !completedSections.has('exam-specific')}>
                     <div className="flex items-center gap-2">
                       <span>Summary & Declaration</span>
                     </div>
@@ -803,7 +814,7 @@ export function NewSubmission() {
 
               {examType !== 'SIX_MONTHLY_MDW' && (
                 <AccordionItem value="remarks">
-                  <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!completedSections.has('patient-info')}>
+                  <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">
                       <span>Additional Remarks</span>
                     </div>
