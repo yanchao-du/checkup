@@ -12,6 +12,7 @@ import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
@@ -72,6 +73,7 @@ export function NewSubmission() {
   const [weightError, setWeightError] = useState<string | null>(null);
   const [policeReportError, setPoliceReportError] = useState<string | null>(null);
   const [remarksError, setRemarksError] = useState<string | null>(null);
+  const [examinationDateError, setExaminationDateError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
@@ -309,13 +311,16 @@ export function NewSubmission() {
       toast.error('Date of Birth is required for Aged Drivers exam');
       return false;
     }
-    
+
     // Validate Examination Date
     if (!examinationDate) {
-      toast.error('Examination Date is required');
+      // Use inline error instead of toast for examination date
+      setExaminationDateError('Examination Date is required');
       return false;
     }
     
+    // clear inline exam date error if present
+    if (examinationDateError) setExaminationDateError(null);
     return true;
   };
 
@@ -584,7 +589,7 @@ export function NewSubmission() {
                           className={nricError ? 'border-red-500' : ''}
                         />
                         {nricError && (
-                          <p className="text-xs text-red-600 mt-1">{nricError}</p>
+                          <InlineError>{nricError}</InlineError>
                         )}
                       </div>
                     </div>
@@ -649,8 +654,14 @@ export function NewSubmission() {
                           name="examinationDate"
                           type="date"
                           value={examinationDate}
-                          onChange={(e) => setExaminationDate(e.target.value)}
+                          onChange={(e) => {
+                            setExaminationDate(e.target.value);
+                            if (examinationDateError) setExaminationDateError(null);
+                          }}
                         />
+                        {examinationDateError && (
+                          <InlineError>{examinationDateError}</InlineError>
+                        )}
                       </div>
                     </div>
                     </div>
