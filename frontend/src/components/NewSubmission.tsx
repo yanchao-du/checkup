@@ -415,32 +415,35 @@ export function NewSubmission() {
         assignedDoctorId: assignedDoctorId || undefined,
       };
 
-      if (id) {
+        if (id) {
         // Update existing submission
-        await submissionsApi.update(id, submissionData);
+          await submissionsApi.update(id, submissionData);
 
-        // Submit the draft (changes status from draft to submitted/pending_approval)
-        if (user.role === 'nurse' && isRouteForApproval) {
-          await submissionsApi.submitForApproval(id);
-          toast.success('Routed for approval successfully');
-        } else if (user.role === 'doctor') {
-          // Doctor submitting directly to agency
-          await submissionsApi.submitForApproval(id);
-          toast.success('Medical exam submitted successfully');
-        } else {
-          toast.success('Submission updated successfully');
-        }
-        navigate('/submissions', { replace: true });
+          // Submit the draft (changes status from draft to submitted/pending_approval)
+          if (user.role === 'nurse' && isRouteForApproval) {
+            const routed = await submissionsApi.submitForApproval(id);
+            toast.success('Routed for approval successfully');
+            navigate(`/acknowledgement/${routed.id}`, { replace: true });
+          } else if (user.role === 'doctor') {
+            // Doctor submitting directly to agency
+            const submitted = await submissionsApi.submitForApproval(id);
+            toast.success('Medical exam submitted successfully');
+            navigate(`/acknowledgement/${submitted.id}`, { replace: true });
+          } else {
+            toast.success('Submission updated successfully');
+            navigate('/submissions', { replace: true });
+          }
       } else {
         // Create new submission
-        await submissionsApi.create(submissionData);
+          const created = await submissionsApi.create(submissionData);
 
-        if (user.role === 'doctor' || !isRouteForApproval) {
-          toast.success('Medical exam submitted successfully');
-        } else {
-          toast.success('Routed for approval successfully');
-        }
-        navigate('/submissions', { replace: true });
+          if (user.role === 'doctor' || !isRouteForApproval) {
+            toast.success('Medical exam submitted successfully');
+            navigate(`/acknowledgement/${created.id}`, { replace: true });
+          } else {
+            toast.success('Routed for approval successfully');
+            navigate(`/acknowledgement/${created.id}`, { replace: true });
+          }
       }
     } catch (error) {
       console.error('Failed to submit:', error);
