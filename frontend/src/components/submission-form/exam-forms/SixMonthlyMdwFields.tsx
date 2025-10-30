@@ -2,6 +2,7 @@ import { PregnancyTestField } from '../fields/PregnancyTestField';
 import { ChestXrayField } from '../fields/ChestXrayField';
 import { HeightField } from '../fields/HeightField';
 import { WeightField } from '../fields/WeightField';
+import { BmiField } from '../fields/BmiField';
 
 interface SixMonthlyMdwFieldsProps {
   formData: Record<string, any>;
@@ -31,6 +32,10 @@ export function SixMonthlyMdwFields({
         onChange={(value) => onChange('weight', value)}
         lastRecordedWeight={lastRecordedWeight}
         lastRecordedDate={lastRecordedDate}
+      />
+      <BmiField
+        height={formData.height || ''}
+        weight={formData.weight || ''}
       />
       <PregnancyTestField
         value={formData.pregnancyTest || ''}

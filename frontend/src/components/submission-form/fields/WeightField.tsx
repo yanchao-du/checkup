@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { validateWeight } from '../../../lib/validationRules';
+import { AlertTriangle } from 'lucide-react';
 
 interface WeightFieldProps {
   value: string;
@@ -12,17 +13,29 @@ interface WeightFieldProps {
 
 export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedDate }: WeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '');
     if (val.length <= 3) {
       onChange(val);
       if (error) setError(null);
+      // Hide warning when user is typing
+      setShowWarning(false);
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setError(validateWeight(e.target.value));
+    
+    // Check and show warning on blur
+    if (lastRecordedWeight && e.target.value) {
+      const currentWeight = parseFloat(e.target.value);
+      const lastWeight = parseFloat(lastRecordedWeight);
+      if (!isNaN(currentWeight) && !isNaN(lastWeight)) {
+        setShowWarning(currentWeight <= lastWeight * 0.9);
+      }
+    }
   };
 
   return (
@@ -42,6 +55,14 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
       />
       {error && (
         <p className="text-xs text-red-600 mt-1">{error}</p>
+      )}
+      {showWarning && (
+        <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
+          <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-amber-800">
+            This helper has lost ≥10% weight since the last examination. If her weight loss was unintentional or if its reason cannot be determined, please select Yes for weight loss under the Physical examination details.
+          </p>
+        </div>
       )}
       {lastRecordedWeight && lastRecordedDate && (
         <p className="text-xs text-slate-500">

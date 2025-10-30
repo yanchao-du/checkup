@@ -3,6 +3,7 @@ import { TbTestField } from '../fields/TbTestField';
 import { HeightField } from '../fields/HeightField';
 import { WeightField } from '../fields/WeightField';
 import { BloodPressureField } from '../fields/BloodPressureField';
+import { BmiField } from '../fields/BmiField';
 
 interface WorkPermitFieldsProps {
   formData: Record<string, any>;
@@ -22,6 +23,10 @@ export function WorkPermitFields({
       <WeightField
         value={formData.weight || ''}
         onChange={(value) => onChange('weight', value)}
+      />
+      <BmiField
+        height={formData.height || ''}
+        weight={formData.weight || ''}
       />
       <BloodPressureField
         systolic={formData.systolic || ''}
