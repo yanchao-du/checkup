@@ -191,15 +191,13 @@ export function SixMonthlyMdwSummary({
             </div>
           </div>
 
-          {/* Remarks */}
-          {formData.remarks && (
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Remarks</h4>
-              <div className="text-sm bg-slate-50 p-3 rounded-md">
-                <p className="text-slate-700 whitespace-pre-wrap">{formData.remarks}</p>
-              </div>
+          {/* Remarks - always show, display '-' when empty */}
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Remarks</h4>
+            <div className="text-sm bg-slate-50 p-3 rounded-md">
+              <p className="text-slate-700 whitespace-pre-wrap">{formData.remarks ? formData.remarks : '-'}</p>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
     </div>

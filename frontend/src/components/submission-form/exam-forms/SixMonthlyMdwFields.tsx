@@ -128,7 +128,14 @@ export function SixMonthlyMdwFields({
         <MdwRemarksField
           hasAdditionalRemarks={formData.hasAdditionalRemarks === 'true'}
           remarks={formData.remarks || ''}
-          onHasAdditionalRemarksChange={(checked) => handleCheckboxChange('hasAdditionalRemarks', checked)}
+          onHasAdditionalRemarksChange={(checked) => {
+            // Update the flag
+            handleCheckboxChange('hasAdditionalRemarks', checked);
+            // If the user de-selects the checkbox, clear the remarks value
+            if (!checked) {
+              onChange('remarks', '');
+            }
+          }}
           onRemarksChange={(value) => onChange('remarks', value)}
           forceExpanded={hasPhysicalExamConcerns}
         />
