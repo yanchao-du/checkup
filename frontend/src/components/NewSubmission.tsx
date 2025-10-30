@@ -325,6 +325,7 @@ export function NewSubmission() {
   };
 
   const validateExamSpecific = (): boolean => {
+    console.log('[validateExamSpecific] start', { examType, formData });
     // For Six-Monthly MDW, require height and weight and validate police report if physical exam concerns are present
     if (examType === 'SIX_MONTHLY_MDW') {
       // Height and weight are mandatory
@@ -332,6 +333,9 @@ export function NewSubmission() {
         // Set inline errors instead of toasts
         if (!formData.height) setHeightError('Height is required');
         if (!formData.weight) setWeightError('Weight is required');
+        // Scroll to first invalid field (height/weight) so user sees the error
+        console.log('[validateExamSpecific] missing height/weight, will focus first invalid field');
+        focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
         return false;
       }
 
@@ -363,21 +367,217 @@ export function NewSubmission() {
   };
 
   // Scroll and focus the first invalid field in order: height, weight, police report, remarks
-  const focusFirstInvalidField = (states: { height: boolean; weight: boolean; policeReport: boolean; remarks: boolean; }) => {
-    const tryScroll = (elId: string) => {
-      const el = document.getElementById(elId) as HTMLElement | null;
-      if (!el) return false;
-
-      // Smoothly scroll the element into view but do not focus it.
-      // This keeps the viewport stable and leaves control to the user.
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return true;
+  const focusFirstInvalidField = async (states: { height: boolean; weight: boolean; policeReport: boolean; remarks: boolean; }) => {
+    console.log('[focusFirstInvalidField] invoked', states);
+    const getScrollableParent = (node: HTMLElement | null): HTMLElement | null => {
+      let el = node?.parentElement;
+      const html = document.documentElement;
+      while (el && el !== html && el !== document.body) {
+        const style = getComputedStyle(el);
+        const overflowY = style.overflowY;
+        const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && el.scrollHeight > el.clientHeight;
+        if (isScrollable) return el;
+        el = el.parentElement;
+      }
+      return document.scrollingElement as HTMLElement | null;
     };
 
-    if (!states.height && tryScroll('height')) return;
-    if (!states.weight && tryScroll('weight')) return;
-    if (!states.policeReport && tryScroll('policeReport-yes')) return;
-    if (!states.remarks && tryScroll('remarks')) return;
+    const scrollToAndFocus = async (elId: string): Promise<boolean> => {
+      const el = document.getElementById(elId) as HTMLElement | null;
+      if (!el) {
+        // Visible log so we can diagnose missing DOM nodes in all environments
+        console.log('[focusFirstInvalidField] element not found:', elId);
+        return false;
+      }
+
+      // If the element is inside an animated/collapsing container that uses overflow:hidden,
+      // scrolling the window might not reveal it. Ensure the accordion is opened first so
+      // measurements (getBoundingClientRect) return useful values. We'll listen for the
+      // accordion to become 'open' via the data-state attribute or animation/transition end
+      // and fall back to a short timeout.
+      const accordionAncestor = el.closest('[data-state]') as HTMLElement | null;
+      const waitForAccordionOpen = (ancestor: HTMLElement | null): Promise<void> => {
+        return new Promise((resolve) => {
+          if (!ancestor) return resolve();
+          try {
+            // If already open, resolve immediately
+            if (ancestor.getAttribute('data-state') === 'open') return resolve();
+
+            let settled = false;
+            const onDone = () => {
+              if (settled) return;
+              settled = true;
+              ancestor.removeEventListener('animationend', onDone);
+              ancestor.removeEventListener('transitionend', onDone);
+              resolve();
+            };
+
+            ancestor.addEventListener('animationend', onDone);
+            ancestor.addEventListener('transitionend', onDone);
+
+            // Also poll the attribute in case the library toggles it without firing animations
+            const start = Date.now();
+            const poll = () => {
+              if (ancestor.getAttribute('data-state') === 'open') {
+                onDone();
+                return;
+              }
+              if (Date.now() - start > 500) {
+                // timeout fallback
+                onDone();
+                return;
+              }
+              requestAnimationFrame(poll);
+            };
+            requestAnimationFrame(poll);
+          } catch (e) {
+            // if anything goes wrong, don't block
+            resolve();
+          }
+        });
+      };
+
+      // If the accordion is closed, request it to open and wait for it to finish opening
+      try {
+        if (accordionAncestor && accordionAncestor.getAttribute('data-state') !== 'open') {
+          console.log('[focusFirstInvalidField] detected closed accordionAncestor, opening and waiting');
+          setActiveAccordion('exam-specific');
+          // wait for open/animation end (max ~500ms)
+          // eslint-disable-next-line no-await-in-loop
+          await waitForAccordionOpen(accordionAncestor);
+        }
+
+      } catch (e) {
+        // ignore and continue to measurement
+      }
+
+      // Also add a tiny debug overlay so developers can visually see where we think the
+      // invalid element is located at runtime.
+      try {
+        const elRectDebug = el.getBoundingClientRect();
+        const overlay = document.createElement('div');
+        overlay.setAttribute('data-debug-overlay', 'focus-first-invalid');
+        // Style so it doesn't block pointer events and is visible above content
+        Object.assign(overlay.style, {
+          position: 'fixed',
+          top: `${elRectDebug.top}px`,
+          left: `${elRectDebug.left}px`,
+          width: `${Math.max(2, elRectDebug.width)}px`,
+          height: `${Math.max(2, elRectDebug.height)}px`,
+          border: '3px solid rgba(220,38,38,0.95)',
+          borderRadius: '6px',
+          boxShadow: '0 0 12px rgba(220,38,38,0.5)',
+          pointerEvents: 'none',
+          zIndex: '99999',
+          transition: 'opacity 300ms ease',
+          opacity: '1',
+        });
+        document.body.appendChild(overlay);
+        // fade and remove after a short while
+        setTimeout(() => {
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            try { overlay.remove(); } catch (e) { /* ignore */ }
+          }, 350);
+        }, 900);
+      } catch (e) {
+        // don't block scrolling if overlay creation fails
+      }
+      let originalOverflow: string | null = null;
+      if (accordionAncestor) {
+        const style = getComputedStyle(accordionAncestor);
+        if (style.overflowY === 'hidden') {
+          originalOverflow = accordionAncestor.style.overflow;
+          accordionAncestor.style.overflow = 'visible';
+        }
+      }
+
+      const scrollableParent = getScrollableParent(el);
+
+      // Visible log (matches heartbeat-style logging) to help diagnose runtime behavior
+      console.log('[focusFirstInvalidField] attempting scroll', { elId, tagName: el.tagName, scrollableParent, accordionAncestor });
+
+      try {
+        if (scrollableParent && scrollableParent !== document.scrollingElement) {
+          // Compute offset relative to the parent
+          const parentRect = scrollableParent.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const offsetTop = elRect.top - parentRect.top + scrollableParent.scrollTop - (parentRect.height / 2) + (elRect.height / 2);
+          scrollableParent.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        } else {
+          // Fallback to window scrolling which will work when there's no intervening overflow-hidden
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Focus after a short delay to allow smooth scroll/accordion animations to complete
+        setTimeout(() => {
+          const focusable = el.querySelector<HTMLElement>('input, textarea, select, button, [tabindex]');
+          try {
+            if (focusable) {
+              focusable.focus();
+              if ((focusable as HTMLInputElement).setSelectionRange) {
+                const val = (focusable as HTMLInputElement).value || '';
+                (focusable as HTMLInputElement).setSelectionRange(val.length, val.length);
+              }
+            } else if (typeof (el as any).focus === 'function') {
+              (el as any).focus();
+            }
+          } catch (e) {
+            // ignore focus errors
+          }
+        }, 260);
+
+        console.log('[focusFirstInvalidField] scheduled focus for', elId);
+
+        // Restore any temporary overflow change after animations
+        if (accordionAncestor && originalOverflow !== null) {
+          setTimeout(() => {
+            try {
+              accordionAncestor.style.overflow = originalOverflow || '';
+            } catch (e) {
+              // ignore
+            }
+          }, 700);
+        }
+
+        return true;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    // If the invalid field is part of the exam-specific section, make sure that accordion is open
+    // so its contents are rendered and not collapsed.
+    const openExamAccordionIfNeeded = () => {
+      try {
+        console.log('[focusFirstInvalidField] opening exam accordion');
+        // activeAccordion is a state variable; use setter to open exam-specific
+        setActiveAccordion('exam-specific');
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    if (!states.height) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('height')) return;
+    }
+    if (!states.weight) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('weight')) return;
+    }
+    if (!states.policeReport) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('policeReport-yes')) return;
+    }
+    if (!states.remarks) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('remarks')) return;
+    }
   };
 
   const validateRemarks = (): boolean => {
@@ -553,6 +753,10 @@ export function NewSubmission() {
         </Button>
         <div>
           <h1 className="text-slate-900 text-2xl font-semibold">{id ? 'Edit Submission' : 'New Medical Examination'}</h1>
+          {/* TEMP DEBUG BADGE: remove when finished debugging */}
+          <div data-debug-newsubmission style={{ color: 'crimson', fontSize: 12, fontWeight: 600 }}>
+            DEBUG: NewSubmission active
+          </div>
           <p className="text-slate-600">Complete the form to submit medical examination results</p>
         </div>
       </div>
