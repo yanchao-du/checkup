@@ -11,8 +11,9 @@ export class CreateSubmissionDto {
   @IsString()
   patientNric: string;
   
+  @IsOptional()
   @IsDateString()
-  patientDateOfBirth: string;
+  patientDateOfBirth?: string;
   
   @IsOptional()
   @IsDateString()

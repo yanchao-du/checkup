@@ -11,6 +11,7 @@ import { DraftsList } from './components/DraftsList';
 import { PendingApprovals } from './components/PendingApprovals';
 import { RejectedSubmissions } from './components/RejectedSubmissions';
 import { ViewSubmission } from './components/ViewSubmission';
+import { Acknowledgement } from './components/Acknowledgement';
 import { Settings } from './components/Settings';
 import { AuthProvider, useAuth } from './components/AuthContext';
 import { UnsavedChangesProvider } from './components/UnsavedChangesContext';
@@ -111,6 +112,7 @@ function AppRoutes() {
                     } 
                   />
                   <Route path="/view-submission/:id" element={<ViewSubmission />} />
+                  <Route path="/acknowledgement/:id" element={<Acknowledgement />} />
                   <Route path="/draft/:id" element={<NewSubmission />} />
                 </Routes>
               </DashboardLayout>

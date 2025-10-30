@@ -11,6 +11,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { ArrowLeft, FileText, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { cn } from './ui/utils';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import {
   AlertDialog,
@@ -158,12 +159,14 @@ export function ViewSubmission() {
                   <p className="text-sm text-slate-500 mb-1">NRIC / FIN</p>
                   <p className="text-slate-900">{submission.patientNric}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
-                  <p className="text-slate-900">
-                    {new Date(submission.patientDateOfBirth).toLocaleDateString()}
-                  </p>
-                </div>
+                {submission.examType === 'AGED_DRIVERS' && submission.patientDateOfBirth && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
+                    <p className="text-slate-900">
+                      {new Date(submission.patientDateOfBirth).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Examination Date</p>
                   <p className="text-slate-900">
@@ -176,7 +179,7 @@ export function ViewSubmission() {
               <div>
                 <p className="text-sm text-slate-500 mb-1">Exam Type</p>
                 <p className="text-slate-900 text-sm">
-                  {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Workers'}
+                  {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Worker'}
                   {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
                   {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
                 </p>
@@ -190,96 +193,194 @@ export function ViewSubmission() {
               {/* <CardDescription>{submission.examType}</CardDescription> */}
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                {submission.formData.height && (
+              {/* Body Measurements Section */}
+              {(submission.formData.height || submission.formData.weight || submission.formData.bloodPressure) && (
+                <>
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">Height</p>
-                    <p className="text-slate-900">{submission.formData.height} cm</p>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Body Measurements</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      {submission.formData.height && (
+                        <div>
+                          <p className="text-sm text-slate-500 mb-1">Height</p>
+                          <p className="text-slate-900">{submission.formData.height} cm</p>
+                        </div>
+                      )}
+                      {submission.formData.weight && (
+                        <div>
+                          <p className="text-sm text-slate-500 mb-1">Weight</p>
+                          <p className="text-slate-900">{submission.formData.weight} kg</p>
+                        </div>
+                      )}
+                      {(() => {
+                        // Calculate BMI if height and weight are available
+                        if (submission.formData.height && submission.formData.weight) {
+                          const heightInMeters = parseFloat(submission.formData.height) / 100;
+                          const weightInKg = parseFloat(submission.formData.weight);
+                          if (!isNaN(heightInMeters) && !isNaN(weightInKg) && heightInMeters > 0) {
+                            const bmi = (weightInKg / (heightInMeters * heightInMeters)).toFixed(1);
+                            const getBMICategory = (bmiValue: number) => {
+                              if (bmiValue < 18.5) return 'Underweight';
+                              if (bmiValue < 23) return 'Normal';
+                              if (bmiValue < 27.5) return 'Overweight';
+                              return 'Obese';
+                            };
+                            return (
+                              <div>
+                                <p className="text-sm text-slate-500 mb-1">BMI</p>
+                                {(() => {
+                                  const category = getBMICategory(parseFloat(bmi));
+                                  const isAlert = category === 'Underweight' || category === 'Obese';
+                                  return (
+                                    <p className="text-slate-900">
+                                      {bmi} - 
+                                      <span className={isAlert ? 'font-semibold text-red-600' : ''}> {category}</span>
+                                    </p>
+                                  );
+                                })()}
+                              </div>
+                            );
+                          }
+                        }
+                        return null;
+                      })()}
+                      {submission.formData.bloodPressure && (
+                        <div>
+                          <p className="text-sm text-slate-500 mb-1">Blood Pressure</p>
+                          <p className="text-slate-900">{submission.formData.bloodPressure}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-                {submission.formData.weight && (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Weight</p>
-                    <p className="text-slate-900">{submission.formData.weight} kg</p>
-                  </div>
-                )}
-                {submission.formData.bloodPressure && (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Blood Pressure</p>
-                    <p className="text-slate-900">{submission.formData.bloodPressure}</p>
-                  </div>
-                )}
-              </div>
+                  <Separator />
+                </>
+              )}
 
-              <Separator />
 
               {/* Exam type specific fields */}
               {submission.examType === 'SIX_MONTHLY_MDW' && (
-                <div className="grid grid-cols-2 gap-4">
-                  {submission.formData.pregnancyTest && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">Pregnancy Test</p>
-                      <p className="text-slate-900">{submission.formData.pregnancyTest}</p>
-                    </div>
-                  )}
-                  {submission.formData.chestXray && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">Chest X-Ray</p>
-                      <p className="text-slate-900">{submission.formData.chestXray}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {submission.examType === 'WORK_PERMIT' && (
-                <div className="grid grid-cols-2 gap-4">
-                  {submission.formData.hivTest && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">HIV Test</p>
-                      <p className="text-slate-900">{submission.formData.hivTest}</p>
-                    </div>
-                  )}
-                  {submission.formData.tbTest && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">TB Test</p>
-                      <p className="text-slate-900">{submission.formData.tbTest}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {submission.examType === 'AGED_DRIVERS' && (
-                <div className="grid grid-cols-2 gap-4">
-                  {submission.formData.visualAcuity && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">Visual Acuity</p>
-                      <p className="text-slate-900">{submission.formData.visualAcuity}</p>
-                    </div>
-                  )}
-                  {submission.formData.hearingTest && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">Hearing Test</p>
-                      <p className="text-slate-900">{submission.formData.hearingTest}</p>
-                    </div>
-                  )}
-                  {submission.formData.diabetes && (
-                    <div>
-                      <p className="text-sm text-slate-500 mb-1">Diabetes</p>
-                      <p className="text-slate-900">{submission.formData.diabetes}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {submission.formData.remarks && (
                 <>
-                  <Separator />
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">Additional Remarks</p>
-                    <p className="text-slate-900">{submission.formData.remarks}</p>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Test Results</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">Pregnancy Test</p>
+                        <p className={cn('text-slate-900', String(submission.formData.pregnancyTestPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.pregnancyTestPositive) === 'true'
+                            ? 'Positive/Reactive'
+                            : (submission.formData.pregnancyTest ?? 'Negative/Non-reactive')}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">Syphilis Test</p>
+                        <p className={cn('text-slate-900', String(submission.formData.syphilisTestPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.syphilisTestPositive) === 'true'
+                            ? 'Positive/Reactive'
+                            : (submission.formData.syphilisTest ?? 'Negative/Non-reactive')}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">HIV Test</p>
+                        <p className={cn('text-slate-900', String(submission.formData.hivTestPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.hivTestPositive) === 'true'
+                            ? 'Positive/Reactive'
+                            : (submission.formData.hivTest ?? 'Negative/Non-reactive')}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">Chest X-Ray</p>
+                        <p className={cn('text-slate-900', String(submission.formData.chestXrayPositive) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.chestXrayPositive) === 'true'
+                            ? 'Positive/Reactive'
+                            : (submission.formData.chestXray ?? 'Negative/Non-reactive')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Physical Examination Details</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-slate-500">Signs of suspicious or unexplained injuries</p>
+                        <p className={cn('text-slate-900', String(submission.formData.suspiciousInjuries) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.suspiciousInjuries) === 'true' ? 'Yes' : 'No'}
+                        </p>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-slate-500">Unintentional weight loss</p>
+                        <p className={cn('text-slate-900', String(submission.formData.unintentionalWeightLoss) === 'true' && 'font-semibold text-red-600')}>
+                          {String(submission.formData.unintentionalWeightLoss) === 'true' ? 'Yes' : 'No'}
+                        </p>
+                      </div>
+
+                      {(submission.formData.suspiciousInjuries === 'true' || submission.formData.unintentionalWeightLoss === 'true') && (
+                        <div className="flex justify-between items-center pt-2 border-t">
+                          <p className="text-sm text-slate-500 font-medium">Police report made</p>
+                          <p className="text-slate-900 font-medium">
+                            {submission.formData.policeReport === 'yes' ? 'Yes' : submission.formData.policeReport === 'no' ? 'No' : '-'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
+
+              {submission.examType === 'WORK_PERMIT' && (
+                <>
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Test Results</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">HIV Test</p>
+                        <p className="text-slate-900">{submission.formData.hivTest || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">TB Test</p>
+                        <p className="text-slate-900">{submission.formData.tbTest || 'Not specified'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {submission.examType === 'AGED_DRIVERS' && (
+                <>
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Medical Assessment</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">Visual Acuity</p>
+                        <p className="text-slate-900">{submission.formData.visualAcuity || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">Hearing Test</p>
+                        <p className="text-slate-900">{submission.formData.hearingTest || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-500 mb-1">Diabetes</p>
+                        <p className="text-slate-900">{submission.formData.diabetes || 'Not specified'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <>
+                <Separator />
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 mb-3">Additional Remarks</h4>
+                  <div className="bg-slate-50 p-3 rounded-md">
+                    <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : 'No additional remarks.'}</p>
+                  </div>
+                </div>
+              </>
             </CardContent>
           </Card>
         </div>

@@ -1,21 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateHeight, validateNricOrFin, validateWeight, validateSystolic, validateDiastolic } from '../lib/validationRules';
+import { validateNricOrFin } from '../lib/validationRules';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
 import { submissionsApi } from '../services';
 import { usersApi, type Doctor } from '../services/users.service';
+import { patientsApi } from '../services/patients.service';
 import type { ExamType } from '../services';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Textarea } from './ui/textarea';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,9 +29,15 @@ import {
 } from './ui/alert-dialog';
 
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
+import { RemarksField } from './submission-form/fields/RemarksField';
+import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
+import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
+import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
+import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
+import { DeclarationSection } from './submission-form/summary/DeclarationSection';
 
 const examTypes: { value: ExamType; label: string }[] = [
-  { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)' },
+  { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
   { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
   { value: 'AGED_DRIVERS', label: 'Medical Exam for Aged Drivers (SPF)' },
 ];
@@ -38,6 +45,7 @@ const examTypes: { value: ExamType; label: string }[] = [
 export function NewSubmission() {
   const { id } = useParams();
   const { user } = useAuth();
+  const role = user?.role || 'nurse';
   const { hasUnsavedChanges, setHasUnsavedChanges, navigate, navigateWithConfirmation } = useUnsavedChanges();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -55,10 +63,22 @@ export function NewSubmission() {
   const [assignedDoctorId, setAssignedDoctorId] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
+  const [isNameFromApi, setIsNameFromApi] = useState(false);
+  const [isLoadingPatient, setIsLoadingPatient] = useState(false);
+  const [activeAccordion, setActiveAccordion] = useState<string>('patient-info');
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [lastRecordedHeight, setLastRecordedHeight] = useState<string>('');
+  const [lastRecordedWeight, setLastRecordedWeight] = useState<string>('');
+  const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
   const [heightError, setHeightError] = useState<string | null>(null);
   const [weightError, setWeightError] = useState<string | null>(null);
-  const [systolicError, setSystolicError] = useState<string | null>(null);
-  const [diastolicError, setDiastolicError] = useState<string | null>(null);
+  const [policeReportError, setPoliceReportError] = useState<string | null>(null);
+  const [remarksError, setRemarksError] = useState<string | null>(null);
+  const [examinationDateError, setExaminationDateError] = useState<string | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [declarationChecked, setDeclarationChecked] = useState(false);
+  // Ref to remember which NRIC we last looked up to avoid duplicate fetches
+  const lastLookedUpNricRef = useRef<string | null>(null);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -111,6 +131,24 @@ export function NewSubmission() {
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
+          
+          // Mark sections as complete if they have valid data
+          const completed = new Set<string>();
+          
+          // Check patient info
+          if (existing.patientName && existing.patientNric && existing.examinationDate) {
+            if (existing.examType !== 'AGED_DRIVERS' || existing.patientDateOfBirth) {
+              completed.add('patient-info');
+            }
+          }
+          
+          // Mark other sections as complete if loading existing submission
+          if (existing.formData && Object.keys(existing.formData).length > 0) {
+            completed.add('exam-specific');
+            completed.add('remarks');
+          }
+          
+          setCompletedSections(completed);
         } catch (error) {
           console.error('Failed to load submission:', error);
           toast.error('Failed to load submission');
@@ -127,6 +165,12 @@ export function NewSubmission() {
         setExaminationDate('');
         setAssignedDoctorId('');
         setFormData({});
+        setIsNameFromApi(false);
+        setCompletedSections(new Set());
+        setActiveAccordion('patient-info');
+        setLastRecordedHeight('');
+        setLastRecordedWeight('');
+        setLastRecordedDate('');
       }
     };
 
@@ -148,8 +192,464 @@ export function NewSubmission() {
     };
   }, [setHasUnsavedChanges]);
 
+  // Fetch patient name from API for SIX_MONTHLY_MDW and WORK_PERMIT
+  useEffect(() => {
+    const shouldFetchPatientName = 
+      (examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') &&
+      patientNric.length >= 9 && 
+      !nricError &&
+      !id; // Only auto-fetch for new submissions, not when editing
+
+    if (!shouldFetchPatientName) {
+      return;
+    }
+
+    const fetchPatientName = async () => {
+    
+      // Guard: if we've already looked up this NRIC, skip
+      if (lastLookedUpNricRef.current === patientNric) {
+        console.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { patientNric });
+        return;
+      }
+      setIsLoadingPatient(true);
+      try {
+        const patient = await patientsApi.getByNric(patientNric);
+        if (patient) {
+          lastLookedUpNricRef.current = patientNric;
+          setPatientName(patient.name);
+          setIsNameFromApi(true);
+          
+          // Only store and auto-populate vitals for SIX_MONTHLY_MDW
+          if (examType === 'SIX_MONTHLY_MDW') {
+            // Store last recorded vitals
+            setLastRecordedHeight(patient.lastHeight || '');
+            setLastRecordedWeight(patient.lastWeight || '');
+            setLastRecordedDate(patient.lastExamDate || '');
+            
+            // Auto-populate height if not already set
+            if (patient.lastHeight && !formData.height) {
+              setFormData(prev => ({ ...prev, height: patient.lastHeight }));
+            }
+          }
+          
+          toast.success(`Patient found: ${patient.name}`);
+        } else {
+          // Clear name and vitals if no patient found
+          if (isNameFromApi) {
+            setPatientName('');
+            setIsNameFromApi(false);
+            setLastRecordedHeight('');
+            setLastRecordedWeight('');
+            setLastRecordedDate('');
+            toast.info('Patient not found in system. Please enter name manually.');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch patient:', error);
+        // Don't show error toast, just allow manual entry
+      } finally {
+        setIsLoadingPatient(false);
+      }
+    };
+
+    // Debounce the API call
+    const timeoutId = setTimeout(fetchPatientName, 500);
+    return () => clearTimeout(timeoutId);
+  // Note: we intentionally do NOT include formData.height in the deps here.
+  // The effect should run when the patient NRIC changes (or examType/id flags),
+  // but not when the local height field is edited. Including formData.height
+  // caused every height edit to re-trigger the patient lookup API.
+  }, [patientNric, examType, nricError, id]);
+
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleExamTypeChange = (value: string) => {
+    const newExamType = value as ExamType;
+    setExamType(newExamType);
+    
+    // Reset name-from-API flag when switching exam types
+    if (newExamType === 'AGED_DRIVERS') {
+      setIsNameFromApi(false);
+    }
+    
+    // Reset completed sections and active accordion when exam type changes
+    setCompletedSections(new Set());
+    setActiveAccordion('patient-info');
+    
+    // Clear last recorded values when changing exam type
+    setLastRecordedHeight('');
+    setLastRecordedWeight('');
+    setLastRecordedDate('');
+    
+    // Reset summary and declaration
+    setShowSummary(false);
+    setDeclarationChecked(false);
+  };
+
+  const validatePatientInfo = (): boolean => {
+    // Validate NRIC/FIN
+    if (!patientNric.trim()) {
+      setNricError('NRIC/FIN is required');
+      // scroll/focus the NRIC field
+      // attempt to focus and scroll to patientNric
+      try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
+      return false;
+    }
+
+    const nricValidationError = validateNricOrFin(patientNric, validateNRIC);
+    if (nricValidationError) {
+      setNricError(nricValidationError);
+      try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
+      return false;
+    }
+    
+    // Validate Patient Name
+    if (!patientName.trim()) {
+      toast.error('Patient Name is required');
+      return false;
+    }
+    
+    // Validate DOB for AGED_DRIVERS
+    if (examType === 'AGED_DRIVERS' && !patientDateOfBirth) {
+      toast.error('Date of Birth is required for Aged Drivers exam');
+      return false;
+    }
+
+    // Validate Examination Date
+    if (!examinationDate) {
+      // Use inline error instead of toast for examination date
+      setExaminationDateError('Examination Date is required');
+      return false;
+    }
+    
+    // clear inline exam date error if present
+    if (examinationDateError) setExaminationDateError(null);
+    if (nricError) setNricError(null);
+    return true;
+  };
+
+  const validateExamSpecific = (): boolean => {
+    
+    // For Six-Monthly MDW, require height and weight and validate police report if physical exam concerns are present
+    if (examType === 'SIX_MONTHLY_MDW') {
+      // Height and weight are mandatory
+      if (!formData.height || !formData.weight) {
+        // Set inline errors instead of toasts
+        if (!formData.height) setHeightError('Height is required');
+        if (!formData.weight) setWeightError('Weight is required');
+  // Scroll to first invalid field (height/weight) so user sees the error
+  focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+        return false;
+      }
+
+      const hasPhysicalExamConcerns = 
+        formData.suspiciousInjuries === 'true' || 
+        formData.unintentionalWeightLoss === 'true';
+      
+      if (hasPhysicalExamConcerns) {
+        if (!formData.policeReport) {
+          setPoliceReportError('Please indicate whether you have made a police report');
+        }
+        if (!formData.remarks) {
+          setRemarksError('Please provide your assessment in the remarks section');
+        }
+        if (!formData.policeReport || !formData.remarks) {
+          // scroll and focus the first invalid field
+          focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+          return false;
+        }
+      }
+
+      // Additionally, if the clinician explicitly checked the "has additional remarks" checkbox,
+      // require remarks even if there are no physical exam concerns.
+      if (formData.hasAdditionalRemarks === 'true') {
+        if (!formData.remarks || !formData.remarks.trim()) {
+          setRemarksError('Please provide your assessment in the remarks section');
+          // scroll and focus the remarks textarea
+          focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+          return false;
+        }
+      }
+
+      // If the remarks textarea is present in the DOM (e.g. checkbox was just toggled and
+      // formData may not have updated yet), validate its value directly to avoid a race.
+      try {
+        const remarksEl = document.getElementById('remarks') as HTMLTextAreaElement | null;
+        if (remarksEl) {
+          const val = (remarksEl.value || '').trim();
+          if (!val) {
+            setRemarksError('Please provide your assessment in the remarks section');
+            // ensure we scroll/focus the textarea
+            focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+            return false;
+          }
+        }
+      } catch (e) {
+        // ignore DOM errors
+      }
+
+      // Also check the 'hasAdditionalRemarks' checkbox element directly in case its
+      // state hasn't propagated into formData yet. If the checkbox is checked, require remarks.
+      try {
+        const checkboxEl = document.getElementById('hasAdditionalRemarks') as HTMLElement | null;
+        if (checkboxEl) {
+          // Radix checkbox may not expose `.checked`; it uses data-state="checked" or aria-checked
+          const isChecked = checkboxEl.getAttribute('data-state') === 'checked' || checkboxEl.getAttribute('aria-checked') === 'true';
+          if (isChecked) {
+            const val = (formData.remarks || '').trim();
+            // If formData doesn't yet reflect the checkbox toggle, also check the textarea DOM
+            const remarksEl = document.getElementById('remarks') as HTMLTextAreaElement | null;
+            const domVal = remarksEl ? (remarksEl.value || '').trim() : '';
+            if (!val && !domVal) {
+              setRemarksError('Please provide your assessment in the remarks section');
+              focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+              return false;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore DOM errors
+      }
+    }
+    
+    // clear inline errors if validation passes
+    setHeightError(null);
+    setWeightError(null);
+    setPoliceReportError(null);
+    setRemarksError(null);
+    return true;
+  };
+
+  // Scroll and focus the first invalid field in order: height, weight, police report, remarks
+  const focusFirstInvalidField = async (states: { height: boolean; weight: boolean; policeReport: boolean; remarks: boolean; }) => {
+    
+    const getScrollableParent = (node: HTMLElement | null): HTMLElement | null => {
+      let el = node?.parentElement;
+      const html = document.documentElement;
+      while (el && el !== html && el !== document.body) {
+        const style = getComputedStyle(el);
+        const overflowY = style.overflowY;
+        const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && el.scrollHeight > el.clientHeight;
+        if (isScrollable) return el;
+        el = el.parentElement;
+      }
+      return document.scrollingElement as HTMLElement | null;
+    };
+
+    const scrollToAndFocus = async (elId: string): Promise<boolean> => {
+      const el = document.getElementById(elId) as HTMLElement | null;
+      if (!el) return false;
+
+      // If the element is inside an animated/collapsing container that uses overflow:hidden,
+      // scrolling the window might not reveal it. Ensure the accordion is opened first so
+      // measurements (getBoundingClientRect) return useful values. We'll listen for the
+      // accordion to become 'open' via the data-state attribute or animation/transition end
+      // and fall back to a short timeout.
+      const accordionAncestor = el.closest('[data-state]') as HTMLElement | null;
+      const waitForAccordionOpen = (ancestor: HTMLElement | null): Promise<void> => {
+        return new Promise((resolve) => {
+          if (!ancestor) return resolve();
+          try {
+            // If already open, resolve immediately
+            if (ancestor.getAttribute('data-state') === 'open') return resolve();
+
+            let settled = false;
+            const onDone = () => {
+              if (settled) return;
+              settled = true;
+              ancestor.removeEventListener('animationend', onDone);
+              ancestor.removeEventListener('transitionend', onDone);
+              resolve();
+            };
+
+            ancestor.addEventListener('animationend', onDone);
+            ancestor.addEventListener('transitionend', onDone);
+
+            // Also poll the attribute in case the library toggles it without firing animations
+            const start = Date.now();
+            const poll = () => {
+              if (ancestor.getAttribute('data-state') === 'open') {
+                onDone();
+                return;
+              }
+              if (Date.now() - start > 500) {
+                // timeout fallback
+                onDone();
+                return;
+              }
+              requestAnimationFrame(poll);
+            };
+            requestAnimationFrame(poll);
+          } catch (e) {
+            // if anything goes wrong, don't block
+            resolve();
+          }
+        });
+      };
+
+      // If the accordion is closed, request it to open and wait for it to finish opening
+      try {
+        if (accordionAncestor && accordionAncestor.getAttribute('data-state') !== 'open') {
+          setActiveAccordion('exam-specific');
+          // wait for open/animation end (max ~500ms)
+          // eslint-disable-next-line no-await-in-loop
+          await waitForAccordionOpen(accordionAncestor);
+        }
+
+      } catch (e) {
+        // ignore and continue to measurement
+      }
+
+      
+      let originalOverflow: string | null = null;
+      if (accordionAncestor) {
+        const style = getComputedStyle(accordionAncestor);
+        if (style.overflowY === 'hidden') {
+          originalOverflow = accordionAncestor.style.overflow;
+          accordionAncestor.style.overflow = 'visible';
+        }
+      }
+
+      const scrollableParent = getScrollableParent(el);
+
+      
+
+      try {
+        if (scrollableParent && scrollableParent !== document.scrollingElement) {
+          // Compute offset relative to the parent
+          const parentRect = scrollableParent.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const offsetTop = elRect.top - parentRect.top + scrollableParent.scrollTop - (parentRect.height / 2) + (elRect.height / 2);
+          scrollableParent.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        } else {
+          // Fallback to window scrolling which will work when there's no intervening overflow-hidden
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+  // Focus after a short delay to allow smooth scroll/accordion animations to complete
+        setTimeout(() => {
+          const focusable = el.querySelector<HTMLElement>('input, textarea, select, button, [tabindex]');
+          try {
+            if (focusable) {
+              focusable.focus();
+              if ((focusable as HTMLInputElement).setSelectionRange) {
+                const val = (focusable as HTMLInputElement).value || '';
+                (focusable as HTMLInputElement).setSelectionRange(val.length, val.length);
+              }
+            } else if (typeof (el as any).focus === 'function') {
+              (el as any).focus();
+            }
+          } catch (e) {
+            // ignore focus errors
+          }
+        }, 260);
+
+        
+
+        // Restore any temporary overflow change after animations
+        if (accordionAncestor && originalOverflow !== null) {
+          setTimeout(() => {
+            try {
+              accordionAncestor.style.overflow = originalOverflow || '';
+            } catch (e) {
+              // ignore
+            }
+          }, 700);
+        }
+
+        return true;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    // If the invalid field is part of the exam-specific section, make sure that accordion is open
+    // so its contents are rendered and not collapsed.
+    const openExamAccordionIfNeeded = () => {
+      try {
+        // activeAccordion is a state variable; use setter to open exam-specific
+        setActiveAccordion('exam-specific');
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    if (!states.height) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('height')) return;
+    }
+    if (!states.weight) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('weight')) return;
+    }
+    if (!states.policeReport) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('policeReport-yes')) return;
+    }
+    if (!states.remarks) {
+      openExamAccordionIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      if (await scrollToAndFocus('remarks')) return;
+    }
+  };
+
+  const validateRemarks = (): boolean => {
+    // Remarks are required when the "has additional remarks" checkbox is checked
+    const wantsRemarks = formData.hasAdditionalRemarks === 'true';
+    if (wantsRemarks) {
+      if (!formData.remarks || !formData.remarks.trim()) {
+        setRemarksError('Please provide your assessment in the remarks section');
+        // attempt to focus/scroll to remarks so the user sees the inline error
+        try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks }); } catch (e) { /* ignore */ }
+        return false;
+      }
+    }
+
+    // clear any previous remarks error
+    if (remarksError) setRemarksError(null);
+    return true;
+  };
+
+  // Compute whether the Patient Information section is complete and valid.
+  // This is used to enable/disable other accordions when patient-info is incomplete or has inline errors.
+  const isPatientInfoValid = Boolean(
+    patientNric.trim() &&
+    !nricError &&
+    patientName.trim() &&
+    (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
+    examinationDate &&
+    !examinationDateError
+  );
+
+  const handleContinue = (currentSection: string, nextSection: string) => {
+    let isValid = false;
+    
+    switch (currentSection) {
+      case 'patient-info':
+        isValid = validatePatientInfo();
+        break;
+      case 'exam-specific':
+        isValid = validateExamSpecific();
+        break;
+      case 'remarks':
+        isValid = validateRemarks();
+        break;
+      default:
+        isValid = true;
+    }
+    
+    if (isValid) {
+      // Mark current section as completed
+      setCompletedSections(prev => new Set(prev).add(currentSection));
+      
+  // Move to next section
+  setActiveAccordion(nextSection);
+    }
   };
 
   const handleSaveDraft = async () => {
@@ -163,7 +663,7 @@ export function NewSubmission() {
         examType,
         patientName,
         patientNric,
-        patientDateOfBirth,
+        ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         routeForApproval: false,
@@ -171,15 +671,16 @@ export function NewSubmission() {
       };
 
       if (id) {
-        // Update existing draft
+        // Update existing draft - stay on the same page
         await submissionsApi.update(id, submissionData);
         toast.success('Draft updated successfully');
-        navigate('/drafts', { replace: true });
+        // Do not navigate away; remain on the draft edit page
       } else {
-        // Create new draft
-        await submissionsApi.create(submissionData);
+        // Create new draft and navigate to its draft edit URL so user stays on the page
+        const created = await submissionsApi.create(submissionData);
         toast.success('Draft saved successfully');
-        navigate('/drafts', { replace: true });
+        // Navigate to /draft/:id which will load the draft into the form
+        navigate(`/draft/${created.id}`, { replace: true });
       }
     } catch (error) {
       console.error('Failed to save draft:', error);
@@ -207,7 +708,7 @@ export function NewSubmission() {
         examType,
         patientName,
         patientNric,
-        patientDateOfBirth,
+        ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         // Don't send routeForApproval: false for doctors - backend treats that as draft
@@ -216,32 +717,35 @@ export function NewSubmission() {
         assignedDoctorId: assignedDoctorId || undefined,
       };
 
-      if (id) {
+        if (id) {
         // Update existing submission
-        await submissionsApi.update(id, submissionData);
+          await submissionsApi.update(id, submissionData);
 
-        // Submit the draft (changes status from draft to submitted/pending_approval)
-        if (user.role === 'nurse' && isRouteForApproval) {
-          await submissionsApi.submitForApproval(id);
-          toast.success('Routed for approval successfully');
-        } else if (user.role === 'doctor') {
-          // Doctor submitting directly to agency
-          await submissionsApi.submitForApproval(id);
-          toast.success('Medical exam submitted successfully');
-        } else {
-          toast.success('Submission updated successfully');
-        }
-        navigate('/submissions', { replace: true });
+          // Submit the draft (changes status from draft to submitted/pending_approval)
+          if (user.role === 'nurse' && isRouteForApproval) {
+            const routed = await submissionsApi.submitForApproval(id);
+            toast.success('Routed for approval successfully');
+            navigate(`/acknowledgement/${routed.id}`, { replace: true });
+          } else if (user.role === 'doctor') {
+            // Doctor submitting directly to agency
+            const submitted = await submissionsApi.submitForApproval(id);
+            toast.success('Medical exam submitted successfully');
+            navigate(`/acknowledgement/${submitted.id}`, { replace: true });
+          } else {
+            toast.success('Submission updated successfully');
+            navigate('/submissions', { replace: true });
+          }
       } else {
         // Create new submission
-        await submissionsApi.create(submissionData);
+          const created = await submissionsApi.create(submissionData);
 
-        if (user.role === 'doctor' || !isRouteForApproval) {
-          toast.success('Medical exam submitted successfully');
-        } else {
-          toast.success('Routed for approval successfully');
-        }
-        navigate('/submissions', { replace: true });
+          if (user.role === 'doctor' || !isRouteForApproval) {
+            toast.success('Medical exam submitted successfully');
+            navigate(`/acknowledgement/${created.id}`, { replace: true });
+          } else {
+            toast.success('Routed for approval successfully');
+            navigate(`/acknowledgement/${created.id}`, { replace: true });
+          }
       }
     } catch (error) {
       console.error('Failed to submit:', error);
@@ -252,7 +756,8 @@ export function NewSubmission() {
     }
   };
 
-  const isFormValid = examType && patientName && patientNric && patientDateOfBirth;
+  const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
+    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true);
 
   if (isLoading) {
     return (
@@ -277,19 +782,16 @@ export function NewSubmission() {
         </Button>
         <div>
           <h1 className="text-slate-900 text-2xl font-semibold">{id ? 'Edit Submission' : 'New Medical Examination'}</h1>
+          {/* debug badge removed */}
           <p className="text-slate-600">Complete the form to submit medical examination results</p>
         </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
-          <CardDescription>Enter patient details and exam type</CardDescription>
-        </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="examType">Exam Type *</Label>
-            <Select value={examType} onValueChange={(value: string) => setExamType(value as ExamType)} name="examType">
+            <Label htmlFor="examType" className="pt-4">Exam Type *</Label>
+            <Select value={examType} onValueChange={handleExamTypeChange} name="examType">
               <SelectTrigger id="examType" data-testid="examType">
                 <SelectValue placeholder="Select exam type" />
               </SelectTrigger>
@@ -303,355 +805,323 @@ export function NewSubmission() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="patientName">Patient Name *</Label>
-              <Input
-                id="patientName"
-                name="patientName"
-                value={patientName}
-                onChange={(e) => setPatientName(e.target.value)}
-                placeholder="Enter patient name"
-              />
-            </div>
+          {examType && (
+            <Accordion type="single" collapsible value={activeAccordion} onValueChange={setActiveAccordion} className="w-full">
+              <AccordionItem value="patient-info">
+                <AccordionTrigger isCompleted={completedSections.has('patient-info')}>
+                  <div className="flex items-center gap-2">
+                    <span>Patient Information</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="patientNric">NRIC / FIN *</Label>
+                        <Input
+                          id="patientNric"
+                          name="nric"
+                          value={patientNric}
+                          onChange={(e) => setPatientNric(e.target.value)}
+                          onBlur={(e) => {
+                            setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                          }}
+                          placeholder="S1234567A"
+                          className={nricError ? 'border-red-500' : ''}
+                        />
+                        {nricError && (
+                          <InlineError>{nricError}</InlineError>
+                        )}
+                      </div>
+                    </div>
+                    {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="patientName">Patient Name *</Label>
+                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') ? (
+                        patientNric.length === 9 && !nricError ? 
+                        (
+                          <Input
+                            id="patientName"
+                            name="patientName"
+                            value={patientName}
+                            onChange={(e) => setPatientName(e.target.value)}
+                            placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
+                            readOnly={isNameFromApi}
+                            className={isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                          />
+                        ) : (
+                          <Input
+                            id="patientName"
+                            name="patientName"
+                            value=""
+                            disabled
+                            placeholder="Fill NRIC/FIN first"
+                          />
+                        )
+                      ) : (
+                        <Input
+                          id="patientName"
+                          name="patientName"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
+                          readOnly={false}
+                        />
+                      )}
+                      {/* {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi && patientNric.length === 9 && !nricError && (
+                        <p className="text-xs text-slate-500">Name retrieved from system based on NRIC/FIN</p>
+                      )} */}
+                    </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {examType === 'AGED_DRIVERS' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="dob">Date of Birth *</Label>
+                          <Input
+                            id="dob"
+                            name="dateOfBirth"
+                            type="date"
+                            value={patientDateOfBirth}
+                            onChange={(e) => setPatientDateOfBirth(e.target.value)}
+                          />
+                        </div>
+                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="examinationDate">Examination Date *</Label>
+                        <Input
+                          id="examinationDate"
+                          name="examinationDate"
+                          type="date"
+                          value={examinationDate}
+                          onChange={(e) => {
+                            setExaminationDate(e.target.value);
+                            if (examinationDateError) setExaminationDateError(null);
+                          }}
+                          aria-invalid={!!examinationDateError}
+                          className={`${examinationDateError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+                        />
+                        {examinationDateError && (
+                          <InlineError>{examinationDateError}</InlineError>
+                        )}
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => handleContinue('patient-info', 'exam-specific')}
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            <div className="space-y-2">
-              <Label htmlFor="patientNric">NRIC / FIN *</Label>
-              <Input
-                id="patientNric"
-                name="nric"
-                value={patientNric}
-                onChange={(e) => setPatientNric(e.target.value)}
-                onBlur={(e) => {
-                  setNricError(validateNricOrFin(e.target.value, validateNRIC));
-                }}
-                placeholder="S1234567A"
-                className={nricError ? 'border-red-500' : ''}
-              />
-              {nricError && (
-                <p className="text-xs text-red-600 mt-1">{nricError}</p>
+              <AccordionItem value="exam-specific">
+                <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
+                  <div className="flex items-center gap-2">
+                    <span>Examination Details</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {examType === 'SIX_MONTHLY_MDW' && (
+                    <SixMonthlyMdwFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                      lastRecordedHeight={lastRecordedHeight}
+                      lastRecordedWeight={lastRecordedWeight}
+                      lastRecordedDate={lastRecordedDate}
+                      heightError={heightError}
+                      setHeightError={setHeightError}
+                      weightError={weightError}
+                      setWeightError={setWeightError}
+                      policeReportError={policeReportError}
+                      setPoliceReportError={setPoliceReportError}
+                      remarksError={remarksError}
+                      setRemarksError={setRemarksError}
+                    />
+                  )}
+                  {examType === 'WORK_PERMIT' && (
+                    <WorkPermitFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  {examType === 'AGED_DRIVERS' && (
+                    <AgedDriversFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        if (examType === 'SIX_MONTHLY_MDW') {
+                          // For MDW, show summary page
+                          if (validateExamSpecific()) {
+                            setCompletedSections(prev => new Set(prev).add('exam-specific'));
+                            setShowSummary(true);
+                            setActiveAccordion('summary');
+                          }
+                        } else {
+                          handleContinue('exam-specific', 'remarks');
+                        }
+                      }}
+                    >
+                      {examType === 'SIX_MONTHLY_MDW' ? 'Continue' : 'Continue'}
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {examType === 'SIX_MONTHLY_MDW' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!isPatientInfoValid || !completedSections.has('exam-specific')}>
+                    <div className="flex items-center gap-2">
+                      <span>Summary & Declaration</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <SixMonthlyMdwSummary
+                        formData={formData}
+                        patientName={patientName}
+                        patientNric={patientNric}
+                        examinationDate={examinationDate}
+                        lastRecordedHeight={lastRecordedHeight}
+                        lastRecordedWeight={lastRecordedWeight}
+                        lastRecordedDate={lastRecordedDate}
+                        onEdit={(section) => {
+                          // Navigate to the requested section for editing
+                          setActiveAccordion(section);
+                          // Keep showSummary true so user can navigate back
+                        }}
+                      />
+                      
+                      <DeclarationSection
+                        checked={declarationChecked}
+                        onChange={setDeclarationChecked}
+                        userRole={role}
+                      />
+                      
+                      <div className="flex justify-end mt-4">
+                        {role === 'doctor' ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (!declarationChecked) {
+                                toast.error('Please check the declaration before submitting');
+                                return;
+                              }
+                              // mark summary completed and open submit dialog for doctors
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
+                            }}
+                            disabled={!declarationChecked}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit to Agency
+                          </Button>
+                        ) : role === 'nurse' ? (
+                          <Button
+                            type="button"
+                            onClick={async () => {
+                              // For nurses, route for approval from the summary
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+
+                              if (!hasDefaultDoctor) {
+                                setShowSetDefaultDoctorDialog(true);
+                              } else {
+                                // If default doctor exists but assignedDoctorId is empty (e.g. editing a draft),
+                                // fetch the default doctor id and pre-fill the select before opening dialog.
+                                try {
+                                  if (!assignedDoctorId) {
+                                    const { defaultDoctorId } = await usersApi.getDefaultDoctor();
+                                    if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
+                                  }
+                                } catch (e) {
+                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                }
+
+                                setIsRouteForApproval(true);
+                                setShowSubmitDialog(true);
+                              }
+                            }}
+                            disabled={!isPatientInfoValid || isSaving}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit for Approval
+                          </Button>
+                        ) : (
+                          // Other roles (non-doctor, non-nurse) can continue
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              toast.success('All sections completed! You can now save or submit.');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               )}
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="dob">Date of Birth *</Label>
-            <Input
-              id="dob"
-              name="dateOfBirth"
-              type="date"
-              value={patientDateOfBirth}
-              onChange={(e) => setPatientDateOfBirth(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="examinationDate">Examination Date *</Label>
-            <Input
-              id="examinationDate"
-              name="examinationDate"
-              type="date"
-              value={examinationDate}
-              onChange={(e) => setExaminationDate(e.target.value)}
-            />
-          </div>
+              {examType !== 'SIX_MONTHLY_MDW' && (
+                <AccordionItem value="remarks">
+                  <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
+                    <div className="flex items-center gap-2">
+                      <span>Additional Remarks</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <RemarksField
+                      value={formData.remarks || ''}
+                      onChange={(value) => handleFormDataChange('remarks', value)}
+                    />
+                    <div className="flex justify-end mt-4">
+                      <Button 
+                        type="button"
+                        onClick={() => {
+                          if (validateRemarks()) {
+                            setCompletedSections(prev => new Set(prev).add('remarks'));
+                            toast.success('All sections completed! You can now save or submit.');
+                          }
+                        }}
+                      >
+                        Mark as Complete
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+          )}
         </CardContent>
       </Card>
 
       {examType && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Medical Examination Details</CardTitle>
-            <CardDescription>
-              {examTypes.find(t => t.value === examType)?.label || examType}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Common fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="height">Height (cm)</Label>
-                <Input
-                  id="height"
-                  name="height"
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={3}
-                  value={formData.height || ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    if (val.length <= 3) {
-                      handleFormDataChange('height', val);
-                    }
-                    if (heightError) setHeightError(null);
-                  }}
-                  onBlur={(e) => {
-                    setHeightError(validateHeight(e.target.value));
-                  }}
-                  placeholder="170"
-                  className={heightError ? 'border-red-500' : ''}
-                />
-                {heightError && (
-                  <p className="text-xs text-red-600 mt-1">{heightError}</p>
-                )}
-              </div>
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={handleSaveDraft} disabled={!isFormValid || isSaving}>
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save as Draft'}
+          </Button>
 
-              <div className="space-y-2">
-                <Label htmlFor="weight">Weight (kg)</Label>
-                <Input
-                  id="weight"
-                  name="weight"
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={3}
-                  value={formData.weight || ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    if (val.length <= 3) {
-                      handleFormDataChange('weight', val);
-                    }
-                    if (weightError) setWeightError(null);
-                  }}
-                  onBlur={(e) => {
-                    setWeightError(validateWeight(e.target.value));
-                  }}
-                  placeholder="70"
-                  className={weightError ? 'border-red-500' : ''}
-                />
-                {weightError && (
-                  <p className="text-xs text-red-600 mt-1">{weightError}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Blood Pressure (mmHg)</Label>
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <Input
-                      id="systolic"
-                      name="systolic"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={3}
-                      value={formData.systolic || ''}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, '');
-                        if (val.length <= 3) {
-                          handleFormDataChange('systolic', val);
-                        }
-                        if (systolicError) setSystolicError(null);
-                      }}
-                      onBlur={(e) => {
-                        setSystolicError(validateSystolic(e.target.value));
-                      }}
-                      placeholder="120"
-                      className={systolicError ? 'border-red-500' : ''}
-                    />
-                    <p className="text-xs text-slate-500">Systolic (high)</p>
-                    {systolicError && (
-                      <p className="text-xs text-red-600 mt-1">{systolicError}</p>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <Input
-                      id="diastolic"
-                      name="diastolic"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={3}
-                      value={formData.diastolic || ''}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, '');
-                        if (val.length <= 3) {
-                          handleFormDataChange('diastolic', val);
-                        }
-                        if (diastolicError) setDiastolicError(null);
-                      }}
-                      onBlur={(e) => {
-                        setDiastolicError(validateDiastolic(e.target.value));
-                      }}
-                      placeholder="80"
-                      className={diastolicError ? 'border-red-500' : ''}
-                    />
-                    <p className="text-xs text-slate-500">Diastolic (low)</p>
-                    {diastolicError && (
-                      <p className="text-xs text-red-600 mt-1">{diastolicError}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Exam type specific fields */}
-            {examType === 'SIX_MONTHLY_MDW' && (
-              <>
-                <div className="space-y-2">
-                  <Label>Pregnancy Test</Label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="preg-positive"
-                        checked={formData.pregnancyTest === 'Positive'}
-                        onChange={(e) => handleFormDataChange('pregnancyTest', e.target.checked ? 'Positive' : 'Negative')}
-                        className="form-checkbox h-5 w-5 text-orange-500"
-                      />
-                      <Label htmlFor="preg-positive" className={formData.pregnancyTest === 'Positive' ? 'text-orange-500 font-semibold' : ''}>
-                        Positive
-                      </Label>
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="chestXray">Chest X-Ray Result</Label>
-                  <Input
-                    id="chestXray"
-                    value={formData.chestXray || ''}
-                    onChange={(e) => handleFormDataChange('chestXray', e.target.value)}
-                    placeholder="Normal / Abnormal findings"
-                  />
-                </div>
-              </>
-            )}
-
-            {examType === 'WORK_PERMIT' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="hivTest">HIV Test Result</Label>
-                  <Select
-                    value={formData.hivTest || ''}
-                    onValueChange={(value: string) => handleFormDataChange('hivTest', value)}
-                  >
-                    <SelectTrigger id="hivTest">
-                      <SelectValue placeholder="Select result" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Negative">Negative</SelectItem>
-                      <SelectItem value="Positive">Positive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tbTest">TB Test Result</Label>
-                  <Select
-                    value={formData.tbTest || ''}
-                    onValueChange={(value: string) => handleFormDataChange('tbTest', value)}
-                  >
-                    <SelectTrigger id="tbTest">
-                      <SelectValue placeholder="Select result" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Negative">Negative</SelectItem>
-                      <SelectItem value="Positive">Positive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-
-            {examType === 'AGED_DRIVERS' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="visualAcuity">Visual Acuity</Label>
-                  <Input
-                    id="visualAcuity"
-                    value={formData.visualAcuity || ''}
-                    onChange={(e) => handleFormDataChange('visualAcuity', e.target.value)}
-                    placeholder="6/6"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="hearingTest">Hearing Test</Label>
-                  <Input
-                    id="hearingTest"
-                    value={formData.hearingTest || ''}
-                    onChange={(e) => handleFormDataChange('hearingTest', e.target.value)}
-                    placeholder="Normal / Impaired"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Diabetes</Label>
-                  <RadioGroup
-                    value={formData.diabetes || ''}
-                    onValueChange={(value: string) => handleFormDataChange('diabetes', value)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Yes" id="diabetes-yes" />
-                      <Label htmlFor="diabetes-yes">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="No" id="diabetes-no" />
-                      <Label htmlFor="diabetes-no">No</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="remarks">Additional Remarks</Label>
-              <Textarea
-                id="remarks"
-                value={formData.remarks || ''}
-                onChange={(e) => handleFormDataChange('remarks', e.target.value)}
-                placeholder="Enter any additional medical findings or notes"
-                rows={4}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={handleSaveDraft} disabled={!isFormValid || isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save as Draft'}
-        </Button>
-
-        <div className="flex gap-3">
-          {user?.role === 'nurse' && (
-            <Button 
-              onClick={() => {
-                // Check if default doctor is set
-                if (!hasDefaultDoctor) {
-                  setShowSetDefaultDoctorDialog(true);
-                } else {
-                  setIsRouteForApproval(true);
-                  setShowSubmitDialog(true);
-                }
-              }}
-              disabled={!isFormValid || isSaving}
-            >
-            <>
-            <Send className="w-4 h-4 mr-2" />
-              Submit for Approval
-            </>
-            </Button>
-          )}
-          
-          {user?.role === 'doctor' && (<Button 
-            onClick={() => {
-              setIsRouteForApproval(false);
-              setShowSubmitDialog(true);
-            }}
-            disabled={!isFormValid || isSaving}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                Submit to Agency
-              </>
-            )}
-          </Button>)}
+          <div className="flex gap-3">
+            {/* Nurses submit for approval from the Summary section only; no footer button here. */}
+            
+            {/* Doctors submit from the Summary section only; no footer button here. */}
+          </div>
         </div>
-      </div>
+      )}
 
       <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
         <AlertDialogContent>

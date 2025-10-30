@@ -142,7 +142,7 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 ## Domain Context
 
 ### Medical Examination Types
-1. **Six-monthly Medical Exam for Migrant Domestic Workers (MOM)**
+1. **Six-monthly Medical Exam for Migrant Domestic Worker (MOM)**
    - Required every 6 months for MDWs
    - Includes pregnancy test, infectious diseases screening
 2. **Full Medical Exam for Work Permit (MOM)**

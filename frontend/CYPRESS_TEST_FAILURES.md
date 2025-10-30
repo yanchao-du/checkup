@@ -84,7 +84,7 @@ These components still use mock data (`useMockData` hook) but the app is now usi
 
 #### Exam Type Enum Mismatch
 **Frontend Mock Data**: 
-- "Six-monthly Medical Exam for Migrant Domestic Workers (MOM)"
+-- "Six-monthly Medical Exam for Migrant Domestic Worker (MOM)"
 - "Full Medical Exam for Work Permit (MOM)"
 - "Medical Exam for Aged Drivers (SPF)"
 
@@ -196,7 +196,7 @@ Create a utility function to map enum values to display text:
 ```typescript
 // src/lib/exam-types.ts
 export const EXAM_TYPE_LABELS: Record<string, string> = {
-  'MDW_SIX_MONTHLY': 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)',
+  'MDW_SIX_MONTHLY': 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)',
   'WORK_PERMIT': 'Full Medical Exam for Work Permit (MOM)',
   'AGED_DRIVERS': 'Medical Exam for Aged Drivers (SPF)',
 };

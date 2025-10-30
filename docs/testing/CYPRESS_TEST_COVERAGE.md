@@ -381,7 +381,7 @@ const testPatients = {
 ```
 
 ### Exam Types
-- Six-monthly Medical Exam for Migrant Domestic Workers (MOM)
+- Six-monthly Medical Exam for Migrant Domestic Worker (MOM)
 - Full Medical Exam for Work Permit (MOM)
 - Medical Exam for Aged Drivers (SPF)
 

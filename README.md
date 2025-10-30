@@ -10,7 +10,7 @@ A comprehensive medical examination portal for Singapore clinics with role-based
 
 - **Role-Based Access**: Doctor, Nurse, and Admin roles with different permissions
 - **Medical Exam Types**: Support for 3 Singapore government exam types
-  - Six-monthly Medical Exam for Migrant Domestic Workers (MOM)
+  - Six-monthly Medical Exam for Migrant Domestic Worker (MOM)
   - Full Medical Exam for Work Permit (MOM)
   - Medical Exam for Aged Drivers (SPF)
 - **Approval Workflow**: Nurses create → Doctors approve → Submit to government

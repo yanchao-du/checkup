@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export type ExamType = 
-  | 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)'
+  | 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)'
   | 'Full Medical Exam for Work Permit (MOM)'
   | 'Medical Exam for Aged Drivers (SPF)';
 
@@ -28,7 +28,7 @@ export interface MedicalSubmission {
 const generateMockSubmissions = (): MedicalSubmission[] => [
   {
     id: 'sub-001',
-    examType: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)',
+  examType: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)',
     patientName: 'Maria Santos',
     patientNric: 'S1234567A',
     patientDateOfBirth: '1990-05-15',
@@ -89,7 +89,7 @@ const generateMockSubmissions = (): MedicalSubmission[] => [
   },
   {
     id: 'sub-004',
-    examType: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)',
+  examType: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)',
     patientName: 'Fatima Abdul',
     patientNric: 'S4567890D',
     patientDateOfBirth: '1992-11-28',
