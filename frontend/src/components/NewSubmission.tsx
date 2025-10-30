@@ -1030,12 +1030,24 @@ export function NewSubmission() {
                         ) : role === 'nurse' ? (
                           <Button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               // For nurses, route for approval from the summary
                               setCompletedSections(prev => new Set(prev).add('summary'));
+
                               if (!hasDefaultDoctor) {
                                 setShowSetDefaultDoctorDialog(true);
                               } else {
+                                // If default doctor exists but assignedDoctorId is empty (e.g. editing a draft),
+                                // fetch the default doctor id and pre-fill the select before opening dialog.
+                                try {
+                                  if (!assignedDoctorId) {
+                                    const { defaultDoctorId } = await usersApi.getDefaultDoctor();
+                                    if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
+                                  }
+                                } catch (e) {
+                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                }
+
                                 setIsRouteForApproval(true);
                                 setShowSubmitDialog(true);
                               }
