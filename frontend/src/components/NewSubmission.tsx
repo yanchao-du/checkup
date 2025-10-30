@@ -836,6 +836,8 @@ export function NewSubmission() {
                             setExaminationDate(e.target.value);
                             if (examinationDateError) setExaminationDateError(null);
                           }}
+                          aria-invalid={!!examinationDateError}
+                          className={`${examinationDateError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
                         />
                         {examinationDateError && (
                           <InlineError>{examinationDateError}</InlineError>

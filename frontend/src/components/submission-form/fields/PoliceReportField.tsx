@@ -14,16 +14,16 @@ export function PoliceReportField({ value, onChange, externalError }: PoliceRepo
       <Label className="text-sm font-medium text-slate-900">
         Have you made a police report? *
       </Label>
-      <RadioGroup value={value} onValueChange={onChange}>
+      <RadioGroup value={value} onValueChange={onChange} aria-invalid={!!externalError}>
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="yes" id="policeReport-yes" aria-invalid={!!externalError} className={`${externalError ? 'focus-visible:border-red-500 focus-visible:ring-destructive' : ''}`} />
+            <RadioGroupItem value="yes" id="policeReport-yes" aria-invalid={!!externalError} />
             <Label htmlFor="policeReport-yes" className="text-sm font-normal cursor-pointer">
               Yes
             </Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="no" id="policeReport-no" aria-invalid={!!externalError} className={`${externalError ? 'focus-visible:border-red-500 focus-visible:ring-destructive' : ''}`} />
+            <RadioGroupItem value="no" id="policeReport-no" aria-invalid={!!externalError} />
             <Label htmlFor="policeReport-no" className="text-sm font-normal cursor-pointer">
               No
             </Label>
