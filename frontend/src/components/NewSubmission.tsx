@@ -16,7 +16,7 @@ import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +45,7 @@ const examTypes: { value: ExamType; label: string }[] = [
 export function NewSubmission() {
   const { id } = useParams();
   const { user } = useAuth();
+  const role = user?.role || 'nurse';
   const { hasUnsavedChanges, setHasUnsavedChanges, navigate, navigateWithConfirmation } = useUnsavedChanges();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -1004,11 +1005,11 @@ export function NewSubmission() {
                       <DeclarationSection
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
-                        userRole={user?.role || 'nurse'}
+                        userRole={role}
                       />
                       
                       <div className="flex justify-end mt-4">
-                        {user?.role === 'doctor' ? (
+                        {role === 'doctor' ? (
                           <Button
                             type="button"
                             onClick={() => {
@@ -1026,7 +1027,7 @@ export function NewSubmission() {
                             <Send className="w-4 h-4 mr-2" />
                             Submit to Agency
                           </Button>
-                        ) : user?.role === 'nurse' ? (
+                        ) : role === 'nurse' ? (
                           <Button
                             type="button"
                             onClick={() => {
@@ -1123,25 +1124,7 @@ export function NewSubmission() {
               </Button>
             )}
             
-            {!showSummary && user?.role === 'doctor' && (<Button 
-              onClick={() => {
-                setIsRouteForApproval(false);
-                setShowSubmitDialog(true);
-              }}
-              disabled={!isFormValid || isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4 mr-2" />
-                  Submit to Agency
-                </>
-              )}
-            </Button>)}
+            {/* Doctors submit from the Summary section only; no footer button here. */}
           </div>
         </div>
       )}
