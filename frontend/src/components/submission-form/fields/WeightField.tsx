@@ -59,7 +59,7 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}
-        placeholder="70"
+        // placeholder="70"
         aria-invalid={!!(externalError || error)}
         className={`${externalError || error ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
       />

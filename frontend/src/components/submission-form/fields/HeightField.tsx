@@ -47,7 +47,7 @@ export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedD
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}
-        placeholder="170"
+        // placeholder="170"
         aria-invalid={!!(error || externalError)}
         className={`${error || externalError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
       />
