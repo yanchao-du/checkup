@@ -646,10 +646,8 @@ export function NewSubmission() {
       // Mark current section as completed
       setCompletedSections(prev => new Set(prev).add(currentSection));
       
-      // Move to next section
-      setActiveAccordion(nextSection);
-      
-      toast.success('Section completed');
+  // Move to next section
+  setActiveAccordion(nextSection);
     }
   };
 
