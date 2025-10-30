@@ -57,3 +57,13 @@ See `tasks.md` and `design.md` for detailed implementation plan.
 3. Component file size reduced by at least 50%
 4. Each field component includes its own validation logic
 5. Accordion provides clear visual organization
+
+## What Changes
+
+- Refactored `NewSubmission.tsx` to use an accordion-based UI for medical exam details, splitting the form into collapsible sections for Common Vitals, Exam-Specific Fields, and Additional Remarks.
+- Created 11 reusable field components for all common and exam-specific fields, each with built-in validation and error handling.
+- Created 3 exam-type specific form components (`SixMonthlyMdwFields`, `WorkPermitFields`, `AgedDriversFields`) to encapsulate logic for each exam type.
+- Removed inline field and validation logic from `NewSubmission.tsx`, delegating all field rendering and validation to child components.
+- Updated Cypress E2E tests to work with the new field structure (no selector changes required).
+- Added documentation and usage examples for all new components.
+- No changes to backend API, data structure, or database schema.
