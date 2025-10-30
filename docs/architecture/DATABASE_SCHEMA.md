@@ -122,7 +122,7 @@ CREATE TABLE users (
 
 -- Exam types enum
 CREATE TYPE exam_type AS ENUM (
-    'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)',
+  'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)',
     'Full Medical Exam for Work Permit (MOM)',
     'Medical Exam for Aged Drivers (SPF)'
 );
@@ -336,7 +336,7 @@ INSERT INTO medical_submissions (
  '550e8400-e29b-41d4-a716-446655440000',
  '550e8400-e29b-41d4-a716-446655440002',
  '550e8400-e29b-41d4-a716-446655440001',
- 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)',
+ 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)',
  'Maria Santos',
  'S1234567A',
  '1990-05-15',
@@ -475,7 +475,7 @@ enum UserStatus {
 }
 
 enum ExamType {
-  Six_monthly_Medical_Exam_for_Migrant_Domestic_Workers_MOM @map("Six-monthly Medical Exam for Migrant Domestic Workers (MOM)")
+  Six_monthly_Medical_Exam_for_Migrant_Domestic_Worker_MOM @map("Six-monthly Medical Exam for Migrant Domestic Worker (MOM)")
   Full_Medical_Exam_for_Work_Permit_MOM                     @map("Full Medical Exam for Work Permit (MOM)")
   Medical_Exam_for_Aged_Drivers_SPF                         @map("Medical Exam for Aged Drivers (SPF)")
 }

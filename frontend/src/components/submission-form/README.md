@@ -110,7 +110,7 @@ These components compose multiple field components for each exam type.
 
 ### SixMonthlyMdwFields
 
-Fields for Six-Monthly Medical Exam for Migrant Domestic Workers:
+Fields for Six-Monthly Medical Exam for Migrant Domestic Worker:
 - Pregnancy Test
 - Chest X-Ray Result
 

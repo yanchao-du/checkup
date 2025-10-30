@@ -15,7 +15,7 @@ This OpenAPI 3.0 specification documents the backend API for the Singapore Medic
 
 ## Exam Types Supported
 
-### 1. Six-monthly Medical Exam for Migrant Domestic Workers (MOM)
+### 1. Six-monthly Medical Exam for Migrant Domestic Worker (MOM)
 - Regular health screenings for MDWs
 - Required fields: height, weight, blood pressure, pregnancy test, chest X-ray
 - Submitted to Ministry of Manpower

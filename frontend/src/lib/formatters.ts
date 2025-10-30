@@ -22,7 +22,7 @@ export function formatExamType(examType: ExamType): string {
 export function formatExamTypeFull(examType: ExamType): string {
   switch (examType) {
     case 'SIX_MONTHLY_MDW':
-      return 'Six-monthly Medical Exam for Migrant Domestic Workers';
+  return 'Six-monthly Medical Exam for Migrant Domestic Worker';
     case 'WORK_PERMIT':
       return 'Full Medical Exam for Work Permit';
     case 'AGED_DRIVERS':

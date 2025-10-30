@@ -36,7 +36,7 @@ import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSum
 import { DeclarationSection } from './submission-form/summary/DeclarationSection';
 
 const examTypes: { value: ExamType; label: string }[] = [
-  { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Workers (MOM)' },
+  { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
   { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
   { value: 'AGED_DRIVERS', label: 'Medical Exam for Aged Drivers (SPF)' },
 ];

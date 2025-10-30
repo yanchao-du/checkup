@@ -179,7 +179,7 @@ export function ViewSubmission() {
               <div>
                 <p className="text-sm text-slate-500 mb-1">Exam Type</p>
                 <p className="text-slate-900 text-sm">
-                  {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Workers'}
+                  {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Worker'}
                   {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
                   {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
                 </p>
