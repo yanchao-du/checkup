@@ -686,20 +686,35 @@ export function NewSubmission() {
                       />
                       
                       <div className="flex justify-end mt-4">
-                        <Button 
-                          type="button"
-                          onClick={() => {
-                            if (user?.role === 'doctor' && !declarationChecked) {
-                              toast.error('Please check the declaration before submitting');
-                              return;
-                            }
-                            setCompletedSections(prev => new Set(prev).add('summary'));
-                            toast.success('All sections completed! You can now save or submit.');
-                          }}
-                          disabled={user?.role === 'doctor' && !declarationChecked}
-                        >
-                          Mark as Complete
-                        </Button>
+                        {user?.role === 'doctor' ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (!declarationChecked) {
+                                toast.error('Please check the declaration before submitting');
+                                return;
+                              }
+                              // mark summary completed and open submit dialog for doctors
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
+                            }}
+                            disabled={!declarationChecked}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit to Agency
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              toast.success('All sections completed! You can now save or submit.');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </AccordionContent>
@@ -746,7 +761,7 @@ export function NewSubmission() {
         </Button>
 
         <div className="flex gap-3">
-          {user?.role === 'nurse' && (
+          {!showSummary && user?.role === 'nurse' && (
             <Button 
               onClick={() => {
                 // Check if default doctor is set
@@ -766,7 +781,7 @@ export function NewSubmission() {
             </Button>
           )}
           
-          {user?.role === 'doctor' && (<Button 
+          {!showSummary && user?.role === 'doctor' && (<Button 
             onClick={() => {
               setIsRouteForApproval(false);
               setShowSubmitDialog(true);
