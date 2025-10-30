@@ -6,9 +6,11 @@ import { validateWeight } from '../../../lib/validationRules';
 interface WeightFieldProps {
   value: string;
   onChange: (value: string) => void;
+  lastRecordedWeight?: string;
+  lastRecordedDate?: string;
 }
 
-export function WeightField({ value, onChange }: WeightFieldProps) {
+export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedDate }: WeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,6 +42,11 @@ export function WeightField({ value, onChange }: WeightFieldProps) {
       />
       {error && (
         <p className="text-xs text-red-600 mt-1">{error}</p>
+      )}
+      {lastRecordedWeight && lastRecordedDate && (
+        <p className="text-xs text-slate-500">
+          Last recorded weight: {lastRecordedWeight} kg (Date: {new Date(lastRecordedDate).toLocaleDateString()})
+        </p>
       )}
     </div>
   );

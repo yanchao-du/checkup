@@ -63,6 +63,9 @@ export function NewSubmission() {
   const [isLoadingPatient, setIsLoadingPatient] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState<string>('patient-info');
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [lastRecordedHeight, setLastRecordedHeight] = useState<string>('');
+  const [lastRecordedWeight, setLastRecordedWeight] = useState<string>('');
+  const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -152,6 +155,9 @@ export function NewSubmission() {
         setIsNameFromApi(false);
         setCompletedSections(new Set());
         setActiveAccordion('patient-info');
+        setLastRecordedHeight('');
+        setLastRecordedWeight('');
+        setLastRecordedDate('');
       }
     };
 
@@ -192,12 +198,29 @@ export function NewSubmission() {
         if (patient) {
           setPatientName(patient.name);
           setIsNameFromApi(true);
+          
+          // Only store and auto-populate vitals for SIX_MONTHLY_MDW
+          if (examType === 'SIX_MONTHLY_MDW') {
+            // Store last recorded vitals
+            setLastRecordedHeight(patient.lastHeight || '');
+            setLastRecordedWeight(patient.lastWeight || '');
+            setLastRecordedDate(patient.lastExamDate || '');
+            
+            // Auto-populate height if not already set
+            if (patient.lastHeight && !formData.height) {
+              setFormData(prev => ({ ...prev, height: patient.lastHeight }));
+            }
+          }
+          
           toast.success(`Patient found: ${patient.name}`);
         } else {
-          // Clear name if no patient found
+          // Clear name and vitals if no patient found
           if (isNameFromApi) {
             setPatientName('');
             setIsNameFromApi(false);
+            setLastRecordedHeight('');
+            setLastRecordedWeight('');
+            setLastRecordedDate('');
             toast.info('Patient not found in system. Please enter name manually.');
           }
         }
@@ -212,7 +235,7 @@ export function NewSubmission() {
     // Debounce the API call
     const timeoutId = setTimeout(fetchPatientName, 500);
     return () => clearTimeout(timeoutId);
-  }, [patientNric, examType, nricError, id, isNameFromApi]);
+  }, [patientNric, examType, nricError, id, isNameFromApi, formData.height]);
 
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -230,6 +253,11 @@ export function NewSubmission() {
     // Reset completed sections and active accordion when exam type changes
     setCompletedSections(new Set());
     setActiveAccordion('patient-info');
+    
+    // Clear last recorded values when changing exam type
+    setLastRecordedHeight('');
+    setLastRecordedWeight('');
+    setLastRecordedDate('');
   };
 
   const validatePatientInfo = (): boolean => {
@@ -570,6 +598,9 @@ export function NewSubmission() {
                     <SixMonthlyMdwFields
                       formData={formData}
                       onChange={handleFormDataChange}
+                      lastRecordedHeight={lastRecordedHeight}
+                      lastRecordedWeight={lastRecordedWeight}
+                      lastRecordedDate={lastRecordedDate}
                     />
                   )}
                   {examType === 'WORK_PERMIT' && (

@@ -6,9 +6,11 @@ import { validateHeight } from '../../../lib/validationRules';
 interface HeightFieldProps {
   value: string;
   onChange: (value: string) => void;
+  lastRecordedHeight?: string;
+  lastRecordedDate?: string;
 }
 
-export function HeightField({ value, onChange }: HeightFieldProps) {
+export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedDate }: HeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,6 +42,11 @@ export function HeightField({ value, onChange }: HeightFieldProps) {
       />
       {error && (
         <p className="text-xs text-red-600 mt-1">{error}</p>
+      )}
+      {lastRecordedHeight && lastRecordedDate && (
+        <p className="text-xs text-slate-500">
+          Last recorded height: {lastRecordedHeight} cm (Date: {new Date(lastRecordedDate).toLocaleDateString()})
+        </p>
       )}
     </div>
   );

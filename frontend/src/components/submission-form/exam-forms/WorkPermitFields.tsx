@@ -9,7 +9,10 @@ interface WorkPermitFieldsProps {
   onChange: (key: string, value: string) => void;
 }
 
-export function WorkPermitFields({ formData, onChange }: WorkPermitFieldsProps) {
+export function WorkPermitFields({ 
+  formData, 
+  onChange
+}: WorkPermitFieldsProps) {
   return (
     <div className="space-y-4">
       <HeightField

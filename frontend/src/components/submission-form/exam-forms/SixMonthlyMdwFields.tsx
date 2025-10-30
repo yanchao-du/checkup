@@ -6,18 +6,31 @@ import { WeightField } from '../fields/WeightField';
 interface SixMonthlyMdwFieldsProps {
   formData: Record<string, any>;
   onChange: (key: string, value: string) => void;
+  lastRecordedHeight?: string;
+  lastRecordedWeight?: string;
+  lastRecordedDate?: string;
 }
 
-export function SixMonthlyMdwFields({ formData, onChange }: SixMonthlyMdwFieldsProps) {
+export function SixMonthlyMdwFields({ 
+  formData, 
+  onChange, 
+  lastRecordedHeight, 
+  lastRecordedWeight, 
+  lastRecordedDate 
+}: SixMonthlyMdwFieldsProps) {
   return (
     <div className="space-y-4">
       <HeightField
         value={formData.height || ''}
         onChange={(value) => onChange('height', value)}
+        lastRecordedHeight={lastRecordedHeight}
+        lastRecordedDate={lastRecordedDate}
       />
       <WeightField
         value={formData.weight || ''}
         onChange={(value) => onChange('weight', value)}
+        lastRecordedWeight={lastRecordedWeight}
+        lastRecordedDate={lastRecordedDate}
       />
       <PregnancyTestField
         value={formData.pregnancyTest || ''}
