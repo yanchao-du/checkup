@@ -216,7 +216,7 @@ describe('Submissions (e2e)', () => {
         .expect(400);
     });
 
-    it('should create FMW submission with only test results (no vitals required)', async () => {
+    it('should create FMW submission without vitals as doctor', async () => {
       const res = await request(app.getHttpServer())
         .post('/v1/submissions')
         .set('Authorization', `Bearer ${doctorToken}`)
@@ -230,6 +230,8 @@ describe('Submissions (e2e)', () => {
             syphilisTestPositive: 'false',
             hivTestPositive: 'false',
             chestXrayPositive: 'false',
+            hasAdditionalRemarks: 'true',
+            remarks: 'Patient appears healthy, no concerns noted.',
           },
         })
         .expect(201);
@@ -238,6 +240,8 @@ describe('Submissions (e2e)', () => {
       expect(res.body.patientName).toBe('Female Worker Test');
       expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
       expect(res.body.formData.pregnancyTestPositive).toBe('false');
+      expect(res.body.formData.hasAdditionalRemarks).toBe('true');
+      expect(res.body.formData.remarks).toBe('Patient appears healthy, no concerns noted.');
       // Should not have height/weight
       expect(res.body.formData.height).toBeUndefined();
       expect(res.body.formData.weight).toBeUndefined();

@@ -951,6 +951,8 @@ export function NewSubmission() {
                     <SixMonthlyFmwFields
                       formData={formData}
                       onChange={handleFormDataChange}
+                      remarksError={remarksError}
+                      setRemarksError={setRemarksError}
                     />
                   )}
                   {examType === 'WORK_PERMIT' && (

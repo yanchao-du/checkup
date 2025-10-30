@@ -419,6 +419,8 @@ async function main() {
         syphilisTestPositive: 'false',
         hivTestPositive: 'false',
         chestXrayPositive: 'false',
+        hasAdditionalRemarks: 'true',
+        remarks: 'Patient in good health. All test results negative.',
       },
       clinicId: clinic.id,
       createdById: nurse.id,

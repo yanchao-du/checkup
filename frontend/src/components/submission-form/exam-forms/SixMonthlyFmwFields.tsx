@@ -1,13 +1,18 @@
 import { CheckboxField } from '../fields/CheckboxField';
+import { MdwRemarksField } from '../fields/MdwRemarksField';
 
 interface SixMonthlyFmwFieldsProps {
   formData: Record<string, any>;
   onChange: (key: string, value: string) => void;
+  remarksError?: string | null;
+  setRemarksError?: (err: string | null) => void;
 }
 
 export function SixMonthlyFmwFields({ 
   formData, 
   onChange,
+  remarksError,
+  setRemarksError,
 }: SixMonthlyFmwFieldsProps) {
   const handleCheckboxChange = (key: string, checked: boolean) => {
     onChange(key, checked ? 'true' : 'false');
@@ -52,6 +57,27 @@ export function SixMonthlyFmwFields({
             description='Note: HIV test must be done by an MOH-approved laboratory.'
           />
         </div>
+      </div>
+
+      {/* Remarks */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Remarks</h3>
+        <MdwRemarksField
+          hasAdditionalRemarks={formData.hasAdditionalRemarks === 'true'}
+          remarks={formData.remarks || ''}
+          onHasAdditionalRemarksChange={(checked) => {
+            handleCheckboxChange('hasAdditionalRemarks', checked);
+            if (!checked) {
+              onChange('remarks', '');
+              if (setRemarksError) setRemarksError(null);
+            }
+          }}
+          onRemarksChange={(value) => {
+            onChange('remarks', value);
+            if (setRemarksError) setRemarksError(null);
+          }}
+          externalError={remarksError}
+        />
       </div>
     </div>
   );
