@@ -369,7 +369,7 @@ export function NewSubmission() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Accordion type="multiple" defaultValue={['vitals', 'exam-specific', 'remarks']} className="w-full">
+            <Accordion type="single" collapsible defaultValue="vitals" className="w-full">
               <AccordionItem value="vitals">
                 <AccordionTrigger>Common Vitals</AccordionTrigger>
                 <AccordionContent>
