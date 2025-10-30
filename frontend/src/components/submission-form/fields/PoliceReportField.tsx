@@ -5,12 +5,12 @@ interface PoliceReportFieldProps {
   value: string;
   onChange: (value: string) => void;
   externalError?: string | null;
-  highlight?: boolean;
+  
 }
 
-export function PoliceReportField({ value, onChange, externalError, highlight }: PoliceReportFieldProps) {
+export function PoliceReportField({ value, onChange, externalError }: PoliceReportFieldProps) {
   return (
-    <div className={`space-y-3 pt-4 border-t border-slate-200 ${highlight ? 'animate-pulse ring-2 ring-red-300 rounded-md' : ''}`}>
+    <div className="space-y-3 pt-4 border-t border-slate-200">
       <Label className="text-sm font-medium text-slate-900">
         Have you made a police report? *
       </Label>

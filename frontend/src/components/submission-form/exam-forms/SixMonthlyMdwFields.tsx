@@ -20,7 +20,6 @@ interface SixMonthlyMdwFieldsProps {
   setPoliceReportError?: (err: string | null) => void;
   remarksError?: string | null;
   setRemarksError?: (err: string | null) => void;
-  highlightedField?: string | null;
 }
 
 export function SixMonthlyMdwFields({ 
@@ -37,7 +36,6 @@ export function SixMonthlyMdwFields({
   setPoliceReportError,
   remarksError,
   setRemarksError,
-  highlightedField,
 }: SixMonthlyMdwFieldsProps) {
   const handleCheckboxChange = (key: string, checked: boolean) => {
     onChange(key, checked ? 'true' : 'false');
@@ -55,14 +53,13 @@ export function SixMonthlyMdwFields({
       {/* Body Measurements */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Body Measurements</h3>
-        <HeightField
+          <HeightField
           value={formData.height || ''}
           onChange={(value) => onChange('height', value)}
           lastRecordedHeight={lastRecordedHeight}
           lastRecordedDate={lastRecordedDate}
           externalError={heightError}
           setExternalError={setHeightError}
-          highlight={highlightedField === 'height'}
         />
         <WeightField
           value={formData.weight || ''}
@@ -71,7 +68,6 @@ export function SixMonthlyMdwFields({
           lastRecordedDate={lastRecordedDate}
           externalError={weightError}
           setExternalError={setWeightError}
-          highlight={highlightedField === 'weight'}
         />
         <BmiField
           height={formData.height || ''}
@@ -151,14 +147,13 @@ export function SixMonthlyMdwFields({
             warningMessage="Provide your assessment in the remarks section."
           />
           {hasPhysicalExamConcerns && (
-            <PoliceReportField
+              <PoliceReportField
               value={formData.policeReport || ''}
               onChange={(value) => {
                 onChange('policeReport', value);
                 if (setPoliceReportError) setPoliceReportError(null);
               }}
               externalError={policeReportError}
-              highlight={highlightedField === 'policeReport'}
             />
           )}
         </div>
