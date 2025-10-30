@@ -360,6 +360,57 @@ export function NewSubmission() {
           return false;
         }
       }
+
+      // Additionally, if the clinician explicitly checked the "has additional remarks" checkbox,
+      // require remarks even if there are no physical exam concerns.
+      if (formData.hasAdditionalRemarks === 'true') {
+        if (!formData.remarks || !formData.remarks.trim()) {
+          setRemarksError('Please provide your assessment in the remarks section');
+          // scroll and focus the remarks textarea
+          focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+          return false;
+        }
+      }
+
+      // If the remarks textarea is present in the DOM (e.g. checkbox was just toggled and
+      // formData may not have updated yet), validate its value directly to avoid a race.
+      try {
+        const remarksEl = document.getElementById('remarks') as HTMLTextAreaElement | null;
+        if (remarksEl) {
+          const val = (remarksEl.value || '').trim();
+          if (!val) {
+            setRemarksError('Please provide your assessment in the remarks section');
+            // ensure we scroll/focus the textarea
+            focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+            return false;
+          }
+        }
+      } catch (e) {
+        // ignore DOM errors
+      }
+
+      // Also check the 'hasAdditionalRemarks' checkbox element directly in case its
+      // state hasn't propagated into formData yet. If the checkbox is checked, require remarks.
+      try {
+        const checkboxEl = document.getElementById('hasAdditionalRemarks') as HTMLElement | null;
+        if (checkboxEl) {
+          // Radix checkbox may not expose `.checked`; it uses data-state="checked" or aria-checked
+          const isChecked = checkboxEl.getAttribute('data-state') === 'checked' || checkboxEl.getAttribute('aria-checked') === 'true';
+          if (isChecked) {
+            const val = (formData.remarks || '').trim();
+            // If formData doesn't yet reflect the checkbox toggle, also check the textarea DOM
+            const remarksEl = document.getElementById('remarks') as HTMLTextAreaElement | null;
+            const domVal = remarksEl ? (remarksEl.value || '').trim() : '';
+            if (!val && !domVal) {
+              setRemarksError('Please provide your assessment in the remarks section');
+              focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+              return false;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore DOM errors
+      }
     }
     
     // clear inline errors if validation passes
@@ -547,7 +598,19 @@ export function NewSubmission() {
   };
 
   const validateRemarks = (): boolean => {
-    // Remarks are optional, so always return true
+    // Remarks are required when the "has additional remarks" checkbox is checked
+    const wantsRemarks = formData.hasAdditionalRemarks === 'true';
+    if (wantsRemarks) {
+      if (!formData.remarks || !formData.remarks.trim()) {
+        setRemarksError('Please provide your assessment in the remarks section');
+        // attempt to focus/scroll to remarks so the user sees the inline error
+        try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks }); } catch (e) { /* ignore */ }
+        return false;
+      }
+    }
+
+    // clear any previous remarks error
+    if (remarksError) setRemarksError(null);
     return true;
   };
 

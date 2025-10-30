@@ -171,6 +171,7 @@ export function SixMonthlyMdwFields({
             // If the user de-selects the checkbox, clear the remarks value
             if (!checked) {
               onChange('remarks', '');
+              if (setRemarksError) setRemarksError(null);
             }
           }}
           onRemarksChange={(value) => {
