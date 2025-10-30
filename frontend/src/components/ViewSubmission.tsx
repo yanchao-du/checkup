@@ -373,17 +373,15 @@ export function ViewSubmission() {
                 </>
               )}
 
-              {submission.formData.remarks && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Additional Remarks</h4>
-                    <div className="bg-slate-50 p-3 rounded-md">
-                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks}</p>
-                    </div>
+              <>
+                <Separator />
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 mb-3">Additional Remarks</h4>
+                  <div className="bg-slate-50 p-3 rounded-md">
+                    <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : 'No additional remarks.'}</p>
                   </div>
-                </>
-              )}
+                </div>
+              </>
             </CardContent>
           </Card>
         </div>
