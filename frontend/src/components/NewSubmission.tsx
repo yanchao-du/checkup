@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
 import { validateNricOrFin } from '../lib/validationRules';
 import { useParams } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { submissionsApi } from '../services';
 import { usersApi, type Doctor } from '../services/users.service';
 import { patientsApi } from '../services/patients.service';
 import type { ExamType } from '../services';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -70,6 +70,8 @@ export function NewSubmission() {
   const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
+  // Ref to remember which NRIC we last looked up to avoid duplicate fetches
+  const lastLookedUpNricRef = useRef<string | null>(null);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -196,10 +198,17 @@ export function NewSubmission() {
     }
 
     const fetchPatientName = async () => {
+      console.debug('[NewSubmission] fetchPatientName start', { patientNric });
+      // Guard: if we've already looked up this NRIC, skip
+      if (lastLookedUpNricRef.current === patientNric) {
+        console.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { patientNric });
+        return;
+      }
       setIsLoadingPatient(true);
       try {
         const patient = await patientsApi.getByNric(patientNric);
         if (patient) {
+          lastLookedUpNricRef.current = patientNric;
           setPatientName(patient.name);
           setIsNameFromApi(true);
           
@@ -243,7 +252,7 @@ export function NewSubmission() {
   // The effect should run when the patient NRIC changes (or examType/id flags),
   // but not when the local height field is edited. Including formData.height
   // caused every height edit to re-trigger the patient lookup API.
-  }, [patientNric, examType, nricError, id, isNameFromApi]);
+  }, [patientNric, examType, nricError, id]);
 
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
