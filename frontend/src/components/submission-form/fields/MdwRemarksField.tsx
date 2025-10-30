@@ -7,37 +7,42 @@ interface MdwRemarksFieldProps {
   remarks: string;
   onHasAdditionalRemarksChange: (checked: boolean) => void;
   onRemarksChange: (value: string) => void;
+  forceExpanded?: boolean;
 }
 
 export function MdwRemarksField({ 
   hasAdditionalRemarks, 
   remarks, 
   onHasAdditionalRemarksChange, 
-  onRemarksChange 
+  onRemarksChange,
+  forceExpanded = false
 }: MdwRemarksFieldProps) {
   const maxLength = 500;
   const remainingChars = maxLength - remarks.length;
+  const isExpanded = forceExpanded || hasAdditionalRemarks;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start space-x-3 space-y-0">
-        <Checkbox
-          id="hasAdditionalRemarks"
-          checked={hasAdditionalRemarks}
-          onCheckedChange={onHasAdditionalRemarksChange}
-        />
-        <div className="space-y-1 leading-none">
-          <Label
-            htmlFor="hasAdditionalRemarks"
-            className="text-sm font-normal cursor-pointer"
-          >
-            I have something else to report to MOM about the helper
-          </Label>
+      {!forceExpanded && (
+        <div className="flex items-start space-x-3 space-y-0">
+          <Checkbox
+            id="hasAdditionalRemarks"
+            checked={hasAdditionalRemarks}
+            onCheckedChange={onHasAdditionalRemarksChange}
+          />
+          <div className="space-y-1 leading-none">
+            <Label
+              htmlFor="hasAdditionalRemarks"
+              className="text-sm font-normal cursor-pointer"
+            >
+              I have something else to report to MOM about the helper
+            </Label>
+          </div>
         </div>
-      </div>
+      )}
       
-      {hasAdditionalRemarks && (
-        <div className="space-y-2 pl-7">
+      {isExpanded && (
+        <div className={forceExpanded ? 'space-y-2' : 'space-y-2 pl-7'}>
           {/* <Label htmlFor="remarks">Additional Remarks</Label> */}
           <Textarea
             id="remarks"

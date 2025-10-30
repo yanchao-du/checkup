@@ -295,8 +295,18 @@ export function NewSubmission() {
   };
 
   const validateExamSpecific = (): boolean => {
-    // Exam-specific fields are optional, so always return true
-    // You can add specific validation if needed based on exam type
+    // For Six-Monthly MDW, validate police report if physical exam concerns are present
+    if (examType === 'SIX_MONTHLY_MDW') {
+      const hasPhysicalExamConcerns = 
+        formData.suspiciousInjuries === 'true' || 
+        formData.unintentionalWeightLoss === 'true';
+      
+      if (hasPhysicalExamConcerns && !formData.policeReport) {
+        toast.error('Please indicate whether you have made a police report');
+        return false;
+      }
+    }
+    
     return true;
   };
 

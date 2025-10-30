@@ -3,6 +3,7 @@ import { WeightField } from '../fields/WeightField';
 import { BmiField } from '../fields/BmiField';
 import { CheckboxField } from '../fields/CheckboxField';
 import { MdwRemarksField } from '../fields/MdwRemarksField';
+import { PoliceReportField } from '../fields/PoliceReportField';
 
 interface SixMonthlyMdwFieldsProps {
   formData: Record<string, any>;
@@ -24,6 +25,11 @@ export function SixMonthlyMdwFields({
   };
 
   const POSTIVE = 'Positive/Reactive';
+  
+  // Check if any "Yes" is ticked in Physical Examination Details
+  const hasPhysicalExamConcerns = 
+    formData.suspiciousInjuries === 'true' || 
+    formData.unintentionalWeightLoss === 'true';
 
   return (
     <div className="space-y-6">
@@ -95,6 +101,8 @@ export function SixMonthlyMdwFields({
             checkboxLabel="Yes"
             checked={formData.suspiciousInjuries === 'true'}
             onChange={(checked) => handleCheckboxChange('suspiciousInjuries', checked)}
+            showWarning={formData.suspiciousInjuries === 'true'}
+            warningMessage="Provide your assessment in the remarks section."
           />
           <CheckboxField
             id="unintentionalWeightLoss"
@@ -102,7 +110,15 @@ export function SixMonthlyMdwFields({
             checkboxLabel="Yes"
             checked={formData.unintentionalWeightLoss === 'true'}
             onChange={(checked) => handleCheckboxChange('unintentionalWeightLoss', checked)}
+            showWarning={formData.unintentionalWeightLoss === 'true'}
+            warningMessage="Provide your assessment in the remarks section."
           />
+          {hasPhysicalExamConcerns && (
+            <PoliceReportField
+              value={formData.policeReport || ''}
+              onChange={(value) => onChange('policeReport', value)}
+            />
+          )}
         </div>
       </div>
 
@@ -114,6 +130,7 @@ export function SixMonthlyMdwFields({
           remarks={formData.remarks || ''}
           onHasAdditionalRemarksChange={(checked) => handleCheckboxChange('hasAdditionalRemarks', checked)}
           onRemarksChange={(value) => onChange('remarks', value)}
+          forceExpanded={hasPhysicalExamConcerns}
         />
       </div>
     </div>
