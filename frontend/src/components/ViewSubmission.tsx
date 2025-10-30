@@ -232,9 +232,8 @@ export function ViewSubmission() {
                                   const isAlert = category === 'Underweight' || category === 'Obese';
                                   return (
                                     <p className="text-slate-900">
-                                      {bmi} (
-                                      <span className={isAlert ? 'font-semibold text-red-600' : ''}>{category}</span>
-                                      )
+                                      {bmi} - 
+                                      <span className={isAlert ? 'font-semibold text-red-600' : ''}> {category}</span>
                                     </p>
                                   );
                                 })()}
