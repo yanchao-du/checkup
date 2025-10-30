@@ -290,13 +290,17 @@ export function NewSubmission() {
   const validatePatientInfo = (): boolean => {
     // Validate NRIC/FIN
     if (!patientNric.trim()) {
-      toast.error('NRIC/FIN is required');
+      setNricError('NRIC/FIN is required');
+      // scroll/focus the NRIC field
+      // attempt to focus and scroll to patientNric
+      try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
       return false;
     }
-    
+
     const nricValidationError = validateNricOrFin(patientNric, validateNRIC);
     if (nricValidationError) {
-      toast.error(nricValidationError);
+      setNricError(nricValidationError);
+      try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
       return false;
     }
     
@@ -321,6 +325,7 @@ export function NewSubmission() {
     
     // clear inline exam date error if present
     if (examinationDateError) setExaminationDateError(null);
+    if (nricError) setNricError(null);
     return true;
   };
 
