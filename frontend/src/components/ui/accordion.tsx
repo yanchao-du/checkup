@@ -50,7 +50,7 @@ const AccordionTrigger = React.forwardRef<
             "rounded-full border-2 flex items-center justify-center transition-colors",
             isCompleted &&
               !isDisabled &&
-              " group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500 group-data-[state=closed]:w-4 group-data-[state=closed]:h-4 group-data-[state=open]:w-4 group-data-[state=open]:h-4 group-date-[state=open]:text-primary group-data-[state=closed]:bg-gray-200 group-data-[state=closed]:border-gray-400",
+              " group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500 group-data-[state=closed]:w-4 group-data-[state=closed]:h-4 group-data-[state=open]:w-4 group-data-[state=open]:h-4 group-date-[state=open]:text-primary group-data-[state=closed]:bg-green-400 group-data-[state=closed]:border-green-400",
             !isCompleted &&
               !isDisabled &&
               "w-4 h-4 border-gray-500 bg-gray-500 group-data-[state=open]:bg-blue-500 group-data-[state=open]:border-blue-500",
@@ -58,7 +58,7 @@ const AccordionTrigger = React.forwardRef<
           )}
         >
           {isCompleted ? (
-            <Check className=" group-data-[state=open]:text-blue-500 group-data-[state=closed]:text-gray-600" />
+            <Check className=" group-data-[state=open]:text-blue-500 group-data-[state=closed]:text-white" />
           ) : (
             <span className={cn("rounded-full")} />
           )}

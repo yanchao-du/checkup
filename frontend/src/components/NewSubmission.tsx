@@ -64,6 +64,8 @@ export function NewSubmission() {
   const [hasDefaultDoctor, setHasDefaultDoctor] = useState(false);
   const [isNameFromApi, setIsNameFromApi] = useState(false);
   const [isLoadingPatient, setIsLoadingPatient] = useState(false);
+  const [activeAccordion, setActiveAccordion] = useState<string>('patient-info');
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
@@ -116,6 +118,25 @@ export function NewSubmission() {
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
+          
+          // Mark sections as complete if they have valid data
+          const completed = new Set<string>();
+          
+          // Check patient info
+          if (existing.patientName && existing.patientNric && existing.examinationDate) {
+            if (existing.examType !== 'AGED_DRIVERS' || existing.patientDateOfBirth) {
+              completed.add('patient-info');
+            }
+          }
+          
+          // Mark other sections as complete if loading existing submission
+          if (existing.formData && Object.keys(existing.formData).length > 0) {
+            completed.add('vitals');
+            completed.add('exam-specific');
+            completed.add('remarks');
+          }
+          
+          setCompletedSections(completed);
         } catch (error) {
           console.error('Failed to load submission:', error);
           toast.error('Failed to load submission');
@@ -133,6 +154,8 @@ export function NewSubmission() {
         setAssignedDoctorId('');
         setFormData({});
         setIsNameFromApi(false);
+        setCompletedSections(new Set());
+        setActiveAccordion('patient-info');
       }
     };
 
@@ -206,6 +229,92 @@ export function NewSubmission() {
     // Reset name-from-API flag when switching exam types
     if (newExamType === 'AGED_DRIVERS') {
       setIsNameFromApi(false);
+    }
+    
+    // Reset completed sections and active accordion when exam type changes
+    setCompletedSections(new Set());
+    setActiveAccordion('patient-info');
+  };
+
+  const validatePatientInfo = (): boolean => {
+    // Validate NRIC/FIN
+    if (!patientNric.trim()) {
+      toast.error('NRIC/FIN is required');
+      return false;
+    }
+    
+    const nricValidationError = validateNricOrFin(patientNric, validateNRIC);
+    if (nricValidationError) {
+      toast.error(nricValidationError);
+      return false;
+    }
+    
+    // Validate Patient Name
+    if (!patientName.trim()) {
+      toast.error('Patient Name is required');
+      return false;
+    }
+    
+    // Validate DOB for AGED_DRIVERS
+    if (examType === 'AGED_DRIVERS' && !patientDateOfBirth) {
+      toast.error('Date of Birth is required for Aged Drivers exam');
+      return false;
+    }
+    
+    // Validate Examination Date
+    if (!examinationDate) {
+      toast.error('Examination Date is required');
+      return false;
+    }
+    
+    return true;
+  };
+
+  const validateVitals = (): boolean => {
+    // Vitals are optional, so always return true
+    // You can add specific validation if needed
+    return true;
+  };
+
+  const validateExamSpecific = (): boolean => {
+    // Exam-specific fields are optional, so always return true
+    // You can add specific validation if needed based on exam type
+    return true;
+  };
+
+  const validateRemarks = (): boolean => {
+    // Remarks are optional, so always return true
+    return true;
+  };
+
+  const handleContinue = (currentSection: string, nextSection: string) => {
+    let isValid = false;
+    
+    switch (currentSection) {
+      case 'patient-info':
+        isValid = validatePatientInfo();
+        break;
+      case 'vitals':
+        isValid = validateVitals();
+        break;
+      case 'exam-specific':
+        isValid = validateExamSpecific();
+        break;
+      case 'remarks':
+        isValid = validateRemarks();
+        break;
+      default:
+        isValid = true;
+    }
+    
+    if (isValid) {
+      // Mark current section as completed
+      setCompletedSections(prev => new Set(prev).add(currentSection));
+      
+      // Move to next section
+      setActiveAccordion(nextSection);
+      
+      toast.success('Section completed');
     }
   };
 
@@ -357,9 +466,13 @@ export function NewSubmission() {
           </div>
 
           {examType && (
-            <Accordion type="single" collapsible defaultValue="patient-info" className="w-full">
+            <Accordion type="single" collapsible value={activeAccordion} onValueChange={setActiveAccordion} className="w-full">
               <AccordionItem value="patient-info">
-                <AccordionTrigger>Patient Information</AccordionTrigger>
+                <AccordionTrigger isCompleted={completedSections.has('patient-info')}>
+                  <div className="flex items-center gap-2">
+                    <span>Patient Information</span>
+                  </div>
+                </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -424,11 +537,23 @@ export function NewSubmission() {
                       </div>
                     </div>
                   </div>
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => handleContinue('patient-info', 'vitals')}
+                    >
+                      Continue
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="vitals">
-                <AccordionTrigger>Common Vitals</AccordionTrigger>
+                <AccordionTrigger is>
+                  <div className="flex items-center gap-2">
+                    <span>Common Vitals</span>
+                  </div>
+                </AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <HeightField
@@ -446,14 +571,26 @@ export function NewSubmission() {
                       onDiastolicChange={(value) => handleFormDataChange('diastolic', value)}
                     />
                   </div>
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => handleContinue('vitals', 'exam-specific')}
+                    >
+                      Continue
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="exam-specific">
-                <AccordionTrigger>
-                  {examType === 'SIX_MONTHLY_MDW' && 'Six-Monthly MDW Specific Fields'}
-                  {examType === 'WORK_PERMIT' && 'Work Permit Specific Fields'}
-                  {examType === 'AGED_DRIVERS' && 'Aged Drivers Specific Fields'}
+                <AccordionTrigger isCompleted={completedSections.has('exam-specific')}>
+                  <div className="flex items-center gap-2">
+                    <span>
+                      {examType === 'SIX_MONTHLY_MDW' && 'Six-Monthly MDW Specific Fields'}
+                      {examType === 'WORK_PERMIT' && 'Work Permit Specific Fields'}
+                      {examType === 'AGED_DRIVERS' && 'Aged Drivers Specific Fields'}
+                    </span>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   {examType === 'SIX_MONTHLY_MDW' && (
@@ -474,16 +611,41 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                     />
                   )}
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => handleContinue('exam-specific', 'remarks')}
+                    >
+                      Continue
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="remarks">
-                <AccordionTrigger>Additional Remarks</AccordionTrigger>
+                <AccordionTrigger isCompleted={completedSections.has('remarks')}>
+                  <div className="flex items-center gap-2">
+                    <span>Additional Remarks</span>
+                  </div>
+                </AccordionTrigger>
                 <AccordionContent>
                   <RemarksField
                     value={formData.remarks || ''}
                     onChange={(value) => handleFormDataChange('remarks', value)}
                   />
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        if (validateRemarks()) {
+                          setCompletedSections(prev => new Set(prev).add('remarks'));
+                          toast.success('All sections completed! You can now save or submit.');
+                        }
+                      }}
+                    >
+                      Mark as Complete
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
