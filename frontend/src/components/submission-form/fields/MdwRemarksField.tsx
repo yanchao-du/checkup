@@ -54,7 +54,8 @@ export function MdwRemarksField({
             placeholder="Enter additional remarks..."
             maxLength={maxLength}
             rows={4}
-            className="resize-none"
+            aria-invalid={!!externalError}
+            className={`resize-none ${externalError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
           />
           {externalError && (
             <p className="text-xs text-red-600 mt-1">{externalError}</p>

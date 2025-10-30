@@ -60,7 +60,8 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder="70"
-        className={`${externalError || error ? 'border-red-500' : ''}`}
+        aria-invalid={!!(externalError || error)}
+        className={`${externalError || error ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
       />
       {(externalError || error) && (
         <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>

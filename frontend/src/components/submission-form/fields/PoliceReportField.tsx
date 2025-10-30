@@ -17,13 +17,13 @@ export function PoliceReportField({ value, onChange, externalError }: PoliceRepo
       <RadioGroup value={value} onValueChange={onChange}>
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="yes" id="policeReport-yes" />
+            <RadioGroupItem value="yes" id="policeReport-yes" aria-invalid={!!externalError} className={`${externalError ? 'focus-visible:border-red-500 focus-visible:ring-destructive' : ''}`} />
             <Label htmlFor="policeReport-yes" className="text-sm font-normal cursor-pointer">
               Yes
             </Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="no" id="policeReport-no" />
+            <RadioGroupItem value="no" id="policeReport-no" aria-invalid={!!externalError} className={`${externalError ? 'focus-visible:border-red-500 focus-visible:ring-destructive' : ''}`} />
             <Label htmlFor="policeReport-no" className="text-sm font-normal cursor-pointer">
               No
             </Label>

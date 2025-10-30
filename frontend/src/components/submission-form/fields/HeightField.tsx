@@ -48,7 +48,8 @@ export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedD
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder="170"
-        className={`${error || externalError ? 'border-red-500' : ''}`}
+        aria-invalid={!!(error || externalError)}
+        className={`${error || externalError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
       />
       {(externalError || error) && (
         <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>
