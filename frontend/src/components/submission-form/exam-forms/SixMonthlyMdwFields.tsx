@@ -100,7 +100,13 @@ export function SixMonthlyMdwFields({
             label="Signs of suspicious or unexplained injuries"
             checkboxLabel="Yes"
             checked={formData.suspiciousInjuries === 'true'}
-            onChange={(checked) => handleCheckboxChange('suspiciousInjuries', checked)}
+            onChange={(checked) => {
+              handleCheckboxChange('suspiciousInjuries', checked);
+              // If user unchecks this and the other concern is not checked, clear police report
+              if (!checked && formData.unintentionalWeightLoss !== 'true') {
+                onChange('policeReport', '');
+              }
+            }}
             showWarning={formData.suspiciousInjuries === 'true'}
             warningMessage="Provide your assessment in the remarks section."
           />
@@ -109,7 +115,13 @@ export function SixMonthlyMdwFields({
             label="Unintentional weight loss (if unsure, select yes)"
             checkboxLabel="Yes"
             checked={formData.unintentionalWeightLoss === 'true'}
-            onChange={(checked) => handleCheckboxChange('unintentionalWeightLoss', checked)}
+            onChange={(checked) => {
+              handleCheckboxChange('unintentionalWeightLoss', checked);
+              // If user unchecks this and the other concern is not checked, clear police report
+              if (!checked && formData.suspiciousInjuries !== 'true') {
+                onChange('policeReport', '');
+              }
+            }}
             showWarning={formData.unintentionalWeightLoss === 'true'}
             warningMessage="Provide your assessment in the remarks section."
           />
