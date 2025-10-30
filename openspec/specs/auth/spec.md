@@ -1,7 +1,8 @@
 # auth Specification
 
 ## Purpose
-TBD - created by archiving change add-corppass-auth. Update Purpose after archive.
+Provides authentication and authorization for CheckUp users, supporting both traditional email/password login and Singapore CorpPass OpenID Connect integration. Enables secure access control with JWT tokens, role-based permissions, and account linking for business users.
+
 ## Requirements
 ### Requirement: CorpPass OAuth Authentication
 The system SHALL support CorpPass OpenID Connect (OIDC) authentication as an alternative login method alongside email/password authentication.
@@ -185,16 +186,6 @@ The system SHALL require administrator approval for new users created via CorpPa
 - **AND** user cannot log in
 - **AND** user receives rejection notification
 
-### Requirement: User Authentication
-The system SHALL authenticate users via **either** email/password **or** CorpPass OpenID Connect.
-
-#### Scenario: User authentication with method selection
-- **GIVEN** user wants to access the system
-- **WHEN** user navigates to login page
-- **THEN** user can choose between email/password or CorpPass
-- **AND** both methods lead to same authenticated state
-- **AND** JWT token is issued upon successful authentication
-
 ### Requirement: Login Response
 The system SHALL return authentication method information in login response.
 
@@ -232,13 +223,4 @@ The system SHALL support traditional email and password authentication.
 - **THEN** authentication flow proceeds as expected
 - **AND** JWT token is issued
 - **AND** user accesses dashboard
-
-#### Scenario: User has both authentication methods linked
-- **GIVEN** user has both email/password and CorpPass linked to account
-- **WHEN** user logs in via email/password
-- **THEN** authentication succeeds
-- **WHEN** user logs in via CorpPass
-- **THEN** authentication succeeds
-- **AND** both methods access same user account
-- **AND** user sees same data and permissions
 
