@@ -34,6 +34,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
         ref={ref}
+        disabled={isDisabled}
         className={cn(
           "flex flex-1 items-center justify-between py-4 text-base transition-all text-left group",
           isDisabled && "opacity-50 cursor-not-allowed hover:no-underline",

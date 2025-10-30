@@ -549,7 +549,7 @@ export function NewSubmission() {
               </AccordionItem>
 
               <AccordionItem value="vitals">
-                <AccordionTrigger is>
+                <AccordionTrigger isCompleted={completedSections.has('vitals')} isDisabled={!completedSections.has('patient-info')}>
                   <div className="flex items-center gap-2">
                     <span>Common Vitals</span>
                   </div>
@@ -583,7 +583,7 @@ export function NewSubmission() {
               </AccordionItem>
 
               <AccordionItem value="exam-specific">
-                <AccordionTrigger isCompleted={completedSections.has('exam-specific')}>
+                <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!completedSections.has('patient-info')}>
                   <div className="flex items-center gap-2">
                     <span>
                       {examType === 'SIX_MONTHLY_MDW' && 'Six-Monthly MDW Specific Fields'}
@@ -623,7 +623,7 @@ export function NewSubmission() {
               </AccordionItem>
 
               <AccordionItem value="remarks">
-                <AccordionTrigger isCompleted={completedSections.has('remarks')}>
+                <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!completedSections.has('patient-info')}>
                   <div className="flex items-center gap-2">
                     <span>Additional Remarks</span>
                   </div>
