@@ -618,40 +618,52 @@ export function NewSubmission() {
                   <div className="flex justify-end mt-4">
                     <Button 
                       type="button"
-                      onClick={() => handleContinue('exam-specific', 'remarks')}
+                      onClick={() => {
+                        if (examType === 'SIX_MONTHLY_MDW') {
+                          // For MDW, mark exam-specific as complete (includes remarks)
+                          if (validateExamSpecific()) {
+                            setCompletedSections(prev => new Set(prev).add('exam-specific'));
+                            toast.success('All sections completed! You can now save or submit.');
+                          }
+                        } else {
+                          handleContinue('exam-specific', 'remarks');
+                        }
+                      }}
                     >
-                      Continue
+                      {examType === 'SIX_MONTHLY_MDW' ? 'Mark as Complete' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="remarks">
-                <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!completedSections.has('patient-info')}>
-                  <div className="flex items-center gap-2">
-                    <span>Additional Remarks</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <RemarksField
-                    value={formData.remarks || ''}
-                    onChange={(value) => handleFormDataChange('remarks', value)}
-                  />
-                  <div className="flex justify-end mt-4">
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        if (validateRemarks()) {
-                          setCompletedSections(prev => new Set(prev).add('remarks'));
-                          toast.success('All sections completed! You can now save or submit.');
-                        }
-                      }}
-                    >
-                      Mark as Complete
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+              {examType !== 'SIX_MONTHLY_MDW' && (
+                <AccordionItem value="remarks">
+                  <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!completedSections.has('patient-info')}>
+                    <div className="flex items-center gap-2">
+                      <span>Additional Remarks</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <RemarksField
+                      value={formData.remarks || ''}
+                      onChange={(value) => handleFormDataChange('remarks', value)}
+                    />
+                    <div className="flex justify-end mt-4">
+                      <Button 
+                        type="button"
+                        onClick={() => {
+                          if (validateRemarks()) {
+                            setCompletedSections(prev => new Set(prev).add('remarks'));
+                            toast.success('All sections completed! You can now save or submit.');
+                          }
+                        }}
+                      >
+                        Mark as Complete
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
             </Accordion>
           )}
         </CardContent>
