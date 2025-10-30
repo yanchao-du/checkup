@@ -8,21 +8,31 @@ interface HeightFieldProps {
   onChange: (value: string) => void;
   lastRecordedHeight?: string;
   lastRecordedDate?: string;
+  // Optional external error controlled by parent (inline validation)
+  externalError?: string | null;
+  setExternalError?: (err: string | null) => void;
 }
 
-export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedDate }: HeightFieldProps) {
+export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedDate, externalError, setExternalError }: HeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '');
     if (val.length <= 3) {
       onChange(val);
+      // Clear either local or external error when user types
       if (error) setError(null);
+      if (setExternalError) setExternalError(null);
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setError(validateHeight(e.target.value));
+    const validation = validateHeight(e.target.value);
+    if (setExternalError) {
+      setExternalError(validation);
+    } else {
+      setError(validation);
+    }
   };
 
   return (
@@ -40,8 +50,8 @@ export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedD
         placeholder="170"
         className={error ? 'border-red-500' : ''}
       />
-      {error && (
-        <p className="text-xs text-red-600 mt-1">{error}</p>
+      {(externalError || error) && (
+        <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>
       )}
       {lastRecordedHeight && lastRecordedDate && (
         <p className="text-xs text-slate-500">

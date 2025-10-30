@@ -9,9 +9,11 @@ interface WeightFieldProps {
   onChange: (value: string) => void;
   lastRecordedWeight?: string;
   lastRecordedDate?: string;
+  externalError?: string | null;
+  setExternalError?: (err: string | null) => void;
 }
 
-export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedDate }: WeightFieldProps) {
+export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedDate, externalError, setExternalError }: WeightFieldProps) {
   const [error, setError] = useState<string | null>(null);
   const [showWarning, setShowWarning] = useState(false);
 
@@ -20,13 +22,19 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
     if (val.length <= 3) {
       onChange(val);
       if (error) setError(null);
+      if (setExternalError) setExternalError(null);
       // Hide warning when user is typing
       setShowWarning(false);
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setError(validateWeight(e.target.value));
+    const validation = validateWeight(e.target.value);
+    if (setExternalError) {
+      setExternalError(validation);
+    } else {
+      setError(validation);
+    }
     
     // Check and show warning on blur
     if (lastRecordedWeight && e.target.value) {
@@ -53,8 +61,8 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
         placeholder="70"
         className={error ? 'border-red-500' : ''}
       />
-      {error && (
-        <p className="text-xs text-red-600 mt-1">{error}</p>
+      {(externalError || error) && (
+        <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>
       )}
       {showWarning && (
         <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md">

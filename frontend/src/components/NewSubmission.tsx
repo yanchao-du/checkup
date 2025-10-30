@@ -68,6 +68,8 @@ export function NewSubmission() {
   const [lastRecordedHeight, setLastRecordedHeight] = useState<string>('');
   const [lastRecordedWeight, setLastRecordedWeight] = useState<string>('');
   const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
+  const [heightError, setHeightError] = useState<string | null>(null);
+  const [weightError, setWeightError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
@@ -316,8 +318,16 @@ export function NewSubmission() {
   };
 
   const validateExamSpecific = (): boolean => {
-    // For Six-Monthly MDW, validate police report if physical exam concerns are present
+    // For Six-Monthly MDW, require height and weight and validate police report if physical exam concerns are present
     if (examType === 'SIX_MONTHLY_MDW') {
+      // Height and weight are mandatory
+      if (!formData.height || !formData.weight) {
+        // Set inline errors instead of toasts
+        if (!formData.height) setHeightError('Height is required');
+        if (!formData.weight) setWeightError('Weight is required');
+        return false;
+      }
+
       const hasPhysicalExamConcerns = 
         formData.suspiciousInjuries === 'true' || 
         formData.unintentionalWeightLoss === 'true';
@@ -328,6 +338,9 @@ export function NewSubmission() {
       }
     }
     
+    // clear inline errors if validation passes
+    setHeightError(null);
+    setWeightError(null);
     return true;
   };
 
@@ -467,7 +480,8 @@ export function NewSubmission() {
     }
   };
 
-  const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true);
+  const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
+    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true);
 
   if (isLoading) {
     return (
@@ -635,6 +649,10 @@ export function NewSubmission() {
                       lastRecordedHeight={lastRecordedHeight}
                       lastRecordedWeight={lastRecordedWeight}
                       lastRecordedDate={lastRecordedDate}
+                      heightError={heightError}
+                      setHeightError={setHeightError}
+                      weightError={weightError}
+                      setWeightError={setWeightError}
                     />
                   )}
                   {examType === 'WORK_PERMIT' && (

@@ -11,6 +11,11 @@ interface SixMonthlyMdwFieldsProps {
   lastRecordedHeight?: string;
   lastRecordedWeight?: string;
   lastRecordedDate?: string;
+  // Optional external error props to show inline validation passed from parent
+  heightError?: string | null;
+  setHeightError?: (err: string | null) => void;
+  weightError?: string | null;
+  setWeightError?: (err: string | null) => void;
 }
 
 export function SixMonthlyMdwFields({ 
@@ -18,7 +23,11 @@ export function SixMonthlyMdwFields({
   onChange, 
   lastRecordedHeight, 
   lastRecordedWeight, 
-  lastRecordedDate 
+  lastRecordedDate,
+  heightError,
+  setHeightError,
+  weightError,
+  setWeightError,
 }: SixMonthlyMdwFieldsProps) {
   const handleCheckboxChange = (key: string, checked: boolean) => {
     onChange(key, checked ? 'true' : 'false');
@@ -41,12 +50,16 @@ export function SixMonthlyMdwFields({
           onChange={(value) => onChange('height', value)}
           lastRecordedHeight={lastRecordedHeight}
           lastRecordedDate={lastRecordedDate}
+          externalError={heightError}
+          setExternalError={setHeightError}
         />
         <WeightField
           value={formData.weight || ''}
           onChange={(value) => onChange('weight', value)}
           lastRecordedWeight={lastRecordedWeight}
           lastRecordedDate={lastRecordedDate}
+          externalError={weightError}
+          setExternalError={setWeightError}
         />
         <BmiField
           height={formData.height || ''}
