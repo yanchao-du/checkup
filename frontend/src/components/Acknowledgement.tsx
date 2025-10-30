@@ -27,6 +27,18 @@ export function Acknowledgement() {
     fetch();
   }, [id]);
 
+  // When the acknowledgement is shown (submission loaded), ensure page is scrolled to top
+  useEffect(() => {
+    if (submission) {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        // fallback for older browsers
+        window.scrollTo(0, 0);
+      }
+    }
+  }, [submission]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
