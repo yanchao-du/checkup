@@ -493,24 +493,47 @@ export function NewSubmission() {
                           <p className="text-xs text-red-600 mt-1">{nricError}</p>
                         )}
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="patientName">Patient Name *</Label>
+                    </div>
+                    {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="patientName">Patient Name *</Label>
+                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') ? (
+                        patientNric.length === 9 && !nricError ? 
+                        (
+                          <Input
+                            id="patientName"
+                            name="patientName"
+                            value={patientName}
+                            onChange={(e) => setPatientName(e.target.value)}
+                            placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
+                            readOnly={isNameFromApi}
+                            className={isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                          />
+                        ) : (
+                          <Input
+                            id="patientName"
+                            name="patientName"
+                            value=""
+                            disabled
+                            placeholder="Fill NRIC/FIN first"
+                          />
+                        )
+                      ) : (
                         <Input
                           id="patientName"
                           name="patientName"
                           value={patientName}
                           onChange={(e) => setPatientName(e.target.value)}
                           placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
-                          readOnly={(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi}
-                          className={((examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                          readOnly={false}
                         />
-                        {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi && (
-                          <p className="text-xs text-slate-500">Name retrieved from system based on NRIC/FIN</p>
-                        )}
-                      </div>
+                      )}
+                      {/* {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi && patientNric.length === 9 && !nricError && (
+                        <p className="text-xs text-slate-500">Name retrieved from system based on NRIC/FIN</p>
+                      )} */}
                     </div>
-
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {examType === 'AGED_DRIVERS' && (
                         <div className="space-y-2">
