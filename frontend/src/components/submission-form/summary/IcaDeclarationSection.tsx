@@ -1,5 +1,6 @@
 import type { UserRole } from '../../../types/api';
 import { Declaration } from './Declaration';
+import { IcaDeclarationContent } from './DeclarationContent';
 
 interface IcaDeclarationSectionProps {
   checked: boolean;
@@ -19,13 +20,7 @@ export function IcaDeclarationSection({
       userRole={userRole}
       checkboxId="ica-declaration"
     >
-      <p className="text-sm text-slate-700 leading-relaxed">
-        {/* TODO: Replace with actual ICA declaration text when provided */}
-        <strong>Note:</strong> ICA-specific declaration text to be provided. This is a placeholder.
-      </p>
-      <p className="text-sm text-slate-500 italic mt-2">
-        The actual declaration text for ICA medical examinations will be updated here.
-      </p>
+      <IcaDeclarationContent />
     </Declaration>
   );
 }

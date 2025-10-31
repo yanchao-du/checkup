@@ -18,6 +18,8 @@ import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
 import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
+import { DeclarationView } from './submission-view/DeclarationView';
+import { MomDeclarationContent, IcaDeclarationContent } from './submission-form/summary/DeclarationContent';
 import { formatExamTypeFull } from '../lib/formatters';
 import {
   AlertDialog,
@@ -338,6 +340,26 @@ export function ViewSubmission() {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Declaration - show for submitted submissions */}
+          {submission.status === 'submitted' && (
+            <>
+              {(submission.examType === 'PR_MEDICAL' || 
+                submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                submission.examType === 'LTVP_MEDICAL') && (
+                <DeclarationView>
+                  <IcaDeclarationContent />
+                </DeclarationView>
+              )}
+              {submission.examType !== 'PR_MEDICAL' && 
+               submission.examType !== 'STUDENT_PASS_MEDICAL' && 
+               submission.examType !== 'LTVP_MEDICAL' && (
+                <DeclarationView>
+                  <MomDeclarationContent />
+                </DeclarationView>
+              )}
+            </>
           )}
 
           {/* Submission Timeline */}
