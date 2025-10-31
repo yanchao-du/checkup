@@ -186,6 +186,9 @@ enum ExamType {
   PR_MEDICAL           @map("Medical Examination for Permanent Residency (ICA)")
   STUDENT_PASS_MEDICAL @map("Medical Examination for Student Pass (ICA)")
   LTVP_MEDICAL         @map("Medical Examination for Long Term Visit Pass (ICA)")
+  DRIVING_LICENCE_TP   @map("Driving Licence Medical Examination Report (TP)")
+  DRIVING_VOCATIONAL_TP_LTA @map("Driving Licence and Vocational Licence (TP & LTA)")
+  VOCATIONAL_LICENCE_LTA    @map("Vocational Licence Medical Examination (LTA)")
 }
 
 enum SubmissionStatus {

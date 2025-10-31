@@ -34,6 +34,9 @@ import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwF
 import { SixMonthlyFmwFields } from './submission-form/exam-forms/SixMonthlyFmwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
 import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
+import { DrivingLicenceTpFields } from './submission-form/exam-forms/DrivingLicenceTpFields';
+import { DrivingVocationalTpLtaFields } from './submission-form/exam-forms/DrivingVocationalTpLtaFields';
+import { VocationalLicenceLtaFields } from './submission-form/exam-forms/VocationalLicenceLtaFields';
 import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
 import { SixMonthlyFmwSummary } from './submission-form/summary/SixMonthlyFmwSummary';
 import { DeclarationSection } from './submission-form/summary/DeclarationSection';
@@ -50,6 +53,9 @@ const examTypes: { value: ExamType; label: string }[] = [
   { value: 'PR_MEDICAL', label: 'Medical Examination for Permanent Residency (ICA)' },
   { value: 'STUDENT_PASS_MEDICAL', label: 'Medical Examination for Student Pass (ICA)' },
   { value: 'LTVP_MEDICAL', label: 'Medical Examination for Long Term Visit Pass (ICA)' },
+  { value: 'DRIVING_LICENCE_TP', label: 'Driving Licence Medical Examination Report (TP)' },
+  { value: 'DRIVING_VOCATIONAL_TP_LTA', label: 'Driving Licence and Vocational Licence (TP & LTA)' },
+  { value: 'VOCATIONAL_LICENCE_LTA', label: 'Vocational Licence Medical Examination (LTA)' },
 ];
 
 // Helper to check if exam type is ICA
@@ -1082,6 +1088,24 @@ export function NewSubmission() {
                   )}
                   {examType === 'AGED_DRIVERS' && (
                     <AgedDriversFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  {examType === 'DRIVING_LICENCE_TP' && (
+                    <DrivingLicenceTpFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  {examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
+                    <DrivingVocationalTpLtaFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                    />
+                  )}
+                  {examType === 'VOCATIONAL_LICENCE_LTA' && (
+                    <VocationalLicenceLtaFields
                       formData={formData}
                       onChange={handleFormDataChange}
                     />

@@ -25,7 +25,10 @@ export type ExamType =
   | 'AGED_DRIVERS'
   | 'PR_MEDICAL'
   | 'STUDENT_PASS_MEDICAL'
-  | 'LTVP_MEDICAL';
+  | 'LTVP_MEDICAL'
+  | 'DRIVING_LICENCE_TP'
+  | 'DRIVING_VOCATIONAL_TP_LTA'
+  | 'VOCATIONAL_LICENCE_LTA';
 export type SubmissionStatus = 'draft' | 'pending_approval' | 'submitted' | 'rejected';
 
 export interface MedicalSubmission {

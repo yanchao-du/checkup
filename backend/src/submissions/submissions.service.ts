@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
+import { validateDriverExam } from './validation/driver-exam.validation';
 
 @Injectable()
 export class SubmissionsService {
@@ -9,6 +10,9 @@ export class SubmissionsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, userRole: string, clinicId: string, dto: CreateSubmissionDto) {
+    // Validate driver exam submissions
+    validateDriverExam(dto);
+    
     // When routeForApproval is explicitly false, it's a draft
     // When routeForApproval is true or undefined, check the logic
     const isDraft = dto.routeForApproval === false;
