@@ -306,6 +306,27 @@ export function ViewSubmission() {
                   </div>
                 </>
               )}
+
+              {/* Declaration - show for submitted submissions */}
+              {submission.status === 'submitted' && (
+                <>
+                  <Separator />
+                  {(submission.examType === 'PR_MEDICAL' || 
+                    submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                    submission.examType === 'LTVP_MEDICAL') && (
+                    <DeclarationView>
+                      <IcaDeclarationContent />
+                    </DeclarationView>
+                  )}
+                  {submission.examType !== 'PR_MEDICAL' && 
+                   submission.examType !== 'STUDENT_PASS_MEDICAL' && 
+                   submission.examType !== 'LTVP_MEDICAL' && (
+                    <DeclarationView>
+                      <MomDeclarationContent />
+                    </DeclarationView>
+                  )}
+                </>
+              )}
               
             </CardContent>
           </Card>
@@ -340,26 +361,6 @@ export function ViewSubmission() {
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {/* Declaration - show for submitted submissions */}
-          {submission.status === 'submitted' && (
-            <>
-              {(submission.examType === 'PR_MEDICAL' || 
-                submission.examType === 'STUDENT_PASS_MEDICAL' || 
-                submission.examType === 'LTVP_MEDICAL') && (
-                <DeclarationView>
-                  <IcaDeclarationContent />
-                </DeclarationView>
-              )}
-              {submission.examType !== 'PR_MEDICAL' && 
-               submission.examType !== 'STUDENT_PASS_MEDICAL' && 
-               submission.examType !== 'LTVP_MEDICAL' && (
-                <DeclarationView>
-                  <MomDeclarationContent />
-                </DeclarationView>
-              )}
-            </>
           )}
 
           {/* Submission Timeline */}
