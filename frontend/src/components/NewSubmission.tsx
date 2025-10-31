@@ -978,12 +978,18 @@ export function NewSubmission() {
                             setShowSummary(true);
                             setActiveAccordion('summary');
                           }
+                        } else if (examType === 'SIX_MONTHLY_FMW') {
+                          // For FMW, complete the section (remarks are integrated in exam-specific)
+                          if (validateExamSpecific()) {
+                            setCompletedSections(prev => new Set(prev).add('exam-specific'));
+                            toast.success('All sections completed! You can now save or submit.');
+                          }
                         } else {
                           handleContinue('exam-specific', 'remarks');
                         }
                       }}
                     >
-                      {examType === 'SIX_MONTHLY_MDW' ? 'Continue' : 'Continue'}
+                      {examType === 'SIX_MONTHLY_MDW' ? 'Continue' : examType === 'SIX_MONTHLY_FMW' ? 'Mark as Complete' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
@@ -1086,7 +1092,7 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {examType !== 'SIX_MONTHLY_MDW' && (
+              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && (
                 <AccordionItem value="remarks">
                   <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">
@@ -1127,9 +1133,51 @@ export function NewSubmission() {
           </Button>
 
           <div className="flex gap-3">
-            {/* Nurses submit for approval from the Summary section only; no footer button here. */}
+            {/* For FMW, show submit buttons in the footer since there's no summary section */}
+            {examType === 'SIX_MONTHLY_FMW' && completedSections.has('exam-specific') && (
+              <>
+                {role === 'doctor' && (
+                  <Button
+                    onClick={() => {
+                      setIsRouteForApproval(false);
+                      setShowSubmitDialog(true);
+                    }}
+                    disabled={!isFormValid || isSaving}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Submit to Agency
+                  </Button>
+                )}
+                {role === 'nurse' && (
+                  <Button
+                    onClick={async () => {
+                      if (!hasDefaultDoctor) {
+                        setShowSetDefaultDoctorDialog(true);
+                      } else {
+                        try {
+                          if (!assignedDoctorId) {
+                            const { defaultDoctorId } = await usersApi.getDefaultDoctor();
+                            if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
+                          }
+                        } catch (e) {
+                          console.error('Failed to fetch default doctor', e);
+                        }
+                        setIsRouteForApproval(true);
+                        setShowSubmitDialog(true);
+                      }
+                    }}
+                    disabled={!isFormValid || isSaving}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Submit for Approval
+                  </Button>
+                )}
+              </>
+            )}
             
-            {/* Doctors submit from the Summary section only; no footer button here. */}
+            {/* Nurses submit for approval from the Summary section only; no footer button here for MDW. */}
+            
+            {/* Doctors submit from the Summary section only; no footer button here for MDW. */}
           </div>
         </div>
       )}
