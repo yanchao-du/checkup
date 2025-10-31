@@ -28,14 +28,24 @@ declare global {
   }
 }
 
-// Login command
+// Login command - uses backend API to get token and set it in localStorage
 Cypress.Commands.add('login', (email: string, password: string) => {
-  cy.visit('/')
-  cy.get('input[type="email"]').type(email)
-  cy.get('input[type="password"]').type(password)
-  cy.get('button[type="submit"]').click()
+  // Call backend login endpoint directly to get token
+  cy.request({
+    method: 'POST',
+    url: 'http://localhost:3344/v1/auth/login',
+    body: {
+      email,
+      password
+    }
+  }).then((response) => {
+    // Store the token in localStorage
+    window.localStorage.setItem('token', response.body.token)
+    window.localStorage.setItem('user', JSON.stringify(response.body.user))
+  })
   
-  // Wait for redirect to dashboard
+  // Visit dashboard
+  cy.visit('/dashboard')
   cy.url().should('include', '/dashboard')
 })
 
