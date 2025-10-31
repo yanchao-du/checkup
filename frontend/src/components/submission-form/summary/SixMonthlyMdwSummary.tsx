@@ -11,6 +11,12 @@ interface SixMonthlyMdwSummaryProps {
   lastRecordedWeight?: string;
   lastRecordedDate?: string;
   onEdit: (section: string) => void;
+  requiredTests?: {
+    pregnancy: boolean;
+    syphilis: boolean;
+    hiv: boolean;
+    chestXray: boolean;
+  };
 }
 
 export function SixMonthlyMdwSummary({
@@ -22,7 +28,15 @@ export function SixMonthlyMdwSummary({
   lastRecordedWeight,
   lastRecordedDate,
   onEdit,
+  requiredTests,
 }: SixMonthlyMdwSummaryProps) {
+  // Extract required tests from formData if not provided as prop
+  const tests = requiredTests || {
+    pregnancy: true,
+    syphilis: true,
+    hiv: formData.hivTestRequired === 'true',
+    chestXray: formData.chestXrayRequired === 'true',
+  };
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString();
@@ -137,30 +151,38 @@ export function SixMonthlyMdwSummary({
           <div className="mb-6">
             <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Test Results</h4>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-700">Pregnancy test</span>
-                <span className={formData.pregnancyTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.pregnancyTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-700">Syphilis test</span>
-                <span className={formData.syphilisTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.syphilisTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-700">HIV test</span>
-                <span className={formData.hivTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.hivTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-700">Chest X-ray to screen for TB</span>
-                <span className={formData.chestXrayPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.chestXrayPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
-                </span>
-              </div>
+              {tests.pregnancy && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-700">Pregnancy test</span>
+                  <span className={formData.pregnancyTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
+                    {formData.pregnancyTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
+                  </span>
+                </div>
+              )}
+              {tests.syphilis && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-700">Syphilis test</span>
+                  <span className={formData.syphilisTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
+                    {formData.syphilisTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
+                  </span>
+                </div>
+              )}
+              {tests.hiv && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-700">HIV test</span>
+                  <span className={formData.hivTestPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
+                    {formData.hivTestPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
+                  </span>
+                </div>
+              )}
+              {tests.chestXray && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-700">Chest X-ray to screen for TB</span>
+                  <span className={formData.chestXrayPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
+                    {formData.chestXrayPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
