@@ -16,6 +16,7 @@ import { SixMonthlyMdwDetails } from './submission-view/SixMonthlyMdwDetails';
 import { SixMonthlyFmwDetails } from './submission-view/SixMonthlyFmwDetails';
 import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
+import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import {
   AlertDialog,
@@ -188,6 +189,9 @@ export function ViewSubmission() {
                   {submission.examType === 'SIX_MONTHLY_FMW' && 'Six-monthly Medical Exam for Female Migrant Worker'}
                   {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
                   {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
+                  {submission.examType === 'PR_MEDICAL' && 'Medical Examination for Permanent Residency'}
+                  {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Medical Examination for Student Pass'}
+                  {submission.examType === 'LTVP_MEDICAL' && 'Medical Examination for Long Term Visit Pass'}
                 </p>
               </div>
             </CardContent>
@@ -277,6 +281,12 @@ export function ViewSubmission() {
 
               {submission.examType === 'AGED_DRIVERS' && (
                 <AgedDriversDetails formData={submission.formData} />
+              )}
+
+              {(submission.examType === 'PR_MEDICAL' || 
+                submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                submission.examType === 'LTVP_MEDICAL') && (
+                <IcaExamDetails formData={submission.formData} />
               )}
                 <>
                   <Separator />
