@@ -1097,8 +1097,8 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW') {
-                          // For MDW and FMW, show summary page
+                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
+                          // For MDW, FMW, and ICA exams, show summary page
                           if (validateExamSpecific()) {
                             setCompletedSections(prev => new Set(prev).add('exam-specific'));
                             setShowSummary(true);
@@ -1109,7 +1109,7 @@ export function NewSubmission() {
                         }
                       }}
                     >
-                      {examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' ? 'Continue' : 'Continue'}
+                      {examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? 'Continue' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
