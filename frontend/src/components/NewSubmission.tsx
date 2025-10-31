@@ -37,13 +37,25 @@ import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversField
 import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
 import { SixMonthlyFmwSummary } from './submission-form/summary/SixMonthlyFmwSummary';
 import { DeclarationSection } from './submission-form/summary/DeclarationSection';
+import { IcaExamFields } from './submission-form/exam-forms/IcaExamFields';
+import { IcaExamSummary } from './submission-form/summary/IcaExamSummary';
+import { IcaDeclarationSection } from './submission-form/summary/IcaDeclarationSection';
+import { IcaExamDetails } from './submission-view/IcaExamDetails';
 
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
   { value: 'SIX_MONTHLY_FMW', label: 'Six-monthly Medical Exam for Female Migrant Worker (MOM)' },
   { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
   { value: 'AGED_DRIVERS', label: 'Medical Exam for Aged Drivers (SPF)' },
+  { value: 'PR_MEDICAL', label: 'Medical Examination for Permanent Residency (ICA)' },
+  { value: 'STUDENT_PASS_MEDICAL', label: 'Medical Examination for Student Pass (ICA)' },
+  { value: 'LTVP_MEDICAL', label: 'Medical Examination for Long Term Visit Pass (ICA)' },
 ];
+
+// Helper to check if exam type is ICA
+const isIcaExamType = (examType: ExamType | ''): boolean => {
+  return examType === 'PR_MEDICAL' || examType === 'STUDENT_PASS_MEDICAL' || examType === 'LTVP_MEDICAL';
+};
 
 export function NewSubmission() {
   const { id } = useParams();
@@ -240,9 +252,10 @@ export function NewSubmission() {
     }
   }, [examType, id]);
 
-  // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW and WORK_PERMIT
+  // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW and WORK_PERMIT (but not ICA)
   useEffect(() => {
     const shouldFetchPatientName = 
+      !isIcaExamType(examType) &&
       (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') &&
       patientNric.length >= 9 && 
       !nricError &&
@@ -842,7 +855,7 @@ export function NewSubmission() {
 
   const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
     (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
-    (examType === 'SIX_MONTHLY_FMW' ? true : true);
+    (examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? true : true);
 
   if (isLoading) {
     return (
@@ -1073,6 +1086,13 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                     />
                   )}
+                  {isIcaExamType(examType) && (
+                    <IcaExamFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                      remarksError={remarksError}
+                    />
+                  )}
                   <div className="flex justify-end mt-4">
                     <Button 
                       type="button"
@@ -1288,7 +1308,65 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && (
+              {isIcaExamType(examType) && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!isPatientInfoValid || !completedSections.has('exam-specific')}>
+                    <div className="flex items-center gap-2">
+                      <span>Summary & Declaration</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <IcaExamSummary
+                        formData={formData}
+                        patientName={patientName}
+                        patientNric={patientNric}
+                        examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          setActiveAccordion(section);
+                        }}
+                      />
+                      
+                      <IcaDeclarationSection
+                        checked={declarationChecked}
+                        onChange={setDeclarationChecked}
+                        userRole={role}
+                      />
+                      
+                      <div className="flex justify-end mt-4">
+                        {role === 'doctor' ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (!declarationChecked) {
+                                toast.error('Please check the declaration before submitting');
+                                return;
+                              }
+                              handleSubmit();
+                            }}
+                            disabled={!declarationChecked || isSaving}
+                          >
+                            {isSaving ? 'Submitting...' : 'Submit to ICA'}
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setIsRouteForApproval(true);
+                              setShowSubmitDialog(true);
+                            }}
+                            disabled={isSaving}
+                          >
+                            Continue
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && !isIcaExamType(examType) && (
                 <AccordionItem value="remarks">
                   <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">

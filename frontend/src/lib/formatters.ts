@@ -13,6 +13,12 @@ export function formatExamType(examType: ExamType): string {
       return 'Work Permit (MOM)';
     case 'AGED_DRIVERS':
       return 'Aged Drivers (SPF)';
+    case 'PR_MEDICAL':
+      return 'PR Medical (ICA)';
+    case 'STUDENT_PASS_MEDICAL':
+      return 'Student Pass (ICA)';
+    case 'LTVP_MEDICAL':
+      return 'LTVP (ICA)';
     default:
       return examType;
   }
@@ -31,7 +37,33 @@ export function formatExamTypeFull(examType: ExamType): string {
       return 'Full Medical Exam for Work Permit';
     case 'AGED_DRIVERS':
       return 'Medical Exam for Aged Drivers';
+    case 'PR_MEDICAL':
+      return 'Medical Examination for Permanent Residency';
+    case 'STUDENT_PASS_MEDICAL':
+      return 'Medical Examination for Student Pass';
+    case 'LTVP_MEDICAL':
+      return 'Medical Examination for Long Term Visit Pass';
     default:
       return examType;
+  }
+}
+
+/**
+ * Formats exam type to government agency name
+ */
+export function formatAgency(examType: ExamType): string {
+  switch (examType) {
+    case 'SIX_MONTHLY_MDW':
+    case 'SIX_MONTHLY_FMW':
+    case 'WORK_PERMIT':
+      return 'MOM';
+    case 'AGED_DRIVERS':
+      return 'SPF';
+    case 'PR_MEDICAL':
+    case 'STUDENT_PASS_MEDICAL':
+    case 'LTVP_MEDICAL':
+      return 'ICA';
+    default:
+      return 'Unknown';
   }
 }
