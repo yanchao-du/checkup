@@ -147,6 +147,16 @@ export function NewSubmission() {
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
           
+          // Restore required tests from formData
+          if (existing.formData) {
+            setRequiredTests({
+              pregnancy: true, // Always required for MDW/FMW
+              syphilis: true,  // Always required for MDW/FMW
+              hiv: existing.formData.hivTestRequired === 'true',
+              chestXray: existing.formData.chestXrayRequired === 'true',
+            });
+          }
+          
           // Mark sections as complete if they have valid data
           const completed = new Set<string>();
           
@@ -260,6 +270,12 @@ export function NewSubmission() {
           // Set required tests from patient data
           if (patient.requiredTests) {
             setRequiredTests(patient.requiredTests);
+            // Save required test flags to formData so they persist when submission is saved
+            setFormData(prev => ({
+              ...prev,
+              hivTestRequired: patient.requiredTests!.hiv ? 'true' : 'false',
+              chestXrayRequired: patient.requiredTests!.chestXray ? 'true' : 'false',
+            }));
           } else {
             // Default to all tests required if not specified
             setRequiredTests({
@@ -268,6 +284,11 @@ export function NewSubmission() {
               hiv: true,
               chestXray: true,
             });
+            setFormData(prev => ({
+              ...prev,
+              hivTestRequired: 'true',
+              chestXrayRequired: 'true',
+            }));
           }
           
           // Only store and auto-populate vitals for SIX_MONTHLY_MDW
@@ -299,6 +320,11 @@ export function NewSubmission() {
               hiv: true,
               chestXray: true,
             });
+            setFormData(prev => ({
+              ...prev,
+              hivTestRequired: 'true',
+              chestXrayRequired: 'true',
+            }));
             toast.info('Patient not found in system. Please enter name manually.');
           }
         }
@@ -1086,6 +1112,7 @@ export function NewSubmission() {
                         lastRecordedHeight={lastRecordedHeight}
                         lastRecordedWeight={lastRecordedWeight}
                         lastRecordedDate={lastRecordedDate}
+                        requiredTests={requiredTests}
                         onEdit={(section) => {
                           // Navigate to the requested section for editing
                           setActiveAccordion(section);
@@ -1180,6 +1207,7 @@ export function NewSubmission() {
                         patientName={patientName}
                         patientNric={patientNric}
                         examinationDate={examinationDate}
+                        requiredTests={requiredTests}
                         onEdit={(section) => {
                           // Navigate to the requested section for editing
                           setActiveAccordion(section);
