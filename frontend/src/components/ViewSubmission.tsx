@@ -290,8 +290,10 @@ export function ViewSubmission() {
                 <IcaExamDetails formData={submission.formData} />
               )}
 
-              {/* General Remarks section - only for exam types that don't include remarks in their detail components */}
-              {(submission.examType === 'WORK_PERMIT' || submission.examType === 'AGED_DRIVERS') && (
+              {/* General Remarks section - for all exam types except ICA (which includes remarks in IcaExamDetails) */}
+              {submission.examType !== 'PR_MEDICAL' && 
+               submission.examType !== 'STUDENT_PASS_MEDICAL' && 
+               submission.examType !== 'LTVP_MEDICAL' && (
                 <>
                   <Separator />
                   <div>
