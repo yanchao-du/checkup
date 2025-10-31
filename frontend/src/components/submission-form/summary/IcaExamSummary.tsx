@@ -91,15 +91,13 @@ export function IcaExamSummary({
             </div>
           </div>
 
-          {/* Remarks */}
-          {formData.remarks && (
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Remarks</h4>
-              <div className="text-sm bg-slate-50 p-3 rounded border border-slate-200">
-                <p className="whitespace-pre-wrap text-slate-700">{formData.remarks}</p>
-              </div>
+          {/* Remarks - always show, display '-' when empty */}
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Remarks</h4>
+            <div className="text-sm bg-slate-50 p-3 rounded border border-slate-200">
+              <p className="whitespace-pre-wrap text-slate-700">{formData.remarks || '-'}</p>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -31,15 +31,13 @@ export function IcaExamDetails({ formData }: IcaExamDetailsProps) {
         </div>
       </div>
 
-      {/* Remarks */}
-      {formData.hasAdditionalRemarks === 'true' && formData.remarks && (
-        <div>
-          <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
-          <div className="bg-slate-50 p-3 rounded border border-slate-200">
-            <p className="text-sm text-slate-700 whitespace-pre-wrap">{formData.remarks}</p>
-          </div>
+      {/* Remarks - always show, display '-' when empty */}
+      <div>
+        <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
+        <div className="bg-slate-50 p-3 rounded border border-slate-200">
+          <p className="text-sm text-slate-700 whitespace-pre-wrap">{formData.remarks || '-'}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 }
