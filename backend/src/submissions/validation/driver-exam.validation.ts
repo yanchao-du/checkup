@@ -80,7 +80,7 @@ export function validateExamTiming(
 /**
  * Validate AMT (Abbreviated Mental Test) data structure
  */
-function validateAmt(amt: any): void {
+export function validateAmt(amt: any): void {
   if (!amt || typeof amt !== 'object') {
     throw new BadRequestException(
       'Abbreviated Mental Test is required for TP driving licence examinations',
@@ -99,7 +99,7 @@ function validateAmt(amt: any): void {
 /**
  * Validate LTA Vocational Licence medical details
  */
-function validateLtaVocational(ltaVocational: any): void {
+export function validateLtaVocational(ltaVocational: any): void {
   if (!ltaVocational || typeof ltaVocational !== 'object') {
     throw new BadRequestException(
       'LTA Vocational Licence Medical Details are required',
@@ -125,7 +125,7 @@ function validateLtaVocational(ltaVocational: any): void {
 /**
  * Validate medical declaration structure
  */
-function validateMedicalDeclaration(medicalDeclaration: any): void {
+export function validateMedicalDeclaration(medicalDeclaration: any): void {
   if (!medicalDeclaration || typeof medicalDeclaration !== 'object') {
     throw new BadRequestException('Medical Declaration by Examinee is required');
   }
@@ -134,7 +134,7 @@ function validateMedicalDeclaration(medicalDeclaration: any): void {
 /**
  * Validate medical history structure
  */
-function validateMedicalHistory(medicalHistory: any): void {
+export function validateMedicalHistory(medicalHistory: any): void {
   if (!medicalHistory || typeof medicalHistory !== 'object') {
     throw new BadRequestException('Medical History of Examinee is required');
   }
@@ -143,7 +143,7 @@ function validateMedicalHistory(medicalHistory: any): void {
 /**
  * Validate assessment section
  */
-function validateAssessment(assessment: any, examType: string): void {
+export function validateAssessment(assessment: any, examType: string): void {
   if (!assessment || typeof assessment !== 'object') {
     throw new BadRequestException('Medical practitioner assessment is required');
   }
@@ -173,7 +173,7 @@ function validateAssessment(assessment: any, examType: string): void {
 /**
  * Validate common medical fields
  */
-function validateCommonFields(formData: any): void {
+export function validateCommonFields(formData: any): void {
   const requiredFields = ['height', 'weight', 'bloodPressure', 'pulse', 'visualAcuity', 'hearingTest'];
   
   for (const field of requiredFields) {
