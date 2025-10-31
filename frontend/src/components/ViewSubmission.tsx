@@ -278,18 +278,16 @@ export function ViewSubmission() {
               {submission.examType === 'AGED_DRIVERS' && (
                 <AgedDriversDetails formData={submission.formData} />
               )}
-
-              {submission.examType !== 'SIX_MONTHLY_FMW' && (
                 <>
                   <Separator />
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Additional Remarks</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
                     <div className="bg-slate-50 p-3 rounded-md">
-                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : 'No additional remarks.'}</p>
+                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : '-'}</p>
                     </div>
                   </div>
                 </>
-              )}
+              
             </CardContent>
           </Card>
         </div>
