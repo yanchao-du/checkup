@@ -13,6 +13,10 @@ The `seed-patients.ts` script generates **1000 female patient records** with the
 
 ### Patient Demographics
 - **Names**: Female names from Indonesia, Myanmar, and Philippines
+  - 150 unique base names
+  - Extended with letter suffixes for remaining patients (e.g., "Ana Reyes A", "Ana Reyes B")
+  - **Guaranteed unique**: Each of the 1000 patients has a completely unique name
+  - No numeric digits in names - only letters
 - **Identification**: Each patient has a unique, valid FIN (Foreign Identification Number)
   - Format: F followed by 7 digits and a checksum letter (e.g., F2527750M)
   - All FINs are validated using Singapore's official checksum algorithm
@@ -78,13 +82,34 @@ This will:
 To check the seeded data:
 
 ```bash
-npx ts-node prisma/verify-patients.ts
+npm run seed:patients:verify
 ```
 
 This will display:
 - Total count of patients
 - Sample patients with/without height and weight
 - Statistics on test requirements and positive results
+
+### Check Examination Dates
+
+To verify the distribution of examination dates:
+
+```bash
+npm run seed:patients:check-dates
+```
+
+### Analyze Name Uniqueness
+
+To verify that all patient names are unique:
+
+```bash
+npm run seed:patients:analyze-names
+```
+
+This will show:
+- Number of base names (without suffix)
+- Number of extended names (with numeric suffix)
+- Confirmation that all 1000 names are unique
 
 ### View in Prisma Studio
 
@@ -123,8 +148,14 @@ Then navigate to the `medical_submissions` table and filter by:
 
 ## Notes
 
-- All FINs are validated and guaranteed to be unique
+- **All FINs are validated and guaranteed to be unique**
+- **All patient names are guaranteed to be unique** (no two FINs share the same name)
+  - First 150 patients use base names from the original list
+  - Remaining 850 patients use extended names with letter suffixes (e.g., "Ana Reyes A", "Ana Reyes B")
+  - Names contain only letters and spaces - no numeric digits
 - The script requires an existing clinic and nurse user (run main seed first)
 - Patients are inserted in batches of 100 for optimal performance
-- All patients have examination date set to 2025-10-30
+- Examination dates are distributed around 6 months ago (±2 months variation)
+- HIV test required for ~25% of patients
+- TB (Chest X-ray) test required for ~10% of patients
 - Test positive rates are randomized but approximate real-world percentages

@@ -113,6 +113,34 @@ async function main() {
   const usedFINs = new Set<string>();
   const patients: any[] = [];
 
+  // Shuffle all names to ensure variety and no duplicates
+  const shuffledNames = shuffleArray(allNames);
+  
+  // If we need more than available names, we'll need to generate variations
+  const extendedNames: string[] = [];
+  if (shuffledNames.length < 1000) {
+    // Use the shuffled names as base
+    extendedNames.push(...shuffledNames);
+    
+    // Generate additional unique names by adding letter suffixes (A, B, C, etc.)
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    let letterIndex = 0;
+    
+    while (extendedNames.length < 1000) {
+      const suffix = letters[letterIndex % letters.length];
+      const multiplier = Math.floor(letterIndex / letters.length);
+      const suffixStr = multiplier > 0 ? suffix.repeat(multiplier + 1) : suffix;
+      
+      for (const name of shuffledNames) {
+        if (extendedNames.length >= 1000) break;
+        extendedNames.push(`${name} ${suffixStr}`);
+      }
+      letterIndex++;
+    }
+  } else {
+    extendedNames.push(...shuffledNames.slice(0, 1000));
+  }
+
   // Generate 1000 unique patient records
   for (let i = 0; i < 1000; i++) {
     let fin: string;
@@ -127,10 +155,8 @@ async function main() {
     
     usedFINs.add(fin);
 
-    // Randomly select a name (ensure we have enough variety by cycling and randomizing)
-    const nameIndex = i % allNames.length;
-    const shuffledIndex = (nameIndex * 7 + Math.floor(Math.random() * 3)) % allNames.length;
-    const patientName = allNames[shuffledIndex];
+    // Use unique name from the extended names list
+    const patientName = extendedNames[i];
 
     // Determine if this patient should have height/weight (600 yes, 400 no)
     const hasHeightWeight = i < 600;
