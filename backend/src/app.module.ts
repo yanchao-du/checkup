@@ -8,6 +8,7 @@ import { SubmissionsModule } from './submissions/submissions.module';
 import { ApprovalsModule } from './approvals/approvals.module';
 import { UsersModule } from './users/users.module';
 import { ClinicsModule } from './clinics/clinics.module';
+import { PatientsModule } from './patients/patients.module';
 import { WellKnownController } from './well-known/well-known.controller';
 
 @Module({
@@ -21,6 +22,7 @@ import { WellKnownController } from './well-known/well-known.controller';
     ApprovalsModule,
     UsersModule,
     ClinicsModule,
+    PatientsModule,
   ],
   controllers: [AppController, WellKnownController],
   providers: [AppService],

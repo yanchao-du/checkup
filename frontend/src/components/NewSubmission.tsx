@@ -80,6 +80,7 @@ export function NewSubmission() {
   const [examinationDateError, setExaminationDateError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
+  const [testFin, setTestFin] = useState<string>('');
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
   const lastLookedUpNricRef = useRef<string | null>(null);
 
@@ -194,6 +195,23 @@ export function NewSubmission() {
       setHasUnsavedChanges(false);
     };
   }, [setHasUnsavedChanges]);
+
+  // Fetch a random test FIN when exam type supports patient lookup
+  useEffect(() => {
+    const shouldShowTestFin = !id && (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT');
+    
+    if (shouldShowTestFin) {
+      patientsApi.getRandomTestFin().then((result) => {
+        if (result) {
+          setTestFin(result.fin);
+        }
+      }).catch((error) => {
+        console.error('Failed to fetch test FIN:', error);
+      });
+    } else {
+      setTestFin('');
+    }
+  }, [examType, id]);
 
   // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW and WORK_PERMIT
   useEffect(() => {
@@ -822,6 +840,28 @@ export function NewSubmission() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="patientNric">NRIC / FIN *</Label>
+                        {testFin && (
+                          <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                            <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
+                            <div className="flex items-center gap-2">
+                              <code className="text-sm font-mono text-blue-900 select-all cursor-pointer px-2 py-1 bg-white rounded border border-blue-300 hover:bg-blue-100 transition-colors">
+                                {testFin}
+                              </code>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setPatientNric(testFin);
+                                  toast.success('Test FIN populated');
+                                }}
+                                className="text-xs h-7 px-2"
+                              >
+                                Use This
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                         <Input
                           id="patientNric"
                           name="nric"
