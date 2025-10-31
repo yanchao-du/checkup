@@ -19,7 +19,7 @@ export function IcaDeclarationSection({
   }
 
   return (
-    <Card className="border-2 border-blue-200 bg-blue-50">
+    <Card className="border-2 border-blue-700 bg-blue-50">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900">Declaration</h3>
