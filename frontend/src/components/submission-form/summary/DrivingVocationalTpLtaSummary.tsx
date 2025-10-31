@@ -1,3 +1,7 @@
+import { Button } from '../../ui/button';
+import { Card, CardContent } from '../../ui/card';
+import { Edit } from 'lucide-react';
+
 interface DrivingVocationalTpLtaSummaryProps {
   formData: Record<string, any>;
   patientInfo: {
@@ -6,12 +10,14 @@ interface DrivingVocationalTpLtaSummaryProps {
     dateOfBirth?: string;
   };
   examinationDate: string;
+  onEdit?: (section: string) => void;
 }
 
 export function DrivingVocationalTpLtaSummary({
   formData,
   patientInfo,
   examinationDate,
+  onEdit,
 }: DrivingVocationalTpLtaSummaryProps) {
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
@@ -77,34 +83,67 @@ export function DrivingVocationalTpLtaSummary({
   return (
     <div className="space-y-6">
       {/* Patient Information */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="font-semibold text-lg mb-3">Patient Information</h3>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <span className="text-gray-600">Name:</span>
-            <p className="font-medium">{patientInfo.name}</p>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Patient Information</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('patient-info')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
-          <div>
-            <span className="text-gray-600">NRIC/FIN:</span>
-            <p className="font-medium">{patientInfo.nric}</p>
-          </div>
-          {patientInfo.dateOfBirth && (
+          <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600">Date of Birth:</span>
-              <p className="font-medium">{new Date(patientInfo.dateOfBirth).toLocaleDateString()}</p>
+              <p className="text-slate-500">Patient Name</p>
+              <p className="font-medium">{patientInfo.name}</p>
             </div>
-          )}
-          <div>
-            <span className="text-gray-600">Examination Date:</span>
-            <p className="font-medium">{new Date(examinationDate).toLocaleDateString()}</p>
+            <div>
+              <p className="text-slate-500">NRIC/FIN</p>
+              <p className="font-medium">{patientInfo.nric}</p>
+            </div>
+            {patientInfo.dateOfBirth && (
+              <div>
+                <p className="text-slate-500">Date of Birth</p>
+                <p className="font-medium">{new Date(patientInfo.dateOfBirth).toLocaleDateString()}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-slate-500">Examination Date</p>
+              <p className="font-medium">{new Date(examinationDate).toLocaleDateString()}</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* General Medical Examination */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3">General Medical Examination</h3>
-        <div className="grid grid-cols-3 gap-4 text-sm">
+      {/* Examination Details */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Examination Details</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('driver-exam-details')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+
+          {/* General Medical Examination */}
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">General Medical Examination</h4>
+            <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Height:</span>
             <p className="font-medium">{formData.height || '-'} cm</p>
@@ -285,6 +324,8 @@ export function DrivingVocationalTpLtaSummary({
           </div>
         </div>
       </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -758,8 +758,13 @@ export function NewSubmission() {
       // Mark current section as completed
       setCompletedSections(prev => new Set(prev).add(currentSection));
       
-  // Move to next section
-  setActiveAccordion(nextSection);
+      // For driver exams from patient-info, skip exam-specific and go to driver-exam-details
+      if (currentSection === 'patient-info' && isDriverExamType(examType)) {
+        setActiveAccordion('driver-exam-details');
+      } else {
+        // Move to next section
+        setActiveAccordion(nextSection);
+      }
     }
   };
 
@@ -1054,6 +1059,8 @@ export function NewSubmission() {
                 </AccordionContent>
               </AccordionItem>
 
+              {/* Examination Details - hidden for driver exams as they have their own internal structure */}
+              {!isDriverExamType(examType) && (
               <AccordionItem value="exam-specific">
                 <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
                   <div className="flex items-center gap-2">
@@ -1100,6 +1107,45 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                     />
                   )}
+                  {isIcaExamType(examType) && (
+                    <IcaExamFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                      remarksError={remarksError}
+                    />
+                  )}
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
+                          // For MDW, FMW, and ICA exams, show summary page
+                          if (validateExamSpecific()) {
+                            setCompletedSections(prev => new Set(prev).add('exam-specific'));
+                            setShowSummary(true);
+                            setActiveAccordion('summary');
+                          }
+                        } else {
+                          handleContinue('exam-specific', 'remarks');
+                        }
+                      }}
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              )}
+
+              {/* Driver Exam Details - shown directly after patient info, no wrapper accordion */}
+              {isDriverExamType(examType) && (
+              <AccordionItem value="driver-exam-details">
+                <AccordionTrigger isCompleted={completedSections.has('driver-exam-details')} isDisabled={!isPatientInfoValid}>
+                  <div className="flex items-center gap-2">
+                    <span>Medical Examination Details</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
                   {examType === 'DRIVING_LICENCE_TP' && (
                     <DrivingLicenceTpFields
                       formData={formData}
@@ -1118,34 +1164,23 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                     />
                   )}
-                  {isIcaExamType(examType) && (
-                    <IcaExamFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                      remarksError={remarksError}
-                    />
-                  )}
                   <div className="flex justify-end mt-4">
                     <Button 
                       type="button"
                       onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) || isDriverExamType(examType)) {
-                          // For MDW, FMW, ICA, and Driver exams, show summary page
-                          if (validateExamSpecific()) {
-                            setCompletedSections(prev => new Set(prev).add('exam-specific'));
-                            setShowSummary(true);
-                            setActiveAccordion('summary');
-                          }
-                        } else {
-                          handleContinue('exam-specific', 'remarks');
+                        if (validateExamSpecific()) {
+                          setCompletedSections(prev => new Set(prev).add('driver-exam-details'));
+                          setShowSummary(true);
+                          setActiveAccordion('summary');
                         }
                       }}
                     >
-                      {examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) || isDriverExamType(examType) ? 'Continue' : 'Continue'}
+                      Continue
                     </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
+              )}
 
               {examType === 'SIX_MONTHLY_MDW' && showSummary && (
                 <AccordionItem value="summary">
@@ -1416,6 +1451,9 @@ export function NewSubmission() {
                           dateOfBirth: patientDateOfBirth,
                         }}
                         examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          setActiveAccordion(section);
+                        }}
                       />
 
                       <div className="flex justify-end mt-4">
@@ -1457,6 +1495,9 @@ export function NewSubmission() {
                           dateOfBirth: patientDateOfBirth,
                         }}
                         examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          setActiveAccordion(section);
+                        }}
                       />
 
                       <div className="flex justify-end mt-4">
@@ -1498,6 +1539,9 @@ export function NewSubmission() {
                           dateOfBirth: patientDateOfBirth,
                         }}
                         examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          setActiveAccordion(section);
+                        }}
                       />
 
                       <div className="flex justify-end mt-4">

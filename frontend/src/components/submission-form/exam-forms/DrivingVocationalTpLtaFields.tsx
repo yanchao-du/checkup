@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
 import { CommonMedicalFields } from '../fields/CommonMedicalFields';
 import { MedicalDeclarationSection } from '../fields/MedicalDeclarationSection';
@@ -16,15 +17,27 @@ interface DrivingVocationalTpLtaFieldsProps {
 export function DrivingVocationalTpLtaFields({
   formData,
   onChange,
-  activeSection = 'general-medical',
+  activeSection: externalActiveSection,
   onSectionChange,
 }: DrivingVocationalTpLtaFieldsProps) {
+  const [internalActiveSection, setInternalActiveSection] = useState<string>('general-medical');
+  
+  // Use external state if provided, otherwise use internal state
+  const activeSection = externalActiveSection !== undefined ? externalActiveSection : internalActiveSection;
+  const handleSectionChange = (value: string) => {
+    if (onSectionChange) {
+      onSectionChange(value);
+    } else {
+      setInternalActiveSection(value);
+    }
+  };
+
   return (
     <Accordion
       type="single"
       collapsible
       value={activeSection}
-      onValueChange={(value) => onSectionChange?.(value || '')}
+      onValueChange={(value) => handleSectionChange(value || '')}
       className="w-full"
     >
       {/* General Medical Examination */}
