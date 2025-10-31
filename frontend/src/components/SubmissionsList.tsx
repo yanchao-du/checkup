@@ -120,6 +120,15 @@ export function SubmissionsList() {
                   <SelectItem value="AGED_DRIVERS">
                     Aged Drivers (SPF)
                   </SelectItem>
+                  <SelectItem value="PR_MEDICAL">
+                    PR Medical (ICA)
+                  </SelectItem>
+                  <SelectItem value="STUDENT_PASS_MEDICAL">
+                    Student Pass (ICA)
+                  </SelectItem>
+                  <SelectItem value="LTVP_MEDICAL">
+                    LTVP (ICA)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -172,6 +181,9 @@ export function SubmissionsList() {
                           {submission.examType === 'SIX_MONTHLY_FMW' && 'FMW Six-monthly (MOM)'}
                           {submission.examType === 'WORK_PERMIT' && 'Work Permit (MOM)'}
                           {submission.examType === 'AGED_DRIVERS' && 'Aged Drivers (SPF)'}
+                          {submission.examType === 'PR_MEDICAL' && 'PR Medical (ICA)'}
+                          {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Student Pass (ICA)'}
+                          {submission.examType === 'LTVP_MEDICAL' && 'LTVP (ICA)'}
                         </div>
                       </TableCell>
                       <TableCell>

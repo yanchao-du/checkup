@@ -646,4 +646,152 @@ describe('Submissions (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('ICA Exam Types', () => {
+    it('should create PR_MEDICAL submission as doctor', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'PR_MEDICAL',
+          patientName: 'Test PR Patient',
+          patientNric: 'S1234567A',
+          examinationDate: '2025-10-31',
+          formData: {
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+            remarks: 'No abnormalities detected',
+          },
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+      expect(res.body.examType).toBe('PR_MEDICAL');
+      expect(res.body.patientName).toBe('Test PR Patient');
+      expect(res.body.formData.hivTestPositive).toBe('false');
+      expect(res.body.formData.chestXrayPositive).toBe('false');
+    });
+
+    it('should create STUDENT_PASS_MEDICAL submission as doctor', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'STUDENT_PASS_MEDICAL',
+          patientName: 'Test Student',
+          patientNric: 'S7654321B',
+          examinationDate: '2025-10-31',
+          formData: {
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+            hasAdditionalRemarks: 'true',
+            remarks: 'All tests negative',
+          },
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+      expect(res.body.examType).toBe('STUDENT_PASS_MEDICAL');
+      expect(res.body.patientName).toBe('Test Student');
+    });
+
+    it('should create LTVP_MEDICAL submission as doctor', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({
+          examType: 'LTVP_MEDICAL',
+          patientName: 'Test LTVP Patient',
+          patientNric: 'S9876543C',
+          examinationDate: '2025-10-31',
+          formData: {
+            hivTestPositive: 'true',
+            chestXrayPositive: 'false',
+            hasAdditionalRemarks: 'true',
+            remarks: 'HIV positive - requires follow-up',
+          },
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+      expect(res.body.examType).toBe('LTVP_MEDICAL');
+      expect(res.body.formData.hivTestPositive).toBe('true');
+    });
+
+    it('should create ICA submission as nurse (pending approval)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'PR_MEDICAL',
+          patientName: 'Test PR Nurse',
+          patientNric: 'S1111222A',
+          examinationDate: '2025-10-31',
+          formData: {
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: true,
+        })
+        .expect(201);
+
+      expect(res.body.status).toBe('pending_approval');
+      expect(res.body.examType).toBe('PR_MEDICAL');
+    });
+
+    it('should filter ICA submissions by exam type', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/submissions?examType=PR_MEDICAL')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200);
+
+      expect(res.body).toHaveProperty('data');
+      expect(Array.isArray(res.body.data)).toBe(true);
+      if (res.body.data.length > 0) {
+        res.body.data.forEach((submission: any) => {
+          expect(submission.examType).toBe('PR_MEDICAL');
+        });
+      }
+    });
+
+    it('should update ICA submission', async () => {
+      // Create a draft submission as nurse
+      const created = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'STUDENT_PASS_MEDICAL',
+          patientName: 'Original Name',
+          patientNric: 'S3333444B',
+          examinationDate: '2025-10-31',
+          formData: {
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: false,
+        })
+        .expect(201);
+
+      expect(created.body.status).toBe('draft');
+
+      // Update it using PUT (not PATCH)
+      const res = await request(app.getHttpServer())
+        .put(`/v1/submissions/${created.body.id}`)
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          patientName: 'Updated Name',
+          formData: {
+            hivTestPositive: 'false',
+            chestXrayPositive: 'true',
+            hasAdditionalRemarks: 'true',
+            remarks: 'Updated: Chest X-ray positive for TB',
+          },
+        })
+        .expect(200);
+
+      expect(res.body.patientName).toBe('Updated Name');
+      expect(res.body.formData.chestXrayPositive).toBe('true');
+      expect(res.body.formData.remarks).toContain('TB');
+    });
+  });
 });

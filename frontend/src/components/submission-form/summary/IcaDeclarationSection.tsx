@@ -1,26 +1,26 @@
 import type { UserRole } from '../../../types/api';
 import { Declaration } from './Declaration';
-import { MomDeclarationContent } from './DeclarationContent';
+import { IcaDeclarationContent } from './DeclarationContent';
 
-interface DeclarationSectionProps {
+interface IcaDeclarationSectionProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   userRole: UserRole;
 }
 
-export function DeclarationSection({
+export function IcaDeclarationSection({
   checked,
   onChange,
   userRole,
-}: DeclarationSectionProps) {
+}: IcaDeclarationSectionProps) {
   return (
     <Declaration 
       checked={checked} 
       onChange={onChange} 
       userRole={userRole}
-      checkboxId="declaration"
+      checkboxId="ica-declaration"
     >
-      <MomDeclarationContent />
+      <IcaDeclarationContent />
     </Declaration>
   );
 }

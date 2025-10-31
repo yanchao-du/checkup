@@ -16,7 +16,11 @@ import { SixMonthlyMdwDetails } from './submission-view/SixMonthlyMdwDetails';
 import { SixMonthlyFmwDetails } from './submission-view/SixMonthlyFmwDetails';
 import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
+import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
+import { DeclarationView } from './submission-view/DeclarationView';
+import { MomDeclarationContent, IcaDeclarationContent } from './submission-form/summary/DeclarationContent';
+import { formatExamTypeFull } from '../lib/formatters';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -188,6 +192,9 @@ export function ViewSubmission() {
                   {submission.examType === 'SIX_MONTHLY_FMW' && 'Six-monthly Medical Exam for Female Migrant Worker'}
                   {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
                   {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
+                  {submission.examType === 'PR_MEDICAL' && 'Medical Examination for Permanent Residency'}
+                  {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Medical Examination for Student Pass'}
+                  {submission.examType === 'LTVP_MEDICAL' && 'Medical Examination for Long Term Visit Pass'}
                 </p>
               </div>
             </CardContent>
@@ -278,6 +285,17 @@ export function ViewSubmission() {
               {submission.examType === 'AGED_DRIVERS' && (
                 <AgedDriversDetails formData={submission.formData} />
               )}
+
+              {(submission.examType === 'PR_MEDICAL' || 
+                submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                submission.examType === 'LTVP_MEDICAL') && (
+                <IcaExamDetails formData={submission.formData} />
+              )}
+
+              {/* General Remarks section - for all exam types except ICA (which includes remarks in IcaExamDetails) */}
+              {submission.examType !== 'PR_MEDICAL' && 
+               submission.examType !== 'STUDENT_PASS_MEDICAL' && 
+               submission.examType !== 'LTVP_MEDICAL' && (
                 <>
                   <Separator />
                   <div>
@@ -287,6 +305,28 @@ export function ViewSubmission() {
                     </div>
                   </div>
                 </>
+              )}
+
+              {/* Declaration - show for submitted submissions */}
+              {submission.status === 'submitted' && (
+                <>
+                  <Separator />
+                  {(submission.examType === 'PR_MEDICAL' || 
+                    submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                    submission.examType === 'LTVP_MEDICAL') && (
+                    <DeclarationView>
+                      <IcaDeclarationContent />
+                    </DeclarationView>
+                  )}
+                  {submission.examType !== 'PR_MEDICAL' && 
+                   submission.examType !== 'STUDENT_PASS_MEDICAL' && 
+                   submission.examType !== 'LTVP_MEDICAL' && (
+                    <DeclarationView>
+                      <MomDeclarationContent />
+                    </DeclarationView>
+                  )}
+                </>
+              )}
               
             </CardContent>
           </Card>
@@ -303,18 +343,19 @@ export function ViewSubmission() {
                   <div>
                     <p className="text-sm text-slate-500">Submitted To</p>
                     <p className="text-slate-900">
-                      {submission.examType === 'AGED_DRIVERS' 
-                        ? 'Singapore Police Force' 
-                        : 'Ministry of Manpower'}
+                      {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
+                      {(submission.examType === 'SIX_MONTHLY_MDW' || 
+                        submission.examType === 'SIX_MONTHLY_FMW' || 
+                        submission.examType === 'WORK_PERMIT') && 'Ministry of Manpower'}
+                      {(submission.examType === 'PR_MEDICAL' || 
+                        submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                        submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Exam Category</p>
                     <p className="text-slate-900 text-sm">
-                      {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
-                      {submission.examType === 'SIX_MONTHLY_FMW' && 'Female Migrant Worker'}
-                      {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
-                      {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
+                      {formatExamTypeFull(submission.examType)}
                     </p>
                   </div>
                 </div>
