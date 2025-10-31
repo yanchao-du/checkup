@@ -111,6 +111,9 @@ export function SubmissionsList() {
                   <SelectItem value="SIX_MONTHLY_MDW">
                     MDW Six-monthly (MOM)
                   </SelectItem>
+                  <SelectItem value="SIX_MONTHLY_FMW">
+                    FMW Six-monthly (MOM)
+                  </SelectItem>
                   <SelectItem value="WORK_PERMIT">
                     Work Permit (MOM)
                   </SelectItem>
@@ -166,6 +169,7 @@ export function SubmissionsList() {
                       <TableCell>
                         <div className="text-sm">
                           {submission.examType === 'SIX_MONTHLY_MDW' && 'MDW Six-monthly (MOM)'}
+                          {submission.examType === 'SIX_MONTHLY_FMW' && 'FMW Six-monthly (MOM)'}
                           {submission.examType === 'WORK_PERMIT' && 'Work Permit (MOM)'}
                           {submission.examType === 'AGED_DRIVERS' && 'Aged Drivers (SPF)'}
                         </div>

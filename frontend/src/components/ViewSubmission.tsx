@@ -9,10 +9,14 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { ArrowLeft, FileText, CheckCircle, Loader2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
-import { cn } from './ui/utils';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
+import { SixMonthlyMdwDetails } from './submission-view/SixMonthlyMdwDetails';
+import { SixMonthlyFmwDetails } from './submission-view/SixMonthlyFmwDetails';
+import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
+import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
+import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +36,6 @@ export function ViewSubmission() {
   const origin = (location.state as any)?.from as string | undefined;
   const { user } = useAuth();
   const [submission, setSubmission] = useState<any>(null);
-  const [history, setHistory] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -50,8 +53,7 @@ export function ViewSubmission() {
           submissionsApi.getById(id),
           submissionsApi.getHistory(id).catch(() => null) // History is optional
         ]);
-        setSubmission(submissionData);
-        setHistory(historyData);
+        setSubmission({ ...submissionData, history: historyData });
       } catch (error) {
         console.error('Failed to fetch submission:', error);
         toast.error('Failed to load submission details');
@@ -183,6 +185,7 @@ export function ViewSubmission() {
                 <p className="text-sm text-slate-500 mb-1">Exam Type</p>
                 <p className="text-slate-900 text-sm">
                   {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Worker'}
+                  {submission.examType === 'SIX_MONTHLY_FMW' && 'Six-monthly Medical Exam for Female Migrant Worker'}
                   {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
                   {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
                 </p>
@@ -261,129 +264,30 @@ export function ViewSubmission() {
 
               {/* Exam type specific fields */}
               {submission.examType === 'SIX_MONTHLY_MDW' && (
-                <>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Test Results</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">Pregnancy Test</p>
-                        <p className={cn('text-slate-900', String(submission.formData.pregnancyTestPositive) === 'true' && 'font-semibold text-red-600')}>
-                          {String(submission.formData.pregnancyTestPositive) === 'true'
-                            ? 'Positive/Reactive'
-                            : (submission.formData.pregnancyTest ?? 'Negative/Non-reactive')}
-                        </p>
-                      </div>
+                <SixMonthlyMdwDetails formData={submission.formData} />
+              )}
 
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">Syphilis Test</p>
-                        <p className={cn('text-slate-900', String(submission.formData.syphilisTestPositive) === 'true' && 'font-semibold text-red-600')}>
-                          {String(submission.formData.syphilisTestPositive) === 'true'
-                            ? 'Positive/Reactive'
-                            : (submission.formData.syphilisTest ?? 'Negative/Non-reactive')}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">HIV Test</p>
-                        <p className={cn('text-slate-900', String(submission.formData.hivTestPositive) === 'true' && 'font-semibold text-red-600')}>
-                          {String(submission.formData.hivTestPositive) === 'true'
-                            ? 'Positive/Reactive'
-                            : (submission.formData.hivTest ?? 'Negative/Non-reactive')}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">Chest X-Ray</p>
-                        <p className={cn('text-slate-900', String(submission.formData.chestXrayPositive) === 'true' && 'font-semibold text-red-600')}>
-                          {String(submission.formData.chestXrayPositive) === 'true'
-                            ? 'Positive/Reactive'
-                            : (submission.formData.chestXray ?? 'Negative/Non-reactive')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Physical Examination Details</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-slate-500">Signs of suspicious or unexplained injuries</p>
-                        <p className={cn('text-slate-900', String(submission.formData.suspiciousInjuries) === 'true' && 'font-semibold text-red-600')}>
-                          {String(submission.formData.suspiciousInjuries) === 'true' ? 'Yes' : 'No'}
-                        </p>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-slate-500">Unintentional weight loss</p>
-                        <p className={cn('text-slate-900', String(submission.formData.unintentionalWeightLoss) === 'true' && 'font-semibold text-red-600')}>
-                          {String(submission.formData.unintentionalWeightLoss) === 'true' ? 'Yes' : 'No'}
-                        </p>
-                      </div>
-
-                      {(submission.formData.suspiciousInjuries === 'true' || submission.formData.unintentionalWeightLoss === 'true') && (
-                        <div className="flex justify-between items-center pt-2 border-t">
-                          <p className="text-sm text-slate-500 font-medium">Police report made</p>
-                          <p className="text-slate-900 font-medium">
-                            {submission.formData.policeReport === 'yes' ? 'Yes' : submission.formData.policeReport === 'no' ? 'No' : '-'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
+              {submission.examType === 'SIX_MONTHLY_FMW' && (
+                <SixMonthlyFmwDetails formData={submission.formData} />
               )}
 
               {submission.examType === 'WORK_PERMIT' && (
-                <>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Test Results</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">HIV Test</p>
-                        <p className="text-slate-900">{submission.formData.hivTest || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">TB Test</p>
-                        <p className="text-slate-900">{submission.formData.tbTest || 'Not specified'}</p>
-                      </div>
-                    </div>
-                  </div>
-                </>
+                <WorkPermitDetails formData={submission.formData} />
               )}
 
               {submission.examType === 'AGED_DRIVERS' && (
+                <AgedDriversDetails formData={submission.formData} />
+              )}
                 <>
+                  <Separator />
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Medical Assessment</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">Visual Acuity</p>
-                        <p className="text-slate-900">{submission.formData.visualAcuity || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">Hearing Test</p>
-                        <p className="text-slate-900">{submission.formData.hearingTest || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-500 mb-1">Diabetes</p>
-                        <p className="text-slate-900">{submission.formData.diabetes || 'Not specified'}</p>
-                      </div>
+                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
+                    <div className="bg-slate-50 p-3 rounded-md">
+                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : '-'}</p>
                     </div>
                   </div>
                 </>
-              )}
-
-              <>
-                <Separator />
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900 mb-3">Additional Remarks</h4>
-                  <div className="bg-slate-50 p-3 rounded-md">
-                    <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : 'No additional remarks.'}</p>
-                  </div>
-                </div>
-              </>
+              
             </CardContent>
           </Card>
         </div>
@@ -408,6 +312,7 @@ export function ViewSubmission() {
                     <p className="text-sm text-slate-500">Exam Category</p>
                     <p className="text-slate-900 text-sm">
                       {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
+                      {submission.examType === 'SIX_MONTHLY_FMW' && 'Female Migrant Worker'}
                       {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
                       {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
                     </p>
@@ -417,171 +322,8 @@ export function ViewSubmission() {
             </Card>
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Submission Timeline</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {history && history.events && history.events.length > 0 ? (
-                [...history.events]
-                  .sort((a, b) => {
-                    // First sort by timestamp
-                    const timeCompare = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-                    
-                    // If timestamps are the same or very close (within 1 second), enforce logical order
-                    if (Math.abs(timeCompare) < 1000) {
-                      // Define event priority (lower number = earlier in timeline)
-                      const eventPriority: Record<string, number> = {
-                        'created': 1,
-                        'updated': 2,
-                        'submitted_for_approval': 3,  // Routed for approval
-                        'approved': 4,  // Approved by doctor
-                        'submitted_to_agency': 5,  // Submitted to agency (must be after approved)
-                        'rejected': 6,
-                      };
-                      
-                      // Determine event types based on eventType and details
-                      const getEventPriority = (event: any) => {
-                        if (event.eventType === 'updated' && event.details?.action === 'reopened') {
-                          return 2; // Same as updated
-                        }
-                        if (event.eventType === 'submitted' && event.details?.status === 'pending_approval') {
-                          return eventPriority['submitted_for_approval'];
-                        }
-                        if (event.eventType === 'submitted' && event.details?.status === 'submitted') {
-                          return eventPriority['submitted_to_agency'];
-                        }
-                        if (event.eventType === 'approved') {
-                          return eventPriority['approved'];
-                        }
-                        return eventPriority[event.eventType] || 99;
-                      };
-                      
-                      return getEventPriority(a) - getEventPriority(b);
-                    }
-                    
-                    return timeCompare;
-                  })
-                  .reverse()
-                  .map((event: any, index: number) => {
-                  const getEventIcon = (eventType: string, details: any) => {
-                    // Check if this is a reopen action
-                    if (eventType === 'updated' && details?.action === 'reopened') {
-                      return { icon: FileText, bgColor: 'bg-purple-100', iconColor: 'text-purple-600' };
-                    }
-                    
-                    switch (eventType) {
-                      case 'created':
-                        return { icon: FileText, bgColor: 'bg-blue-100', iconColor: 'text-blue-600' };
-                      case 'updated':
-                        return { icon: FileText, bgColor: 'bg-amber-100', iconColor: 'text-amber-600' };
-                      case 'submitted':
-                        return { icon: CheckCircle, bgColor: 'bg-green-100', iconColor: 'text-green-600' };
-                      case 'approved':
-                        return { icon: CheckCircle, bgColor: 'bg-green-100', iconColor: 'text-green-600' };
-                      case 'rejected':
-                        return { icon: XCircle, bgColor: 'bg-red-100', iconColor: 'text-red-600' };
-                      default:
-                        return { icon: FileText, bgColor: 'bg-gray-100', iconColor: 'text-gray-600' };
-                    }
-                  };
-
-                  const getEventLabel = (eventType: string, details: any) => {
-                    // Check if this is a reopen action
-                    if (eventType === 'updated' && details?.action === 'reopened') {
-                      return 'Reopened for Editing';
-                    }
-                    
-                    switch (eventType) {
-                      case 'created':
-                        return 'Draft Created';
-                      case 'updated':
-                        return 'Draft Updated';
-                      case 'submitted':
-                        // Check the status at the TIME of this event (from details), not current submission status
-                        if (details?.status === 'submitted') {
-                          return 'Submitted to Agency';
-                        }
-                        // If status was pending_approval, this means routed for approval
-                        if (details?.status === 'pending_approval') {
-                          return 'Routed for Approval';
-                        }
-                        // Fallback for old events without status in details
-                        return 'Submitted';
-                      case 'approved':
-                        return 'Approved by Doctor';
-                      case 'rejected':
-                        return 'Rejected';
-                      default:
-                        return eventType.charAt(0).toUpperCase() + eventType.slice(1);
-                    }
-                  };
-
-                  const getEventDescription = (eventType: string, details: any) => {
-                    // Check if this is a reopen action
-                    if (eventType === 'updated' && details?.action === 'reopened') {
-                      return `Changed from ${details.previousStatus} back to ${details.newStatus}`;
-                    }
-                    
-                    if (eventType === 'submitted') {
-                      // If routed for approval (status was pending_approval), show assigned doctor
-                      if (details?.status === 'pending_approval' && details?.assignedDoctorName) {
-                        return `Assigned to: ${details.assignedDoctorName}`;
-                      }
-                      // If submitted to agency (status was submitted), show agency name
-                      if (details?.status === 'submitted' && details?.agency) {
-                        return details.agency;
-                      }
-                      // Fallback to assigned doctor from submission if not in event details
-                      if (submission.assignedDoctorName && !details?.agency) {
-                        return `Assigned to: ${submission.assignedDoctorName}`;
-                      }
-                    }
-                    if (eventType === 'approved' && submission.approvedByName) {
-                      return `By: ${submission.approvedByName}`;
-                    }
-                    if (eventType === 'rejected' && details?.reason) {
-                      return `Reason: ${details.reason}`;
-                    }
-                    return null;
-                  };
-
-                  const { icon: Icon, bgColor, iconColor } = getEventIcon(event.eventType, event.details);
-
-                  return (
-                    <div key={index} className="flex gap-3">
-                      <div className={`w-8 h-8 ${bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
-                        <Icon className={`w-4 h-4 ${iconColor}`} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-slate-900">{getEventLabel(event.eventType, event.details)}</p>
-                        {getEventDescription(event.eventType, event.details) && (
-                          <p className="text-xs text-slate-600">{getEventDescription(event.eventType, event.details)}</p>
-                        )}
-                        <p className="text-xs text-slate-500">{event.userName}</p>
-                        <p className="text-xs text-slate-500">
-                          {new Date(event.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-slate-900">Created</p>
-                    <p className="text-xs text-slate-500">{submission.createdByName}</p>
-                    <p className="text-xs text-slate-500">
-                      {new Date(submission.createdDate).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Submission Timeline */}
+          <SubmissionTimeline history={submission.history} submission={submission} />
         </div>
       </div>
 

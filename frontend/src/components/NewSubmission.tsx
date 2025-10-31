@@ -31,13 +31,16 @@ import {
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
 import { RemarksField } from './submission-form/fields/RemarksField';
 import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
+import { SixMonthlyFmwFields } from './submission-form/exam-forms/SixMonthlyFmwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
 import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
 import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
+import { SixMonthlyFmwSummary } from './submission-form/summary/SixMonthlyFmwSummary';
 import { DeclarationSection } from './submission-form/summary/DeclarationSection';
 
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
+  { value: 'SIX_MONTHLY_FMW', label: 'Six-monthly Medical Exam for Female Migrant Worker (MOM)' },
   { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
   { value: 'AGED_DRIVERS', label: 'Medical Exam for Aged Drivers (SPF)' },
 ];
@@ -192,10 +195,10 @@ export function NewSubmission() {
     };
   }, [setHasUnsavedChanges]);
 
-  // Fetch patient name from API for SIX_MONTHLY_MDW and WORK_PERMIT
+  // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW and WORK_PERMIT
   useEffect(() => {
     const shouldFetchPatientName = 
-      (examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') &&
+      (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') &&
       patientNric.length >= 9 && 
       !nricError &&
       !id; // Only auto-fetch for new submissions, not when editing
@@ -757,7 +760,8 @@ export function NewSubmission() {
   };
 
   const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
-    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true);
+    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
+    (examType === 'SIX_MONTHLY_FMW' ? true : true);
 
   if (isLoading) {
     return (
@@ -838,7 +842,7 @@ export function NewSubmission() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="patientName">Patient Name *</Label>
-                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') ? (
+                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
                           <Input
@@ -944,6 +948,14 @@ export function NewSubmission() {
                       setRemarksError={setRemarksError}
                     />
                   )}
+                  {examType === 'SIX_MONTHLY_FMW' && (
+                    <SixMonthlyFmwFields
+                      formData={formData}
+                      onChange={handleFormDataChange}
+                      remarksError={remarksError}
+                      setRemarksError={setRemarksError}
+                    />
+                  )}
                   {examType === 'WORK_PERMIT' && (
                     <WorkPermitFields
                       formData={formData}
@@ -960,8 +972,8 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW') {
-                          // For MDW, show summary page
+                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW') {
+                          // For MDW and FMW, show summary page
                           if (validateExamSpecific()) {
                             setCompletedSections(prev => new Set(prev).add('exam-specific'));
                             setShowSummary(true);
@@ -972,7 +984,7 @@ export function NewSubmission() {
                         }
                       }}
                     >
-                      {examType === 'SIX_MONTHLY_MDW' ? 'Continue' : 'Continue'}
+                      {examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' ? 'Continue' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
@@ -1075,7 +1087,101 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {examType !== 'SIX_MONTHLY_MDW' && (
+              {examType === 'SIX_MONTHLY_FMW' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!isPatientInfoValid || !completedSections.has('exam-specific')}>
+                    <div className="flex items-center gap-2">
+                      <span>Summary & Declaration</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <SixMonthlyFmwSummary
+                        formData={formData}
+                        patientName={patientName}
+                        patientNric={patientNric}
+                        examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          // Navigate to the requested section for editing
+                          setActiveAccordion(section);
+                          // Keep showSummary true so user can navigate back
+                        }}
+                      />
+                      
+                      <DeclarationSection
+                        checked={declarationChecked}
+                        onChange={setDeclarationChecked}
+                        userRole={role}
+                      />
+                      
+                      <div className="flex justify-end mt-4">
+                        {role === 'doctor' ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (!declarationChecked) {
+                                toast.error('Please check the declaration before submitting');
+                                return;
+                              }
+                              // mark summary completed and open submit dialog for doctors
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
+                            }}
+                            disabled={!declarationChecked}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit to Agency
+                          </Button>
+                        ) : role === 'nurse' ? (
+                          <Button
+                            type="button"
+                            onClick={async () => {
+                              // For nurses, route for approval from the summary
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+
+                              if (!hasDefaultDoctor) {
+                                setShowSetDefaultDoctorDialog(true);
+                              } else {
+                                // If default doctor exists but assignedDoctorId is empty (e.g. editing a draft),
+                                // fetch the default doctor id and pre-fill the select before opening dialog.
+                                try {
+                                  if (!assignedDoctorId) {
+                                    const { defaultDoctorId } = await usersApi.getDefaultDoctor();
+                                    if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
+                                  }
+                                } catch (e) {
+                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                }
+
+                                setIsRouteForApproval(true);
+                                setShowSubmitDialog(true);
+                              }
+                            }}
+                            disabled={!isPatientInfoValid || isSaving}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit for Approval
+                          </Button>
+                        ) : (
+                          // Other roles (non-doctor, non-nurse) can continue
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              toast.success('All sections completed! You can now save or submit.');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && (
                 <AccordionItem value="remarks">
                   <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">
@@ -1116,9 +1222,9 @@ export function NewSubmission() {
           </Button>
 
           <div className="flex gap-3">
-            {/* Nurses submit for approval from the Summary section only; no footer button here. */}
+            {/* Nurses submit for approval from the Summary section only; no footer button here for MDW/FMW. */}
             
-            {/* Doctors submit from the Summary section only; no footer button here. */}
+            {/* Doctors submit from the Summary section only; no footer button here for MDW/FMW. */}
           </div>
         </div>
       )}

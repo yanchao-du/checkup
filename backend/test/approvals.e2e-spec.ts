@@ -116,6 +116,46 @@ describe('Approvals (e2e)', () => {
           expect(res.body.pagination.limit).toBe(5);
         });
     });
+
+    it('should filter by FMW exam type', () => {
+      return request(app.getHttpServer())
+        .get('/v1/approvals?examType=SIX_MONTHLY_FMW')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('data');
+          expect(Array.isArray(res.body.data)).toBe(true);
+        });
+    });
+
+    it('should include FMW submissions in pending approvals', async () => {
+      // First create a FMW submission pending approval
+      await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Approval Test',
+          patientNric: 'S1111111F',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'false',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: true,
+        });
+
+      // Check it appears in approvals list
+      const res = await request(app.getHttpServer())
+        .get('/v1/approvals')
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .expect(200);
+
+      const fmwApprovals = res.body.data.filter((a: any) => a.examType === 'SIX_MONTHLY_FMW');
+      expect(fmwApprovals.length).toBeGreaterThan(0);
+    });
   });
 
   describe('/v1/approvals/:id/approve (POST)', () => {
@@ -204,6 +244,41 @@ describe('Approvals (e2e)', () => {
         .send({})
         .expect(403);
     });
+
+    it('should approve FMW submission as doctor', async () => {
+      // Create FMW submission pending approval
+      const createRes = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Approve Test',
+          patientNric: 'S9988776D',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'false',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: true,
+        });
+
+      const fmwSubmissionId = createRes.body.id;
+
+      // Approve the FMW submission
+      const res = await request(app.getHttpServer())
+        .post(`/v1/approvals/${fmwSubmissionId}/approve`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({ notes: 'FMW test results verified' })
+        .expect(201);
+
+      expect(res.body.status).toBe('submitted');
+      expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
+      expect(res.body).toHaveProperty('approvedBy');
+      expect(res.body).toHaveProperty('approvedDate');
+      expect(res.body).toHaveProperty('submittedDate');
+    });
   });
 
   describe('/v1/approvals/:id/reject (POST)', () => {
@@ -287,6 +362,41 @@ describe('Approvals (e2e)', () => {
         .set('Authorization', `Bearer ${doctorToken}`)
         .send({ reason: 'Too late' })
         .expect(403);
+    });
+
+    it('should reject FMW submission with reason', async () => {
+      // Create FMW submission pending approval
+      const createRes = await request(app.getHttpServer())
+        .post('/v1/submissions')
+        .set('Authorization', `Bearer ${nurseToken}`)
+        .send({
+          examType: 'SIX_MONTHLY_FMW',
+          patientName: 'FMW Reject Test',
+          patientNric: 'S8877665C',
+          examinationDate: '2025-10-30',
+          formData: {
+            pregnancyTestPositive: 'true',
+            syphilisTestPositive: 'false',
+            hivTestPositive: 'false',
+            chestXrayPositive: 'false',
+          },
+          routeForApproval: true,
+        });
+
+      const fmwSubmissionId = createRes.body.id;
+
+      // Reject the FMW submission
+      const res = await request(app.getHttpServer())
+        .post(`/v1/approvals/${fmwSubmissionId}/reject`)
+        .set('Authorization', `Bearer ${doctorToken}`)
+        .send({ reason: 'Positive pregnancy test requires additional review' })
+        .expect(201);
+
+      expect(res.body.status).toBe('rejected');
+      expect(res.body.examType).toBe('SIX_MONTHLY_FMW');
+      expect(res.body.rejectedReason).toBe('Positive pregnancy test requires additional review');
+      expect(res.body).toHaveProperty('approvedBy');
+      expect(res.body.submittedDate).toBeNull();
     });
   });
 });

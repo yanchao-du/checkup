@@ -78,6 +78,20 @@ export class SubmissionsService {
       });
     }
 
+    // If doctor created and submitted directly, also create a 'submitted' event
+    if (status === 'submitted') {
+      await this.prisma.auditLog.create({
+        data: {
+          submissionId: submission.id,
+          userId,
+          eventType: 'submitted',
+          changes: { 
+            status: 'submitted',
+          },
+        },
+      });
+    }
+
     return this.formatSubmission(submission);
   }
 

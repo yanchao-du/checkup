@@ -400,8 +400,57 @@ async function main() {
       },
       clinicId: clinic.id,
       createdById: nurse.id,
-      createdDate: new Date('2025-10-22T14:15:00'),
-      updatedAt: new Date('2025-10-22T14:15:00'),
+      createdDate: new Date('2025-10-22T14:00:00'),
+      updatedAt: new Date('2025-10-22T14:00:00'),
+    },
+  });
+
+  // Add FMW submission
+  const submissionFmw = await prisma.medicalSubmission.create({
+    data: {
+      examType: 'SIX_MONTHLY_FMW',
+      patientName: 'Nguyen Thi Mai',
+      patientNric: 'S8877665C',
+      patientDob: new Date('1995-07-12'),
+      examinationDate: new Date('2025-10-25'),
+      status: 'submitted',
+      formData: {
+        pregnancyTestPositive: 'false',
+        syphilisTestPositive: 'false',
+        hivTestPositive: 'false',
+        chestXrayPositive: 'false',
+        hasAdditionalRemarks: 'true',
+        remarks: 'Patient in good health. All test results negative.',
+      },
+      clinicId: clinic.id,
+      createdById: nurse.id,
+      approvedById: doctor.id,
+      createdDate: new Date('2025-10-25T10:00:00'),
+      submittedDate: new Date('2025-10-25T11:30:00'),
+      approvedDate: new Date('2025-10-25T11:00:00'),
+      updatedAt: new Date('2025-10-25T11:30:00'),
+    },
+  });
+
+  // Add FMW submission pending approval
+  const submissionFmwPending = await prisma.medicalSubmission.create({
+    data: {
+      examType: 'SIX_MONTHLY_FMW',
+      patientName: 'Lim Siew Hong',
+      patientNric: 'S9988776D',
+      patientDob: new Date('1993-09-25'),
+      examinationDate: new Date('2025-10-28'),
+      status: 'pending_approval',
+      formData: {
+        pregnancyTestPositive: 'false',
+        syphilisTestPositive: 'false',
+        hivTestPositive: 'false',
+        chestXrayPositive: 'false',
+      },
+      clinicId: clinic.id,
+      createdById: nurse.id,
+      createdDate: new Date('2025-10-28T13:45:00'),
+      updatedAt: new Date('2025-10-28T13:45:00'),
     },
   });
 
@@ -425,6 +474,14 @@ async function main() {
   });
 
   console.log('✅ Created sample submissions and drafts');
+  console.log('   - Maria Santos (SIX_MONTHLY_MDW): submitted');
+  console.log('   - John Tan (WORK_PERMIT): submitted');
+  console.log('   - Lim Ah Kow (AGED_DRIVERS): pending_approval');
+  console.log('   - Chen Li Hua (SIX_MONTHLY_MDW): pending_approval');
+  console.log('   - Kumar Ravi (WORK_PERMIT): pending_approval');
+  console.log('   - Nguyen Thi Mai (SIX_MONTHLY_FMW): submitted');
+  console.log('   - Lim Siew Hong (SIX_MONTHLY_FMW): pending_approval');
+  console.log('   - Wang Wei (WORK_PERMIT): draft');
 
   // Create CorpPass user associations
   // Link doctor@clinic.sg to CorpPass account
