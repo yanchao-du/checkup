@@ -18,6 +18,7 @@ import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
 import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
+import { formatExamTypeFull } from '../lib/formatters';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -313,18 +314,19 @@ export function ViewSubmission() {
                   <div>
                     <p className="text-sm text-slate-500">Submitted To</p>
                     <p className="text-slate-900">
-                      {submission.examType === 'AGED_DRIVERS' 
-                        ? 'Singapore Police Force' 
-                        : 'Ministry of Manpower'}
+                      {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
+                      {(submission.examType === 'SIX_MONTHLY_MDW' || 
+                        submission.examType === 'SIX_MONTHLY_FMW' || 
+                        submission.examType === 'WORK_PERMIT') && 'Ministry of Manpower'}
+                      {(submission.examType === 'PR_MEDICAL' || 
+                        submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                        submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Exam Category</p>
                     <p className="text-slate-900 text-sm">
-                      {submission.examType === 'SIX_MONTHLY_MDW' && 'Migrant Domestic Worker'}
-                      {submission.examType === 'SIX_MONTHLY_FMW' && 'Female Migrant Worker'}
-                      {submission.examType === 'WORK_PERMIT' && 'Work Permit Holder'}
-                      {submission.examType === 'AGED_DRIVERS' && 'Aged Driver Assessment'}
+                      {formatExamTypeFull(submission.examType)}
                     </p>
                   </div>
                 </div>
