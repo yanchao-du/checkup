@@ -1,6 +1,7 @@
-import { Controller, Get, Query, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Logger } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LookupPatientDto } from './dto/lookup-patient.dto';
 
 @Controller('patients')
 @UseGuards(JwtAuthGuard)
@@ -9,10 +10,10 @@ export class PatientsController {
 
   constructor(private patientsService: PatientsService) {}
 
-  @Get('lookup')
-  async lookupByNric(@Query('nric') nric: string) {
-    this.logger.log(`Looking up patient by NRIC: ${nric}`);
-    return this.patientsService.lookupByNric(nric);
+  @Post('lookup')
+  async lookupByNric(@Body() lookupPatientDto: LookupPatientDto) {
+    this.logger.log(`Looking up patient by NRIC: ${lookupPatientDto.nric}`);
+    return this.patientsService.lookupByNric(lookupPatientDto.nric);
   }
 
   @Get('random-test-fin')

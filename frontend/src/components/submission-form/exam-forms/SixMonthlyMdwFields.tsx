@@ -20,6 +20,12 @@ interface SixMonthlyMdwFieldsProps {
   setPoliceReportError?: (err: string | null) => void;
   remarksError?: string | null;
   setRemarksError?: (err: string | null) => void;
+  requiredTests?: {
+    pregnancy: boolean;
+    syphilis: boolean;
+    hiv: boolean;
+    chestXray: boolean;
+  };
 }
 
 export function SixMonthlyMdwFields({ 
@@ -36,6 +42,12 @@ export function SixMonthlyMdwFields({
   setPoliceReportError,
   remarksError,
   setRemarksError,
+  requiredTests = {
+    pregnancy: true,
+    syphilis: true,
+    hiv: true,
+    chestXray: true,
+  },
 }: SixMonthlyMdwFieldsProps) {
   const handleCheckboxChange = (key: string, checked: boolean) => {
     onChange(key, checked ? 'true' : 'false');
@@ -80,35 +92,43 @@ export function SixMonthlyMdwFields({
         <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Test Results</h3>
         <p className="text-sm text-slate-600">Indicate <b>postive</b> test results:</p>
         <div className="space-y-0 border border-slate-200 rounded-md p-4">
-          <CheckboxField
-            id="pregnancyTestPositive"
-            label="Pregnancy test"
-            checkboxLabel={POSTIVE}
-            checked={formData.pregnancyTestPositive === 'true'}
-            onChange={(checked) => handleCheckboxChange('pregnancyTestPositive', checked)}
-          />
-          <CheckboxField
-            id="syphilisTestPositive"
-            label="Syphilis test"
-            checkboxLabel={POSTIVE}
-            checked={formData.syphilisTestPositive === 'true'}
-            onChange={(checked) => handleCheckboxChange('syphilisTestPositive', checked)}
-          />
-          <CheckboxField
-            id="hivTestPositive"
-            label="HIV test"
-            checkboxLabel={POSTIVE}
-            checked={formData.hivTestPositive === 'true'}
-            onChange={(checked) => handleCheckboxChange('hivTestPositive', checked)}
-          />
-          <CheckboxField
-            id="chestXrayPositive"
-            label="Chest X-ray to screen for TB"
-            checkboxLabel={POSTIVE}
-            checked={formData.chestXrayPositive === 'true'}
-            onChange={(checked) => handleCheckboxChange('chestXrayPositive', checked)}
-            description='Note: HIV test must be done by an MOH-approved laboratory.'
-          />
+          {requiredTests.pregnancy && (
+            <CheckboxField
+              id="pregnancyTestPositive"
+              label="Pregnancy test"
+              checkboxLabel={POSTIVE}
+              checked={formData.pregnancyTestPositive === 'true'}
+              onChange={(checked) => handleCheckboxChange('pregnancyTestPositive', checked)}
+            />
+          )}
+          {requiredTests.syphilis && (
+            <CheckboxField
+              id="syphilisTestPositive"
+              label="Syphilis test"
+              checkboxLabel={POSTIVE}
+              checked={formData.syphilisTestPositive === 'true'}
+              onChange={(checked) => handleCheckboxChange('syphilisTestPositive', checked)}
+            />
+          )}
+          {requiredTests.hiv && (
+            <CheckboxField
+              id="hivTestPositive"
+              label="HIV test"
+              checkboxLabel={POSTIVE}
+              checked={formData.hivTestPositive === 'true'}
+              onChange={(checked) => handleCheckboxChange('hivTestPositive', checked)}
+            />
+          )}
+          {requiredTests.chestXray && (
+            <CheckboxField
+              id="chestXrayPositive"
+              label="Chest X-ray to screen for TB"
+              checkboxLabel={POSTIVE}
+              checked={formData.chestXrayPositive === 'true'}
+              onChange={(checked) => handleCheckboxChange('chestXrayPositive', checked)}
+              description='Note: HIV test must be done by an MOH-approved laboratory.'
+            />
+          )}
         </div>
       </div>
 

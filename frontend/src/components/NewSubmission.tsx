@@ -81,6 +81,17 @@ export function NewSubmission() {
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [testFin, setTestFin] = useState<string>('');
+  const [requiredTests, setRequiredTests] = useState<{
+    pregnancy: boolean;
+    syphilis: boolean;
+    hiv: boolean;
+    chestXray: boolean;
+  }>({
+    pregnancy: true,
+    syphilis: true,
+    hiv: true,
+    chestXray: true,
+  });
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
   const lastLookedUpNricRef = useRef<string | null>(null);
 
@@ -175,6 +186,12 @@ export function NewSubmission() {
         setLastRecordedHeight('');
         setLastRecordedWeight('');
         setLastRecordedDate('');
+        setRequiredTests({
+          pregnancy: true,
+          syphilis: true,
+          hiv: true,
+          chestXray: true,
+        });
       }
     };
 
@@ -240,6 +257,19 @@ export function NewSubmission() {
           setPatientName(patient.name);
           setIsNameFromApi(true);
           
+          // Set required tests from patient data
+          if (patient.requiredTests) {
+            setRequiredTests(patient.requiredTests);
+          } else {
+            // Default to all tests required if not specified
+            setRequiredTests({
+              pregnancy: true,
+              syphilis: true,
+              hiv: true,
+              chestXray: true,
+            });
+          }
+          
           // Only store and auto-populate vitals for SIX_MONTHLY_MDW
           if (examType === 'SIX_MONTHLY_MDW') {
             // Store last recorded vitals
@@ -262,6 +292,13 @@ export function NewSubmission() {
             setLastRecordedHeight('');
             setLastRecordedWeight('');
             setLastRecordedDate('');
+            // Reset to default all tests required
+            setRequiredTests({
+              pregnancy: true,
+              syphilis: true,
+              hiv: true,
+              chestXray: true,
+            });
             toast.info('Patient not found in system. Please enter name manually.');
           }
         }
@@ -986,6 +1023,7 @@ export function NewSubmission() {
                       setPoliceReportError={setPoliceReportError}
                       remarksError={remarksError}
                       setRemarksError={setRemarksError}
+                      requiredTests={requiredTests}
                     />
                   )}
                   {examType === 'SIX_MONTHLY_FMW' && (
@@ -994,6 +1032,7 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                       remarksError={remarksError}
                       setRemarksError={setRemarksError}
+                      requiredTests={requiredTests}
                     />
                   )}
                   {examType === 'WORK_PERMIT' && (

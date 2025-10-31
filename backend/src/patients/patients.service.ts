@@ -7,6 +7,12 @@ export interface PatientInfo {
   lastHeight?: string;
   lastWeight?: string;
   lastExamDate?: string;
+  requiredTests?: {
+    pregnancy: boolean;
+    syphilis: boolean;
+    hiv: boolean;
+    chestXray: boolean;
+  };
 }
 
 @Injectable()
@@ -52,12 +58,23 @@ export class PatientsService {
     const lastWeight = formData?.weight?.toString() || undefined;
     const lastExamDate = submission.examinationDate?.toISOString().split('T')[0] || undefined;
 
+    // Extract test requirements from formData
+    // Pregnancy and Syphilis are always required for MDW/FMW exams
+    // HIV and Chest X-ray requirements are stored in formData
+    const requiredTests = {
+      pregnancy: true,
+      syphilis: true,
+      hiv: formData?.hivTestRequired === 'true',
+      chestXray: formData?.chestXrayRequired === 'true',
+    };
+
     return {
       nric: submission.patientNric,
       name: submission.patientName,
       lastHeight,
       lastWeight,
       lastExamDate,
+      requiredTests,
     };
   }
 

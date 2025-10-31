@@ -17,6 +17,12 @@ export interface PatientInfo {
   lastHeight?: string;
   lastWeight?: string;
   lastExamDate?: string;
+  requiredTests?: {
+    pregnancy: boolean;
+    syphilis: boolean;
+    hiv: boolean;
+    chestXray: boolean;
+  };
 }
 
 export interface RandomTestFin {
@@ -36,9 +42,7 @@ export const patientsApi = {
   async getByNric(nric: string): Promise<PatientInfo | null> {
     try {
       const api = getAxiosInstance();
-      const response = await api.get<PatientInfo>('/patients/lookup', {
-        params: { nric },
-      });
+      const response = await api.post<PatientInfo>('/patients/lookup', { nric });
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
