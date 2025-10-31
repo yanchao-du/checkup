@@ -39,6 +39,9 @@ import { DrivingVocationalTpLtaFields } from './submission-form/exam-forms/Drivi
 import { VocationalLicenceLtaFields } from './submission-form/exam-forms/VocationalLicenceLtaFields';
 import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
 import { SixMonthlyFmwSummary } from './submission-form/summary/SixMonthlyFmwSummary';
+import { DrivingLicenceTpSummary } from './submission-form/summary/DrivingLicenceTpSummary';
+import { DrivingVocationalTpLtaSummary } from './submission-form/summary/DrivingVocationalTpLtaSummary';
+import { VocationalLicenceLtaSummary } from './submission-form/summary/VocationalLicenceLtaSummary';
 import { DeclarationSection } from './submission-form/summary/DeclarationSection';
 import { IcaExamFields } from './submission-form/exam-forms/IcaExamFields';
 import { IcaExamSummary } from './submission-form/summary/IcaExamSummary';
@@ -61,6 +64,11 @@ const examTypes: { value: ExamType; label: string }[] = [
 // Helper to check if exam type is ICA
 const isIcaExamType = (examType: ExamType | ''): boolean => {
   return examType === 'PR_MEDICAL' || examType === 'STUDENT_PASS_MEDICAL' || examType === 'LTVP_MEDICAL';
+};
+
+// Helper to check if exam type is a driver medical exam
+const isDriverExamType = (examType: ExamType | ''): boolean => {
+  return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
 };
 
 export function NewSubmission() {
@@ -1121,8 +1129,8 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
-                          // For MDW, FMW, and ICA exams, show summary page
+                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) || isDriverExamType(examType)) {
+                          // For MDW, FMW, ICA, and Driver exams, show summary page
                           if (validateExamSpecific()) {
                             setCompletedSections(prev => new Set(prev).add('exam-specific'));
                             setShowSummary(true);
@@ -1133,7 +1141,7 @@ export function NewSubmission() {
                         }
                       }}
                     >
-                      {examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? 'Continue' : 'Continue'}
+                      {examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) || isDriverExamType(examType) ? 'Continue' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
@@ -1390,7 +1398,131 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && !isIcaExamType(examType) && (
+              {/* Driver Medical Exam Summaries */}
+              {examType === 'DRIVING_LICENCE_TP' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')}>
+                    <div className="flex items-center gap-2">
+                      <span>Review & Submit</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <DrivingLicenceTpSummary
+                        formData={formData}
+                        patientInfo={{
+                          name: patientName,
+                          nric: patientNric,
+                          dateOfBirth: patientDateOfBirth,
+                        }}
+                        examinationDate={examinationDate}
+                      />
+
+                      <div className="flex justify-end mt-4">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setCompletedSections(prev => new Set(prev).add('summary'));
+                            if (role === 'doctor') {
+                              handleSubmit();
+                            } else {
+                              setIsRouteForApproval(true);
+                              setShowSubmitDialog(true);
+                            }
+                          }}
+                          disabled={isSaving}
+                        >
+                          {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP' : 'Route for Approval'}
+                        </Button>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {examType === 'DRIVING_VOCATIONAL_TP_LTA' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')}>
+                    <div className="flex items-center gap-2">
+                      <span>Review & Submit</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <DrivingVocationalTpLtaSummary
+                        formData={formData}
+                        patientInfo={{
+                          name: patientName,
+                          nric: patientNric,
+                          dateOfBirth: patientDateOfBirth,
+                        }}
+                        examinationDate={examinationDate}
+                      />
+
+                      <div className="flex justify-end mt-4">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setCompletedSections(prev => new Set(prev).add('summary'));
+                            if (role === 'doctor') {
+                              handleSubmit();
+                            } else {
+                              setIsRouteForApproval(true);
+                              setShowSubmitDialog(true);
+                            }
+                          }}
+                          disabled={isSaving}
+                        >
+                          {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP & LTA' : 'Route for Approval'}
+                        </Button>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {examType === 'VOCATIONAL_LICENCE_LTA' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')}>
+                    <div className="flex items-center gap-2">
+                      <span>Review & Submit</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <VocationalLicenceLtaSummary
+                        formData={formData}
+                        patientInfo={{
+                          name: patientName,
+                          nric: patientNric,
+                          dateOfBirth: patientDateOfBirth,
+                        }}
+                        examinationDate={examinationDate}
+                      />
+
+                      <div className="flex justify-end mt-4">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setCompletedSections(prev => new Set(prev).add('summary'));
+                            if (role === 'doctor') {
+                              handleSubmit();
+                            } else {
+                              setIsRouteForApproval(true);
+                              setShowSubmitDialog(true);
+                            }
+                          }}
+                          disabled={isSaving}
+                        >
+                          {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to LTA' : 'Route for Approval'}
+                        </Button>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && !isIcaExamType(examType) && examType !== 'DRIVING_LICENCE_TP' && examType !== 'DRIVING_VOCATIONAL_TP_LTA' && examType !== 'VOCATIONAL_LICENCE_LTA' && (
                 <AccordionItem value="remarks">
                   <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">

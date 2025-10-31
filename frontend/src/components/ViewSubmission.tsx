@@ -17,6 +17,9 @@ import { SixMonthlyFmwDetails } from './submission-view/SixMonthlyFmwDetails';
 import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
 import { IcaExamDetails } from './submission-view/IcaExamDetails';
+import { DrivingLicenceTpDetails } from './submission-form/details/DrivingLicenceTpDetails';
+import { DrivingVocationalTpLtaDetails } from './submission-form/details/DrivingVocationalTpLtaDetails';
+import { VocationalLicenceLtaDetails } from './submission-form/details/VocationalLicenceLtaDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import { DeclarationView } from './submission-view/DeclarationView';
 import { MomDeclarationContent, IcaDeclarationContent } from './submission-form/summary/DeclarationContent';
@@ -195,6 +198,9 @@ export function ViewSubmission() {
                   {submission.examType === 'PR_MEDICAL' && 'Medical Examination for Permanent Residency'}
                   {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Medical Examination for Student Pass'}
                   {submission.examType === 'LTVP_MEDICAL' && 'Medical Examination for Long Term Visit Pass'}
+                  {submission.examType === 'DRIVING_LICENCE_TP' && 'Driving Licence Medical Examination Report (TP)'}
+                  {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Driving Licence and Vocational Licence (TP & LTA)'}
+                  {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Vocational Licence Medical Examination (LTA)'}
                 </p>
               </div>
             </CardContent>
@@ -286,16 +292,31 @@ export function ViewSubmission() {
                 <AgedDriversDetails formData={submission.formData} />
               )}
 
+              {submission.examType === 'DRIVING_LICENCE_TP' && (
+                <DrivingLicenceTpDetails submission={submission} />
+              )}
+
+              {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
+                <DrivingVocationalTpLtaDetails submission={submission} />
+              )}
+
+              {submission.examType === 'VOCATIONAL_LICENCE_LTA' && (
+                <VocationalLicenceLtaDetails submission={submission} />
+              )}
+
               {(submission.examType === 'PR_MEDICAL' || 
                 submission.examType === 'STUDENT_PASS_MEDICAL' || 
                 submission.examType === 'LTVP_MEDICAL') && (
                 <IcaExamDetails formData={submission.formData} />
               )}
 
-              {/* General Remarks section - for all exam types except ICA (which includes remarks in IcaExamDetails) */}
+              {/* General Remarks section - for all exam types except ICA and driver exams (which include remarks in their detail components) */}
               {submission.examType !== 'PR_MEDICAL' && 
                submission.examType !== 'STUDENT_PASS_MEDICAL' && 
-               submission.examType !== 'LTVP_MEDICAL' && (
+               submission.examType !== 'LTVP_MEDICAL' &&
+               submission.examType !== 'DRIVING_LICENCE_TP' &&
+               submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
+               submission.examType !== 'VOCATIONAL_LICENCE_LTA' && (
                 <>
                   <Separator />
                   <div>
@@ -350,6 +371,9 @@ export function ViewSubmission() {
                       {(submission.examType === 'PR_MEDICAL' || 
                         submission.examType === 'STUDENT_PASS_MEDICAL' || 
                         submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
+                      {submission.examType === 'DRIVING_LICENCE_TP' && 'Traffic Police'}
+                      {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Traffic Police & Land Transport Authority'}
+                      {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Land Transport Authority'}
                     </p>
                   </div>
                   <div>
