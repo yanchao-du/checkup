@@ -68,6 +68,21 @@ function generateRandomWeight(): number {
   return Math.floor(Math.random() * 36) + 40;
 }
 
+// Function to generate examination date around 6 months ago (±2 months)
+function generateExamDate(): Date {
+  const today = new Date();
+  // 6 months ago as base
+  const sixMonthsAgo = new Date(today);
+  sixMonthsAgo.setMonth(today.getMonth() - 6);
+  
+  // Add random offset between -60 and +60 days (±2 months)
+  const randomDays = Math.floor(Math.random() * 121) - 60;
+  const examDate = new Date(sixMonthsAgo);
+  examDate.setDate(examDate.getDate() + randomDays);
+  
+  return examDate;
+}
+
 // Function to shuffle array
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -121,8 +136,15 @@ async function main() {
     const hasHeightWeight = i < 600;
 
     // Generate random values for HIV and TB requirements
-    const hivRequired = Math.random() < 0.5;
-    const tbRequired = Math.random() < 0.5;
+    const hivRequired = Math.random() < 0.25; // 25% require HIV test
+    const tbRequired = Math.random() < 0.10;  // 10% require chest X-ray (TB test)
+
+    // Generate exam date around 6 months ago
+    const examDate = generateExamDate();
+    const createdDate = new Date(examDate);
+    createdDate.setHours(9, 0, 0, 0);
+    const submittedDate = new Date(examDate);
+    submittedDate.setHours(10, 0, 0, 0);
 
     const patient = {
       id: `patient-${String(i + 1).padStart(4, '0')}`,
@@ -130,7 +152,7 @@ async function main() {
       patientName,
       patientNric: fin,
       patientDob: generateRandomDOB(),
-      examinationDate: new Date('2025-10-30'),
+      examinationDate: examDate,
       status: 'submitted' as const,
       formData: {
         // Always required
@@ -157,9 +179,9 @@ async function main() {
       },
       clinicId: clinic.id,
       createdById: nurse.id,
-      createdDate: new Date('2025-10-30T09:00:00'),
-      submittedDate: new Date('2025-10-30T10:00:00'),
-      updatedAt: new Date('2025-10-30T10:00:00'),
+      createdDate: createdDate,
+      submittedDate: submittedDate,
+      updatedAt: submittedDate,
     };
 
     patients.push(patient);
@@ -181,6 +203,7 @@ async function main() {
   console.log(`   - 400 patients without height and weight`);
   console.log(`   - All patients have Pregnancy and Syphilis tests (always required)`);
   console.log(`   - HIV and TB tests randomly assigned as required/not required`);
+  console.log(`   - Examination dates: ~6 months ago (±2 months variation)`);
   console.log(`   - Names from Indonesia, Myanmar, and Philippines`);
   console.log(`   - All have valid FINs (Foreign Identification Numbers)`);
 }

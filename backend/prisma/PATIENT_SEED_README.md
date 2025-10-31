@@ -41,12 +41,12 @@ Each patient has 4 types of tests with the following rules:
 
 3. **HIV Test** (Randomly Required)
    - Field: `hivTestRequired` and `hivTestPositive`
-   - ~50% of patients have this test required
+   - ~25% of patients have this test required
    - ~2% positive rate among those tested
 
 4. **Chest X-ray for TB** (Randomly Required)
    - Field: `chestXrayRequired` and `chestXrayPositive`
-   - ~50% of patients have this test required
+   - ~10% of patients have this test required
    - ~4% positive rate among those tested
 
 ### Database Storage
@@ -56,6 +56,7 @@ All patient data is stored in the `medical_submissions` table with:
 - Exam Type: `SIX_MONTHLY_FMW`
 - Valid FIN as `patientNric`
 - Date of birth as `patientDob`
+- Examination dates: ~6 months ago with ±2 months variation (range: 4-8 months ago)
 - Test results in `formData` JSON field
 
 ## Usage
@@ -104,7 +105,7 @@ Then navigate to the `medical_submissions` table and filter by:
   "patientName": "Rina Susanti",
   "patientNric": "F2527750M",
   "patientDob": "1992-08-25",
-  "examinationDate": "2025-10-30",
+  "examinationDate": "2025-03-15",
   "status": "submitted",
   "formData": {
     "height": 168,
