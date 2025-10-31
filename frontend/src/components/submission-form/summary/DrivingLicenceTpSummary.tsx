@@ -124,24 +124,24 @@ export function DrivingLicenceTpSummary({
       {/* Examination Details */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Examination Details</h3>
-            {onEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-blue-600"
-                onClick={() => onEdit('driver-exam-details')}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            )}
-          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Examination Details</h3>
 
           {/* General Medical Examination */}
           <div className="mb-6">
-            <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">General Medical Examination</h4>
+            <div className="flex items-center justify-between mb-3 border-b pb-2">
+              <h4 className="text-sm font-semibold text-slate-900">General Medical Examination</h4>
+              {onEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600"
+                  onClick={() => onEdit('general-medical')}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
             <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Height:</span>
@@ -179,8 +179,21 @@ export function DrivingLicenceTpSummary({
       </div>
 
       {/* Medical Declaration */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3">Medical Declaration (Past 6 Months)</h3>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <h4 className="text-sm font-semibold text-slate-900">Medical Declaration (Past 6 Months)</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('medical-declaration')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         {checkedDeclarations.length > 0 ? (
           <ul className="list-disc list-inside space-y-1 text-sm">
             {checkedDeclarations.map((item, index) => (
@@ -193,8 +206,21 @@ export function DrivingLicenceTpSummary({
       </div>
 
       {/* Medical History */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3">Medical History</h3>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <h4 className="text-sm font-semibold text-slate-900">Medical History</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('medical-history')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         {checkedHistoryItems.length > 0 ? (
           <ul className="list-disc list-inside space-y-1 text-sm">
             {checkedHistoryItems.map((item, index) => (
@@ -207,8 +233,21 @@ export function DrivingLicenceTpSummary({
       </div>
 
       {/* AMT Score */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-lg mb-3">Abbreviated Mental Test (AMT)</h3>
+      <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-slate-900">Abbreviated Mental Test (AMT)</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('amt')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">Total Score</p>
@@ -226,7 +265,20 @@ export function DrivingLicenceTpSummary({
 
       {/* Assessment */}
       <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="font-semibold text-lg mb-3">Medical Practitioner Assessment</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-slate-900">Medical Practitioner Assessment</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('assessment')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         <div className="space-y-3 text-sm">
           <div>
             <span className="text-gray-600">Fit to Drive:</span>

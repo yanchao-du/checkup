@@ -30,13 +30,16 @@ import {
 
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
 import { RemarksField } from './submission-form/fields/RemarksField';
+import { CommonMedicalFields } from './submission-form/fields/CommonMedicalFields';
+import { MedicalDeclarationSection } from './submission-form/fields/MedicalDeclarationSection';
+import { MedicalHistorySection } from './submission-form/fields/MedicalHistorySection';
+import { AbbreviatedMentalTestSection } from './submission-form/fields/AbbreviatedMentalTestSection';
+import { AssessmentSection } from './submission-form/fields/AssessmentSection';
+import { LtaVocationalSection } from './submission-form/fields/LtaVocationalSection';
 import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
 import { SixMonthlyFmwFields } from './submission-form/exam-forms/SixMonthlyFmwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
 import { AgedDriversFields } from './submission-form/exam-forms/AgedDriversFields';
-import { DrivingLicenceTpFields } from './submission-form/exam-forms/DrivingLicenceTpFields';
-import { DrivingVocationalTpLtaFields } from './submission-form/exam-forms/DrivingVocationalTpLtaFields';
-import { VocationalLicenceLtaFields } from './submission-form/exam-forms/VocationalLicenceLtaFields';
 import { SixMonthlyMdwSummary } from './submission-form/summary/SixMonthlyMdwSummary';
 import { SixMonthlyFmwSummary } from './submission-form/summary/SixMonthlyFmwSummary';
 import { DrivingLicenceTpSummary } from './submission-form/summary/DrivingLicenceTpSummary';
@@ -1137,49 +1140,440 @@ export function NewSubmission() {
               </AccordionItem>
               )}
 
-              {/* Driver Exam Details - shown directly after patient info, no wrapper accordion */}
-              {isDriverExamType(examType) && (
-              <AccordionItem value="driver-exam-details">
-                <AccordionTrigger isCompleted={completedSections.has('driver-exam-details')} isDisabled={!isPatientInfoValid}>
-                  <div className="flex items-center gap-2">
-                    <span>Medical Examination Details</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  {examType === 'DRIVING_LICENCE_TP' && (
-                    <DrivingLicenceTpFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                    />
-                  )}
-                  {examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
-                    <DrivingVocationalTpLtaFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                    />
-                  )}
-                  {examType === 'VOCATIONAL_LICENCE_LTA' && (
-                    <VocationalLicenceLtaFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                    />
-                  )}
-                  <div className="flex justify-end mt-4">
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        if (validateExamSpecific()) {
-                          setCompletedSections(prev => new Set(prev).add('driver-exam-details'));
-                          setShowSummary(true);
-                          setActiveAccordion('summary');
-                        }
-                      }}
-                    >
-                      Continue
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+              {/* Driver Exam Details - render accordion items directly for TP Driving Licence */}
+              {examType === 'DRIVING_LICENCE_TP' && (
+                <>
+                  {/* General Medical Examination */}
+                  <AccordionItem value="general-medical">
+                    <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!isPatientInfoValid}>
+                      <div className="flex items-center gap-2">
+                        <span>General Medical Examination</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <CommonMedicalFields formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('general-medical'));
+                              setActiveAccordion('medical-declaration');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical Declaration by Examinee */}
+                  <AccordionItem value="medical-declaration">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-declaration')} isDisabled={!completedSections.has('general-medical')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Declaration by Examinee</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <MedicalDeclarationSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('medical-declaration'));
+                              setActiveAccordion('medical-history');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical History of Examinee */}
+                  <AccordionItem value="medical-history">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!completedSections.has('medical-declaration')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical History of Examinee</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <MedicalHistorySection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('medical-history'));
+                              setActiveAccordion('amt');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Abbreviated Mental Test (AMT) */}
+                  <AccordionItem value="amt">
+                    <AccordionTrigger isCompleted={completedSections.has('amt')} isDisabled={!completedSections.has('medical-history')}>
+                      <div className="flex items-center gap-2">
+                        <span>Abbreviated Mental Test (AMT)</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <AbbreviatedMentalTestSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('amt'));
+                              setActiveAccordion('assessment');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical Practitioner Assessment */}
+                  <AccordionItem value="assessment">
+                    <AccordionTrigger isCompleted={completedSections.has('assessment')} isDisabled={!completedSections.has('amt')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Practitioner Assessment</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <AssessmentSection 
+                          formData={formData} 
+                          onChange={handleFormDataChange}
+                          examType="DRIVING_LICENCE_TP"
+                        />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              if (validateExamSpecific()) {
+                                setCompletedSections(prev => new Set(prev).add('assessment'));
+                                setShowSummary(true);
+                                setActiveAccordion('summary');
+                              }
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </>
+              )}
+
+              {/* Driver Exam Details - DRIVING_VOCATIONAL_TP_LTA with flat accordion structure */}
+              {examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
+                <>
+                  {/* General Medical Examination */}
+                  <AccordionItem value="general-medical">
+                    <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!isPatientInfoValid}>
+                      <div className="flex items-center gap-2">
+                        <span>General Medical Examination</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <CommonMedicalFields formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('general-medical'));
+                              setActiveAccordion('medical-declaration');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical Declaration by Examinee */}
+                  <AccordionItem value="medical-declaration">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-declaration')} isDisabled={!completedSections.has('general-medical')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Declaration by Examinee</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <MedicalDeclarationSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('medical-declaration'));
+                              setActiveAccordion('medical-history');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical History of Examinee */}
+                  <AccordionItem value="medical-history">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!completedSections.has('medical-declaration')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical History of Examinee</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <MedicalHistorySection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('medical-history'));
+                              setActiveAccordion('amt');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Abbreviated Mental Test (AMT) */}
+                  <AccordionItem value="amt">
+                    <AccordionTrigger isCompleted={completedSections.has('amt')} isDisabled={!completedSections.has('medical-history')}>
+                      <div className="flex items-center gap-2">
+                        <span>Abbreviated Mental Test (TP)</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <AbbreviatedMentalTestSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('amt'));
+                              setActiveAccordion('lta-vocational');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* LTA Vocational Licence Medical Details */}
+                  <AccordionItem value="lta-vocational">
+                    <AccordionTrigger isCompleted={completedSections.has('lta-vocational')} isDisabled={!completedSections.has('amt')}>
+                      <div className="flex items-center gap-2">
+                        <span>LTA Vocational Licence Medical Details</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <LtaVocationalSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('lta-vocational'));
+                              setActiveAccordion('assessment');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical Practitioner Assessment */}
+                  <AccordionItem value="assessment">
+                    <AccordionTrigger isCompleted={completedSections.has('assessment')} isDisabled={!completedSections.has('lta-vocational')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Practitioner Assessment</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <AssessmentSection 
+                          formData={formData} 
+                          onChange={handleFormDataChange}
+                          examType="DRIVING_VOCATIONAL_TP_LTA"
+                        />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              if (validateExamSpecific()) {
+                                setCompletedSections(prev => new Set(prev).add('assessment'));
+                                setShowSummary(true);
+                                setActiveAccordion('summary');
+                              }
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </>
+              )}
+
+              {/* Driver Exam Details - VOCATIONAL_LICENCE_LTA with flat accordion structure */}
+              {examType === 'VOCATIONAL_LICENCE_LTA' && (
+                <>
+                  {/* General Medical Examination */}
+                  <AccordionItem value="general-medical">
+                    <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!isPatientInfoValid}>
+                      <div className="flex items-center gap-2">
+                        <span>General Medical Examination</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <CommonMedicalFields formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('general-medical'));
+                              setActiveAccordion('medical-declaration');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical Declaration by Examinee */}
+                  <AccordionItem value="medical-declaration">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-declaration')} isDisabled={!completedSections.has('general-medical')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Declaration by Examinee</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <MedicalDeclarationSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('medical-declaration'));
+                              setActiveAccordion('medical-history');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical History of Examinee */}
+                  <AccordionItem value="medical-history">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!completedSections.has('medical-declaration')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical History of Examinee</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <MedicalHistorySection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('medical-history'));
+                              setActiveAccordion('lta-vocational');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* LTA Vocational Licence Medical Details */}
+                  <AccordionItem value="lta-vocational">
+                    <AccordionTrigger isCompleted={completedSections.has('lta-vocational')} isDisabled={!completedSections.has('medical-history')}>
+                      <div className="flex items-center gap-2">
+                        <span>LTA Vocational Licence Medical Details</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <LtaVocationalSection formData={formData} onChange={handleFormDataChange} />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('lta-vocational'));
+                              setActiveAccordion('assessment');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Medical Practitioner Assessment */}
+                  <AccordionItem value="assessment">
+                    <AccordionTrigger isCompleted={completedSections.has('assessment')} isDisabled={!completedSections.has('lta-vocational')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Practitioner Assessment</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <AssessmentSection 
+                          formData={formData} 
+                          onChange={handleFormDataChange}
+                          examType="VOCATIONAL_LICENCE_LTA"
+                        />
+                        <div className="flex justify-end mt-4">
+                          <Button 
+                            type="button"
+                            onClick={() => {
+                              if (validateExamSpecific()) {
+                                setCompletedSections(prev => new Set(prev).add('assessment'));
+                                setShowSummary(true);
+                                setActiveAccordion('summary');
+                              }
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </>
               )}
 
               {examType === 'SIX_MONTHLY_MDW' && showSummary && (

@@ -124,25 +124,24 @@ export function VocationalLicenceLtaSummary({
       {/* Examination Details */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Examination Details</h3>
-            {onEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-blue-600"
-                onClick={() => onEdit('driver-exam-details')}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            )}
-          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Examination Details</h3>
 
           {/* General Medical Examination */}
           <div className="mb-6">
-            <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">General Medical Examination</h4>
-        <h3 className="font-semibold text-lg mb-3">General Medical Examination</h3>
+            <div className="flex items-center justify-between mb-3 border-b pb-2">
+              <h4 className="text-sm font-semibold text-slate-900">General Medical Examination</h4>
+              {onEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600"
+                  onClick={() => onEdit('general-medical')}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Height:</span>
@@ -180,8 +179,21 @@ export function VocationalLicenceLtaSummary({
       </div>
 
       {/* Medical Declaration */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3">Medical Declaration (Past 6 Months)</h3>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <h4 className="text-sm font-semibold text-slate-900">Medical Declaration (Past 6 Months)</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('medical-declaration')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         {checkedDeclarations.length > 0 ? (
           <ul className="list-disc list-inside space-y-1 text-sm">
             {checkedDeclarations.map((item, index) => (
@@ -194,8 +206,21 @@ export function VocationalLicenceLtaSummary({
       </div>
 
       {/* Medical History */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3">Medical History</h3>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <h4 className="text-sm font-semibold text-slate-900">Medical History</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('medical-history')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         {checkedHistoryItems.length > 0 ? (
           <ul className="list-disc list-inside space-y-1 text-sm">
             {checkedHistoryItems.map((item, index) => (
@@ -208,8 +233,21 @@ export function VocationalLicenceLtaSummary({
       </div>
 
       {/* LTA Vocational Assessment */}
-      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-        <h3 className="font-semibold text-lg mb-3">LTA Vocational Licence Assessment</h3>
+      <div className="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-slate-900">LTA Vocational Licence Assessment</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('lta-vocational')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -273,8 +311,21 @@ export function VocationalLicenceLtaSummary({
       </div>
 
       {/* Assessment */}
-      <div className="mb-6">
-        <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Medical Practitioner Assessment</h4>
+      <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-slate-900">Medical Practitioner Assessment</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('assessment')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
         <div className="space-y-3 text-sm">
           <div>
             <span className="text-gray-600">Fit for Vocational Duty:</span>
