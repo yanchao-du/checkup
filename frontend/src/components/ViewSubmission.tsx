@@ -289,6 +289,9 @@ export function ViewSubmission() {
                 submission.examType === 'LTVP_MEDICAL') && (
                 <IcaExamDetails formData={submission.formData} />
               )}
+
+              {/* General Remarks section - only for exam types that don't include remarks in their detail components */}
+              {(submission.examType === 'WORK_PERMIT' || submission.examType === 'AGED_DRIVERS') && (
                 <>
                   <Separator />
                   <div>
@@ -298,6 +301,7 @@ export function ViewSubmission() {
                     </div>
                   </div>
                 </>
+              )}
               
             </CardContent>
           </Card>
