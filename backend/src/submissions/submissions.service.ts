@@ -10,12 +10,13 @@ export class SubmissionsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, userRole: string, clinicId: string, dto: CreateSubmissionDto) {
-    // Validate driver exam submissions
-    validateDriverExam(dto);
-    
     // When routeForApproval is explicitly false, it's a draft
-    // When routeForApproval is true or undefined, check the logic
     const isDraft = dto.routeForApproval === false;
+    
+    // Only validate driver exam submissions if not a draft
+    if (!isDraft) {
+      validateDriverExam(dto);
+    }
     
     let status: string;
     if (isDraft) {
