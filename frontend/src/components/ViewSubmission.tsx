@@ -183,6 +183,12 @@ export function ViewSubmission() {
                     </p>
                   </div>
                 )}
+                {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (submission as any).drivingLicenseClass && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Class of Driving Licence</p>
+                    <p className="text-slate-900">{(submission as any).drivingLicenseClass}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Examination Date</p>
                   <p className="text-slate-900">

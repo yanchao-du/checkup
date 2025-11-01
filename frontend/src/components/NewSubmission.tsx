@@ -87,6 +87,7 @@ export function NewSubmission() {
   const [patientNric, setPatientNric] = useState('');
   const [nricError, setNricError] = useState<string | null>(null);
   const [patientDateOfBirth, setPatientDateOfBirth] = useState('');
+  const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
@@ -172,6 +173,7 @@ export function NewSubmission() {
           setPatientName(existing.patientName);
           setPatientNric(existing.patientNric);
           setPatientDateOfBirth(existing.patientDateOfBirth);
+          setDrivingLicenseClass((existing as any).drivingLicenseClass || '');
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
@@ -216,6 +218,7 @@ export function NewSubmission() {
         setPatientName('');
         setPatientNric('');
         setPatientDateOfBirth('');
+        setDrivingLicenseClass('');
         setExaminationDate('');
         setAssignedDoctorId('');
         setFormData({});
@@ -240,10 +243,10 @@ export function NewSubmission() {
   // Track form changes
   useEffect(() => {
     // Mark as changed if any field has data (for new submissions) or if editing an existing draft
-    const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || 
+    const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || drivingLicenseClass ||
                     examinationDate || Object.keys(formData).length > 0);
     setHasUnsavedChanges(hasData);
-  }, [examType, patientName, patientNric, patientDateOfBirth, examinationDate, formData, setHasUnsavedChanges]);
+  }, [examType, patientName, patientNric, patientDateOfBirth, drivingLicenseClass, examinationDate, formData, setHasUnsavedChanges]);
 
   // Reset unsaved changes when component unmounts
   useEffect(() => {
@@ -428,6 +431,12 @@ export function NewSubmission() {
     // Validate DOB for AGED_DRIVERS and driver exams
     if ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && !patientDateOfBirth) {
       toast.error('Date of Birth is required for this exam type');
+      return false;
+    }
+
+    // Validate Driving Licence Class for TP and TP_LTA exams
+    if ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && !drivingLicenseClass) {
+      toast.error('Class of Driving Licence is required for this exam type');
       return false;
     }
 
@@ -736,6 +745,7 @@ export function NewSubmission() {
     !nricError &&
     patientName.trim() &&
     ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
+    ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
     examinationDate &&
     !examinationDateError
   );
@@ -783,6 +793,7 @@ export function NewSubmission() {
         patientName,
         patientNric,
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
+        ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         routeForApproval: false,
@@ -828,6 +839,7 @@ export function NewSubmission() {
         patientName,
         patientNric,
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
+        ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
         // Don't send routeForApproval: false for doctors - backend treats that as draft
@@ -875,7 +887,9 @@ export function NewSubmission() {
     }
   };
 
-  const isFormValid = examType && patientName && patientNric && ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
+  const isFormValid = examType && patientName && patientNric && 
+    ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
+    ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
     (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
     (examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? true : true);
 
@@ -1026,6 +1040,34 @@ export function NewSubmission() {
                           value={patientDateOfBirth}
                           onChange={(e) => setPatientDateOfBirth(e.target.value)}
                         />
+                      </div>
+                    )}
+                    {(examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
+                      <div className="space-y-2">
+                        <Label htmlFor="drivingLicenseClass">Class of Driving Licence *</Label>
+                        <Select
+                          value={drivingLicenseClass}
+                          onValueChange={setDrivingLicenseClass}
+                        >
+                          <SelectTrigger id="drivingLicenseClass">
+                            <SelectValue placeholder="Select driving licence class" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="2B">2B</SelectItem>
+                            <SelectItem value="2A">2A</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                            <SelectItem value="3">3</SelectItem>
+                            <SelectItem value="3A">3A</SelectItem>
+                            <SelectItem value="3C">3C</SelectItem>
+                            <SelectItem value="3CA">3CA</SelectItem>
+                            <SelectItem value="4">4</SelectItem>
+                            <SelectItem value="4P">4P</SelectItem>
+                            <SelectItem value="4A">4A</SelectItem>
+                            <SelectItem value="4AP">4AP</SelectItem>
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="5P">5P</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
                     <div className="space-y-2">
@@ -1839,6 +1881,7 @@ export function NewSubmission() {
                           name: patientName,
                           nric: patientNric,
                           dateOfBirth: patientDateOfBirth,
+                          drivingLicenseClass: drivingLicenseClass,
                         }}
                         examinationDate={examinationDate}
                         onEdit={(section) => {
@@ -1883,6 +1926,7 @@ export function NewSubmission() {
                           name: patientName,
                           nric: patientNric,
                           dateOfBirth: patientDateOfBirth,
+                          drivingLicenseClass: drivingLicenseClass,
                         }}
                         examinationDate={examinationDate}
                         onEdit={(section) => {

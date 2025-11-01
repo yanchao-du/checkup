@@ -8,6 +8,7 @@ interface DrivingLicenceTpSummaryProps {
     name: string;
     nric: string;
     dateOfBirth?: string;
+    drivingLicenseClass?: string;
   };
   examinationDate: string;
   onEdit?: (section: string) => void;
@@ -111,6 +112,12 @@ export function DrivingLicenceTpSummary({
               <div>
                 <p className="text-slate-500">Date of Birth</p>
                 <p className="font-medium">{new Date(patientInfo.dateOfBirth).toLocaleDateString()}</p>
+              </div>
+            )}
+            {patientInfo.drivingLicenseClass && (
+              <div>
+                <p className="text-slate-500">Class of Driving Licence</p>
+                <p className="font-medium">{patientInfo.drivingLicenseClass}</p>
               </div>
             )}
             <div>
