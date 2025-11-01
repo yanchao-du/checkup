@@ -425,9 +425,9 @@ export function NewSubmission() {
       return false;
     }
     
-    // Validate DOB for AGED_DRIVERS
-    if (examType === 'AGED_DRIVERS' && !patientDateOfBirth) {
-      toast.error('Date of Birth is required for Aged Drivers exam');
+    // Validate DOB for AGED_DRIVERS and driver exams
+    if ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && !patientDateOfBirth) {
+      toast.error('Date of Birth is required for this exam type');
       return false;
     }
 
@@ -735,7 +735,7 @@ export function NewSubmission() {
     patientNric.trim() &&
     !nricError &&
     patientName.trim() &&
-    (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
+    ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
     examinationDate &&
     !examinationDateError
   );
@@ -875,7 +875,7 @@ export function NewSubmission() {
     }
   };
 
-  const isFormValid = examType && patientName && patientNric && (examType === 'AGED_DRIVERS' ? patientDateOfBirth : true) &&
+  const isFormValid = examType && patientName && patientNric && ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
     (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
     (examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? true : true);
 
@@ -1016,39 +1016,35 @@ export function NewSubmission() {
                       )} */}
                     </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {examType === 'AGED_DRIVERS' && (
-                        <div className="space-y-2">
-                          <Label htmlFor="dob">Date of Birth *</Label>
-                          <Input
-                            id="dob"
-                            name="dateOfBirth"
-                            type="date"
-                            value={patientDateOfBirth}
-                            onChange={(e) => setPatientDateOfBirth(e.target.value)}
-                          />
-                        </div>
-                      )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && (
                       <div className="space-y-2">
-                        <Label htmlFor="examinationDate">Examination Date *</Label>
+                        <Label htmlFor="dob">Date of Birth *</Label>
                         <Input
-                          id="examinationDate"
-                          name="examinationDate"
+                          id="dob"
+                          name="dateOfBirth"
                           type="date"
-                          value={examinationDate}
-                          onChange={(e) => {
-                            setExaminationDate(e.target.value);
-                            if (examinationDateError) setExaminationDateError(null);
-                          }}
-                          aria-invalid={!!examinationDateError}
-                          className={`${examinationDateError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+                          value={patientDateOfBirth}
+                          onChange={(e) => setPatientDateOfBirth(e.target.value)}
                         />
-                        {examinationDateError && (
-                          <InlineError>{examinationDateError}</InlineError>
-                        )}
                       </div>
-                    </div>
+                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="examinationDate">Examination Date *</Label>
+                      <Input
+                        id="examinationDate"
+                        name="examinationDate"
+                        type="date"
+                        value={examinationDate}
+                        onChange={(e) => {
+                          setExaminationDate(e.target.value);
+                          if (examinationDateError) setExaminationDateError(null);
+                        }}
+                        aria-invalid={!!examinationDateError}
+                        className={`${examinationDateError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+                      />
+                      {examinationDateError && (
+                        <InlineError>{examinationDateError}</InlineError>
+                      )}
                     </div>
                   </div>
                   <div className="flex justify-end mt-4">

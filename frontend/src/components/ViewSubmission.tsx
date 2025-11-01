@@ -35,6 +35,10 @@ import {
   AlertDialogTitle,
 } from './ui/alert-dialog';
 
+const isDriverExamType = (examType: string) => {
+  return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
+};
+
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -171,7 +175,7 @@ export function ViewSubmission() {
                   <p className="text-sm text-slate-500 mb-1">NRIC / FIN</p>
                   <p className="text-slate-900">{submission.patientNric}</p>
                 </div>
-                {submission.examType === 'AGED_DRIVERS' && submission.patientDateOfBirth && (
+                {(submission.examType === 'AGED_DRIVERS' || isDriverExamType(submission.examType)) && submission.patientDateOfBirth && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
                     <p className="text-slate-900">
