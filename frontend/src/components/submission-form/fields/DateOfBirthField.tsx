@@ -8,6 +8,8 @@ interface DateOfBirthFieldProps {
 }
 
 export function DateOfBirthField({ value, onChange, required = true }: DateOfBirthFieldProps) {
+  const today = new Date().toISOString().split('T')[0];
+  
   return (
     <div className="space-y-2">
       <Label htmlFor="dob">Date of Birth {required && '*'}</Label>
@@ -16,6 +18,7 @@ export function DateOfBirthField({ value, onChange, required = true }: DateOfBir
         name="dateOfBirth"
         type="date"
         value={value}
+        max={today}
         onChange={(e) => onChange(e.target.value)}
       />
     </div>

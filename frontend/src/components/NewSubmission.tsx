@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
 import { validateNricOrFin } from '../lib/validationRules';
+import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
+import { calculateAge, formatAge } from '../lib/ageCalculation';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -110,6 +112,10 @@ export function NewSubmission() {
   const [policeReportError, setPoliceReportError] = useState<string | null>(null);
   const [remarksError, setRemarksError] = useState<string | null>(null);
   const [examinationDateError, setExaminationDateError] = useState<string | null>(null);
+  const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
+  const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
+  const [nextRequiredAge, setNextRequiredAge] = useState<number | undefined>(undefined);
+  const [nextBirthdayDate, setNextBirthdayDate] = useState<Date | undefined>(undefined);
   const [showSummary, setShowSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [testFin, setTestFin] = useState<string>('');
@@ -241,6 +247,48 @@ export function NewSubmission() {
 
     loadSubmission();
   }, [id, navigate]);
+
+  // Validate driving licence exam timing
+  useEffect(() => {
+    if ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && 
+        patientDateOfBirth && examinationDate && drivingLicenseClass) {
+      
+      // Check if exam date is before DOB
+      if (new Date(examinationDate) < new Date(patientDateOfBirth)) {
+        setDrivingLicenceTimingError('Examination date cannot be before date of birth.');
+        setDrivingLicenceTimingWarning(null);
+        setNextRequiredAge(undefined);
+        setNextBirthdayDate(undefined);
+        return;
+      }
+      
+      const validation = validateDrivingLicenceExamTiming(
+        patientDateOfBirth,
+        examinationDate,
+        drivingLicenseClass
+      );
+      
+      if (!validation.isValid && validation.error) {
+        setDrivingLicenceTimingError(validation.error);
+      } else {
+        setDrivingLicenceTimingError(null);
+      }
+      
+      if (validation.warningMessage) {
+        setDrivingLicenceTimingWarning(validation.warningMessage);
+      } else {
+        setDrivingLicenceTimingWarning(null);
+      }
+      
+      setNextRequiredAge(validation.nextRequiredAge);
+      setNextBirthdayDate(validation.nextBirthdayDate);
+    } else {
+      setDrivingLicenceTimingError(null);
+      setDrivingLicenceTimingWarning(null);
+      setNextRequiredAge(undefined);
+      setNextBirthdayDate(undefined);
+    }
+  }, [examType, patientDateOfBirth, examinationDate, drivingLicenseClass]);
 
   // Track form changes
   useEffect(() => {
@@ -446,6 +494,12 @@ export function NewSubmission() {
     if (!examinationDate) {
       // Use inline error instead of toast for examination date
       setExaminationDateError('Examination Date is required');
+      return false;
+    }
+
+    // Validate driving licence exam timing
+    if (drivingLicenceTimingError) {
+      toast.error(drivingLicenceTimingError);
       return false;
     }
     
@@ -749,7 +803,8 @@ export function NewSubmission() {
     ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
     ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
     examinationDate &&
-    !examinationDateError
+    !examinationDateError &&
+    !drivingLicenceTimingError
   );
 
   const handleContinue = (currentSection: string, nextSection: string) => {
@@ -1044,6 +1099,54 @@ export function NewSubmission() {
                         onChange={setDrivingLicenseClass}
                       />
                     )}
+                    {isDriverExamType(examType) && patientDateOfBirth && examinationDate && (
+                      <div className="space-y-2 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-slate-700">Age at Examination</p>
+                            {calculateAge(patientDateOfBirth, examinationDate) ? (
+                              <p className="text-lg font-semibold text-slate-900">
+                                {formatAge(calculateAge(patientDateOfBirth, examinationDate))}
+                              </p>
+                            ) : (
+                              <p className="text-sm text-red-600 font-medium">
+                                Invalid: Examination date is before date of birth
+                              </p>
+                            )}
+                          </div>
+                          {(examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && drivingLicenseClass && calculateAge(patientDateOfBirth, examinationDate) && (
+                            <div>
+                              {!drivingLicenceTimingError && nextRequiredAge && nextBirthdayDate && (() => {
+                                const examDate = new Date(examinationDate);
+                                const timeDiff = nextBirthdayDate.getTime() - examDate.getTime();
+                                const totalDays = Math.abs(Math.floor(timeDiff / (1000 * 60 * 60 * 24)));
+                                const months = Math.floor(totalDays / 30);
+                                const days = totalDays % 30;
+                                const isAfter = timeDiff < 0;
+                                
+                                return (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                    <span className="text-green-700 font-medium">
+                                      {months > 0 
+                                        ? `${months} ${months === 1 ? 'month' : 'months'} ${days} ${days === 1 ? 'day' : 'days'} ${isAfter ? 'after' : 'before'} age ${nextRequiredAge}`
+                                        : `${days} ${days === 1 ? 'day' : 'days'} ${isAfter ? 'after' : 'before'} age ${nextRequiredAge}`
+                                      }
+                                    </span>
+                                  </div>
+                                );
+                              })()}
+                              {drivingLicenceTimingError && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                  <span className="text-red-700 font-medium">Outside validity period</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <Label htmlFor="examinationDate">Examination Date *</Label>
                       <Input
@@ -1055,11 +1158,17 @@ export function NewSubmission() {
                           setExaminationDate(e.target.value);
                           if (examinationDateError) setExaminationDateError(null);
                         }}
-                        aria-invalid={!!examinationDateError}
-                        className={`${examinationDateError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+                        aria-invalid={!!examinationDateError || !!drivingLicenceTimingError}
+                        className={`${examinationDateError || drivingLicenceTimingError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
                       />
                       {examinationDateError && (
                         <InlineError>{examinationDateError}</InlineError>
+                      )}
+                      {drivingLicenceTimingError && (
+                        <InlineError>{drivingLicenceTimingError}</InlineError>
+                      )}
+                      {!drivingLicenceTimingError && drivingLicenceTimingWarning && (
+                        <p className="text-sm text-amber-600">{drivingLicenceTimingWarning}</p>
                       )}
                     </div>
                   </div>
@@ -1067,6 +1176,7 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => handleContinue('patient-info', 'exam-specific')}
+                      disabled={!isPatientInfoValid}
                     >
                       Continue
                     </Button>

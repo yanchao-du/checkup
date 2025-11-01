@@ -1,5 +1,5 @@
 import { Label } from '../../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../ui/select';
 
 interface DrivingLicenceClassFieldProps {
   value: string;
@@ -7,9 +7,11 @@ interface DrivingLicenceClassFieldProps {
   required?: boolean;
 }
 
-const DRIVING_LICENCE_CLASSES = [
-  '2B', '2A', '2', '3', '3A', '3C', '3CA', '4', '4P', '4A', '4AP', '5', '5P'
-];
+const LICENCE_CATEGORIES = {
+  motorcycle: ['2B', '2A', '2'],
+  motorCar: ['3', '3A', '3C', '3C(A)'],
+  heavyVehicle: ['4', '4P', '4A', '4AP', '5', '5P']
+};
 
 export function DrivingLicenceClassField({ value, onChange, required = true }: DrivingLicenceClassFieldProps) {
   return (
@@ -20,11 +22,30 @@ export function DrivingLicenceClassField({ value, onChange, required = true }: D
           <SelectValue placeholder="Select driving licence class" />
         </SelectTrigger>
         <SelectContent>
-          {DRIVING_LICENCE_CLASSES.map((classType) => (
-            <SelectItem key={classType} value={classType}>
-              {classType}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            <SelectLabel>Motorcycle</SelectLabel>
+            {LICENCE_CATEGORIES.motorcycle.map((classType) => (
+              <SelectItem key={classType} value={classType}>
+                Class {classType}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>Motor Car</SelectLabel>
+            {LICENCE_CATEGORIES.motorCar.map((classType) => (
+              <SelectItem key={classType} value={classType}>
+                Class {classType}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>Heavy Vehicle</SelectLabel>
+            {LICENCE_CATEGORIES.heavyVehicle.map((classType) => (
+              <SelectItem key={classType} value={classType}>
+                Class {classType}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
     </div>

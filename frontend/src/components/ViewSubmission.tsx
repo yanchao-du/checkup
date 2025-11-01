@@ -12,6 +12,8 @@ import { Textarea } from './ui/textarea';
 import { ArrowLeft, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
+import { calculateAge, formatAge } from '../lib/ageCalculation';
+import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { SixMonthlyMdwDetails } from './submission-view/SixMonthlyMdwDetails';
 import { SixMonthlyFmwDetails } from './submission-view/SixMonthlyFmwDetails';
 import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
@@ -187,6 +189,42 @@ export function ViewSubmission() {
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Class of Driving Licence</p>
                     <p className="text-slate-900">{(submission as any).drivingLicenseClass}</p>
+                  </div>
+                )}
+                {isDriverExamType(submission.examType) && submission.patientDateOfBirth && submission.examinationDate && (
+                  <div className="col-span-2">
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-700 mb-1">Age at Examination</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {formatAge(calculateAge(submission.patientDateOfBirth, submission.examinationDate))}
+                          </p>
+                        </div>
+                        {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (submission as any).drivingLicenseClass && (
+                          <div>
+                            {(() => {
+                              const validation = validateDrivingLicenceExamTiming(
+                                submission.patientDateOfBirth,
+                                submission.examinationDate,
+                                (submission as any).drivingLicenseClass || ''
+                              );
+                              return !validation.error ? (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                  <span className="text-green-700 font-medium">Within validity period</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                  <span className="text-red-700 font-medium">Outside validity period</span>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
                 <div>
