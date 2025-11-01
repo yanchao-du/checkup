@@ -36,6 +36,8 @@ import { MedicalHistorySection } from './submission-form/fields/MedicalHistorySe
 import { AbbreviatedMentalTestSection } from './submission-form/fields/AbbreviatedMentalTestSection';
 import { AssessmentSection } from './submission-form/fields/AssessmentSection';
 import { LtaVocationalSection } from './submission-form/fields/LtaVocationalSection';
+import { DateOfBirthField } from './submission-form/fields/DateOfBirthField';
+import { DrivingLicenceClassField } from './submission-form/fields/DrivingLicenceClassField';
 import { SixMonthlyMdwFields } from './submission-form/exam-forms/SixMonthlyMdwFields';
 import { SixMonthlyFmwFields } from './submission-form/exam-forms/SixMonthlyFmwFields';
 import { WorkPermitFields } from './submission-form/exam-forms/WorkPermitFields';
@@ -1031,44 +1033,16 @@ export function NewSubmission() {
                     </div>
                     </div>
                     {(examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && (
-                      <div className="space-y-2">
-                        <Label htmlFor="dob">Date of Birth *</Label>
-                        <Input
-                          id="dob"
-                          name="dateOfBirth"
-                          type="date"
-                          value={patientDateOfBirth}
-                          onChange={(e) => setPatientDateOfBirth(e.target.value)}
-                        />
-                      </div>
+                      <DateOfBirthField
+                        value={patientDateOfBirth}
+                        onChange={setPatientDateOfBirth}
+                      />
                     )}
                     {(examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
-                      <div className="space-y-2">
-                        <Label htmlFor="drivingLicenseClass">Class of Driving Licence *</Label>
-                        <Select
-                          value={drivingLicenseClass}
-                          onValueChange={setDrivingLicenseClass}
-                        >
-                          <SelectTrigger id="drivingLicenseClass">
-                            <SelectValue placeholder="Select driving licence class" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="2B">2B</SelectItem>
-                            <SelectItem value="2A">2A</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                            <SelectItem value="3A">3A</SelectItem>
-                            <SelectItem value="3C">3C</SelectItem>
-                            <SelectItem value="3CA">3CA</SelectItem>
-                            <SelectItem value="4">4</SelectItem>
-                            <SelectItem value="4P">4P</SelectItem>
-                            <SelectItem value="4A">4A</SelectItem>
-                            <SelectItem value="4AP">4AP</SelectItem>
-                            <SelectItem value="5">5</SelectItem>
-                            <SelectItem value="5P">5P</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <DrivingLicenceClassField
+                        value={drivingLicenseClass}
+                        onChange={setDrivingLicenseClass}
+                      />
                     )}
                     <div className="space-y-2">
                       <Label htmlFor="examinationDate">Examination Date *</Label>
