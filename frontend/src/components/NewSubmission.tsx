@@ -1494,7 +1494,7 @@ export function NewSubmission() {
                         onEdit={(section) => {
                           // Navigate to the requested section for editing
                           setActiveAccordion(section);
-                          // Keep showSummary true so user can navigate back
+                          setIsEditingFromSummary(true);
                         }}
                       />
                       
@@ -1589,7 +1589,7 @@ export function NewSubmission() {
                         onEdit={(section) => {
                           // Navigate to the requested section for editing
                           setActiveAccordion(section);
-                          // Keep showSummary true so user can navigate back
+                          setIsEditingFromSummary(true);
                         }}
                       />
                       
@@ -1682,6 +1682,7 @@ export function NewSubmission() {
                         examinationDate={examinationDate}
                         onEdit={(section) => {
                           setActiveAccordion(section);
+                          setIsEditingFromSummary(true);
                         }}
                       />
                       
@@ -1796,6 +1797,7 @@ export function NewSubmission() {
                         examinationDate={examinationDate}
                         onEdit={(section) => {
                           setActiveAccordion(section);
+                          setIsEditingFromSummary(true);
                         }}
                       />
 
@@ -1842,6 +1844,7 @@ export function NewSubmission() {
                         examinationDate={examinationDate}
                         onEdit={(section) => {
                           setActiveAccordion(section);
+                          setIsEditingFromSummary(true);
                         }}
                       />
 
