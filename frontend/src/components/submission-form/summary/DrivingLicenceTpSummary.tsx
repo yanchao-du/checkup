@@ -244,19 +244,21 @@ export function DrivingLicenceTpSummary({
           {/* Patient Certification */}
           <div className="mt-4 pt-4 border-t border-gray-200">
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
-            <div className={`text-sm p-3 rounded-md ${medicalDeclaration.patientCertification ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}`}>
+            <div className={`p-3 rounded-md ${medicalDeclaration.patientCertification ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}`}>
               {medicalDeclaration.patientCertification ? (
-                <p className="text-green-700 font-medium">✓ Patient certification confirmed</p>
+                <>
+                  <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+                  <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+                  <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                    <li>I have explained this declaration to the patient</li>
+                    <li>The patient has confirmed that he / she has carefully considered his / her responses and believe them to be complete and correct</li>
+                    <li>The patient has declared to me that he / she has not withheld any relevant information or made any misleading statement</li>
+                    <li>He / she has provided his / her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him / her</li>
+                  </ul>
+                </>
               ) : (
                 <p className="text-gray-600 italic">Patient certification not completed</p>
               )}
-              <p className="text-xs text-gray-600 mt-2">The patient certifies that:</p>
-              <ul className="text-xs text-gray-600 mt-1 ml-4 space-y-1 list-disc">
-                <li>The declaration has been explained to them</li>
-                <li>Their responses are complete and correct</li>
-                <li>No relevant information has been withheld</li>
-                <li>They consent to physician communication</li>
-              </ul>
             </div>
           </div>
         </CardContent>
