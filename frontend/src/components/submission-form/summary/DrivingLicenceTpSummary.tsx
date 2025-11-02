@@ -519,13 +519,6 @@ export function DrivingLicenceTpSummary({
         {/* Medical Practitioner Declaration */}
         <div className="pt-4 border-t border-blue-200">
           <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
-          <p className="text-sm text-gray-700 leading-relaxed mb-3">
-            I certify that I have today examined and identified the patient named above:
-          </p>
-          <ul className="ml-6 mb-4 space-y-2 text-sm text-gray-700 list-disc">
-            <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
-            <li>The answers to the questions above are correct to the best of my knowledge.</li>
-          </ul>
           <label className="flex items-start space-x-3 cursor-pointer bg-white p-3 rounded border border-blue-300">
             <input
               type="checkbox"
@@ -537,9 +530,15 @@ export function DrivingLicenceTpSummary({
               }}
               className="h-4 w-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <span className="text-sm font-medium text-gray-900">
-              I agree to the above declaration <span className="text-red-500">*</span>
-            </span>
+            <div>
+              <p className="!text-sm !font-normal !leading-relaxed text-gray-700">
+                I certify that I have today examined and identified the patient named above: <span className="text-red-500">*</span>
+              </p>
+              <ul className="ml-6 mt-2 space-y-2 !text-sm !font-normal !leading-relaxed text-gray-700 list-disc">
+                <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
+                <li>The answers to the questions above are correct to the best of my knowledge.</li>
+              </ul>
+            </div>
           </label>
         </div>
         </CardContent>
