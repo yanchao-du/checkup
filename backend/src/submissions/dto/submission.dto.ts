@@ -32,6 +32,10 @@ export class CreateSubmissionDto {
   patientMobile?: string;
   
   @IsOptional()
+  @IsString()
+  drivingLicenseClass?: string;
+  
+  @IsOptional()
   @IsDateString()
   examinationDate?: string;
   
@@ -79,6 +83,10 @@ export class UpdateSubmissionDto {
   // Valid: 91234567, +6591234567, 81234567, +6581234567
   @Matches(/^(\+65)?[89]\d{7}$/, { message: 'Mobile number must be 8 digits starting with 8 or 9' })
   patientMobile?: string;
+  
+  @IsOptional()
+  @IsString()
+  drivingLicenseClass?: string;
   
   @IsOptional()
   @IsDateString()

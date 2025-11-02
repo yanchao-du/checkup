@@ -84,6 +84,7 @@ export interface MedicalSubmission {
   patientDateOfBirth: string;
   patientEmail?: string;
   patientMobile?: string;
+  drivingLicenseClass?: string;
   examinationDate?: string;
   status: SubmissionStatus;
   formData: Record<string, any>;

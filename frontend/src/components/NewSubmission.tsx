@@ -183,7 +183,7 @@ export function NewSubmission() {
           setPatientDateOfBirth(existing.patientDateOfBirth);
           setPatientEmail(existing.patientEmail || '');
           setPatientMobile(existing.patientMobile || '');
-          setDrivingLicenseClass((existing as any).drivingLicenseClass || '');
+          setDrivingLicenseClass(existing.drivingLicenseClass || '');
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
