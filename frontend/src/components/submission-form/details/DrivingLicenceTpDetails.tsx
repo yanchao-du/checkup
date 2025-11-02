@@ -10,10 +10,11 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
   const medicalHistory = data.medicalHistory || {};
   const amt = data.amt || {};
   const abnormalityChecklist = data.abnormalityChecklist || {};
+  const assessment = data.assessment || {};
 
-  // Helper to get checked declaration items with remarks
+  // Helper to get checked declaration items
   const getCheckedDeclarations = () => {
-    const items: Array<{ label: string; remarks?: string }> = [];
+    const items: string[] = [];
     const labels: Record<string, string> = {
       consultingPractitioner: 'Currently consulting a medical practitioner for a pre-existing or newly diagnosed medical condition',
       takingMedication: 'Currently taking medication for a pre-existing or newly diagnosed medical condition',
@@ -25,8 +26,7 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
     Object.entries(labels).forEach(([key, label]) => {
       if (medicalDeclaration[key]) {
-        const remarks = medicalDeclaration[`${key}Remarks`];
-        items.push({ label, remarks });
+        items.push(label);
       }
     });
 
@@ -103,54 +103,81 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
   return (
     <div className="space-y-6">
-      {/* Medical Declaration */}
+      {/* Medical Declaration by Patient */}
       {checkedDeclarations.length > 0 && (
         <div>
-          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical Declaration</h3>
-          <ul className="space-y-3 text-sm">
+          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical Declaration by Patient</h3>
+          <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
+          <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
             {checkedDeclarations.map((item, index) => (
-              <li key={index} className="ml-6">
-                <div className="flex items-start">
-                  <span className="text-amber-600 mr-2">•</span>
-                  <div className="flex-1">
-                    <p>{item.label}</p>
-                    {item.remarks && (
-                      <p className="text-gray-600 italic mt-1 ml-4">Remarks: {item.remarks}</p>
-                    )}
-                  </div>
-                </div>
-              </li>
+              <li key={index} className="text-amber-700">{item}</li>
             ))}
           </ul>
-          {medicalDeclaration.patientCertification && (
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-gray-600">
-                ✓ I hereby certify that I have fully and truthfully provided the above medical history
+          
+          {/* Remarks */}
+          {medicalDeclaration.remarks && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Remarks</h4>
+              <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">
+                {medicalDeclaration.remarks}
               </p>
+            </div>
+          )}
+
+          {/* Patient Certification */}
+          {medicalDeclaration.patientCertification && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+              <div className="p-3 rounded-md bg-green-50 border border-green-200">
+                <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+                <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+                <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                  <li>I have explained this declaration to the patient</li>
+                  <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                  <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                  <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+                </ul>
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Medical History */}
+      {/* Medical History of Patient */}
       {checkedHistoryItems.length > 0 && (
         <div>
-          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical History</h3>
-          <ul className="space-y-3 text-sm">
+          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical History of Patient</h3>
+          <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
             {checkedHistoryItems.map((item, index) => (
-              <li key={index} className="ml-6">
-                <div className="flex items-start">
-                  <span className="text-amber-600 mr-2">•</span>
-                  <div className="flex-1">
-                    <p>{item.label}</p>
-                    {item.remarks && (
-                      <p className="text-gray-600 italic mt-1 ml-4">Remarks: {item.remarks}</p>
-                    )}
-                  </div>
+              <li key={index} className="text-amber-700">
+                <div>
+                  <div className="font-medium">{item.label}</div>
+                  {item.remarks && (
+                    <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                      <span className="font-semibold">Remarks: </span>{item.remarks}
+                    </div>
+                  )}
                 </div>
               </li>
             ))}
           </ul>
+
+          {/* Patient Certification */}
+          {medicalHistory.patientCertification && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+              <div className="p-3 rounded-md bg-green-50 border border-green-200">
+                <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+                <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+                <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                  <li>I have explained this declaration to the patient</li>
+                  <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                  <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                  <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -213,21 +240,20 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
           </div>
         </div>
 
-        {/* Abnormalities */}
+        {/* Physical & Mental Health Assessment */}
         {abnormalityItems.length > 0 && (
-          <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment - Abnormalities Found</h4>
-            <ul className="space-y-3 text-sm">
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
+            <ul className="list-disc ml-6 space-y-3 text-sm">
               {abnormalityItems.map((item, index) => (
-                <li key={index} className="ml-6">
-                  <div className="flex items-start">
-                    <span className="text-amber-600 mr-2">•</span>
-                    <div className="flex-1">
-                      <p>{item.label}</p>
-                      {item.remarks && (
-                        <p className="text-gray-600 italic mt-1 ml-4">Remarks: {item.remarks}</p>
-                      )}
-                    </div>
+                <li key={index} className="text-red-700">
+                  <div>
+                    <div className="font-medium">{item.label}</div>
+                    {item.remarks && (
+                      <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                        <span className="font-semibold">Remarks: </span>{item.remarks}
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
@@ -236,47 +262,69 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
         )}
       </div>
 
-      {/* AMT Assessment */}
+      {/* Abbreviated Mental Test (AMT) */}
       {amt.score !== undefined && (
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-lg mb-3">Abbreviated Mental Test (AMT)</h3>
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Abbreviated Mental Test (AMT)</h3>
+          <div className="space-y-3">
+            <div className="flex items-center gap-8">
               <div>
-                <p className="text-sm text-gray-600">Total Score</p>
-                <p className="text-4xl font-bold text-blue-700">{amt.score || 0}/10</p>
-                <p className={`text-lg font-semibold mt-2 ${Number(amt.score) >= 8 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Number(amt.score) >= 8 ? '✓ Pass' : '✗ Fail'}
+                <p className="text-sm text-gray-600">Result</p>
+                <p className={`text-2xl font-bold ${Number(amt.score) >= 8 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Number(amt.score) >= 8 ? 'Pass' : 'Fail'}
                 </p>
               </div>
-              {Number(amt.score) < 8 && (
-                <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
-                  <p className="text-sm font-medium text-amber-800">
-                    ⚠️ Score less than 8 may indicate cognitive impairment
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm text-gray-600">Score</p>
+                <p className="text-2xl font-bold">{amt.score}/10</p>
+              </div>
             </div>
+            {Number(amt.score) < 8 && (
+              <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
+                <p className="text-sm font-medium text-amber-800">
+                  ⚠️ Score less than 8 may indicate cognitive impairment
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Medical Practitioner Declaration */}
-      {medicalDeclaration.practitionerCertification && (
-        <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
-          <h3 className="font-semibold text-lg mb-3">Medical Practitioner Declaration</h3>
-          <div className="text-sm">
-            <p className="text-gray-700">
-              ✓ I certify that I have examined the person named above and in my opinion he/she{' '}
-              <span className="font-semibold">
-                {data.passGeneralCondition === 'yes' 
-                  ? 'is physically and mentally fit' 
-                  : 'is NOT physically and mentally fit'
-                }
-              </span>
-              {' '}to have charge of a motor vehicle.
+      {/* Overall Result of Medical Examination */}
+      {assessment && (
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h3 className="font-semibold text-lg mb-4">Overall Result of Medical Examination</h3>
+          
+          {/* Fit to Drive */}
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Is the patient physically and mentally fit to drive a motor vehicle?
             </p>
+            {assessment.fitToDrive !== undefined && (
+              <div className="mt-3">
+                <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
+                  {assessment.fitToDrive ? '✓ YES - Patient is fit to drive' : '✗ NO - Patient is not fit to drive'}
+                </p>
+              </div>
+            )}
           </div>
+
+          {/* Medical Practitioner Declaration */}
+          {assessment.declarationAgreed && (
+            <div className="pt-4 border-t border-blue-200">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
+              <div className="bg-white p-3 rounded border border-blue-300">
+                <p className="text-green-700 font-medium mb-2">✓ Declaration confirmed</p>
+                <p className="text-sm leading-relaxed text-gray-700">
+                  I certify that I have today examined and identified the patient named above:
+                </p>
+                <ul className="ml-6 mt-2 space-y-2 text-sm leading-relaxed text-gray-700 list-disc">
+                  <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
+                  <li>The answers to the questions above are correct to the best of my knowledge.</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
