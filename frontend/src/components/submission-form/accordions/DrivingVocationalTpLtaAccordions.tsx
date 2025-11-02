@@ -5,7 +5,6 @@ import { MedicalDeclarationSection } from '../fields/MedicalDeclarationSection';
 import { MedicalHistorySection } from '../fields/MedicalHistorySection';
 import { AbbreviatedMentalTestSection } from '../fields/AbbreviatedMentalTestSection';
 import { VocationalLicenceLtaFields } from '../exam-forms/VocationalLicenceLtaFields';
-import { AssessmentSection } from '../fields/AssessmentSection';
 import { 
   validateMedicalDeclaration, 
   validateMedicalHistory, 
@@ -179,33 +178,7 @@ export function DrivingVocationalTpLtaAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('lta-vocational', 'assessment')}
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* Medical Practitioner Assessment */}
-      <AccordionItem value="assessment">
-        <AccordionTrigger isCompleted={completedSections.has('assessment')}>
-          <div className="flex items-center gap-2">
-            <span>Medical Practitioner Assessment</span>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-4">
-            <AssessmentSection 
-              formData={formData} 
-              onChange={onChange}
-              examType="DRIVING_VOCATIONAL_TP_LTA"
-            />
-            <div className="flex justify-end mt-4">
-              <Button 
-                type="button"
-                onClick={() => onContinue('assessment', 'summary')}
+                onClick={() => onContinue('lta-vocational', 'summary')}
               >
                 Continue to Summary
               </Button>

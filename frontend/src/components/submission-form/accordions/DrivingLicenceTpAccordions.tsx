@@ -4,7 +4,6 @@ import { CommonMedicalFields } from '../fields/CommonMedicalFields';
 import { MedicalDeclarationSection } from '../fields/MedicalDeclarationSection';
 import { MedicalHistorySection } from '../fields/MedicalHistorySection';
 import { AbbreviatedMentalTestSection } from '../fields/AbbreviatedMentalTestSection';
-import { AssessmentSection } from '../fields/AssessmentSection';
 import { 
   validateMedicalDeclaration, 
   validateMedicalHistory, 
@@ -156,33 +155,7 @@ export function DrivingLicenceTpAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('amt', 'assessment')}
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* Medical Practitioner Assessment */}
-      <AccordionItem value="assessment">
-        <AccordionTrigger isCompleted={completedSections.has('assessment')}>
-          <div className="flex items-center gap-2">
-            <span>Medical Practitioner Assessment</span>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-4">
-            <AssessmentSection 
-              formData={formData} 
-              onChange={onChange}
-              examType="DRIVING_LICENCE_TP"
-            />
-            <div className="flex justify-end mt-4">
-              <Button 
-                type="button"
-                onClick={() => onContinue('assessment', 'summary')}
+                onClick={() => onContinue('amt', 'summary')}
               >
                 Continue to Summary
               </Button>

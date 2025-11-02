@@ -12,6 +12,7 @@ interface DrivingLicenceTpSummaryProps {
   };
   examinationDate: string;
   onEdit?: (section: string) => void;
+  onChange?: (key: string, value: any) => void;
 }
 
 export function DrivingLicenceTpSummary({
@@ -19,6 +20,7 @@ export function DrivingLicenceTpSummary({
   patientInfo,
   examinationDate,
   onEdit,
+  onChange,
 }: DrivingLicenceTpSummaryProps) {
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
@@ -270,43 +272,81 @@ export function DrivingLicenceTpSummary({
         </div>
       </div>
 
-      {/* Assessment */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-slate-900">Medical Practitioner Assessment</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('assessment')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        <div className="space-y-3 text-sm">
-          <div>
-            <span className="text-gray-600">Fit to Drive:</span>
-            <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
-              {assessment.fitToDrive ? '✓ YES' : '✗ NO'}
-            </p>
+      {/* Overall Result of Medical Examination */}
+      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+        <h4 className="text-base font-semibold text-slate-900 mb-4">Overall Result of Medical Examination</h4>
+        
+        {/* Fit to Drive Question */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-gray-700 mb-3">
+            Is the patient physically and mentally fit to drive a motor vehicle? <span className="text-red-500">*</span>
+          </p>
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="fitToDrive"
+                value="true"
+                checked={assessment.fitToDrive === true}
+                onChange={() => {
+                  if (onChange) {
+                    onChange('assessment', { ...assessment, fitToDrive: true });
+                  }
+                }}
+                className="h-4 w-4"
+              />
+              <span className="text-sm font-medium">Yes</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="fitToDrive"
+                value="false"
+                checked={assessment.fitToDrive === false}
+                onChange={() => {
+                  if (onChange) {
+                    onChange('assessment', { ...assessment, fitToDrive: false });
+                  }
+                }}
+                className="h-4 w-4"
+              />
+              <span className="text-sm font-medium">No</span>
+            </label>
           </div>
-          <div>
-            <span className="text-gray-600">Requires Specialist Review:</span>
-            <p className="font-medium">{assessment.requiresSpecialistReview ? 'Yes' : 'No'}</p>
-          </div>
-          {assessment.requiresSpecialistReview && assessment.specialistType && (
-            <div>
-              <span className="text-gray-600">Specialist Type:</span>
-              <p className="font-medium">{assessment.specialistType}</p>
+          {assessment.fitToDrive !== undefined && (
+            <div className="mt-3">
+              <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
+                {assessment.fitToDrive ? '✓ YES - Patient is fit to drive' : '✗ NO - Patient is not fit to drive'}
+              </p>
             </div>
           )}
-          <div>
-            <span className="text-gray-600">Remarks:</span>
-            <p className="font-medium whitespace-pre-wrap">{assessment.remarks || '-'}</p>
-          </div>
+        </div>
+
+        {/* Medical Practitioner Declaration */}
+        <div className="pt-4 border-t border-blue-200">
+          <h5 className="font-semibold mb-3 text-gray-900">Medical Practitioner Declaration</h5>
+          <p className="text-sm text-gray-700 leading-relaxed mb-3">
+            I certify that I have today examined and identified the patient named above:
+          </p>
+          <ul className="ml-6 mb-4 space-y-2 text-sm text-gray-700 list-disc">
+            <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
+            <li>The answers to the questions above are correct to the best of my knowledge.</li>
+          </ul>
+          <label className="flex items-start space-x-3 cursor-pointer bg-white p-3 rounded border border-blue-300">
+            <input
+              type="checkbox"
+              checked={assessment.declarationAgreed === true}
+              onChange={(e) => {
+                if (onChange) {
+                  onChange('assessment', { ...assessment, declarationAgreed: e.target.checked });
+                }
+              }}
+              className="h-4 w-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm font-medium text-gray-900">
+              I agree to the above declaration <span className="text-red-500">*</span>
+            </span>
+          </label>
         </div>
       </div>
         </CardContent>

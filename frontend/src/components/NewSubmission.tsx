@@ -1388,16 +1388,11 @@ export function NewSubmission() {
                   dateOfBirth={patientDateOfBirth}
                   examinationDate={examinationDate}
                   onContinue={(current, next) => {
-                    if (current === 'assessment') {
-                      if (validateExamSpecific()) {
-                        setCompletedSections(prev => new Set(prev).add(current));
-                        setShowSummary(true);
-                        setActiveAccordion(next);
-                      }
-                    } else {
-                      setCompletedSections(prev => new Set(prev).add(current));
-                      setActiveAccordion(next);
+                    setCompletedSections(prev => new Set(prev).add(current));
+                    if (next === 'summary') {
+                      setShowSummary(true);
                     }
+                    setActiveAccordion(next);
                   }}
                 />
               )}
@@ -1733,6 +1728,7 @@ export function NewSubmission() {
                           drivingLicenseClass: drivingLicenseClass,
                         }}
                         examinationDate={examinationDate}
+                        onChange={handleFormDataChange}
                         onEdit={(section) => {
                           setActiveAccordion(section);
                         }}
@@ -1750,7 +1746,7 @@ export function NewSubmission() {
                               setShowSubmitDialog(true);
                             }
                           }}
-                          disabled={isSaving}
+                          disabled={isSaving || !formData.assessment?.declarationAgreed}
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP' : 'Route for Approval'}
                         </Button>
@@ -1795,7 +1791,7 @@ export function NewSubmission() {
                               setShowSubmitDialog(true);
                             }
                           }}
-                          disabled={isSaving}
+                          disabled={isSaving || !formData.assessment?.declarationAgreed}
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP & LTA' : 'Route for Approval'}
                         </Button>
@@ -1839,7 +1835,7 @@ export function NewSubmission() {
                               setShowSubmitDialog(true);
                             }
                           }}
-                          disabled={isSaving}
+                          disabled={isSaving || !formData.assessment?.declarationAgreed}
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to LTA' : 'Route for Approval'}
                         </Button>
