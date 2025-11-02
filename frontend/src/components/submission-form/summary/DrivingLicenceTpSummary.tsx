@@ -299,38 +299,85 @@ export function DrivingLicenceTpSummary({
               </Button>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-4 text-sm">
+          <div className="space-y-4">
+            {/* Physical Measurements */}
             <div>
-              <span className="text-gray-600">Height:</span>
-              <p className="font-medium">{formData.height || '-'} cm</p>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical Measurements</h4>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Height:</span>
+                  <p className="font-medium">{formData.height || '-'} cm</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Weight:</span>
+                  <p className="font-medium">{formData.weight || '-'} kg</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">BMI:</span>
+                  <p className="font-medium">
+                    {formData.height && formData.weight
+                      ? ((formData.weight / ((formData.height / 100) ** 2)).toFixed(1))
+                      : '-'}
+                  </p>
+                </div>
+              </div>
             </div>
+
+            {/* Cardiovascular Assessment */}
             <div>
-              <span className="text-gray-600">Weight:</span>
-              <p className="font-medium">{formData.weight || '-'} kg</p>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Cardiovascular Assessment</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Blood Pressure:</span>
+                  <p className="font-medium">{formData.bloodPressure || '-'} mmHg</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Pulse:</span>
+                  <p className="font-medium">{formData.pulse || '-'} bpm</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">S1_S2 Reading:</span>
+                  <p className="font-medium">{formData.s1S2Reading || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Murmurs:</span>
+                  <p className="font-medium">{formData.murmurs || '-'}</p>
+                </div>
+              </div>
             </div>
+
+            {/* Vision Assessment */}
             <div>
-              <span className="text-gray-600">BMI:</span>
-              <p className="font-medium">
-                {formData.height && formData.weight
-                  ? ((formData.weight / ((formData.height / 100) ** 2)).toFixed(1))
-                  : '-'}
-              </p>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Vision Assessment</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Optical Aids:</span>
+                  <p className="font-medium">{formData.opticalAids === 'yes' ? 'Yes' : formData.opticalAids === 'no' ? 'No' : '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Visual Acuity:</span>
+                  <p className="font-medium">{formData.visualAcuity || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Near Vision (RE):</span>
+                  <p className="font-medium">{formData.nearVisionRE || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Near Vision (LE):</span>
+                  <p className="font-medium">{formData.nearVisionLE || '-'}</p>
+                </div>
+              </div>
             </div>
+
+            {/* General Condition */}
             <div>
-              <span className="text-gray-600">Blood Pressure:</span>
-              <p className="font-medium">{formData.bloodPressure || '-'} mmHg</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Pulse:</span>
-              <p className="font-medium">{formData.pulse || '-'} bpm</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Visual Acuity:</span>
-              <p className="font-medium">{formData.visualAcuity || '-'}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Hearing Test:</span>
-              <p className="font-medium">{formData.hearingTest || '-'}</p>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">General Condition</h4>
+              <div className="text-sm">
+                <span className="text-gray-600">Pass General Condition:</span>
+                <p className={`font-medium inline ml-2 ${formData.passGeneralCondition === 'yes' ? 'text-green-600' : formData.passGeneralCondition === 'no' ? 'text-red-600' : ''}`}>
+                  {formData.passGeneralCondition === 'yes' ? '✓ Yes' : formData.passGeneralCondition === 'no' ? '✗ No' : '-'}
+                </p>
+              </div>
             </div>
           </div>
           
