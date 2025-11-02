@@ -300,29 +300,6 @@ export function DrivingLicenceTpSummary({
             )}
           </div>
           <div className="space-y-4">
-            {/* Physical Measurements */}
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical Measurements</h4>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Height:</span>
-                  <p className="font-medium">{formData.height || '-'} cm</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Weight:</span>
-                  <p className="font-medium">{formData.weight || '-'} kg</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">BMI:</span>
-                  <p className="font-medium">
-                    {formData.height && formData.weight
-                      ? ((formData.weight / ((formData.height / 100) ** 2)).toFixed(1))
-                      : '-'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Cardiovascular Assessment */}
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Cardiovascular Assessment</h4>
@@ -382,16 +359,18 @@ export function DrivingLicenceTpSummary({
           </div>
           
           {/* Abnormality Checklist */}
-          {abnormalities.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Abnormalities Observed</h4>
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Abnormalities Observed</h4>
+            {abnormalities.length > 0 ? (
               <ul className="list-disc list-inside space-y-1 text-sm">
                 {abnormalities.map((item, index) => (
                   <li key={index} className="text-red-700">⚠ {item}</li>
                 ))}
               </ul>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-gray-600 italic">No abnormalities observed</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
