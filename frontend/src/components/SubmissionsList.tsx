@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { ExamTypeFilter } from './ExamTypeFilter';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import {
   Table,
@@ -152,44 +153,7 @@ export function SubmissionsList() {
                 />
               </div>
               <div className="space-y-2">
-                <Select value={filterExamType} onValueChange={setFilterExamType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Exam Types</SelectItem>
-                    <SelectItem value="SIX_MONTHLY_MDW">
-                      MDW Six-monthly (MOM)
-                    </SelectItem>
-                    <SelectItem value="SIX_MONTHLY_FMW">
-                      FMW Six-monthly (MOM)
-                    </SelectItem>
-                    <SelectItem value="WORK_PERMIT">
-                      Work Permit (MOM)
-                    </SelectItem>
-                    <SelectItem value="AGED_DRIVERS">
-                      Aged Drivers (SPF)
-                    </SelectItem>
-                    <SelectItem value="DRIVING_LICENCE_TP">
-                      Driving Licence (TP)
-                    </SelectItem>
-                    <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-                      Driving Vocational (TP/LTA)
-                    </SelectItem>
-                    <SelectItem value="VOCATIONAL_LICENCE_LTA">
-                      Vocational Licence (LTA)
-                    </SelectItem>
-                    <SelectItem value="PR_MEDICAL">
-                      PR Medical (ICA)
-                    </SelectItem>
-                    <SelectItem value="STUDENT_PASS_MEDICAL">
-                      Student Pass (ICA)
-                    </SelectItem>
-                    <SelectItem value="LTVP_MEDICAL">
-                      LTVP (ICA)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <ExamTypeFilter value={filterExamType} onValueChange={setFilterExamType} />
               </div>
             </div>
           ) : (
@@ -222,44 +186,7 @@ export function SubmissionsList() {
 
             <div className="space-y-2">
               {/* <label className="text-sm text-slate-700">Exam Type</label> */}
-              <Select value={filterExamType} onValueChange={setFilterExamType}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Exam Types</SelectItem>
-                  <SelectItem value="SIX_MONTHLY_MDW">
-                    MDW Six-monthly (MOM)
-                  </SelectItem>
-                  <SelectItem value="SIX_MONTHLY_FMW">
-                    FMW Six-monthly (MOM)
-                  </SelectItem>
-                  <SelectItem value="WORK_PERMIT">
-                    Work Permit (MOM)
-                  </SelectItem>
-                  <SelectItem value="AGED_DRIVERS">
-                    Aged Drivers (SPF)
-                  </SelectItem>
-                  <SelectItem value="DRIVING_LICENCE_TP">
-                    Driving Licence (TP)
-                  </SelectItem>
-                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-                    Driving Vocational (TP/LTA)
-                  </SelectItem>
-                  <SelectItem value="VOCATIONAL_LICENCE_LTA">
-                    Vocational Licence (LTA)
-                  </SelectItem>
-                  <SelectItem value="PR_MEDICAL">
-                    PR Medical (ICA)
-                  </SelectItem>
-                  <SelectItem value="STUDENT_PASS_MEDICAL">
-                    Student Pass (ICA)
-                  </SelectItem>
-                  <SelectItem value="LTVP_MEDICAL">
-                    LTVP (ICA)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <ExamTypeFilter value={filterExamType} onValueChange={setFilterExamType} />
             </div>
           </div>
             </>
