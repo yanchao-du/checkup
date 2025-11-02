@@ -23,6 +23,7 @@ export function AMTRequirementSection({
   const [isAMTRequired, setIsAMTRequired] = useState(false);
   const [requirementReason, setRequirementReason] = useState<string[]>([]);
   const [needsAdditionalInfo, setNeedsAdditionalInfo] = useState(false);
+  const [canMakeDetermination, setCanMakeDetermination] = useState(false);
   
   // Check if questions have been shown (persisted in formData)
   const hasShownPrivateDrivingInstructor = formData.hasShownPrivateDrivingInstructor || false;
@@ -132,6 +133,7 @@ export function AMTRequirementSection({
     setIsAMTRequired(required);
     setRequirementReason(reasons);
     setNeedsAdditionalInfo(needsMoreInfo);
+    setCanMakeDetermination(!needsMoreInfo); // Can only make determination if we don't need more info
   }, [drivingLicenseClass, dateOfBirth, examinationDate, cognitiveImpairment, formData]);
 
   return (
@@ -225,34 +227,36 @@ export function AMTRequirementSection({
         </div>
       )}
 
-      {/* AMT Requirement Result */}
-      <div className={`p-4 rounded-lg border ${isAMTRequired ? 'bg-yellow-50 border-yellow-300' : 'bg-green-50 border-green-300'}`}>
-        <div className="flex items-start gap-3">
-          <div className={`text-2xl ${isAMTRequired ? 'text-yellow-600' : 'text-green-600'}`}>
-            {isAMTRequired ? '⚠️' : '✓'}
-          </div>
-          <div className="flex-1">
-            <p className={`font-semibold ${isAMTRequired ? 'text-yellow-800' : 'text-green-800'}`}>
-              {isAMTRequired ? 'AMT is REQUIRED' : 'AMT is NOT required'}
-            </p>
-            {isAMTRequired && requirementReason.length > 0 && (
-              <ul className="mt-2 text-sm text-yellow-700 space-y-1">
-                {requirementReason.map((reason, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="mr-2">•</span>
-                    <span>{reason}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {!isAMTRequired && (
-              <p className="mt-1 text-sm text-green-700">
-                Patient does not meet any criteria for AMT requirement.
+      {/* AMT Requirement Result - only show when we can make a determination */}
+      {canMakeDetermination && (
+        <div className={`p-4 rounded-lg border ${isAMTRequired ? 'bg-yellow-50 border-yellow-300' : 'bg-green-50 border-green-300'}`}>
+          <div className="flex items-start gap-3">
+            <div className={`text-2xl ${isAMTRequired ? 'text-yellow-600' : 'text-green-600'}`}>
+              {isAMTRequired ? '⚠️' : '✓'}
+            </div>
+            <div className="flex-1">
+              <p className={`font-semibold ${isAMTRequired ? 'text-yellow-800' : 'text-green-800'}`}>
+                {isAMTRequired ? 'AMT is REQUIRED' : 'AMT is NOT required'}
               </p>
-            )}
+              {isAMTRequired && requirementReason.length > 0 && (
+                <ul className="mt-2 text-sm text-yellow-700 space-y-1">
+                  {requirementReason.map((reason, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {!isAMTRequired && (
+                <p className="mt-1 text-sm text-green-700">
+                  Patient does not meet any criteria for AMT requirement.
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Data Summary */}
       <div className="text-xs text-gray-600 bg-white p-3 rounded border border-gray-200">
