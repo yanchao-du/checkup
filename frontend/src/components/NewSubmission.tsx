@@ -306,6 +306,26 @@ export function NewSubmission() {
     };
   }, [setHasUnsavedChanges]);
 
+  // Scroll accordion into view when it expands
+  useEffect(() => {
+    if (activeAccordion) {
+      // Small delay to ensure accordion is expanded before scrolling
+      const timer = setTimeout(() => {
+        // Find the accordion item with the matching value
+        const accordionElement = document.querySelector(`[data-state="open"][data-radix-collection-item]`);
+        if (accordionElement) {
+          // Scroll to the accordion header
+          const header = accordionElement.querySelector('[data-radix-accordion-trigger]');
+          if (header) {
+            header.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+          }
+        }
+      }, 150);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeAccordion]);
+
   // Monitor certification checkboxes and update completed sections
   useEffect(() => {
     setCompletedSections(prev => {
