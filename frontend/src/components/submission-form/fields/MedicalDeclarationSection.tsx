@@ -141,19 +141,29 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
         <Label className="text-sm font-medium">
           Declaration by Patient to Medical Practitioner <span className="text-red-500">*</span>
         </Label>
-        <div className="flex items-start space-x-3 bg-blue-50 p-4 rounded-md">
-          <Checkbox
-            id="patientCertification"
-            checked={declaration.patientCertification || false}
-            onCheckedChange={(checked) => handlePatientCertificationChange(checked as boolean)}
-            className="mt-1 bg-white border-2 border-gray-300"
-          />
-          <Label
-            htmlFor="patientCertification"
-            className="text-sm font-normal cursor-pointer leading-relaxed"
-          >
-            I hereby certify that I have explained this declaration to the patient, and the patient has confirmed that he / she has carefully considered his / her responses and believe them to be complete and correct. The patient has declared to me that he / she has not withheld any relevant information or made any misleading statement. He / she has provided his / her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him / her.
-          </Label>
+        <div className="bg-blue-50 p-4 rounded-md">
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="patientCertification"
+              checked={declaration.patientCertification || false}
+              onCheckedChange={(checked) => handlePatientCertificationChange(checked as boolean)}
+              className="mt-1 bg-white border-2 border-gray-300"
+            />
+            <div className="flex-1">
+              <Label
+                htmlFor="patientCertification"
+                className="text-sm font-normal cursor-pointer leading-relaxed block mb-2"
+              >
+                I hereby certify that:
+              </Label>
+              <ul className="text-sm space-y-1.5 ml-4 list-disc list-outside">
+                <li>I have explained this declaration to the patient</li>
+                <li>The patient has confirmed that he / she has carefully considered his / her responses and believe them to be complete and correct</li>
+                <li>The patient has declared to me that he / she has not withheld any relevant information or made any misleading statement</li>
+                <li>He / she has provided his / her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him / her</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
