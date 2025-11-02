@@ -123,6 +123,8 @@ model MedicalSubmission {
   patientName      String            @map("patient_name")
   patientNric      String            @map("patient_nric")
   patientDob       DateTime?         @map("patient_dob") @db.Date
+  patientEmail     String?           @map("patient_email")
+  patientMobile    String?           @map("patient_mobile")
   examinationDate  DateTime?         @map("examination_date") @db.Date
   status           SubmissionStatus  @default(draft)
   formData         Json              @map("form_data")

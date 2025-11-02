@@ -91,6 +91,8 @@ export function NewSubmission() {
   const [patientNric, setPatientNric] = useState('');
   const [nricError, setNricError] = useState<string | null>(null);
   const [patientDateOfBirth, setPatientDateOfBirth] = useState('');
+  const [patientEmail, setPatientEmail] = useState('');
+  const [patientMobile, setPatientMobile] = useState('');
   const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -112,6 +114,7 @@ export function NewSubmission() {
   const [policeReportError, setPoliceReportError] = useState<string | null>(null);
   const [remarksError, setRemarksError] = useState<string | null>(null);
   const [examinationDateError, setExaminationDateError] = useState<string | null>(null);
+  const [examinationDateBlurred, setExaminationDateBlurred] = useState(false);
   const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
   const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
@@ -179,6 +182,8 @@ export function NewSubmission() {
           setPatientName(existing.patientName);
           setPatientNric(existing.patientNric);
           setPatientDateOfBirth(existing.patientDateOfBirth);
+          setPatientEmail(existing.patientEmail || '');
+          setPatientMobile(existing.patientMobile || '');
           setDrivingLicenseClass((existing as any).drivingLicenseClass || '');
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
@@ -841,6 +846,8 @@ export function NewSubmission() {
         patientName,
         patientNric,
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
+        ...(patientEmail && { patientEmail }), // Only include if not empty
+        ...(patientMobile && { patientMobile }), // Only include if not empty
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
@@ -887,6 +894,8 @@ export function NewSubmission() {
         patientName,
         patientNric,
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
+        ...(patientEmail && { patientEmail }), // Only include if not empty
+        ...(patientMobile && { patientMobile }), // Only include if not empty
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData,
@@ -1084,6 +1093,32 @@ export function NewSubmission() {
                         onChange={setPatientDateOfBirth}
                       />
                     )}
+                    {isDriverExamType(examType) && (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="patientEmail">Email Address</Label>
+                          <Input
+                            id="patientEmail"
+                            name="patientEmail"
+                            type="email"
+                            value={patientEmail}
+                            onChange={(e) => setPatientEmail(e.target.value)}
+                            placeholder="example@email.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="patientMobile">Mobile Number</Label>
+                          <Input
+                            id="patientMobile"
+                            name="patientMobile"
+                            type="tel"
+                            value={patientMobile}
+                            onChange={(e) => setPatientMobile(e.target.value)}
+                            placeholder="+65 9123 4567"
+                          />
+                        </div>
+                      </>
+                    )}
                     {(examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
                       <DrivingLicenceClassField
                         value={drivingLicenseClass}
@@ -1099,15 +1134,15 @@ export function NewSubmission() {
                               <p className="text-lg font-semibold text-slate-900">
                                 {formatAge(calculateAge(patientDateOfBirth, examinationDate))}
                               </p>
-                            ) : (
+                            ) : examinationDateBlurred ? (
                               <p className="text-sm text-red-600 font-medium">
                                 Invalid: Examination date is before date of birth
                               </p>
-                            )}
+                            ) : null}
                           </div>
                           {(examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && drivingLicenseClass && calculateAge(patientDateOfBirth, examinationDate) && (
                             <div>
-                              {drivingLicenceTimingError && (
+                              {examinationDateBlurred && drivingLicenceTimingError && (
                                 <div className="flex items-center gap-2 text-sm">
                                   <div className="w-2 h-2 rounded-full bg-red-500"></div>
                                   <span className="text-red-700 font-medium">Outside valid period</span>
@@ -1129,16 +1164,17 @@ export function NewSubmission() {
                           setExaminationDate(e.target.value);
                           if (examinationDateError) setExaminationDateError(null);
                         }}
-                        aria-invalid={!!examinationDateError || !!drivingLicenceTimingError}
-                        className={`${examinationDateError || drivingLicenceTimingError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+                        onBlur={() => setExaminationDateBlurred(true)}
+                        aria-invalid={!!examinationDateError || (examinationDateBlurred && !!drivingLicenceTimingError)}
+                        className={`${examinationDateError || (examinationDateBlurred && drivingLicenceTimingError) ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
                       />
                       {examinationDateError && (
                         <InlineError>{examinationDateError}</InlineError>
                       )}
-                      {drivingLicenceTimingError && (
+                      {examinationDateBlurred && drivingLicenceTimingError && (
                         <InlineError>{drivingLicenceTimingError}</InlineError>
                       )}
-                      {!drivingLicenceTimingError && drivingLicenceTimingWarning && (
+                      {examinationDateBlurred && !drivingLicenceTimingError && drivingLicenceTimingWarning && (
                         <p className="text-sm text-amber-600">{drivingLicenceTimingWarning}</p>
                       )}
                     </div>

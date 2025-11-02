@@ -16,6 +16,14 @@ export class CreateSubmissionDto {
   patientDateOfBirth?: string;
   
   @IsOptional()
+  @IsString()
+  patientEmail?: string;
+  
+  @IsOptional()
+  @IsString()
+  patientMobile?: string;
+  
+  @IsOptional()
   @IsDateString()
   examinationDate?: string;
   
@@ -47,6 +55,14 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsDateString()
   patientDateOfBirth?: string;
+  
+  @IsOptional()
+  @IsString()
+  patientEmail?: string;
+  
+  @IsOptional()
+  @IsString()
+  patientMobile?: string;
   
   @IsOptional()
   @IsDateString()

@@ -185,6 +185,18 @@ export function ViewSubmission() {
                     </p>
                   </div>
                 )}
+                {isDriverExamType(submission.examType) && submission.patientEmail && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Email Address</p>
+                    <p className="text-slate-900">{submission.patientEmail}</p>
+                  </div>
+                )}
+                {isDriverExamType(submission.examType) && submission.patientMobile && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Mobile Number</p>
+                    <p className="text-slate-900">{submission.patientMobile}</p>
+                  </div>
+                )}
                 {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (submission as any).drivingLicenseClass && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Class of Driving Licence</p>
