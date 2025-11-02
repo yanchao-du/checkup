@@ -442,7 +442,7 @@ export function DrivingLicenceTpSummary({
             )}
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-8">
               <div>
                 <p className="text-sm text-gray-600">Total Score</p>
                 <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
