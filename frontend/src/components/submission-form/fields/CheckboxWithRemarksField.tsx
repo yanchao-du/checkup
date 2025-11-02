@@ -92,6 +92,7 @@ export function CheckboxWithRemarksField({
           variant="outline"
           size="sm"
           onClick={handleClearAll}
+          className="border-blue-500 text-blue-500 hover:bg-blue-50"
         >
           {clearAllButtonText}
         </Button>

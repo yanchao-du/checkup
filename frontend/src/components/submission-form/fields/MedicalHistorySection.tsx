@@ -155,7 +155,7 @@ export function MedicalHistorySection({ formData, onChange, errors, onValidate }
         <p className="text-sm text-gray-600">
           Does the patient have a history of, or is currently suffering from, any of the following?
         </p>
-        <Button type="button" variant="outline" size="sm" onClick={handleAllNormal}>
+        <Button type="button" variant="outline" size="sm" onClick={handleAllNormal} className="border-blue-500 text-blue-500 hover:bg-blue-50">
           Clear All
         </Button>
       </div>

@@ -88,7 +88,7 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
         <p className="text-sm text-gray-600">
           Please indicate if the patient is currently experiencing or has experienced any of the following <b>in the past 6 months:</b>
         </p>
-        <Button type="button" variant="outline" size="sm" onClick={handleClearAll}>
+        <Button type="button" variant="outline" size="sm" onClick={handleClearAll} className="border-blue-500 text-blue-500 hover:bg-blue-50">
           Clear All
         </Button>
       </div>

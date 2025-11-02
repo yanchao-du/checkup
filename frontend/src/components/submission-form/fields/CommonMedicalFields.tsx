@@ -260,7 +260,7 @@ export function CommonMedicalFields({
       {/* Abnormality Checklist Section - Only for driver exams */}
       {showAbnormalityChecklist && (
         <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <h3 className="text-sm font-semibold text-gray-700">Physical Abnormalities</h3>
+          <h3 className="text-sm font-semibold text-gray-700">Physical & Mental Health Assessment</h3>
           <AbnormalityChecklistField
             value={formData.abnormalityChecklist || {}}
             onChange={(value) => onChange('abnormalityChecklist', value)}
