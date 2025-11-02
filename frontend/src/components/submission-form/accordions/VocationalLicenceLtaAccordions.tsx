@@ -76,7 +76,7 @@ export function VocationalLicenceLtaAccordions({
                 disabled={!isPatientCertificationChecked()}
                 onClick={() => {
                   if (validateMedicalDeclaration()) {
-                    onContinue('medical-declaration', 'general-medical');
+                    onContinue('medical-declaration', 'medical-history');
                   }
                 }}
               >
@@ -87,9 +87,31 @@ export function VocationalLicenceLtaAccordions({
         </AccordionContent>
       </AccordionItem>
 
+      {/* Medical History of Patient */}
+      <AccordionItem value="medical-history">
+        <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!completedSections.has('medical-declaration')}>
+          <div className="flex items-center gap-2">
+            <span>Medical History of Patient</span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-4">
+            <MedicalHistorySection formData={formData} onChange={onChange} />
+            <div className="flex justify-end mt-4">
+              <Button 
+                type="button"
+                onClick={() => onContinue('medical-history', 'general-medical')}
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+
       {/* General Medical Examination */}
       <AccordionItem value="general-medical">
-        <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!completedSections.has('medical-declaration')}>
+        <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!completedSections.has('medical-history')}>
           <div className="flex items-center gap-2">
             <span>General Medical Examination</span>
           </div>
@@ -100,29 +122,7 @@ export function VocationalLicenceLtaAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('general-medical', 'medical-history')}
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* Medical History of Examinee */}
-      <AccordionItem value="medical-history">
-        <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!completedSections.has('general-medical')}>
-          <div className="flex items-center gap-2">
-            <span>Medical History of Examinee</span>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-4">
-            <MedicalHistorySection formData={formData} onChange={onChange} />
-            <div className="flex justify-end mt-4">
-              <Button 
-                type="button"
-                onClick={() => onContinue('medical-history', 'lta-vocational')}
+                onClick={() => onContinue('general-medical', 'lta-vocational')}
               >
                 Continue
               </Button>
@@ -133,7 +133,7 @@ export function VocationalLicenceLtaAccordions({
 
       {/* LTA Vocational Licence Medical Details */}
       <AccordionItem value="lta-vocational">
-        <AccordionTrigger isCompleted={completedSections.has('lta-vocational')} isDisabled={!completedSections.has('medical-history')}>
+        <AccordionTrigger isCompleted={completedSections.has('lta-vocational')} isDisabled={!completedSections.has('general-medical')}>
           <div className="flex items-center gap-2">
             <span>LTA Vocational Licence Medical Details</span>
           </div>

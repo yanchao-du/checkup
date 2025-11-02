@@ -52,7 +52,7 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600">
-          Does the examinee have any pre-existing medical conditions?
+          Has the patient had any history of or suffering from any of the following?
         </p>
         <Button type="button" variant="outline" size="sm" onClick={handleAllNormal}>
           All Normal
