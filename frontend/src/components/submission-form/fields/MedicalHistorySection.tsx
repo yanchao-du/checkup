@@ -1,5 +1,4 @@
 import { Label } from '../../ui/label';
-import { Input } from '../../ui/input';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 
@@ -18,41 +17,58 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
     });
   };
 
-  const handleOtherTextChange = (value: string) => {
-    onChange('medicalHistory', {
-      ...history,
-      other: value,
-    });
-  };
-
   const handleAllNormal = () => {
     onChange('medicalHistory', {
-      cardiovascular: false,
-      neurological: false,
-      psychiatric: false,
+      palpitationsBreathlessness: false,
+      asthmaBronchitisCopd: false,
+      highBloodPressure: false,
+      heartAttackDisease: false,
+      chestPain: false,
+      psychiatricIllness: false,
+      headachesMigraine: false,
+      strokeTia: false,
+      epilepsySeizuresFaints: false,
+      headInjuryConcussion: false,
+      muscleDiseaseWeakness: false,
+      arthritisJointDisease: false,
+      eyeTrouble: false,
+      difficultySeeing: false,
+      deafness: false,
       diabetes: false,
-      vision: false,
-      hearing: false,
-      musculoskeletal: false,
+      thyroidDisease: false,
+      surgicalOperations: false,
+      otherRelevant: false,
       other: '',
     });
   };
 
   const historyItems = [
-    { id: 'cardiovascular', label: 'Cardiovascular disease (heart attack, angina, hypertension)' },
-    { id: 'neurological', label: 'Neurological disorder (stroke, epilepsy, MS)' },
-    { id: 'psychiatric', label: 'Psychiatric condition (depression, anxiety, psychosis)' },
-    { id: 'diabetes', label: 'Diabetes mellitus (Type 1 or 2)' },
-    { id: 'vision', label: 'Vision problems (glaucoma, cataracts, retinopathy)' },
-    { id: 'hearing', label: 'Hearing problems (deafness, tinnitus)' },
-    { id: 'musculoskeletal', label: 'Musculoskeletal disorder (arthritis, amputation)' },
+    { id: 'palpitationsBreathlessness', label: 'Palpitations or breathlessness' },
+    { id: 'asthmaBronchitisCopd', label: 'Asthma / bronchitis / COPD' },
+    { id: 'highBloodPressure', label: 'High blood pressure' },
+    { id: 'heartAttackDisease', label: 'Heart attack / disease' },
+    { id: 'chestPain', label: 'Chest pain on exertion or at night' },
+    { id: 'psychiatricIllness', label: 'Psychiatric illness' },
+    { id: 'headachesMigraine', label: 'Severe headaches or migraine' },
+    { id: 'strokeTia', label: 'Stroke / TIA' },
+    { id: 'epilepsySeizuresFaints', label: 'Epilepsy, seizures or fits of any kind / faints' },
+    { id: 'headInjuryConcussion', label: 'Head injury or concussion' },
+    { id: 'muscleDiseaseWeakness', label: 'Muscle disease or weakness' },
+    { id: 'arthritisJointDisease', label: 'Arthritis / joint disease / numbness in hands and fingers' },
+    { id: 'eyeTrouble', label: 'Eye trouble of any kind (e.g. cataracts, glaucoma, strabismus)' },
+    { id: 'difficultySeeing', label: 'Difficulty seeing in the dark' },
+    { id: 'deafness', label: 'Deafness' },
+    { id: 'diabetes', label: 'Diabetes' },
+    { id: 'thyroidDisease', label: 'Thyroid disease' },
+    { id: 'surgicalOperations', label: 'Surgical operations' },
+    { id: 'otherRelevant', label: 'Any relevant medical problems or injuries not mentioned above' },
   ];
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600">
-          Has the patient had any history of or suffering from any of the following?
+          Does the patient have a history of, or is currently suffering from, any of the following?
         </p>
         <Button type="button" variant="outline" size="sm" onClick={handleAllNormal}>
           All Normal
@@ -75,43 +91,6 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
             </Label>
           </div>
         ))}
-
-        {/* Other conditions with text field */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="otherHistoryCheck"
-              checked={!!history.other}
-              onCheckedChange={(checked) => {
-                if (!checked) {
-                  handleOtherTextChange('');
-                }
-              }}
-            />
-            <Label
-              htmlFor="otherHistoryCheck"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Other conditions
-            </Label>
-          </div>
-          {(history.other !== undefined && history.other !== '') && (
-            <Input
-              id="otherHistory"
-              type="text"
-              placeholder="Please specify..."
-              maxLength={200}
-              value={history.other || ''}
-              onChange={(e) => handleOtherTextChange(e.target.value)}
-              className="ml-6"
-            />
-          )}
-          {history.other && (
-            <p className="text-xs text-gray-500 ml-6">
-              {history.other.length}/200 characters
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );
