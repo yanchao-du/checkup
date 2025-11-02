@@ -221,9 +221,9 @@ export function DrivingLicenceTpSummary({
           <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
           {checkedDeclarations.length > 0 ? (
             <>
-              <ul className="list-disc list-inside space-y-1 text-sm mb-4">
+              <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
                 {checkedDeclarations.map((item, index) => (
-                  <li key={index} className="text-amber-700">✓ {item}</li>
+                  <li key={index} className="text-amber-700">{item}</li>
                 ))}
               </ul>
               
