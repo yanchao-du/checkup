@@ -96,7 +96,7 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
             />
             <Label
               htmlFor={item.id}
-              className="text-sm font-normal cursor-pointer"
+              className={`text-sm cursor-pointer ${declaration[item.id] ? 'font-semibold' : 'font-normal'}`}
             >
               {item.label}
             </Label>
