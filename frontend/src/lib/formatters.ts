@@ -13,6 +13,12 @@ export function formatExamType(examType: ExamType): string {
       return 'Work Permit (MOM)';
     case 'AGED_DRIVERS':
       return 'Aged Drivers (SPF)';
+    case 'DRIVING_LICENCE_TP':
+      return 'Driving Licence (TP)';
+    case 'DRIVING_VOCATIONAL_TP_LTA':
+      return 'Driving Vocational (TP/LTA)';
+    case 'VOCATIONAL_LICENCE_LTA':
+      return 'Vocational Licence (LTA)';
     case 'PR_MEDICAL':
       return 'PR Medical (ICA)';
     case 'STUDENT_PASS_MEDICAL':
@@ -37,6 +43,12 @@ export function formatExamTypeFull(examType: ExamType): string {
       return 'Full Medical Exam for Work Permit';
     case 'AGED_DRIVERS':
       return 'Medical Exam for Aged Drivers';
+    case 'DRIVING_LICENCE_TP':
+      return 'Medical Examination Report for Driving Licence';
+    case 'DRIVING_VOCATIONAL_TP_LTA':
+      return 'Medical Examination Report for Driving Vocational Licence';
+    case 'VOCATIONAL_LICENCE_LTA':
+      return 'Medical Examination Report for Vocational Licence';
     case 'PR_MEDICAL':
       return 'Medical Examination for Permanent Residency';
     case 'STUDENT_PASS_MEDICAL':
@@ -59,6 +71,12 @@ export function formatAgency(examType: ExamType): string {
       return 'MOM';
     case 'AGED_DRIVERS':
       return 'SPF';
+    case 'DRIVING_LICENCE_TP':
+      return 'TP';
+    case 'DRIVING_VOCATIONAL_TP_LTA':
+      return 'TP/LTA';
+    case 'VOCATIONAL_LICENCE_LTA':
+      return 'LTA';
     case 'PR_MEDICAL':
     case 'STUDENT_PASS_MEDICAL':
     case 'LTVP_MEDICAL':
