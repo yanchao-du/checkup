@@ -17,6 +17,7 @@ interface DrivingLicenceTpAccordionsProps {
   onChange: (key: string, value: string) => void;
   completedSections: Set<string>;
   isPatientInfoValid: boolean;
+  isEditingFromSummary?: boolean;
   onContinue: (current: string, next: string) => void;
   errors?: Record<string, string>;
   onValidate?: (field: string, error: string) => void;
@@ -30,6 +31,7 @@ export function DrivingLicenceTpAccordions({
   onChange,
   completedSections,
   isPatientInfoValid,
+  isEditingFromSummary = false,
   onContinue,
   errors,
   onValidate,
@@ -64,7 +66,7 @@ export function DrivingLicenceTpAccordions({
                   }
                 }}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>
@@ -96,7 +98,7 @@ export function DrivingLicenceTpAccordions({
                   }
                 }}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>
@@ -129,7 +131,7 @@ export function DrivingLicenceTpAccordions({
                   }
                 }}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>

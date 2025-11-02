@@ -121,6 +121,7 @@ export function NewSubmission() {
   const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
   const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
+  const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [testFin, setTestFin] = useState<string>('');
   const [requiredTests, setRequiredTests] = useState<{
@@ -1377,6 +1378,7 @@ export function NewSubmission() {
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
+                  isEditingFromSummary={isEditingFromSummary}
                   errors={{ 
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
@@ -1389,10 +1391,16 @@ export function NewSubmission() {
                   examinationDate={examinationDate}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
-                    if (next === 'summary') {
+                    if (isEditingFromSummary) {
+                      // When editing from summary, go back to summary
+                      setActiveAccordion('summary');
+                      setIsEditingFromSummary(false);
+                    } else if (next === 'summary') {
                       setShowSummary(true);
+                      setActiveAccordion(next);
+                    } else {
+                      setActiveAccordion(next);
                     }
-                    setActiveAccordion(next);
                   }}
                 />
               )}
@@ -1733,6 +1741,7 @@ export function NewSubmission() {
                         onChange={handleFormDataChange}
                         onEdit={(section) => {
                           setActiveAccordion(section);
+                          setIsEditingFromSummary(true);
                         }}
                       />
 
