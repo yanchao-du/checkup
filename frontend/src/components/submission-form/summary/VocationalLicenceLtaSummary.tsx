@@ -8,6 +8,8 @@ interface VocationalLicenceLtaSummaryProps {
     name: string;
     nric: string;
     dateOfBirth?: string;
+    email?: string;
+    mobile?: string;
   };
   examinationDate: string;
   onEdit?: (section: string) => void;
@@ -111,6 +113,18 @@ export function VocationalLicenceLtaSummary({
               <div>
                 <p className="text-slate-500">Date of Birth</p>
                 <p className="font-medium">{new Date(patientInfo.dateOfBirth).toLocaleDateString()}</p>
+              </div>
+            )}
+            {patientInfo.email && (
+              <div>
+                <p className="text-slate-500">Email Address</p>
+                <p className="font-medium">{patientInfo.email}</p>
+              </div>
+            )}
+            {patientInfo.mobile && (
+              <div>
+                <p className="text-slate-500">Mobile Number</p>
+                <p className="font-medium">{patientInfo.mobile}</p>
               </div>
             )}
             <div>

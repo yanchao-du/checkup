@@ -1726,6 +1726,8 @@ export function NewSubmission() {
                           nric: patientNric,
                           dateOfBirth: patientDateOfBirth,
                           drivingLicenseClass: drivingLicenseClass,
+                          email: patientEmail,
+                          mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
                         onChange={handleFormDataChange}
@@ -1772,6 +1774,8 @@ export function NewSubmission() {
                           nric: patientNric,
                           dateOfBirth: patientDateOfBirth,
                           drivingLicenseClass: drivingLicenseClass,
+                          email: patientEmail,
+                          mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
                         onEdit={(section) => {
@@ -1816,6 +1820,8 @@ export function NewSubmission() {
                           name: patientName,
                           nric: patientNric,
                           dateOfBirth: patientDateOfBirth,
+                          email: patientEmail,
+                          mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
                         onEdit={(section) => {

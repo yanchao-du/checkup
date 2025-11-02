@@ -9,6 +9,8 @@ interface DrivingVocationalTpLtaSummaryProps {
     nric: string;
     dateOfBirth?: string;
     drivingLicenseClass?: string;
+    email?: string;
+    mobile?: string;
   };
   examinationDate: string;
   onEdit?: (section: string) => void;
@@ -119,6 +121,18 @@ export function DrivingVocationalTpLtaSummary({
               <div>
                 <p className="text-slate-500">Class of Driving Licence</p>
                 <p className="font-medium">{patientInfo.drivingLicenseClass}</p>
+              </div>
+            )}
+            {patientInfo.email && (
+              <div>
+                <p className="text-slate-500">Email Address</p>
+                <p className="font-medium">{patientInfo.email}</p>
+              </div>
+            )}
+            {patientInfo.mobile && (
+              <div>
+                <p className="text-slate-500">Mobile Number</p>
+                <p className="font-medium">{patientInfo.mobile}</p>
               </div>
             )}
             <div>
