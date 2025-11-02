@@ -26,6 +26,7 @@ export function DrivingLicenceTpSummary({
   const medicalHistory = formData.medicalHistory || {};
   const amt = formData.amt || {};
   const assessment = formData.assessment || {};
+  const abnormalityChecklist = formData.abnormalityChecklist || {};
 
   // Helper to get checked declaration items
   const getCheckedDeclarations = () => {
@@ -79,8 +80,38 @@ export function DrivingLicenceTpSummary({
     return items;
   };
 
+  // Helper to get abnormalities
+  const getAbnormalities = () => {
+    const items: string[] = [];
+    const labels: Record<string, string> = {
+      abdomen: 'Abdomen abnormality',
+      abnormalityJointMovement: 'Abnormality or limitation in range of movement of the joints',
+      defectInHearing: 'Defect in hearing',
+      deformitiesPhysicalDisabilities: 'Deformities and/or physical disabilities observed',
+      colourPerception: 'Difficulty in accurately recognising the colours red, green and amber',
+      fingerNoseCoordination: 'Finger-nose coordination abnormality',
+      limitationLimbStrength: 'Limitation in strength of upper limbs and lower limbs',
+      lungs: 'Lungs abnormality',
+      nervousSystem: 'Nervous system abnormality',
+      neuroMuscularSystem: 'Neuro-muscular system abnormality',
+      alcoholDrugAddiction: 'Evidence of being addicted to the excessive use of alcohol or drug',
+      psychiatricDisorder: 'Psychiatric disorder',
+      cognitiveImpairment: 'Sign of cognitive impairment',
+    };
+
+    Object.entries(labels).forEach(([key, label]) => {
+      if (abnormalityChecklist[key]?.checked) {
+        const remarks = abnormalityChecklist[key]?.remarks;
+        items.push(remarks ? `${label}: ${remarks}` : label);
+      }
+    });
+
+    return items;
+  };
+
   const checkedDeclarations = getCheckedDeclarations();
   const checkedHistoryItems = getCheckedHistory();
+  const abnormalities = getAbnormalities();
 
   return (
     <div className="space-y-6">
@@ -185,6 +216,18 @@ export function DrivingLicenceTpSummary({
             <p className="font-medium">{formData.hearingTest || '-'}</p>
           </div>
         </div>
+        
+        {/* Abnormality Checklist */}
+        {abnormalities.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h5 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Abnormalities Observed</h5>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              {abnormalities.map((item, index) => (
+                <li key={index} className="text-red-700">⚠ {item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Medical Declaration */}
