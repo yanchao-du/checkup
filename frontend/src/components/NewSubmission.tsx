@@ -314,10 +314,17 @@ export function NewSubmission() {
         // Find the accordion item with the matching value
         const accordionElement = document.querySelector(`[data-state="open"][data-radix-collection-item]`);
         if (accordionElement) {
-          // Scroll to the accordion header
+          // Scroll to the accordion header with offset to ensure title is visible
           const header = accordionElement.querySelector('[data-radix-accordion-trigger]');
           if (header) {
-            header.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+            const headerRect = header.getBoundingClientRect();
+            const offset = 80; // Offset from top to ensure title is visible
+            const scrollTop = window.pageYOffset + headerRect.top - offset;
+            
+            window.scrollTo({
+              top: scrollTop,
+              behavior: 'smooth'
+            });
           }
         }
       }, 150);
