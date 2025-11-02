@@ -1,6 +1,7 @@
 import { Label } from '../../ui/label';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
+import { Textarea } from '../../ui/textarea';
 
 interface MedicalHistorySectionProps {
   formData: Record<string, any>;
@@ -11,34 +12,66 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
   const history = formData.medicalHistory || {};
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
-    onChange('medicalHistory', {
+    const newHistory = {
       ...history,
       [field]: checked,
+    };
+    
+    // Clear remarks when unchecking
+    if (!checked) {
+      newHistory[`${field}Remarks`] = '';
+    }
+    
+    onChange('medicalHistory', newHistory);
+  };
+
+  const handleRemarksChange = (field: string, value: string) => {
+    onChange('medicalHistory', {
+      ...history,
+      [`${field}Remarks`]: value,
     });
   };
 
   const handleAllNormal = () => {
     onChange('medicalHistory', {
       palpitationsBreathlessness: false,
-      asthmaBronchitisCopd: false,
+      palpitationsBreathlessnessRemarks: '',
+      chestPainDiscomfort: false,
+      chestPainDiscomfortRemarks: '',
       highBloodPressure: false,
-      heartAttackDisease: false,
-      chestPain: false,
-      psychiatricIllness: false,
-      headachesMigraine: false,
+      highBloodPressureRemarks: '',
+      heartAttackBypass: false,
+      heartAttackBypassRemarks: '',
       strokeTia: false,
-      epilepsySeizuresFaints: false,
-      headInjuryConcussion: false,
-      muscleDiseaseWeakness: false,
-      arthritisJointDisease: false,
-      eyeTrouble: false,
-      difficultySeeing: false,
-      deafness: false,
+      strokeTiaRemarks: '',
       diabetes: false,
-      thyroidDisease: false,
-      surgicalOperations: false,
+      diabetesRemarks: '',
+      epilepsySeizures: false,
+      epilepsySeizuresRemarks: '',
+      eyeDisorders: false,
+      eyeDisordersRemarks: '',
+      mentalHealthDisorders: false,
+      mentalHealthDisordersRemarks: '',
+      alcoholDrugDependence: false,
+      alcoholDrugDependenceRemarks: '',
+      sleepApnoea: false,
+      sleepApnoeaRemarks: '',
+      infectiousDisease: false,
+      infectiousDiseaseRemarks: '',
+      chronicKidneyFailure: false,
+      chronicKidneyFailureRemarks: '',
+      cancer: false,
+      cancerRemarks: '',
+      musculoskeletalDisorders: false,
+      musculoskeletalDisordersRemarks: '',
+      hearingProblems: false,
+      hearingProblemsRemarks: '',
+      autoimmuneDisorders: false,
+      autoimmuneDisordersRemarks: '',
+      metabolicDisorders: false,
+      metabolicDisordersRemarks: '',
       otherRelevant: false,
-      other: '',
+      otherRelevantRemarks: '',
     });
   };
 
@@ -75,23 +108,40 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
         </Button>
       </div>
 
-      <div className="space-y-3">
+            <ul className="space-y-3">
         {historyItems.map((item) => (
-          <div key={item.id} className="flex items-center space-x-2">
-            <Checkbox
-              id={item.id}
-              checked={history[item.id] || false}
-              onCheckedChange={(checked) => handleCheckboxChange(item.id, checked as boolean)}
-            />
-            <Label
-              htmlFor={item.id}
-              className={`text-sm cursor-pointer ${history[item.id] ? 'font-semibold' : 'font-normal'}`}
-            >
-              {item.label}
-            </Label>
-          </div>
+          <li key={item.id}>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={item.id}
+                checked={history[item.id] || false}
+                onCheckedChange={(checked) => handleCheckboxChange(item.id, checked as boolean)}
+              />
+              <Label
+                htmlFor={item.id}
+                className={history[item.id] ? 'font-semibold' : ''}
+              >
+                {item.label}
+              </Label>
+            </div>
+            {history[item.id] && (
+              <div className="mt-2 ml-6">
+                <Label htmlFor={`${item.id}-remarks`} className="text-sm">
+                  Remarks
+                </Label>
+                <Textarea
+                  id={`${item.id}-remarks`}
+                  placeholder="Please provide details..."
+                  value={history[`${item.id}Remarks`] || ''}
+                  onChange={(e) => handleRemarksChange(item.id, e.target.value)}
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+            )}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
