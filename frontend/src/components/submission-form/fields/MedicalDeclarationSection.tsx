@@ -39,6 +39,17 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
     }
   };
 
+  const handlePatientCertificationChange = (checked: boolean) => {
+    onChange('medicalDeclaration', {
+      ...declaration,
+      patientCertification: checked,
+    });
+    // Clear error when user checks the box
+    if (onValidate && checked) {
+      onValidate('medicalDeclarationPatientCertification', '');
+    }
+  };
+
   const handleClearAll = () => {
     onChange('medicalDeclaration', {
       consultingPractitioner: false,
@@ -48,6 +59,7 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
       otherMedicalProblems: false,
       driverRehabilitation: false,
       remarks: '',
+      patientCertification: false,
     });
   };
 
@@ -123,6 +135,27 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
           )}
         </div>
       )}
+
+      {/* Mandatory Declaration by Patient to Medical Practitioner */}
+      <div className="space-y-2 pt-4 border-t">
+        <Label className="text-sm font-medium">
+          Declaration by Patient to Medical Practitioner <span className="text-red-500">*</span>
+        </Label>
+        <div className="flex items-start space-x-2 bg-gray-50 p-4 rounded-md">
+          <Checkbox
+            id="patientCertification"
+            checked={declaration.patientCertification || false}
+            onCheckedChange={(checked) => handlePatientCertificationChange(checked as boolean)}
+            className="mt-1"
+          />
+          <Label
+            htmlFor="patientCertification"
+            className="text-sm font-normal cursor-pointer leading-relaxed"
+          >
+            I hereby certify that I have explained this declaration to the patient, and the patient has confirmed that he / she has carefully considered his / her responses and believe them to be complete and correct. The patient has declared to me that he / she has not withheld any relevant information or made any misleading statement. He / she has provided his / her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him / her.
+          </Label>
+        </div>
+      </div>
     </div>
   );
 }

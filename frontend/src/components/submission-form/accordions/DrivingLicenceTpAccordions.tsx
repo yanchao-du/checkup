@@ -37,13 +37,20 @@ export function DrivingLicenceTpAccordions({
     ];
     const hasAnyDeclaration = declarations.some(item => declaration[item] === true);
     
+    // Validate remarks if any declaration is checked
     if (hasAnyDeclaration && !declaration.remarks?.trim()) {
       if (onValidate) {
         onValidate('medicalDeclarationRemarks', 'Remarks is required when any declaration is selected');
       }
       return false;
     }
+    
     return true;
+  };
+
+  const isPatientCertificationChecked = () => {
+    const declaration = formData.medicalDeclaration || {};
+    return declaration.patientCertification === true;
   };
 
   return (
@@ -66,6 +73,7 @@ export function DrivingLicenceTpAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
+                disabled={!isPatientCertificationChecked()}
                 onClick={() => {
                   if (validateMedicalDeclaration()) {
                     onContinue('medical-declaration', 'general-medical');
