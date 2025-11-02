@@ -131,14 +131,20 @@ export function AbbreviatedMentalTestSection({
 
       {/* Score Display */}
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-center justify-between">
+        <div className={`flex flex-col gap-4 ${score < 7 ? 'lg:flex-row lg:items-center lg:justify-between' : 'lg:flex-row lg:items-center lg:gap-6'}`}>
           <div>
             <p className="text-sm font-medium text-blue-900">AMT Score</p>
             <p className="text-2xl font-bold text-blue-700">{score}/10</p>
+            <p className={`text-base font-semibold mt-1 lg:hidden ${score >= 7 ? 'text-green-700' : 'text-red-700'}`}>
+              {score >= 7 ? 'Patient has passed AMT' : 'Patient has failed AMT'}
+            </p>
           </div>
+          <p className={`hidden lg:block text-base font-semibold ${score >= 7 ? 'text-green-700' : 'text-red-700'}`}>
+            {score >= 7 ? 'Patient has passed AMT' : 'Patient has failed AMT'}
+          </p>
           {score < 7 && (
-            <div className="flex items-center space-x-2 text-amber-700 bg-amber-50 px-3 py-2 rounded-md border border-amber-200">
-              <AlertCircle className="h-5 w-5" />
+            <div className="flex items-center space-x-2 text-amber-700 bg-amber-50 px-3 py-2 rounded-md border border-amber-200 max-w-md">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
               <p className="text-sm font-medium">A score of less than 7 suggests cognitive impairment and may require specialist referral for further diagnosis.</p>
             </div>
           )}
