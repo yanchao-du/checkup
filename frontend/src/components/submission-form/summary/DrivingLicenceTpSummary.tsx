@@ -457,7 +457,7 @@ export function DrivingLicenceTpSummary({
             {amt.score < 8 && (
               <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
                 <p className="text-sm font-medium text-amber-800">
-                  ⚠️ Low AMT score may indicate cognitive impairment
+                  ⚠️ A score of less than 7 suggests cognitive impairment and may require specialist referral for further diagnosis.
                 </p>
               </div>
             )}
