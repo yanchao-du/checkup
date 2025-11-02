@@ -97,7 +97,7 @@ export function DraftsList() {
       <Card>
         <CardHeader>
           <CardTitle>Search Drafts</CardTitle>
-          <CardDescription>Find your saved drafts</CardDescription>
+          {/* <CardDescription>Find your saved drafts</CardDescription> */}
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

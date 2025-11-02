@@ -160,6 +160,29 @@ export function ViewSubmission() {
         </Badge>
       </div>
 
+      {/* Rejection Reason - Show for all users when submission is rejected */}
+      {submission.status === 'rejected' && submission.rejectedReason && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-900">Submission Rejected</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-red-900">Rejection Reason:</p>
+              <p className="text-sm text-red-700 bg-white p-3 rounded-md border border-red-200">
+                {submission.rejectedReason}
+              </p>
+              {submission.rejectedAt && (
+                <p className="text-xs text-red-600 mt-2">
+                  Rejected on {new Date(submission.rejectedAt).toLocaleString()}
+                  {submission.rejectedByName && ` by ${submission.rejectedByName}`}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>

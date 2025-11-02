@@ -138,7 +138,7 @@ export function SubmissionsList() {
       <Card>
         <CardHeader>
           <CardTitle>Search and filter your completed submissions</CardTitle>
-          <CardDescription>Find submissions by patient name, NRIC, status, or exam type</CardDescription>
+          {/* <CardDescription>Find submissions by patient name, NRIC, status, or exam type</CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-4">
           {isDoctor ? (
