@@ -120,6 +120,15 @@ export function SubmissionsList() {
                   <SelectItem value="AGED_DRIVERS">
                     Aged Drivers (SPF)
                   </SelectItem>
+                  <SelectItem value="DRIVING_LICENCE_TP">
+                    Driving Licence (TP)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
+                    Driving Vocational (TP/LTA)
+                  </SelectItem>
+                  <SelectItem value="VOCATIONAL_LICENCE_LTA">
+                    Vocational Licence (LTA)
+                  </SelectItem>
                   <SelectItem value="PR_MEDICAL">
                     PR Medical (ICA)
                   </SelectItem>
