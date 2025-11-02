@@ -88,7 +88,7 @@ export function DrivingLicenceTpSummary({
 
   // Helper to get abnormalities
   const getAbnormalities = () => {
-    const items: string[] = [];
+    const items: Array<{ label: string; remarks?: string }> = [];
     const labels: Record<string, string> = {
       abdomen: 'Abdomen abnormality',
       abnormalityJointMovement: 'Abnormality or limitation in range of movement of the joints',
@@ -108,7 +108,7 @@ export function DrivingLicenceTpSummary({
     Object.entries(labels).forEach(([key, label]) => {
       if (abnormalityChecklist[key]) {
         const remarks = abnormalityChecklist[`${key}Remarks`];
-        items.push(remarks ? `${label}: ${remarks}` : label);
+        items.push({ label, remarks });
       }
     });
 
@@ -403,9 +403,18 @@ export function DrivingLicenceTpSummary({
           <div className="mt-4 pt-4 border-t border-gray-200">
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
             {abnormalities.length > 0 ? (
-              <ul className="list-disc ml-6 space-y-1 text-sm">
+              <ul className="list-disc ml-6 space-y-3 text-sm">
                 {abnormalities.map((item, index) => (
-                  <li key={index} className="text-red-700">{item}</li>
+                  <li key={index} className="text-red-700">
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      {item.remarks && (
+                        <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                          <span className="font-semibold">Remarks: </span>{item.remarks}
+                        </div>
+                      )}
+                    </div>
+                  </li>
                 ))}
               </ul>
             ) : (
