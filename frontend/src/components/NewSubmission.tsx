@@ -539,11 +539,9 @@ export function NewSubmission() {
     }
 
     // Validate examination date is not in the future
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const examDate = new Date(examinationDate);
+    const todayString = new Date().toISOString().split('T')[0];
     
-    if (examDate > today) {
+    if (examinationDate > todayString) {
       setExaminationDateError('Examination date cannot be in the future');
       return false;
     }
@@ -1289,11 +1287,9 @@ export function NewSubmission() {
                           
                           // Validate if future date
                           if (selectedDate) {
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            const examDate = new Date(selectedDate);
+                            const todayString = new Date().toISOString().split('T')[0];
                             
-                            if (examDate > today) {
+                            if (selectedDate > todayString) {
                               setExaminationDateError('Examination date cannot be in the future');
                             }
                           }
