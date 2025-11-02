@@ -25,16 +25,16 @@ export function AbbreviatedMentalTestSection({
   const [showAMTQuestions, setShowAMTQuestions] = useState(false);
 
   const questions = [
-    { id: 'age', label: '1. Age' },
-    { id: 'time', label: '2. Time (to nearest hour)' },
-    { id: 'address', label: '3. Address for recall at end of test' },
-    { id: 'year', label: '4. Year' },
-    { id: 'place', label: '5. Name of place/building' },
-    { id: 'recognition', label: '6. Recognition of two persons (doctor, nurse)' },
-    { id: 'birthDate', label: '7. Date of birth' },
-    { id: 'yearWWI', label: '8. Year of World War I' },
-    { id: 'currentLeader', label: '9. Name of current national leader' },
-    { id: 'countBackward', label: '10. Count backwards from 20 to 1' },
+    { id: 'year', label: '1. What is the present year? (Western calendar, i.e. 20__)' },
+    { id: 'time', label: '2. What time is it now (within 1 hour)?' },
+    { id: 'age', label: '3. What is your age? (for Chinese, +1 year is usually the norm and hence acceptable)' },
+    { id: 'birthDate', label: '4. What is your date of birth?' },
+    { id: 'place', label: '5. Where are we now? (hospital or clinic is acceptable)' },
+    { id: 'address', label: '6. What is your home address?' },
+    { id: 'currentLeader', label: '7. Who is Singapore\'s present Prime Minister?' },
+    { id: 'recognition', label: '8. Show picture of a profession (e.g. a nurse or doctor) and ask what is his/her job.' },
+    { id: 'countBackward', label: '9. Count backwards from 20 to 1' },
+    { id: 'addressRecall', label: '10. Please recall the memory phrase ("37 Bukit Timah Road")' },
   ];
 
   // Calculate score whenever AMT data changes
@@ -52,7 +52,7 @@ export function AbbreviatedMentalTestSection({
       ...amt,
       score: calculatedScore,
     });
-  }, [amt.age, amt.time, amt.address, amt.year, amt.place, amt.recognition, amt.birthDate, amt.yearWWI, amt.currentLeader, amt.countBackward]);
+  }, [amt.year, amt.time, amt.age, amt.birthDate, amt.place, amt.address, amt.currentLeader, amt.recognition, amt.addressRecall, amt.countBackward]);
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
     onChange('amt', {
@@ -136,10 +136,10 @@ export function AbbreviatedMentalTestSection({
             <p className="text-sm font-medium text-blue-900">AMT Score</p>
             <p className="text-2xl font-bold text-blue-700">{score}/10</p>
           </div>
-          {score < 8 && (
+          {score < 7 && (
             <div className="flex items-center space-x-2 text-amber-700 bg-amber-50 px-3 py-2 rounded-md border border-amber-200">
               <AlertCircle className="h-5 w-5" />
-              <p className="text-sm font-medium">Low AMT score may indicate cognitive impairment</p>
+              <p className="text-sm font-medium">A score of less than 7 suggests cognitive impairment and may require specialist referral for further diagnosis.</p>
             </div>
           )}
         </div>
