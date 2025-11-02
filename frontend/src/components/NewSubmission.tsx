@@ -538,6 +538,16 @@ export function NewSubmission() {
       return false;
     }
 
+    // Validate examination date is not in the future
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const examDate = new Date(examinationDate);
+    
+    if (examDate > today) {
+      setExaminationDateError('Examination date cannot be in the future');
+      return false;
+    }
+
     // Validate email and mobile for driver exams
     if (isDriverExamType(examType)) {
       // Validate email if provided
@@ -1268,10 +1278,25 @@ export function NewSubmission() {
                         id="examinationDate"
                         name="examinationDate"
                         type="date"
+                        max={new Date().toISOString().split('T')[0]}
                         value={examinationDate}
                         onChange={(e) => {
-                          setExaminationDate(e.target.value);
+                          const selectedDate = e.target.value;
+                          setExaminationDate(selectedDate);
+                          
+                          // Clear previous errors
                           if (examinationDateError) setExaminationDateError(null);
+                          
+                          // Validate if future date
+                          if (selectedDate) {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const examDate = new Date(selectedDate);
+                            
+                            if (examDate > today) {
+                              setExaminationDateError('Examination date cannot be in the future');
+                            }
+                          }
                         }}
                         onBlur={() => setExaminationDateBlurred(true)}
                         aria-invalid={!!examinationDateError || (examinationDateBlurred && !!drivingLicenceTimingError)}
