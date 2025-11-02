@@ -314,17 +314,10 @@ export function NewSubmission() {
         // Find the accordion item with the matching value
         const accordionElement = document.querySelector(`[data-state="open"][data-radix-collection-item]`);
         if (accordionElement) {
-          // Scroll to the accordion header with offset to ensure title is visible
+          // Scroll to the accordion header using block: 'center' like MDW exam does
           const header = accordionElement.querySelector('[data-radix-accordion-trigger]');
           if (header) {
-            const headerRect = header.getBoundingClientRect();
-            const offset = 80; // Offset from top to ensure title is visible
-            const scrollTop = window.pageYOffset + headerRect.top - offset;
-            
-            window.scrollTo({
-              top: scrollTop,
-              behavior: 'smooth'
-            });
+            (header as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }
       }, 150);
