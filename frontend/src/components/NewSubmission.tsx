@@ -95,6 +95,7 @@ export function NewSubmission() {
   const [medicalDeclarationRemarksError, setMedicalDeclarationRemarksError] = useState<string | null>(null);
   const [medicalDeclarationPatientCertificationError, setMedicalDeclarationPatientCertificationError] = useState<string | null>(null);
   const [medicalHistoryErrors, setMedicalHistoryErrors] = useState<Record<string, string>>({});
+  const [abnormalityChecklistErrors, setAbnormalityChecklistErrors] = useState<Record<string, string>>({});
   const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -303,6 +304,27 @@ export function NewSubmission() {
     };
   }, [setHasUnsavedChanges]);
 
+  // Monitor certification checkboxes and update completed sections
+  useEffect(() => {
+    setCompletedSections(prev => {
+      const newCompleted = new Set(prev);
+      
+      // Check Medical Declaration certification
+      const medicalDeclaration = formData.medicalDeclaration || {};
+      if (!medicalDeclaration.patientCertification && newCompleted.has('medical-declaration')) {
+        newCompleted.delete('medical-declaration');
+      }
+      
+      // Check Medical History certification
+      const medicalHistory = formData.medicalHistory || {};
+      if (!medicalHistory.patientCertification && newCompleted.has('medical-history')) {
+        newCompleted.delete('medical-history');
+      }
+      
+      return newCompleted;
+    });
+  }, [formData.medicalDeclaration, formData.medicalHistory]);
+
   // Fetch a random test FIN when exam type supports patient lookup
   useEffect(() => {
     const shouldShowTestFin = !id && (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT');
@@ -438,6 +460,12 @@ export function NewSubmission() {
     } else if (field.startsWith('medicalHistory')) {
       // Handle medical history remarks errors
       setMedicalHistoryErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
+    } else {
+      // Handle abnormality checklist errors (fingerNoseCoordination, lungs, etc.)
+      setAbnormalityChecklistErrors(prev => ({
         ...prev,
         [field]: error
       }));
@@ -1352,7 +1380,8 @@ export function NewSubmission() {
                   errors={{ 
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
-                    ...medicalHistoryErrors
+                    ...medicalHistoryErrors,
+                    ...abnormalityChecklistErrors
                   }}
                   onValidate={handleValidationError}
                   onContinue={(current, next) => {
@@ -1380,7 +1409,8 @@ export function NewSubmission() {
                   errors={{ 
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
-                    ...medicalHistoryErrors
+                    ...medicalHistoryErrors,
+                    ...abnormalityChecklistErrors
                   }}
                   onValidate={handleValidationError}
                   onContinue={(current, next) => {
@@ -1408,7 +1438,8 @@ export function NewSubmission() {
                   errors={{ 
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
-                    ...medicalHistoryErrors
+                    ...medicalHistoryErrors,
+                    ...abnormalityChecklistErrors
                   }}
                   onValidate={handleValidationError}
                   onContinue={(current, next) => {

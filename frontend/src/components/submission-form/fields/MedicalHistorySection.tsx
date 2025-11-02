@@ -2,6 +2,8 @@ import { Label } from '../../ui/label';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { Textarea } from '../../ui/textarea';
+import { PatientCertificationCheckbox } from './PatientCertificationCheckbox';
+import { ERROR_MESSAGES } from '../utils/constants';
 
 interface MedicalHistorySectionProps {
   formData: Record<string, any>;
@@ -41,11 +43,47 @@ export function MedicalHistorySection({ formData, onChange, errors, onValidate }
 
   const handleRemarksBlur = (field: string) => {
     if (onValidate && history[field] && !history[`${field}Remarks`]?.trim()) {
-      onValidate(`medicalHistory${field}Remarks`, 'Remarks is required for this condition');
+      onValidate(`medicalHistory${field}Remarks`, ERROR_MESSAGES.REMARKS_REQUIRED);
     }
   };
 
+  const handlePatientCertificationChange = (checked: boolean) => {
+    onChange('medicalHistory', {
+      ...history,
+      patientCertification: checked,
+    });
+  };
+
   const handleAllNormal = () => {
+    // Clear all errors
+    if (onValidate) {
+      const historyItems = [
+        'arthritisJointDisease',
+        'asthmaBronchitisCopd',
+        'chestPain',
+        'deafness',
+        'diabetes',
+        'difficultySeeing',
+        'epilepsySeizuresFaints',
+        'eyeTrouble',
+        'headachesMigraine',
+        'headInjuryConcussion',
+        'heartAttackDisease',
+        'highBloodPressure',
+        'muscleDiseaseWeakness',
+        'otherRelevant',
+        'palpitationsBreathlessness',
+        'psychiatricIllness',
+        'strokeTia',
+        'surgicalOperations',
+        'thyroidDisease',
+      ];
+      
+      historyItems.forEach(item => {
+        onValidate(`medicalHistory${item}Remarks`, '');
+      });
+    }
+    
     onChange('medicalHistory', {
       arthritisJointDisease: false,
       arthritisJointDiseaseRemarks: '',
@@ -85,6 +123,7 @@ export function MedicalHistorySection({ formData, onChange, errors, onValidate }
       surgicalOperationsRemarks: '',
       thyroidDisease: false,
       thyroidDiseaseRemarks: '',
+      patientCertification: false,
     });
   };
 
@@ -117,7 +156,7 @@ export function MedicalHistorySection({ formData, onChange, errors, onValidate }
           Does the patient have a history of, or is currently suffering from, any of the following?
         </p>
         <Button type="button" variant="outline" size="sm" onClick={handleAllNormal}>
-          All Normal
+          Clear All
         </Button>
       </div>
 
@@ -161,6 +200,13 @@ export function MedicalHistorySection({ formData, onChange, errors, onValidate }
           </li>
         ))}
       </ul>
+
+      {/* Patient Certification */}
+      <PatientCertificationCheckbox
+        id="medicalHistoryPatientCertification"
+        checked={history.patientCertification || false}
+        onChange={handlePatientCertificationChange}
+      />
     </div>
   );
 }

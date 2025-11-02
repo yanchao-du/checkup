@@ -9,7 +9,9 @@ import { AssessmentSection } from '../fields/AssessmentSection';
 import { 
   validateMedicalDeclaration, 
   validateMedicalHistory, 
-  isPatientCertificationChecked 
+  isPatientCertificationChecked,
+  isMedicalHistoryPatientCertificationChecked,
+  validateAbnormalityChecklist
 } from '../utils/validation';
 
 interface DrivingVocationalTpLtaAccordionsProps {
@@ -83,6 +85,7 @@ export function DrivingVocationalTpLtaAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
+                disabled={!isMedicalHistoryPatientCertificationChecked(formData)}
                 onClick={() => {
                   if (validateMedicalHistory(formData, onValidate)) {
                     onContinue('medical-history', 'general-medical');
@@ -105,11 +108,22 @@ export function DrivingVocationalTpLtaAccordions({
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4">
-            <CommonMedicalFields formData={formData} onChange={onChange} />
+            <CommonMedicalFields 
+              formData={formData} 
+              onChange={onChange} 
+              hideHeightWeightBmi={true} 
+              showAbnormalityChecklist={true}
+              errors={errors}
+              onValidate={onValidate}
+            />
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('general-medical', 'amt')}
+                onClick={() => {
+                  if (validateAbnormalityChecklist(formData, onValidate)) {
+                    onContinue('general-medical', 'amt');
+                  }
+                }}
               >
                 Continue
               </Button>

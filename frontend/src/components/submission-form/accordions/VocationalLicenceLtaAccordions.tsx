@@ -8,7 +8,9 @@ import { AssessmentSection } from '../fields/AssessmentSection';
 import { 
   validateMedicalDeclaration, 
   validateMedicalHistory, 
-  isPatientCertificationChecked 
+  isPatientCertificationChecked,
+  isMedicalHistoryPatientCertificationChecked,
+  validateAbnormalityChecklist
 } from '../utils/validation';
 
 interface VocationalLicenceLtaAccordionsProps {
@@ -82,6 +84,7 @@ export function VocationalLicenceLtaAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
+                disabled={!isMedicalHistoryPatientCertificationChecked(formData)}
                 onClick={() => {
                   if (validateMedicalHistory(formData, onValidate)) {
                     onContinue('medical-history', 'general-medical');
@@ -104,11 +107,22 @@ export function VocationalLicenceLtaAccordions({
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4">
-            <CommonMedicalFields formData={formData} onChange={onChange} />
+            <CommonMedicalFields 
+              formData={formData} 
+              onChange={onChange} 
+              hideHeightWeightBmi={true} 
+              showAbnormalityChecklist={true}
+              errors={errors}
+              onValidate={onValidate}
+            />
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('general-medical', 'lta-vocational')}
+                onClick={() => {
+                  if (validateAbnormalityChecklist(formData, onValidate)) {
+                    onContinue('general-medical', 'lta-vocational');
+                  }
+                }}
               >
                 Continue
               </Button>

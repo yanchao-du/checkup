@@ -3,20 +3,26 @@ import { Input } from '../../ui/input';
 import { InlineError } from '../../ui/InlineError';
 import { VisualAcuityField } from './VisualAcuityField';
 import { HearingTestField } from './HearingTestField';
+import { AbnormalityChecklistField } from './AbnormalityChecklistField';
 import { useEffect, useState } from 'react';
 
 interface CommonMedicalFieldsProps {
   formData: Record<string, any>;
-  onChange: (key: string, value: string) => void;
-  errors?: {
-    height?: string;
-    weight?: string;
-    bloodPressure?: string;
-    pulse?: string;
-  };
+  onChange: (key: string, value: any) => void;
+  errors?: Record<string, string>;
+  hideHeightWeightBmi?: boolean;
+  showAbnormalityChecklist?: boolean;
+  onValidate?: (field: string, error: string) => void;
 }
 
-export function CommonMedicalFields({ formData, onChange, errors = {} }: CommonMedicalFieldsProps) {
+export function CommonMedicalFields({ 
+  formData, 
+  onChange, 
+  errors = {}, 
+  hideHeightWeightBmi = false, 
+  showAbnormalityChecklist = false,
+  onValidate
+}: CommonMedicalFieldsProps) {
   const [bmi, setBmi] = useState<string>('');
 
   // Auto-calculate BMI when height or weight changes
@@ -35,51 +41,53 @@ export function CommonMedicalFields({ formData, onChange, errors = {} }: CommonM
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Height */}
-        <div>
-          <Label htmlFor="height">Height (cm) <span className="text-red-500">*</span></Label>
-          <Input
-            id="height"
-            type="number"
-            step="0.1"
-            placeholder="e.g., 170"
-            value={formData.height || ''}
-            onChange={(e) => onChange('height', e.target.value)}
-            className={errors.height ? 'border-red-500' : ''}
-          />
-          {errors.height && <InlineError>{errors.height}</InlineError>}
-        </div>
+      {!hideHeightWeightBmi && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Height */}
+          <div>
+            <Label htmlFor="height">Height (cm) <span className="text-red-500">*</span></Label>
+            <Input
+              id="height"
+              type="number"
+              step="0.1"
+              placeholder="e.g., 170"
+              value={formData.height || ''}
+              onChange={(e) => onChange('height', e.target.value)}
+              className={errors.height ? 'border-red-500' : ''}
+            />
+            {errors.height && <InlineError>{errors.height}</InlineError>}
+          </div>
 
-        {/* Weight */}
-        <div>
-          <Label htmlFor="weight">Weight (kg) <span className="text-red-500">*</span></Label>
-          <Input
-            id="weight"
-            type="number"
-            step="0.1"
-            placeholder="e.g., 70"
-            value={formData.weight || ''}
-            onChange={(e) => onChange('weight', e.target.value)}
-            className={errors.weight ? 'border-red-500' : ''}
-          />
-          {errors.weight && <InlineError>{errors.weight}</InlineError>}
-        </div>
+          {/* Weight */}
+          <div>
+            <Label htmlFor="weight">Weight (kg) <span className="text-red-500">*</span></Label>
+            <Input
+              id="weight"
+              type="number"
+              step="0.1"
+              placeholder="e.g., 70"
+              value={formData.weight || ''}
+              onChange={(e) => onChange('weight', e.target.value)}
+              className={errors.weight ? 'border-red-500' : ''}
+            />
+            {errors.weight && <InlineError>{errors.weight}</InlineError>}
+          </div>
 
-        {/* BMI (read-only, auto-calculated) */}
-        <div>
-          <Label htmlFor="bmi">BMI</Label>
-          <Input
-            id="bmi"
-            type="text"
-            value={bmi}
-            readOnly
-            className="bg-gray-50"
-            placeholder="Auto-calculated"
-          />
-          <p className="text-xs text-gray-500 mt-1">Calculated automatically</p>
+          {/* BMI (read-only, auto-calculated) */}
+          <div>
+            <Label htmlFor="bmi">BMI</Label>
+            <Input
+              id="bmi"
+              type="text"
+              value={bmi}
+              readOnly
+              className="bg-gray-50"
+              placeholder="Auto-calculated"
+            />
+            <p className="text-xs text-gray-500 mt-1">Calculated automatically</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Blood Pressure */}
@@ -123,6 +131,16 @@ export function CommonMedicalFields({ formData, onChange, errors = {} }: CommonM
         value={formData.hearingTest || ''}
         onChange={(value) => onChange('hearingTest', value)}
       />
+
+      {/* Abnormality Checklist - Only for driver exams */}
+      {showAbnormalityChecklist && (
+        <AbnormalityChecklistField
+          value={formData.abnormalityChecklist || {}}
+          onChange={(value) => onChange('abnormalityChecklist', value)}
+          errors={errors}
+          onValidate={onValidate}
+        />
+      )}
     </div>
   );
 }
