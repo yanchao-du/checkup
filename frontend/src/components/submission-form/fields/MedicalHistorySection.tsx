@@ -85,7 +85,7 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
             />
             <Label
               htmlFor={item.id}
-              className="text-sm font-normal cursor-pointer"
+              className={`text-sm cursor-pointer ${history[item.id] ? 'font-semibold' : 'font-normal'}`}
             >
               {item.label}
             </Label>
