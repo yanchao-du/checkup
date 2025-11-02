@@ -45,14 +45,29 @@ export function validateMedicalHistory(
 ): boolean {
   const history = formData.medicalHistory || {};
   let isValid = true;
+  let firstErrorField: string | null = null;
 
   for (const item of MEDICAL_HISTORY_ITEMS) {
     if (history[item] === true && !history[`${item}Remarks`]?.trim()) {
       if (onValidate) {
         onValidate(`medicalHistory${item}Remarks`, 'Remarks is required for this condition');
       }
+      if (!firstErrorField) {
+        firstErrorField = `${item}-remarks`;
+      }
       isValid = false;
     }
+  }
+
+  // Scroll to first error if validation failed
+  if (!isValid && firstErrorField) {
+    setTimeout(() => {
+      const element = document.getElementById(firstErrorField!);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.focus();
+      }
+    }, 100);
   }
 
   return isValid;
@@ -76,6 +91,16 @@ export function validateMedicalDeclaration(
     if (onValidate) {
       onValidate('medicalDeclarationRemarks', 'Remarks is required when any declaration is selected');
     }
+    
+    // Scroll to remarks field
+    setTimeout(() => {
+      const element = document.getElementById('declarationRemarks');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.focus();
+      }
+    }, 100);
+    
     return false;
   }
 
