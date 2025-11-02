@@ -379,12 +379,10 @@ export function DrivingLicenceTpSummary({
                   <p className="font-medium">{formData.visualAcuity || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Near Vision (RE):</span>
-                  <p className="font-medium">{formData.nearVisionRE || '-'}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Near Vision (LE):</span>
-                  <p className="font-medium">{formData.nearVisionLE || '-'}</p>
+                  <span className="text-gray-600">Near Vision:</span>
+                  <p className="font-medium">
+                    RE: {formData.nearVisionRE || '-'}, LE: {formData.nearVisionLE || '-'}
+                  </p>
                 </div>
               </div>
             </div>
