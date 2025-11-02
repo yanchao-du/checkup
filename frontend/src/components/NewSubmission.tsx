@@ -309,27 +309,58 @@ export function NewSubmission() {
   // Scroll accordion into view when it expands
   useEffect(() => {
     if (activeAccordion) {
-      // Wait for accordion animation to complete before scrolling
-      const timer = setTimeout(() => {
-        // Find the accordion item with the matching value
-        const accordionElement = document.querySelector(`[data-state="open"][data-radix-collection-item]`);
-        if (accordionElement) {
-          // Scroll to the accordion header at the top with some padding
-          const header = accordionElement.querySelector('[data-radix-accordion-trigger]');
-          if (header) {
-            // Get the header's position
-            const headerRect = header.getBoundingClientRect();
-            const scrollTop = window.pageYOffset + headerRect.top - 20; // 20px padding from top
-            
-            window.scrollTo({
-              top: scrollTop,
-              behavior: 'smooth'
-            });
+      const scrollToAccordion = async () => {
+        // Wait for DOM to update with the new accordion state
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        
+        // Find all accordion triggers - they have data-radix-collection-item and aria-expanded attributes
+        const allTriggers = document.querySelectorAll('button[data-radix-collection-item][aria-expanded]');
+        
+        // Find the one that's currently open
+        let openTrigger: Element | null = null;
+        allTriggers.forEach(trigger => {
+          const state = trigger.getAttribute('data-state');
+          if (state === 'open') {
+            openTrigger = trigger;
           }
+        });
+        
+        if (openTrigger) {
+          const triggerElement = openTrigger as HTMLElement;
+          
+          // Wait for the accordion animation to complete
+          await new Promise<void>((resolve) => {
+            let settled = false;
+            
+            const onDone = () => {
+              if (settled) return;
+              settled = true;
+              triggerElement.removeEventListener('animationend', onDone);
+              triggerElement.removeEventListener('transitionend', onDone);
+              resolve();
+            };
+
+            triggerElement.addEventListener('animationend', onDone);
+            triggerElement.addEventListener('transitionend', onDone);
+
+            // Fallback timeout in case animations don't fire
+            setTimeout(() => onDone(), 500);
+          });
+
+          // Wait additional time for content to fully render and push other elements
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const rect = triggerElement.getBoundingClientRect();
+          
+          // Calculate the target scroll position to position the trigger 80px from the top
+          const targetScrollY = window.scrollY + rect.top - 80;
+          
+          // Scroll directly to the target position in one smooth motion
+          window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
         }
-      }, 300); // Increased delay to wait for accordion animation
-      
-      return () => clearTimeout(timer);
+      };
+
+      scrollToAccordion();
     }
   }, [activeAccordion]);
 
