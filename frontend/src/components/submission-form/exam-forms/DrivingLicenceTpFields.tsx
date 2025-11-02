@@ -52,7 +52,7 @@ export function DrivingLicenceTpFields({
       {/* Medical Declaration by Examinee */}
       <AccordionItem value="medical-declaration">
         <AccordionTrigger className="text-lg font-semibold">
-          Medical Declaration by Examinee
+          Medical Declaration by Patient
         </AccordionTrigger>
         <AccordionContent>
           <MedicalDeclarationSection formData={formData} onChange={onChange} />

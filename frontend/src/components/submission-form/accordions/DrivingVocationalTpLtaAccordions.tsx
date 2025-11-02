@@ -28,7 +28,7 @@ export function DrivingVocationalTpLtaAccordions({
       <AccordionItem value="medical-declaration">
         <AccordionTrigger isCompleted={completedSections.has('medical-declaration')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
-            <span>Medical Declaration by Examinee</span>
+            <span>Medical Declaration by Patient</span>
           </div>
         </AccordionTrigger>
         <AccordionContent>

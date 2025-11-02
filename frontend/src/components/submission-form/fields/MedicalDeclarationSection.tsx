@@ -1,5 +1,4 @@
 import { Label } from '../../ui/label';
-import { Input } from '../../ui/input';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 
@@ -18,41 +17,31 @@ export function MedicalDeclarationSection({ formData, onChange }: MedicalDeclara
     });
   };
 
-  const handleOtherTextChange = (value: string) => {
-    onChange('medicalDeclaration', {
-      ...declaration,
-      otherConditions: value,
-    });
-  };
-
   const handleClearAll = () => {
     onChange('medicalDeclaration', {
-      lossOfConsciousness: false,
-      seizures: false,
-      suddenDizziness: false,
-      chestPain: false,
-      breathlessness: false,
-      substanceAbuse: false,
-      psychiatricCondition: false,
-      otherConditions: '',
+      consultingPractitioner: false,
+      takingMedication: false,
+      hospitalAdmission: false,
+      rehabilitativeTreatment: false,
+      otherMedicalProblems: false,
+      driverRehabilitation: false,
     });
   };
 
   const declarations = [
-    { id: 'lossOfConsciousness', label: 'Loss of consciousness/fainting' },
-    { id: 'seizures', label: 'Seizures or fits' },
-    { id: 'suddenDizziness', label: 'Sudden dizziness or blackouts' },
-    { id: 'chestPain', label: 'Chest pain or discomfort' },
-    { id: 'breathlessness', label: 'Breathlessness during mild exertion' },
-    { id: 'substanceAbuse', label: 'Alcohol or substance abuse' },
-    { id: 'psychiatricCondition', label: 'Psychiatric condition requiring treatment' },
+    { id: 'consultingPractitioner', label: 'Currently consulting medical practitioner for pre-existing / newly diagnosed medical condition' },
+    { id: 'takingMedication', label: 'Currently taking medication for pre-existing / newly diagnosed medical condition' },
+    { id: 'hospitalAdmission', label: 'Being warded or discharged from hospital recently' },
+    { id: 'rehabilitativeTreatment', label: 'Been receiving rehabilitative treatment recently (for stroke patients)' },
+    { id: 'otherMedicalProblems', label: 'Any relevant medical problems or injuries not mentioned above' },
+    { id: 'driverRehabilitation', label: 'Attended any driver rehabilitation and medical fitness assessment programme' },
   ];
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600">
-          Has the examinee experienced any of the following in the past 6 months?
+          Has the patient experienced or currently experiencing any of the following in the <b>past 6 months?</b>
         </p>
         <Button type="button" variant="outline" size="sm" onClick={handleClearAll}>
           Clear All
@@ -75,43 +64,6 @@ export function MedicalDeclarationSection({ formData, onChange }: MedicalDeclara
             </Label>
           </div>
         ))}
-
-        {/* Other conditions with text field */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="otherConditionsCheck"
-              checked={!!declaration.otherConditions}
-              onCheckedChange={(checked) => {
-                if (!checked) {
-                  handleOtherTextChange('');
-                }
-              }}
-            />
-            <Label
-              htmlFor="otherConditionsCheck"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Other medical conditions
-            </Label>
-          </div>
-          {(declaration.otherConditions !== undefined && declaration.otherConditions !== '') && (
-            <Input
-              id="otherConditions"
-              type="text"
-              placeholder="Please specify..."
-              maxLength={200}
-              value={declaration.otherConditions || ''}
-              onChange={(e) => handleOtherTextChange(e.target.value)}
-              className="ml-6"
-            />
-          )}
-          {declaration.otherConditions && (
-            <p className="text-xs text-gray-500 ml-6">
-              {declaration.otherConditions.length}/200 characters
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );
