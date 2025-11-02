@@ -896,6 +896,13 @@ export function NewSubmission() {
       // Mark current section as completed
       setCompletedSections(prev => new Set(prev).add(currentSection));
       
+      // If editing from summary, go back to summary
+      if (isEditingFromSummary) {
+        setActiveAccordion('summary');
+        setIsEditingFromSummary(false);
+        return;
+      }
+      
       // For driver exams from patient-info, go directly to medical-declaration (first exam section)
       if (currentSection === 'patient-info' && isDriverExamType(examType)) {
         setActiveAccordion('medical-declaration');
@@ -1287,7 +1294,7 @@ export function NewSubmission() {
                       onClick={() => handleContinue('patient-info', 'exam-specific')}
                       disabled={!isPatientInfoValid}
                     >
-                      Continue
+                      {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
