@@ -6,6 +6,11 @@ import { MedicalHistorySection } from '../fields/MedicalHistorySection';
 import { AbbreviatedMentalTestSection } from '../fields/AbbreviatedMentalTestSection';
 import { VocationalLicenceLtaFields } from '../exam-forms/VocationalLicenceLtaFields';
 import { AssessmentSection } from '../fields/AssessmentSection';
+import { 
+  validateMedicalDeclaration, 
+  validateMedicalHistory, 
+  isPatientCertificationChecked 
+} from '../utils/validation';
 
 interface DrivingVocationalTpLtaAccordionsProps {
   formData: Record<string, any>;
@@ -26,72 +31,6 @@ export function DrivingVocationalTpLtaAccordions({
   errors,
   onValidate,
 }: DrivingVocationalTpLtaAccordionsProps) {
-  const validateMedicalDeclaration = () => {
-    const declaration = formData.medicalDeclaration || {};
-    const declarations = [
-      'consultingPractitioner',
-      'takingMedication',
-      'hospitalAdmission',
-      'rehabilitativeTreatment',
-      'driverRehabilitation',
-      'otherMedicalProblems',
-    ];
-    const hasAnyDeclaration = declarations.some(item => declaration[item] === true);
-    
-    // Validate remarks if any declaration is checked
-    if (hasAnyDeclaration && !declaration.remarks?.trim()) {
-      if (onValidate) {
-        onValidate('medicalDeclarationRemarks', 'Remarks is required when any declaration is selected');
-      }
-      return false;
-    }
-    
-    return true;
-  };
-
-  const isPatientCertificationChecked = () => {
-    const declaration = formData.medicalDeclaration || {};
-    return declaration.patientCertification === true;
-  };
-
-  const validateMedicalHistory = () => {
-    const history = formData.medicalHistory || {};
-    const historyItems = [
-      'palpitationsBreathlessness',
-      'chestPainDiscomfort',
-      'highBloodPressure',
-      'heartAttackBypass',
-      'strokeTia',
-      'diabetes',
-      'epilepsySeizures',
-      'eyeDisorders',
-      'mentalHealthDisorders',
-      'alcoholDrugDependence',
-      'sleepApnoea',
-      'infectiousDisease',
-      'chronicKidneyFailure',
-      'cancer',
-      'musculoskeletalDisorders',
-      'hearingProblems',
-      'autoimmuneDisorders',
-      'metabolicDisorders',
-      'otherRelevant',
-    ];
-
-    let isValid = true;
-    
-    for (const item of historyItems) {
-      if (history[item] === true && !history[`${item}Remarks`]?.trim()) {
-        if (onValidate) {
-          onValidate(`medicalHistory${item}Remarks`, 'Remarks is required for this condition');
-        }
-        isValid = false;
-      }
-    }
-
-    return isValid;
-  };
-
   return (
     <>
       {/* Medical Declaration by Examinee */}
@@ -112,9 +51,9 @@ export function DrivingVocationalTpLtaAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                disabled={!isPatientCertificationChecked()}
+                disabled={!isPatientCertificationChecked(formData)}
                 onClick={() => {
-                  if (validateMedicalDeclaration()) {
+                  if (validateMedicalDeclaration(formData, onValidate)) {
                     onContinue('medical-declaration', 'medical-history');
                   }
                 }}
@@ -145,7 +84,7 @@ export function DrivingVocationalTpLtaAccordions({
               <Button 
                 type="button"
                 onClick={() => {
-                  if (validateMedicalHistory()) {
+                  if (validateMedicalHistory(formData, onValidate)) {
                     onContinue('medical-history', 'general-medical');
                   }
                 }}
