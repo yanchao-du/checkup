@@ -97,8 +97,8 @@ export function DrivingLicenceTpSummary({
     };
 
     Object.entries(labels).forEach(([key, label]) => {
-      if (abnormalityChecklist[key]?.checked) {
-        const remarks = abnormalityChecklist[key]?.remarks;
+      if (abnormalityChecklist[key]) {
+        const remarks = abnormalityChecklist[`${key}Remarks`];
         items.push(remarks ? `${label}: ${remarks}` : label);
       }
     });
