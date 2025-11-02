@@ -141,8 +141,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* General Medical Examination */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3 border-b pb-2">General Medical Examination</h3>
+      <div className="bg-white border-2 border-blue-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-4 text-blue-900 bg-blue-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-blue-200">General Medical Examination</h3>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Height:</span>
@@ -180,8 +180,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* Medical Declaration */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical Declaration (Past 6 Months)</h3>
+      <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-3 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Medical Declaration (Past 6 Months)</h3>
         {checkedDeclarations.length > 0 ? (
           <ul className="space-y-2 text-sm">
             {checkedDeclarations.map((item, index) => (
@@ -197,8 +197,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* Medical History */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical History</h3>
+      <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-3 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Medical History</h3>
         {checkedHistoryItems.length > 0 ? (
           <ul className="space-y-2 text-sm">
             {checkedHistoryItems.map((item, index) => (
@@ -214,9 +214,9 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* AMT Assessment */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-lg mb-3">Abbreviated Mental Test (AMT)</h3>
-        <div className="mb-4">
+      <div className="bg-white border-2 border-purple-200 rounded-lg shadow-sm">
+        <h3 className="font-semibold text-lg mb-0 text-purple-900 bg-purple-50 px-6 py-4 rounded-t-lg border-b-2 border-purple-200">Abbreviated Mental Test (AMT)</h3>
+        <div className="p-6 mb-4">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-gray-600">Total Score</p>
@@ -247,9 +247,9 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* LTA Vocational Assessment */}
-      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-        <h3 className="font-semibold text-lg mb-3">LTA Vocational Licence Assessment</h3>
-        <div className="space-y-4">
+      <div className="bg-white border-2 border-indigo-200 rounded-lg shadow-sm">
+        <h3 className="font-semibold text-lg mb-0 text-indigo-900 bg-indigo-50 px-6 py-4 rounded-t-lg border-b-2 border-indigo-200">LTA Vocational Licence Assessment</h3>
+        <div className="p-6 space-y-4">
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-gray-600">Color Vision:</span>
@@ -314,9 +314,9 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* Assessment */}
-      <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
-        <h3 className="font-semibold text-lg mb-3">Medical Practitioner Assessment</h3>
-        <div className="space-y-3 text-sm">
+      <div className="bg-white border-2 border-green-300 rounded-lg shadow-sm">
+        <h3 className="font-semibold text-lg mb-0 text-green-900 bg-green-50 px-6 py-4 rounded-t-lg border-b-2 border-green-300">Medical Practitioner Assessment</h3>
+        <div className="p-6 space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-gray-600">Fit to Drive (TP):</span>

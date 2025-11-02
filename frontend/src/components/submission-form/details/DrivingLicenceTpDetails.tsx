@@ -105,8 +105,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
     <div className="space-y-6">
       {/* Medical Declaration by Patient */}
       {checkedDeclarations.length > 0 && (
-        <div>
-          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical Declaration by Patient</h3>
+        <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-3 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Medical Declaration by Patient</h3>
           <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
           <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
             {checkedDeclarations.map((item, index) => (
@@ -145,8 +145,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
       {/* Medical History of Patient */}
       {checkedHistoryItems.length > 0 && (
-        <div>
-          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Medical History of Patient</h3>
+        <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-3 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Medical History of Patient</h3>
           <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
             {checkedHistoryItems.map((item, index) => (
               <li key={index} className="text-amber-700">
@@ -182,8 +182,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
       )}
 
       {/* General Medical Examination */}
-      <div>
-        <h3 className="font-semibold text-lg mb-3 border-b pb-2">General Medical Examination</h3>
+      <div className="bg-white border-2 border-blue-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-4 text-blue-900 bg-blue-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-blue-200">General Medical Examination</h3>
         
         {/* Cardiovascular Assessment */}
         <div className="mb-4">
@@ -264,8 +264,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
       {/* Abbreviated Mental Test (AMT) */}
       {amt.score !== undefined && (
-        <div>
-          <h3 className="font-semibold text-lg mb-3 border-b pb-2">Abbreviated Mental Test (AMT)</h3>
+        <div className="bg-white border-2 border-purple-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-4 text-purple-900 bg-purple-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-purple-200">Abbreviated Mental Test (AMT)</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-8">
               <div>
@@ -292,9 +292,10 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
       {/* Overall Result of Medical Examination */}
       {assessment && (
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-lg mb-4">Overall Result of Medical Examination</h3>
+        <div className="bg-white border-2 border-green-300 rounded-lg shadow-sm">
+          <h3 className="font-semibold text-lg mb-0 text-green-900 bg-green-50 px-6 py-4 rounded-t-lg border-b-2 border-green-300">Overall Result of Medical Examination</h3>
           
+          <div className="p-6">
           {/* Fit to Drive */}
           <div className="mb-6">
             <p className="text-sm font-medium text-gray-700 mb-3">
@@ -311,9 +312,9 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
           {/* Medical Practitioner Declaration */}
           {assessment.declarationAgreed && (
-            <div className="pt-4 border-t border-blue-200">
+            <div className="pt-4 border-t border-green-200">
               <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
-              <div className="bg-white p-3 rounded border border-blue-300">
+              <div className="bg-green-50 p-3 rounded border border-green-300">
                 <p className="text-green-700 font-medium mb-2">✓ Declaration confirmed</p>
                 <p className="text-sm leading-relaxed text-gray-700">
                   I certify that I have today examined and identified the patient named above:
@@ -325,6 +326,7 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>
