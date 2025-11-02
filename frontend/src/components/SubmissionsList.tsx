@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Loader2, Eye, FileText, Search } from 'lucide-react';
+import { Loader2, Eye, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -30,6 +30,26 @@ export function SubmissionsList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterExamType, setFilterExamType] = useState<string>('all');
+  const [sortColumn, setSortColumn] = useState<string>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (column: string) => {
+    if (sortColumn !== column) {
+      return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-30" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="w-4 h-4 ml-1 inline" />
+      : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -60,6 +80,45 @@ export function SubmissionsList() {
     const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
 
     return matchesSearch && matchesStatus && matchesExamType;
+  });
+
+  // Sort the filtered submissions
+  const sortedSubmissions = [...filteredSubmissions].sort((a: any, b: any) => {
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortColumn) {
+      case 'patientName':
+        aValue = a.patientName.toLowerCase();
+        bValue = b.patientName.toLowerCase();
+        break;
+      case 'nric':
+        aValue = a.patientNric.toLowerCase();
+        bValue = b.patientNric.toLowerCase();
+        break;
+      case 'examType':
+        aValue = a.examType;
+        bValue = b.examType;
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'createdBy':
+        aValue = a.createdByName.toLowerCase();
+        bValue = b.createdByName.toLowerCase();
+        break;
+      case 'date':
+        aValue = new Date(a.submittedDate || a.createdDate).getTime();
+        bValue = new Date(b.submittedDate || b.createdDate).getTime();
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
   });
 
   return (
@@ -147,7 +206,7 @@ export function SubmissionsList() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Results ({filteredSubmissions.length})</CardTitle>
+          <CardTitle>Results ({sortedSubmissions.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -155,7 +214,7 @@ export function SubmissionsList() {
               <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
               <p className="text-slate-600">Loading submissions...</p>
             </div>
-          ) : filteredSubmissions.length === 0 ? (
+          ) : sortedSubmissions.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <p>No submissions found</p>
@@ -166,17 +225,47 @@ export function SubmissionsList() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Patient Name</TableHead>
-                    <TableHead>NRIC/FIN</TableHead>
-                    <TableHead>Exam Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('patientName')}
+                    >
+                      Patient Name{getSortIcon('patientName')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('nric')}
+                    >
+                      NRIC/FIN{getSortIcon('nric')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('examType')}
+                    >
+                      Exam Type{getSortIcon('examType')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('status')}
+                    >
+                      Status{getSortIcon('status')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('createdBy')}
+                    >
+                      Created By{getSortIcon('createdBy')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('date')}
+                    >
+                      Date{getSortIcon('date')}
+                    </TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSubmissions.map((submission: any) => (
+                  {sortedSubmissions.map((submission: any) => (
                     <TableRow 
                       key={submission.id}
                       className="cursor-pointer hover:bg-slate-50"
