@@ -54,6 +54,44 @@ export function DrivingVocationalTpLtaAccordions({
     return declaration.patientCertification === true;
   };
 
+  const validateMedicalHistory = () => {
+    const history = formData.medicalHistory || {};
+    const historyItems = [
+      'palpitationsBreathlessness',
+      'chestPainDiscomfort',
+      'highBloodPressure',
+      'heartAttackBypass',
+      'strokeTia',
+      'diabetes',
+      'epilepsySeizures',
+      'eyeDisorders',
+      'mentalHealthDisorders',
+      'alcoholDrugDependence',
+      'sleepApnoea',
+      'infectiousDisease',
+      'chronicKidneyFailure',
+      'cancer',
+      'musculoskeletalDisorders',
+      'hearingProblems',
+      'autoimmuneDisorders',
+      'metabolicDisorders',
+      'otherRelevant',
+    ];
+
+    let isValid = true;
+    
+    for (const item of historyItems) {
+      if (history[item] === true && !history[`${item}Remarks`]?.trim()) {
+        if (onValidate) {
+          onValidate(`medicalHistory${item}Remarks`, 'Remarks is required for this condition');
+        }
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  };
+
   return (
     <>
       {/* Medical Declaration by Examinee */}
@@ -97,11 +135,20 @@ export function DrivingVocationalTpLtaAccordions({
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4">
-            <MedicalHistorySection formData={formData} onChange={onChange} />
+            <MedicalHistorySection 
+              formData={formData} 
+              onChange={onChange}
+              errors={errors}
+              onValidate={onValidate}
+            />
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('medical-history', 'general-medical')}
+                onClick={() => {
+                  if (validateMedicalHistory()) {
+                    onContinue('medical-history', 'general-medical');
+                  }
+                }}
               >
                 Continue
               </Button>

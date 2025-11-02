@@ -6,9 +6,11 @@ import { Textarea } from '../../ui/textarea';
 interface MedicalHistorySectionProps {
   formData: Record<string, any>;
   onChange: (key: string, value: any) => void;
+  errors?: Record<string, string>;
+  onValidate?: (field: string, error: string) => void;
 }
 
-export function MedicalHistorySection({ formData, onChange }: MedicalHistorySectionProps) {
+export function MedicalHistorySection({ formData, onChange, errors, onValidate }: MedicalHistorySectionProps) {
   const history = formData.medicalHistory || {};
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
@@ -30,6 +32,17 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
       ...history,
       [`${field}Remarks`]: value,
     });
+    
+    // Clear error when user starts typing
+    if (onValidate && value.trim()) {
+      onValidate(`medicalHistory${field}Remarks`, '');
+    }
+  };
+
+  const handleRemarksBlur = (field: string) => {
+    if (onValidate && history[field] && !history[`${field}Remarks`]?.trim()) {
+      onValidate(`medicalHistory${field}Remarks`, 'Remarks is required for this condition');
+    }
   };
 
   const handleAllNormal = () => {
@@ -134,9 +147,15 @@ export function MedicalHistorySection({ formData, onChange }: MedicalHistorySect
                   placeholder="Please provide details..."
                   value={history[`${item.id}Remarks`] || ''}
                   onChange={(e) => handleRemarksChange(item.id, e.target.value)}
+                  onBlur={() => handleRemarksBlur(item.id)}
                   className="mt-1"
                   rows={3}
                 />
+                {errors?.[`medicalHistory${item.id}Remarks`] && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors[`medicalHistory${item.id}Remarks`]}
+                  </p>
+                )}
               </div>
             )}
           </li>
