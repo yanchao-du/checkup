@@ -1,5 +1,6 @@
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
+import { getTodayInSingapore } from '../utils/date';
 
 interface DateOfBirthFieldProps {
   value: string;
@@ -8,7 +9,7 @@ interface DateOfBirthFieldProps {
 }
 
 export function DateOfBirthField({ value, onChange, required = true }: DateOfBirthFieldProps) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayInSingapore();
   
   return (
     <div className="space-y-2">

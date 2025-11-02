@@ -3,6 +3,7 @@ import { validateNRIC } from '../lib/nric_validator';
 import { validateNricOrFin, validateEmail, validateSingaporeMobile } from '../lib/validationRules';
 import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
+import { getTodayInSingapore } from './submission-form/utils/date';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -539,7 +540,7 @@ export function NewSubmission() {
     }
 
     // Validate examination date is not in the future
-    const todayString = new Date().toISOString().split('T')[0];
+    const todayString = getTodayInSingapore();
     
     if (examinationDate > todayString) {
       setExaminationDateError('Examination date cannot be in the future');
@@ -1276,7 +1277,7 @@ export function NewSubmission() {
                         id="examinationDate"
                         name="examinationDate"
                         type="date"
-                        max={new Date().toISOString().split('T')[0]}
+                        max={getTodayInSingapore()}
                         value={examinationDate}
                         onChange={(e) => {
                           const selectedDate = e.target.value;
@@ -1287,7 +1288,7 @@ export function NewSubmission() {
                           
                           // Validate if future date
                           if (selectedDate) {
-                            const todayString = new Date().toISOString().split('T')[0];
+                            const todayString = getTodayInSingapore();
                             
                             if (selectedDate > todayString) {
                               setExaminationDateError('Examination date cannot be in the future');
