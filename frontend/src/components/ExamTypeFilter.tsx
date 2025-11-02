@@ -28,9 +28,6 @@ export function ExamTypeFilter({ value, onValueChange }: ExamTypeFilterProps) {
         <SelectItem value="WORK_PERMIT">
           Work Permit (MOM)
         </SelectItem>
-        <SelectItem value="AGED_DRIVERS">
-          Aged Drivers (SPF)
-        </SelectItem>
         <SelectItem value="DRIVING_LICENCE_TP">
           Driving Licence (TP)
         </SelectItem>
