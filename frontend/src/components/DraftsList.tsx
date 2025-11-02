@@ -4,10 +4,18 @@ import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
+import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Edit, FileEdit, Search, Trash2 } from 'lucide-react';
+import { Edit, FileEdit, Search, Trash2, ArrowUpDown } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 import {
   Table,
   TableBody,
@@ -33,8 +41,11 @@ export function DraftsList() {
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterExamType, setFilterExamType] = useState<string>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [includeDeleted] = useState(false);
+  const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchDrafts = async () => {
@@ -57,10 +68,45 @@ export function DraftsList() {
     fetchDrafts();
   }, [user?.role, includeDeleted]);
 
-  const filteredDrafts = drafts.filter(draft => 
-    draft.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    draft.patientNric.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredDrafts = drafts.filter(draft => {
+    const matchesSearch = 
+      draft.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      draft.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesExamType = filterExamType === 'all' || draft.examType === filterExamType;
+    
+    return matchesSearch && matchesExamType;
+  });
+
+  const handleSort = (field: keyof MedicalSubmission) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedDrafts = [...filteredDrafts].sort((a, b) => {
+    if (!sortField) return 0;
+
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    let comparison = 0;
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      comparison = aValue.localeCompare(bValue);
+    } else if (aValue instanceof Date && bValue instanceof Date) {
+      comparison = aValue.getTime() - bValue.getTime();
+    } else {
+      comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    }
+
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
 
   const handleDelete = async () => {
     if (deleteId) {
@@ -95,12 +141,9 @@ export function DraftsList() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Search Drafts</CardTitle>
-          {/* <CardDescription>Find your saved drafts</CardDescription> */}
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="space-y-4">
+          {/* <Label className="text-base font-semibold">Search Drafts</Label> */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
@@ -110,33 +153,56 @@ export function DraftsList() {
                 className="pl-10"
               />
             </div>
-            {/* {user?.role === 'admin' && (
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="includeDeleted"
-                  checked={includeDeleted}
-                  onChange={(e) => setIncludeDeleted(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
-                />
-                <label 
-                  htmlFor="includeDeleted" 
-                  className="text-sm font-medium text-slate-700 cursor-pointer select-none"
-                >
-                  Show deleted drafts
-                </label>
-              </div>
-            )} */}
+            <div className="space-y-2">
+              <Select value={filterExamType} onValueChange={setFilterExamType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Exam Types</SelectItem>
+                  <SelectItem value="SIX_MONTHLY_MDW">
+                    MDW Six-monthly (MOM)
+                  </SelectItem>
+                  <SelectItem value="SIX_MONTHLY_FMW">
+                    FMW Six-monthly (MOM)
+                  </SelectItem>
+                  <SelectItem value="WORK_PERMIT">
+                    Work Permit (MOM)
+                  </SelectItem>
+                  <SelectItem value="AGED_DRIVERS">
+                    Aged Drivers (SPF)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_LICENCE_TP">
+                    Driving Licence (TP)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
+                    Driving Vocational (TP/LTA)
+                  </SelectItem>
+                  <SelectItem value="VOCATIONAL_LICENCE_LTA">
+                    Vocational Licence (LTA)
+                  </SelectItem>
+                  <SelectItem value="PR_MEDICAL">
+                    PR Medical (ICA)
+                  </SelectItem>
+                  <SelectItem value="STUDENT_PASS_MEDICAL">
+                    Student Pass (ICA)
+                  </SelectItem>
+                  <SelectItem value="LTVP_MEDICAL">
+                    LTVP (ICA)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Your Drafts ({filteredDrafts.length})</CardTitle>
-        </CardHeader>
         <CardContent>
-          {filteredDrafts.length === 0 ? (
+          <div className="my-4">
+            <Label className="text-base font-semibold">Your Drafts ({sortedDrafts.length})</Label>
+          </div>
+          {sortedDrafts.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <FileEdit className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <p>No drafts found</p>
@@ -147,16 +213,61 @@ export function DraftsList() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Patient Name</TableHead>
-                    <TableHead>NRIC/FIN</TableHead>
-                    <TableHead>Exam Type</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead>Last Modified</TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('patientName')}
+                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                      >
+                        Patient Name
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('patientNric')}
+                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                      >
+                        NRIC/FIN
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('examType')}
+                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                      >
+                        Exam Type
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('createdByName')}
+                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                      >
+                        Created By
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('createdDate')}
+                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                      >
+                        Last Modified
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDrafts.map((draft) => {
+                  {sortedDrafts.map((draft) => {
                     const isDeleted = !!draft.deletedAt;
                     return (
                       <TableRow 

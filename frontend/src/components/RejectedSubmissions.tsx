@@ -3,11 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { approvalsApi, submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
+import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { XCircle, Eye, Loader2, RotateCcw, Search } from 'lucide-react';
+import { XCircle, Eye, Loader2, RotateCcw, Search, ArrowUpDown } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 import {
   Table,
   TableBody,
@@ -25,7 +33,10 @@ export function RejectedSubmissions() {
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterExamType, setFilterExamType] = useState<string>('all');
   const [reopeningId, setReopeningId] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchRejectedSubmissions = async () => {
@@ -47,10 +58,45 @@ export function RejectedSubmissions() {
     fetchRejectedSubmissions();
   }, [user?.role]);
 
-  const filteredRejections = rejectedSubmissions.filter(submission => 
-    submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRejections = rejectedSubmissions.filter(submission => {
+    const matchesSearch = 
+      submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
+    
+    return matchesSearch && matchesExamType;
+  });
+
+  const handleSort = (field: keyof MedicalSubmission) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedRejections = [...filteredRejections].sort((a, b) => {
+    if (!sortField) return 0;
+
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    let comparison = 0;
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      comparison = aValue.localeCompare(bValue);
+    } else if (aValue instanceof Date && bValue instanceof Date) {
+      comparison = aValue.getTime() - bValue.getTime();
+    } else {
+      comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    }
+
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
 
   const handleReopen = async (submissionId: string) => {
     try {
@@ -95,34 +141,68 @@ export function RejectedSubmissions() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Search Rejected Submissions</CardTitle>
-          <CardDescription>Find submissions by patient name or NRIC</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search by patient name or NRIC..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+        <CardContent className="space-y-4">
+          {/* <Label className="text-base font-semibold">Search Rejected Submissions</Label> */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search by patient name or NRIC..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Select value={filterExamType} onValueChange={setFilterExamType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Exam Types</SelectItem>
+                  <SelectItem value="SIX_MONTHLY_MDW">
+                    MDW Six-monthly (MOM)
+                  </SelectItem>
+                  <SelectItem value="SIX_MONTHLY_FMW">
+                    FMW Six-monthly (MOM)
+                  </SelectItem>
+                  <SelectItem value="WORK_PERMIT">
+                    Work Permit (MOM)
+                  </SelectItem>
+                  <SelectItem value="AGED_DRIVERS">
+                    Aged Drivers (SPF)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_LICENCE_TP">
+                    Driving Licence (TP)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
+                    Driving Vocational (TP/LTA)
+                  </SelectItem>
+                  <SelectItem value="VOCATIONAL_LICENCE_LTA">
+                    Vocational Licence (LTA)
+                  </SelectItem>
+                  <SelectItem value="PR_MEDICAL">
+                    PR Medical (ICA)
+                  </SelectItem>
+                  <SelectItem value="STUDENT_PASS_MEDICAL">
+                    Student Pass (ICA)
+                  </SelectItem>
+                  <SelectItem value="LTVP_MEDICAL">
+                    LTVP (ICA)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Rejected Medical Examinations ({filteredRejections.length})</CardTitle>
-          <CardDescription>
-            {user?.role === 'doctor'
-              ? 'Submissions that were rejected and returned to drafts'
-              : 'Your submissions that were rejected by doctors'}
-          </CardDescription>
-        </CardHeader>
         <CardContent>
-          {filteredRejections.length === 0 ? (
+          <div className="my-4">
+            <Label className="text-base font-semibold">Rejected Medical Examinations ({sortedRejections.length})</Label>
+          </div>
+          {sortedRejections.length === 0 ? (
             <div className="text-center py-12">
               <XCircle className="w-16 h-16 mx-auto mb-4 text-slate-300" />
               <h3 className="text-lg font-semibold text-slate-900 mb-2">No Rejected Submissions Found</h3>
@@ -133,19 +213,91 @@ export function RejectedSubmissions() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Patient Name</TableHead>
-                  <TableHead>NRIC/FIN</TableHead>
-                  <TableHead>Exam Type</TableHead>
-                  <TableHead>Rejection Reason</TableHead>
-                  <TableHead>Submitted By</TableHead>
-                  <TableHead>Rejected By</TableHead>
-                  <TableHead>Rejected Date</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('patientName')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Patient Name
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('patientNric')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      NRIC/FIN
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('examType')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Exam Type
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('rejectedReason')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Rejection Reason
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('createdByName')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Submitted By
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('approvedByName')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Rejected By
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('createdDate')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Rejected Date
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('status')}
+                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
+                    >
+                      Status
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRejections.map((submission) => (
+                {sortedRejections.map((submission) => (
                   <TableRow key={submission.id}>
                     <TableCell className="font-medium">{submission.patientName}</TableCell>
                     <TableCell>{submission.patientNric}</TableCell>

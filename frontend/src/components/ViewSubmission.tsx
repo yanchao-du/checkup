@@ -159,30 +159,6 @@ export function ViewSubmission() {
           {getSubmissionStatusLabel(submission.status)}
         </Badge>
       </div>
-
-      {/* Rejection Reason - Show for all users when submission is rejected */}
-      {submission.status === 'rejected' && submission.rejectedReason && (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader>
-            <CardTitle className="text-red-900">Submission Rejected</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-red-900">Rejection Reason:</p>
-              <p className="text-sm text-red-700 bg-white p-3 rounded-md border border-red-200">
-                {submission.rejectedReason}
-              </p>
-              {submission.rejectedAt && (
-                <p className="text-xs text-red-600 mt-2">
-                  Rejected on {new Date(submission.rejectedAt).toLocaleString()}
-                  {submission.rejectedByName && ` by ${submission.rejectedByName}`}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -191,22 +167,6 @@ export function ViewSubmission() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Patient Name</p>
-                  <p className="text-slate-900">{submission.patientName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">NRIC / FIN</p>
-                  <p className="text-slate-900">{submission.patientNric}</p>
-                </div>
-                {(submission.examType === 'AGED_DRIVERS' || isDriverExamType(submission.examType)) && submission.patientDateOfBirth && (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
-                    <p className="text-slate-900">
-                      {new Date(submission.patientDateOfBirth).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
                 {isDriverExamType(submission.examType) && submission.patientEmail && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Email Address</p>
@@ -259,7 +219,6 @@ export function ViewSubmission() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>Medical Examination Results</CardTitle>

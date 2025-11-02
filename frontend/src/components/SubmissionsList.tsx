@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
+import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -136,14 +137,11 @@ export function SubmissionsList() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Search and filter your completed submissions</CardTitle>
-          {/* <CardDescription>Find submissions by patient name, NRIC, status, or exam type</CardDescription> */}
-        </CardHeader>
         <CardContent className="space-y-4">
+          {/* <Label className="text-base font-semibold">Search and filter your completed submissions</Label> */}
           {isDoctor ? (
             // Doctor layout: Search and Exam Type side by side
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
@@ -270,10 +268,10 @@ export function SubmissionsList() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Results ({sortedSubmissions.length})</CardTitle>
-        </CardHeader>
         <CardContent>
+          <div className="my-4">
+            <Label className="text-base font-semibold">Results ({sortedSubmissions.length})</Label>
+          </div>
           {isLoading ? (
             <div className="text-center py-12">
               <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
