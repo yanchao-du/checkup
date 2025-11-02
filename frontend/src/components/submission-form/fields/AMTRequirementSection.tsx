@@ -1,5 +1,7 @@
 import { Label } from '../../ui/label';
 import { useEffect, useState } from 'react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import { Info } from 'lucide-react';
 
 interface AMTRequirementSectionProps {
   drivingLicenseClass: string;
@@ -109,7 +111,22 @@ export function AMTRequirementSection({
 
   return (
     <div className="space-y-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
-      <h3 className="text-sm font-semibold text-gray-700">Abbreviated Mental Test (AMT) Requirement</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-gray-700">Abbreviated Mental Test (AMT) Requirement</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Info className="h-4 w-4 text-gray-500 cursor-help hover:text-gray-700" />
+          </TooltipTrigger>
+          <TooltipContent className="max-w-lg bg-gray-900 text-white p-3 !text-[11px]">
+            <p className="font-medium mb-2">AMT is required if ANY of the following conditions applies:</p>
+            <ul className="space-y-1 leading-relaxed">
+              <li>• <strong>Condition 1:</strong> Patient holds Class 4, 4A, 4P, 4AP, 5, 5P or Private Driving Instructor licence AND next birthday age is 70-74</li>
+              <li>• <strong>Condition 2:</strong> Patient holds any LTA vocational licence AND is aged 70 or above on examination date</li>
+              <li>• <strong>Condition 3:</strong> Patient shows signs of cognitive impairment</li>
+            </ul>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       
       {needsAdditionalInfo && (
         <div className="space-y-4 bg-white p-4 rounded border border-gray-200">
