@@ -283,6 +283,7 @@ export function DrivingLicenceTpSummary({
           </div>
           {checkedHistoryItems.length > 0 ? (
             <>
+              <p className="text-sm text-gray-600 mb-3 italic">Pre-existing conditions:</p>
               <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
                 {checkedHistoryItems.map((item, index) => (
                   <li key={index} className="text-amber-700">
