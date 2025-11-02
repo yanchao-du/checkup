@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, IsDateString, IsObject, IsBoolean, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsDateString, IsObject, IsBoolean, IsInt, Min, IsEmail, Matches } from 'class-validator';
 
 export class CreateSubmissionDto {
   @IsString()
@@ -16,11 +16,11 @@ export class CreateSubmissionDto {
   patientDateOfBirth?: string;
   
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'Please enter a valid email address' })
   patientEmail?: string;
   
   @IsOptional()
-  @IsString()
+  @Matches(/^(\+65)?[89]\d{7}$/, { message: 'Mobile number must be 8 digits starting with 8 or 9' })
   patientMobile?: string;
   
   @IsOptional()
@@ -57,11 +57,11 @@ export class UpdateSubmissionDto {
   patientDateOfBirth?: string;
   
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'Please enter a valid email address' })
   patientEmail?: string;
   
   @IsOptional()
-  @IsString()
+  @Matches(/^(\+65)?[89]\d{7}$/, { message: 'Mobile number must be 8 digits starting with 8 or 9' })
   patientMobile?: string;
   
   @IsOptional()

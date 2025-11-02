@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateNricOrFin } from '../lib/validationRules';
+import { validateNricOrFin, validateEmail, validateSingaporeMobile } from '../lib/validationRules';
 import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
 import { useParams } from 'react-router-dom';
@@ -90,6 +90,8 @@ export function NewSubmission() {
   const [patientDateOfBirth, setPatientDateOfBirth] = useState('');
   const [patientEmail, setPatientEmail] = useState('');
   const [patientMobile, setPatientMobile] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [mobileError, setMobileError] = useState<string | null>(null);
   const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -490,6 +492,29 @@ export function NewSubmission() {
       return false;
     }
 
+    // Validate email and mobile for driver exams
+    if (isDriverExamType(examType)) {
+      // Validate email if provided
+      if (patientEmail) {
+        const emailValidationError = validateEmail(patientEmail);
+        if (emailValidationError) {
+          setEmailError(emailValidationError);
+          toast.error(emailValidationError);
+          return false;
+        }
+      }
+      
+      // Validate mobile if provided
+      if (patientMobile) {
+        const mobileValidationError = validateSingaporeMobile(patientMobile);
+        if (mobileValidationError) {
+          setMobileError(mobileValidationError);
+          toast.error(mobileValidationError);
+          return false;
+        }
+      }
+    }
+
     // Validate driving licence exam timing
     if (drivingLicenceTimingError) {
       toast.error(drivingLicenceTimingError);
@@ -498,6 +523,8 @@ export function NewSubmission() {
     
     // clear inline exam date error if present
     if (examinationDateError) setExaminationDateError(null);
+    if (emailError) setEmailError(null);
+    if (mobileError) setMobileError(null);
     if (nricError) setNricError(null);
     return true;
   };
@@ -797,7 +824,9 @@ export function NewSubmission() {
     ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
     examinationDate &&
     !examinationDateError &&
-    !drivingLicenceTimingError
+    !drivingLicenceTimingError &&
+    !emailError &&
+    !mobileError
   );
 
   const handleContinue = (currentSection: string, nextSection: string) => {
@@ -1099,20 +1128,50 @@ export function NewSubmission() {
                             name="patientEmail"
                             type="email"
                             value={patientEmail}
-                            onChange={(e) => setPatientEmail(e.target.value)}
+                            onChange={(e) => {
+                              setPatientEmail(e.target.value);
+                              // Clear error on change
+                              if (emailError) setEmailError(null);
+                            }}
+                            onBlur={(e) => {
+                              const error = validateEmail(e.target.value);
+                              setEmailError(error);
+                            }}
                             placeholder="example@email.com"
+                            className={emailError ? 'border-red-500' : ''}
                           />
+                          {emailError && <InlineError>{emailError}</InlineError>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="patientMobile">Mobile Number</Label>
-                          <Input
-                            id="patientMobile"
-                            name="patientMobile"
-                            type="tel"
-                            value={patientMobile}
-                            onChange={(e) => setPatientMobile(e.target.value)}
-                            placeholder="+65 9123 4567"
-                          />
+                          <div className="flex gap-2 items-start">
+                            <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-muted-foreground whitespace-nowrap">
+                              +65
+                            </div>
+                            <div className="flex-1 space-y-2">
+                              <Input
+                                id="patientMobile"
+                                name="patientMobile"
+                                type="tel"
+                                value={patientMobile}
+                                onChange={(e) => {
+                                  // Only allow digits and spaces
+                                  const cleaned = e.target.value.replace(/[^\d\s]/g, '');
+                                  setPatientMobile(cleaned);
+                                  // Clear error on change
+                                  if (mobileError) setMobileError(null);
+                                }}
+                                onBlur={(e) => {
+                                  const error = validateSingaporeMobile(e.target.value);
+                                  setMobileError(error);
+                                }}
+                                placeholder="9123 4567"
+                                maxLength={9}
+                                className={mobileError ? 'border-red-500' : ''}
+                              />
+                              {mobileError && <InlineError>{mobileError}</InlineError>}
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}

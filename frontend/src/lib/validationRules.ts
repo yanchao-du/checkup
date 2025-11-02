@@ -41,3 +41,23 @@ export function validateNricOrFin(value: string, validateNRIC: (nric: string) =>
   }
   return null;
 }
+
+export function validateEmail(value: string): string | null {
+  if (!value) return null; // Optional field
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(value)) {
+    return 'Please enter a valid email address';
+  }
+  return null;
+}
+
+export function validateSingaporeMobile(value: string): string | null {
+  if (!value) return null; // Optional field
+  // Remove spaces and +65 prefix if present
+  const cleaned = value.replace(/\s+/g, '').replace(/^\+65/, '');
+  // Must be exactly 8 digits starting with 8 or 9
+  if (!/^[89]\d{7}$/.test(cleaned)) {
+    return 'Mobile number must be 8 digits starting with 8 or 9';
+  }
+  return null;
+}
