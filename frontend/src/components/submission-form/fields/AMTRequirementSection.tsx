@@ -10,6 +10,7 @@ interface AMTRequirementSectionProps {
   cognitiveImpairment: boolean;
   onChange: (field: string, value: any) => void;
   formData: Record<string, any>;
+  onRequirementChange?: (isRequired: boolean, canDetermine: boolean) => void;
 }
 
 export function AMTRequirementSection({
@@ -19,6 +20,7 @@ export function AMTRequirementSection({
   cognitiveImpairment,
   onChange,
   formData,
+  onRequirementChange,
 }: AMTRequirementSectionProps) {
   const [isAMTRequired, setIsAMTRequired] = useState(false);
   const [requirementReason, setRequirementReason] = useState<string[]>([]);
@@ -134,7 +136,12 @@ export function AMTRequirementSection({
     setRequirementReason(reasons);
     setNeedsAdditionalInfo(needsMoreInfo);
     setCanMakeDetermination(!needsMoreInfo); // Can only make determination if we don't need more info
-  }, [drivingLicenseClass, dateOfBirth, examinationDate, cognitiveImpairment, formData]);
+    
+    // Notify parent about requirement status
+    if (onRequirementChange) {
+      onRequirementChange(required, !needsMoreInfo);
+    }
+  }, [drivingLicenseClass, dateOfBirth, examinationDate, cognitiveImpairment, formData, onRequirementChange]);
 
   return (
     <div className="space-y-4 p-4 border border-blue-200 rounded-lg bg-blue-50">

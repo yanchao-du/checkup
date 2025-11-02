@@ -22,6 +22,7 @@ export function AbbreviatedMentalTestSection({
 }: AbbreviatedMentalTestSectionProps) {
   const amt = formData.amt || {};
   const [score, setScore] = useState(0);
+  const [showAMTQuestions, setShowAMTQuestions] = useState(false);
 
   const questions = [
     { id: 'age', label: '1. Age' },
@@ -71,6 +72,11 @@ export function AbbreviatedMentalTestSection({
     });
   };
 
+  const handleAMTRequirementChange = (isRequired: boolean, canDetermine: boolean) => {
+    // Only show AMT questions if AMT is required AND we can make that determination
+    setShowAMTQuestions(isRequired && canDetermine);
+  };
+
   return (
     <div className="space-y-4">
       {/* AMT Requirement Check */}
@@ -82,19 +88,28 @@ export function AbbreviatedMentalTestSection({
           cognitiveImpairment={formData.abnormalityChecklist?.cognitiveImpairment || false}
           onChange={onChange}
           formData={formData}
+          onRequirementChange={handleAMTRequirementChange}
         />
       )}
 
-      <div className="flex justify-between items-center">
+      {showAMTQuestions && (
+        <>
+          <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-gray-600">
-            Check each question if the examinee answered correctly (1 point each)
+            Ask the following questions and check each question if the patient answers correctly (1 point each)
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={handleAllPassed}>
           All Passed
         </Button>
       </div>
+
+          <div className="p-4 bg-amber-50 border border-amber-300 rounded-lg">
+            <p className="text-sm font-medium text-amber-900">
+              📋 <strong>Instruction:</strong> Before asking any questions, say to the patient: "Please remember this phrase - '37 Bukit Timah Road'. I will ask for this memory phrase later."
+            </p>
+          </div>
 
       <div className="space-y-3">
         {questions.map((question) => (
@@ -129,6 +144,8 @@ export function AbbreviatedMentalTestSection({
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
