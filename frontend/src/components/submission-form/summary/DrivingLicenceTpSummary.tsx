@@ -358,9 +358,9 @@ export function DrivingLicenceTpSummary({
             </div>
           </div>
           
-          {/* Abnormality Checklist */}
+          {/* Physical & Mental Health Assessment */}
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Abnormalities Observed</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
             {abnormalities.length > 0 ? (
               <ul className="list-disc list-inside space-y-1 text-sm">
                 {abnormalities.map((item, index) => (
