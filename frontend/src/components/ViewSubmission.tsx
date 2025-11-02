@@ -388,7 +388,7 @@ export function ViewSubmission() {
                 </>
               )}
 
-              {/* Declaration - show for submitted submissions */}
+              {/* Declaration - show for submitted submissions (MOM exams only) */}
               {submission.status === 'submitted' && (
                 <>
                   <Separator />
@@ -401,7 +401,8 @@ export function ViewSubmission() {
                   )}
                   {submission.examType !== 'PR_MEDICAL' && 
                    submission.examType !== 'STUDENT_PASS_MEDICAL' && 
-                   submission.examType !== 'LTVP_MEDICAL' && (
+                   submission.examType !== 'LTVP_MEDICAL' &&
+                   !isDriverExamType(submission.examType) && (
                     <DeclarationView>
                       <MomDeclarationContent />
                     </DeclarationView>
