@@ -74,7 +74,7 @@ export function DrivingVocationalTpLtaAccordions({
 
       {/* Medical History of Patient */}
       <AccordionItem value="medical-history">
-        <AccordionTrigger isCompleted={completedSections.has('medical-history')}>
+        <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>Medical History of Patient</span>
           </div>
@@ -106,7 +106,7 @@ export function DrivingVocationalTpLtaAccordions({
 
       {/* General Medical Examination */}
       <AccordionItem value="general-medical">
-        <AccordionTrigger isCompleted={completedSections.has('general-medical')}>
+        <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>General Medical Examination</span>
           </div>
@@ -139,7 +139,7 @@ export function DrivingVocationalTpLtaAccordions({
 
       {/* Abbreviated Mental Test (AMT) */}
       <AccordionItem value="amt">
-        <AccordionTrigger isCompleted={completedSections.has('amt')}>
+        <AccordionTrigger isCompleted={completedSections.has('amt')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>Abbreviated Mental Test (AMT)</span>
           </div>
@@ -167,7 +167,7 @@ export function DrivingVocationalTpLtaAccordions({
 
       {/* LTA Vocational Licence Medical Details */}
       <AccordionItem value="lta-vocational">
-        <AccordionTrigger isCompleted={completedSections.has('lta-vocational')}>
+        <AccordionTrigger isCompleted={completedSections.has('lta-vocational')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>LTA Vocational Licence Medical Details</span>
           </div>

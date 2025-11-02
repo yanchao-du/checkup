@@ -68,7 +68,7 @@ export function VocationalLicenceLtaAccordions({
 
       {/* Medical History of Patient */}
       <AccordionItem value="medical-history">
-        <AccordionTrigger isCompleted={completedSections.has('medical-history')}>
+        <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>Medical History of Patient</span>
           </div>
@@ -100,7 +100,7 @@ export function VocationalLicenceLtaAccordions({
 
       {/* General Medical Examination */}
       <AccordionItem value="general-medical">
-        <AccordionTrigger isCompleted={completedSections.has('general-medical')}>
+        <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>General Medical Examination</span>
           </div>
@@ -133,7 +133,7 @@ export function VocationalLicenceLtaAccordions({
 
       {/* LTA Vocational Licence Medical Details */}
       <AccordionItem value="lta-vocational">
-        <AccordionTrigger isCompleted={completedSections.has('lta-vocational')}>
+        <AccordionTrigger isCompleted={completedSections.has('lta-vocational')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>LTA Vocational Licence Medical Details</span>
           </div>
@@ -155,7 +155,7 @@ export function VocationalLicenceLtaAccordions({
 
       {/* Medical Practitioner Assessment */}
       <AccordionItem value="assessment">
-        <AccordionTrigger isCompleted={completedSections.has('assessment')}>
+        <AccordionTrigger isCompleted={completedSections.has('assessment')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
             <span>Medical Practitioner Assessment</span>
           </div>
