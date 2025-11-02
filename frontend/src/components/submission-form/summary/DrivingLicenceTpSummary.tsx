@@ -53,26 +53,35 @@ export function DrivingLicenceTpSummary({
 
   // Helper to get checked history items
   const getCheckedHistory = () => {
-    const items = [];
+    const items: string[] = [];
     const labels: Record<string, string> = {
-      cardiovascular: 'Cardiovascular disease',
-      neurological: 'Neurological disorder',
-      psychiatric: 'Psychiatric condition',
-      diabetes: 'Diabetes mellitus',
-      vision: 'Vision problems',
-      hearing: 'Hearing problems',
-      musculoskeletal: 'Musculoskeletal disorder',
+      arthritisJointDisease: 'Arthritis / joint disease / numbness in hands and fingers',
+      asthmaBronchitisCopd: 'Asthma / bronchitis / COPD',
+      chestPain: 'Chest pain on exertion or at night',
+      deafness: 'Deafness',
+      diabetes: 'Diabetes',
+      difficultySeeing: 'Difficulty seeing in the dark',
+      epilepsySeizuresFaints: 'Epilepsy, seizures or fits of any kind / faints',
+      eyeTrouble: 'Eye trouble of any kind (e.g. cataracts, glaucoma, strabismus)',
+      headachesMigraine: 'Severe headaches or migraine',
+      headInjuryConcussion: 'Head injury or concussion',
+      heartAttackDisease: 'Heart attack / disease',
+      highBloodPressure: 'High blood pressure',
+      muscleDiseaseWeakness: 'Muscle disease or weakness',
+      palpitationsBreathlessness: 'Palpitations or breathlessness',
+      psychiatricIllness: 'Psychiatric illness',
+      strokeTia: 'Stroke / TIA',
+      surgicalOperations: 'Surgical operations',
+      thyroidDisease: 'Thyroid disease',
+      otherRelevant: 'Any relevant medical problems or injuries not mentioned above',
     };
 
     Object.entries(labels).forEach(([key, label]) => {
       if (medicalHistory[key]) {
-        items.push(label);
+        const remarks = medicalHistory[`${key}Remarks`];
+        items.push(remarks ? `${label}: ${remarks}` : label);
       }
     });
-
-    if (medicalHistory.other) {
-      items.push(`Other: ${medicalHistory.other}`);
-    }
 
     return items;
   };
