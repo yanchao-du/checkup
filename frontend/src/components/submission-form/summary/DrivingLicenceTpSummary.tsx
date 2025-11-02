@@ -282,14 +282,47 @@ export function DrivingLicenceTpSummary({
             )}
           </div>
           {checkedHistoryItems.length > 0 ? (
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              {checkedHistoryItems.map((item, index) => (
-                <li key={index} className="text-amber-700">✓ {item}</li>
-              ))}
-            </ul>
+            <>
+              <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
+                {checkedHistoryItems.map((item, index) => (
+                  <li key={index} className="text-amber-700">{item}</li>
+                ))}
+              </ul>
+              
+              {/* Remarks */}
+              {medicalHistory.remarks && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Remarks</h4>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">
+                    {medicalHistory.remarks}
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
           )}
+          
+          {/* Patient Certification */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+            <div className={`p-3 rounded-md ${medicalHistory.patientCertification ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}`}>
+              {medicalHistory.patientCertification ? (
+                <>
+                  <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+                  <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+                  <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                    <li>I have explained this declaration to the patient</li>
+                    <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                    <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                    <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+                  </ul>
+                </>
+              ) : (
+                <p className="text-gray-600 italic">Patient certification not completed</p>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
