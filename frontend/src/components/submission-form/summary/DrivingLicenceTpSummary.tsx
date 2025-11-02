@@ -403,9 +403,9 @@ export function DrivingLicenceTpSummary({
           <div className="mt-4 pt-4 border-t border-gray-200">
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
             {abnormalities.length > 0 ? (
-              <ul className="list-disc list-inside space-y-1 text-sm">
+              <ul className="list-disc ml-6 space-y-1 text-sm">
                 {abnormalities.map((item, index) => (
-                  <li key={index} className="text-red-700">⚠ {item}</li>
+                  <li key={index} className="text-red-700">{item}</li>
                 ))}
               </ul>
             ) : (
