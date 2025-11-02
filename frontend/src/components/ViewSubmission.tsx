@@ -272,8 +272,8 @@ export function ViewSubmission() {
               {/* <CardDescription>{submission.examType}</CardDescription> */}
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Body Measurements Section */}
-              {(submission.formData.height || submission.formData.weight || submission.formData.bloodPressure) && (
+              {/* Body Measurements Section - exclude driver exams as they have their own details component */}
+              {!isDriverExamType(submission.examType) && (submission.formData.height || submission.formData.weight || submission.formData.bloodPressure) && (
                 <>
                   <div>
                     <h4 className="text-sm font-semibold text-slate-900 mb-3">Body Measurements</h4>
