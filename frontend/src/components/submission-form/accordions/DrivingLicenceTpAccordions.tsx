@@ -66,7 +66,7 @@ export function DrivingLicenceTpAccordions({
 
       {/* Medical History of Patient */}
       <AccordionItem value="medical-history">
-        <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!completedSections.has('medical-declaration')}>
+        <AccordionTrigger isCompleted={completedSections.has('medical-history')}>
           <div className="flex items-center gap-2">
             <span>Medical History of Patient</span>
           </div>
@@ -97,7 +97,7 @@ export function DrivingLicenceTpAccordions({
 
       {/* General Medical Examination */}
       <AccordionItem value="general-medical">
-        <AccordionTrigger isCompleted={completedSections.has('general-medical')} isDisabled={!completedSections.has('medical-history')}>
+        <AccordionTrigger isCompleted={completedSections.has('general-medical')}>
           <div className="flex items-center gap-2">
             <span>General Medical Examination</span>
           </div>
@@ -119,7 +119,7 @@ export function DrivingLicenceTpAccordions({
 
       {/* Abbreviated Mental Test (AMT) */}
       <AccordionItem value="amt">
-        <AccordionTrigger isCompleted={completedSections.has('amt')} isDisabled={!completedSections.has('general-medical')}>
+        <AccordionTrigger isCompleted={completedSections.has('amt')}>
           <div className="flex items-center gap-2">
             <span>Abbreviated Mental Test (AMT)</span>
           </div>
@@ -141,7 +141,7 @@ export function DrivingLicenceTpAccordions({
 
       {/* Medical Practitioner Assessment */}
       <AccordionItem value="assessment">
-        <AccordionTrigger isCompleted={completedSections.has('assessment')} isDisabled={!completedSections.has('amt')}>
+        <AccordionTrigger isCompleted={completedSections.has('assessment')}>
           <div className="flex items-center gap-2">
             <span>Medical Practitioner Assessment</span>
           </div>
