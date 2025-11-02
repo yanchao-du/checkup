@@ -23,6 +23,10 @@ export function AMTRequirementSection({
   const [isAMTRequired, setIsAMTRequired] = useState(false);
   const [requirementReason, setRequirementReason] = useState<string[]>([]);
   const [needsAdditionalInfo, setNeedsAdditionalInfo] = useState(false);
+  
+  // Check if questions have been shown (persisted in formData)
+  const hasShownPrivateDrivingInstructor = formData.hasShownPrivateDrivingInstructor || false;
+  const hasShownLTAVocational = formData.hasShownLTAVocational || false;
 
   // Classes that require AMT check for age 70-74
   const AMT_AGE_CHECK_CLASSES = ['4', '4A', '4P', '4AP', '5', '5P'];
@@ -66,47 +70,68 @@ export function AMTRequirementSection({
   useEffect(() => {
     const reasons: string[] = [];
     let required = false;
+    let needsMoreInfo = false;
 
-    // Condition 1: Class 4/4A/4P/4AP/5/5P or Private Driving Instructor AND next birthday age 70-74
-    if (drivingLicenseClass && dateOfBirth && examinationDate) {
-      const ageNextBirthday = calculateAgeOnNextBirthday(dateOfBirth, examinationDate);
-      
-      if (ageNextBirthday !== null) {
-        const isAMTAgeCheckClass = AMT_AGE_CHECK_CLASSES.includes(drivingLicenseClass);
-        const isPrivateDrivingInstructor = formData.isPrivateDrivingInstructor === 'yes';
-        
-        if ((isAMTAgeCheckClass || isPrivateDrivingInstructor) && ageNextBirthday >= 70 && ageNextBirthday <= 74) {
-          required = true;
-          reasons.push(`Patient holds Class ${drivingLicenseClass}${isPrivateDrivingInstructor ? ' or Private Driving Instructor licence' : ''} and next birthday age is ${ageNextBirthday} (70-74)`);
-        }
-      }
-    }
-
-    // Condition 2: Holder of LTA vocational licence AND aged 70+ on examination date
-    if (formData.holdsLTAVocationalLicence === 'yes' && dateOfBirth && examinationDate) {
-      const ageOnExamDate = calculateAgeOnExamDate(dateOfBirth, examinationDate);
-      
-      if (ageOnExamDate !== null && ageOnExamDate >= 70) {
-        required = true;
-        reasons.push(`Patient holds LTA vocational licence and is aged ${ageOnExamDate} on examination date (70+)`);
-      }
-    }
-
-    // Condition 3: Shows signs of cognitive impairment
+    // Condition 3: Shows signs of cognitive impairment (check this first - if true, AMT is required immediately)
     if (cognitiveImpairment) {
       required = true;
       reasons.push('Patient shows signs of cognitive impairment');
     }
 
-    // Check if we need additional information
-    const needsInfo = !!(
-      (drivingLicenseClass && dateOfBirth && examinationDate) &&
-      (formData.isPrivateDrivingInstructor === undefined || formData.holdsLTAVocationalLicence === undefined)
-    );
+    // If already required due to cognitive impairment, no need for additional info
+    if (!required && drivingLicenseClass && dateOfBirth && examinationDate) {
+      const ageNextBirthday = calculateAgeOnNextBirthday(dateOfBirth, examinationDate);
+      const ageOnExamDate = calculateAgeOnExamDate(dateOfBirth, examinationDate);
+      
+      // Check if age is outside the critical ranges - if so, we can determine AMT is NOT required
+      const ageOutsideCriticalRange = (ageNextBirthday !== null && (ageNextBirthday < 70 || ageNextBirthday > 74)) &&
+                                      (ageOnExamDate !== null && ageOnExamDate < 70);
+      
+      if (ageOutsideCriticalRange) {
+        // Age is outside all critical ranges, AMT is definitely not required
+        required = false;
+        needsMoreInfo = false;
+      } else {
+        // Age is in or near critical range, need to check license details
+        
+        // Condition 1: Class 4/4A/4P/4AP/5/5P or Private Driving Instructor AND next birthday age 70-74
+        if (ageNextBirthday !== null && ageNextBirthday >= 70 && ageNextBirthday <= 74) {
+          const isAMTAgeCheckClass = AMT_AGE_CHECK_CLASSES.includes(drivingLicenseClass);
+          
+          if (isAMTAgeCheckClass) {
+            required = true;
+            reasons.push(`Patient holds Class ${drivingLicenseClass} and next birthday age is ${ageNextBirthday} (70-74)`);
+          } else if (formData.isPrivateDrivingInstructor === 'yes') {
+            required = true;
+            reasons.push(`Patient holds Private Driving Instructor licence and next birthday age is ${ageNextBirthday} (70-74)`);
+          } else if (formData.isPrivateDrivingInstructor === undefined) {
+            // Need to know if they're a Private Driving Instructor
+            needsMoreInfo = true;
+          }
+        }
+
+        // Condition 2: Holder of LTA vocational licence AND aged 70+ on examination date
+        if (!required && ageOnExamDate !== null && ageOnExamDate >= 70) {
+          if (formData.holdsLTAVocationalLicence === 'yes') {
+            required = true;
+            reasons.push(`Patient holds LTA vocational licence and is aged ${ageOnExamDate} on examination date (70+)`);
+          } else if (formData.holdsLTAVocationalLicence === undefined) {
+            // Need to know if they hold LTA vocational licence
+            needsMoreInfo = true;
+          }
+        }
+        
+        // If we need more info, persist that these questions have been shown
+        if (needsMoreInfo && (!hasShownPrivateDrivingInstructor || !hasShownLTAVocational)) {
+          onChange('hasShownPrivateDrivingInstructor', true);
+          onChange('hasShownLTAVocational', true);
+        }
+      }
+    }
 
     setIsAMTRequired(required);
     setRequirementReason(reasons);
-    setNeedsAdditionalInfo(needsInfo);
+    setNeedsAdditionalInfo(needsMoreInfo);
   }, [drivingLicenseClass, dateOfBirth, examinationDate, cognitiveImpairment, formData]);
 
   return (
@@ -128,12 +153,12 @@ export function AMTRequirementSection({
         </Tooltip>
       </div>
       
-      {needsAdditionalInfo && (
+      {(needsAdditionalInfo || hasShownPrivateDrivingInstructor || hasShownLTAVocational) && (
         <div className="space-y-4 bg-white p-4 rounded border border-gray-200">
           <p className="text-sm text-gray-600 font-medium">Additional information required to determine AMT requirement:</p>
           
           {/* Private Driving Instructor */}
-          {formData.isPrivateDrivingInstructor === undefined && (
+          {hasShownPrivateDrivingInstructor && (
             <div>
               <Label htmlFor="isPrivateDrivingInstructor">
                 Is the patient a holder of Private Driving Instructor licence?
@@ -166,7 +191,7 @@ export function AMTRequirementSection({
           )}
 
           {/* LTA Vocational Licence */}
-          {formData.holdsLTAVocationalLicence === undefined && (
+          {hasShownLTAVocational && (
             <div>
               <Label htmlFor="holdsLTAVocationalLicence">
                 Is the patient a holder of any LTA vocational licence?
