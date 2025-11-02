@@ -53,7 +53,7 @@ export function DrivingLicenceTpSummary({
 
   // Helper to get checked history items
   const getCheckedHistory = () => {
-    const items: string[] = [];
+    const items: Array<{ label: string; remarks?: string }> = [];
     const labels: Record<string, string> = {
       arthritisJointDisease: 'Arthritis / joint disease / numbness in hands and fingers',
       asthmaBronchitisCopd: 'Asthma / bronchitis / COPD',
@@ -79,7 +79,7 @@ export function DrivingLicenceTpSummary({
     Object.entries(labels).forEach(([key, label]) => {
       if (medicalHistory[key]) {
         const remarks = medicalHistory[`${key}Remarks`];
-        items.push(remarks ? `${label}: ${remarks}` : label);
+        items.push({ label, remarks });
       }
     });
 
@@ -283,21 +283,20 @@ export function DrivingLicenceTpSummary({
           </div>
           {checkedHistoryItems.length > 0 ? (
             <>
-              <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
+              <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
                 {checkedHistoryItems.map((item, index) => (
-                  <li key={index} className="text-amber-700">{item}</li>
+                  <li key={index} className="text-amber-700">
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      {item.remarks && (
+                        <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                          <span className="font-semibold">Remarks: </span>{item.remarks}
+                        </div>
+                      )}
+                    </div>
+                  </li>
                 ))}
               </ul>
-              
-              {/* Remarks */}
-              {medicalHistory.remarks && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Remarks</h4>
-                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">
-                    {medicalHistory.remarks}
-                  </p>
-                </div>
-              )}
             </>
           ) : (
             <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
