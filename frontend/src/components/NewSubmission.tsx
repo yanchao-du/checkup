@@ -309,18 +309,25 @@ export function NewSubmission() {
   // Scroll accordion into view when it expands
   useEffect(() => {
     if (activeAccordion) {
-      // Small delay to ensure accordion is expanded before scrolling
+      // Wait for accordion animation to complete before scrolling
       const timer = setTimeout(() => {
         // Find the accordion item with the matching value
         const accordionElement = document.querySelector(`[data-state="open"][data-radix-collection-item]`);
         if (accordionElement) {
-          // Scroll to the accordion header using block: 'center' like MDW exam does
+          // Scroll to the accordion header at the top with some padding
           const header = accordionElement.querySelector('[data-radix-accordion-trigger]');
           if (header) {
-            (header as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Get the header's position
+            const headerRect = header.getBoundingClientRect();
+            const scrollTop = window.pageYOffset + headerRect.top - 20; // 20px padding from top
+            
+            window.scrollTo({
+              top: scrollTop,
+              behavior: 'smooth'
+            });
           }
         }
-      }, 150);
+      }, 300); // Increased delay to wait for accordion animation
       
       return () => clearTimeout(timer);
     }
