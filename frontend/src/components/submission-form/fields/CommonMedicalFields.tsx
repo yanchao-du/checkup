@@ -27,7 +27,7 @@ export function CommonMedicalFields({
   errors = {}, 
   hideHeightWeightBmi = false, 
   showAbnormalityChecklist = false,
-  onValidate
+  onValidate,
 }: CommonMedicalFieldsProps) {
   const [bmi, setBmi] = useState<string>('');
 

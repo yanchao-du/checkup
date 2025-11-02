@@ -1384,6 +1384,9 @@ export function NewSubmission() {
                     ...abnormalityChecklistErrors
                   }}
                   onValidate={handleValidationError}
+                  drivingLicenseClass={drivingLicenseClass}
+                  dateOfBirth={patientDateOfBirth}
+                  examinationDate={examinationDate}
                   onContinue={(current, next) => {
                     if (current === 'assessment') {
                       if (validateExamSpecific()) {
@@ -1413,6 +1416,9 @@ export function NewSubmission() {
                     ...abnormalityChecklistErrors
                   }}
                   onValidate={handleValidationError}
+                  drivingLicenseClass={drivingLicenseClass}
+                  dateOfBirth={patientDateOfBirth}
+                  examinationDate={examinationDate}
                   onContinue={(current, next) => {
                     if (current === 'assessment') {
                       if (validateExamSpecific()) {

@@ -3,13 +3,23 @@ import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { AMTRequirementSection } from './AMTRequirementSection';
 
 interface AbbreviatedMentalTestSectionProps {
   formData: Record<string, any>;
   onChange: (key: string, value: any) => void;
+  drivingLicenseClass?: string;
+  dateOfBirth?: string;
+  examinationDate?: string;
 }
 
-export function AbbreviatedMentalTestSection({ formData, onChange }: AbbreviatedMentalTestSectionProps) {
+export function AbbreviatedMentalTestSection({ 
+  formData, 
+  onChange,
+  drivingLicenseClass,
+  dateOfBirth,
+  examinationDate 
+}: AbbreviatedMentalTestSectionProps) {
   const amt = formData.amt || {};
   const [score, setScore] = useState(0);
 
@@ -63,6 +73,18 @@ export function AbbreviatedMentalTestSection({ formData, onChange }: Abbreviated
 
   return (
     <div className="space-y-4">
+      {/* AMT Requirement Check */}
+      {drivingLicenseClass && dateOfBirth && examinationDate && (
+        <AMTRequirementSection
+          drivingLicenseClass={drivingLicenseClass}
+          dateOfBirth={dateOfBirth}
+          examinationDate={examinationDate}
+          cognitiveImpairment={formData.abnormalityChecklist?.cognitiveImpairment || false}
+          onChange={onChange}
+          formData={formData}
+        />
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-gray-600">

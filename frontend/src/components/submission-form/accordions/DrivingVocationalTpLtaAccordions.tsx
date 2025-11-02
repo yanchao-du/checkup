@@ -22,6 +22,9 @@ interface DrivingVocationalTpLtaAccordionsProps {
   onContinue: (current: string, next: string) => void;
   errors?: Record<string, string>;
   onValidate?: (field: string, error: string) => void;
+  drivingLicenseClass?: string;
+  dateOfBirth?: string;
+  examinationDate?: string;
 }
 
 export function DrivingVocationalTpLtaAccordions({
@@ -32,6 +35,9 @@ export function DrivingVocationalTpLtaAccordions({
   onContinue,
   errors,
   onValidate,
+  drivingLicenseClass,
+  dateOfBirth,
+  examinationDate,
 }: DrivingVocationalTpLtaAccordionsProps) {
   return (
     <>
@@ -141,7 +147,13 @@ export function DrivingVocationalTpLtaAccordions({
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4">
-            <AbbreviatedMentalTestSection formData={formData} onChange={onChange} />
+            <AbbreviatedMentalTestSection 
+              formData={formData} 
+              onChange={onChange}
+              drivingLicenseClass={drivingLicenseClass}
+              dateOfBirth={dateOfBirth}
+              examinationDate={examinationDate}
+            />
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
