@@ -6,9 +6,11 @@ import { Textarea } from '../../ui/textarea';
 interface MedicalDeclarationSectionProps {
   formData: Record<string, any>;
   onChange: (key: string, value: any) => void;
+  errors?: Record<string, string>;
+  onValidate?: (field: string, error: string) => void;
 }
 
-export function MedicalDeclarationSection({ formData, onChange }: MedicalDeclarationSectionProps) {
+export function MedicalDeclarationSection({ formData, onChange, errors, onValidate }: MedicalDeclarationSectionProps) {
   const declaration = formData.medicalDeclaration || {};
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
@@ -23,6 +25,18 @@ export function MedicalDeclarationSection({ formData, onChange }: MedicalDeclara
       ...declaration,
       remarks: value,
     });
+    // Clear error when user starts typing
+    if (onValidate && value.trim()) {
+      onValidate('medicalDeclarationRemarks', '');
+    }
+  };
+
+  const handleRemarksBlur = () => {
+    if (hasAnyDeclaration && !declaration.remarks?.trim()) {
+      if (onValidate) {
+        onValidate('medicalDeclarationRemarks', 'Remarks is required when any declaration is selected');
+      }
+    }
   };
 
   const handleClearAll = () => {
@@ -92,10 +106,16 @@ export function MedicalDeclarationSection({ formData, onChange }: MedicalDeclara
             placeholder="Enter details about the medical condition(s), treatment(s), or circumstances..."
             value={declaration.remarks || ''}
             onChange={(e) => handleRemarksChange(e.target.value)}
+            onBlur={handleRemarksBlur}
             rows={4}
             className="resize-none"
             required={hasAnyDeclaration}
           />
+          {errors?.medicalDeclarationRemarks && (
+            <p className="text-sm text-red-600 font-medium">
+              {errors.medicalDeclarationRemarks}
+            </p>
+          )}
           {declaration.remarks && (
             <p className="text-xs text-gray-500">
               {declaration.remarks.length} characters

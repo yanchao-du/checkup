@@ -12,6 +12,8 @@ interface DrivingLicenceTpAccordionsProps {
   completedSections: Set<string>;
   isPatientInfoValid: boolean;
   onContinue: (current: string, next: string) => void;
+  errors?: Record<string, string>;
+  onValidate?: (field: string, error: string) => void;
 }
 
 export function DrivingLicenceTpAccordions({
@@ -20,7 +22,30 @@ export function DrivingLicenceTpAccordions({
   completedSections,
   isPatientInfoValid,
   onContinue,
+  errors,
+  onValidate,
 }: DrivingLicenceTpAccordionsProps) {
+  const validateMedicalDeclaration = () => {
+    const declaration = formData.medicalDeclaration || {};
+    const declarations = [
+      'consultingPractitioner',
+      'takingMedication',
+      'hospitalAdmission',
+      'rehabilitativeTreatment',
+      'driverRehabilitation',
+      'otherMedicalProblems',
+    ];
+    const hasAnyDeclaration = declarations.some(item => declaration[item] === true);
+    
+    if (hasAnyDeclaration && !declaration.remarks?.trim()) {
+      if (onValidate) {
+        onValidate('medicalDeclarationRemarks', 'Remarks is required when any declaration is selected');
+      }
+      return false;
+    }
+    return true;
+  };
+
   return (
     <>
       {/* Medical Declaration by Examinee */}
@@ -32,11 +57,20 @@ export function DrivingLicenceTpAccordions({
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4">
-            <MedicalDeclarationSection formData={formData} onChange={onChange} />
+            <MedicalDeclarationSection 
+              formData={formData} 
+              onChange={onChange} 
+              errors={errors}
+              onValidate={onValidate}
+            />
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('medical-declaration', 'general-medical')}
+                onClick={() => {
+                  if (validateMedicalDeclaration()) {
+                    onContinue('medical-declaration', 'general-medical');
+                  }
+                }}
               >
                 Continue
               </Button>

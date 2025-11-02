@@ -92,6 +92,7 @@ export function NewSubmission() {
   const [patientMobile, setPatientMobile] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [mobileError, setMobileError] = useState<string | null>(null);
+  const [medicalDeclarationRemarksError, setMedicalDeclarationRemarksError] = useState<string | null>(null);
   const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -425,6 +426,12 @@ export function NewSubmission() {
 
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleValidationError = (field: string, error: string) => {
+    if (field === 'medicalDeclarationRemarks') {
+      setMedicalDeclarationRemarksError(error);
+    }
   };
 
   const handleExamTypeChange = (value: string) => {
@@ -1332,6 +1339,8 @@ export function NewSubmission() {
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
+                  errors={{ medicalDeclarationRemarks: medicalDeclarationRemarksError || '' }}
+                  onValidate={handleValidationError}
                   onContinue={(current, next) => {
                     if (current === 'assessment') {
                       if (validateExamSpecific()) {
@@ -1354,6 +1363,8 @@ export function NewSubmission() {
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
+                  errors={{ medicalDeclarationRemarks: medicalDeclarationRemarksError || '' }}
+                  onValidate={handleValidationError}
                   onContinue={(current, next) => {
                     if (current === 'assessment') {
                       if (validateExamSpecific()) {
@@ -1376,6 +1387,8 @@ export function NewSubmission() {
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
+                  errors={{ medicalDeclarationRemarks: medicalDeclarationRemarksError || '' }}
+                  onValidate={handleValidationError}
                   onContinue={(current, next) => {
                     if (current === 'assessment') {
                       if (validateExamSpecific()) {
