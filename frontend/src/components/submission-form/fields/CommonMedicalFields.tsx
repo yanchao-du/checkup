@@ -269,6 +269,38 @@ export function CommonMedicalFields({
           />
         </div>
       )}
+
+      {/* General Condition Assessment */}
+      <div className="mt-6 pl-4">
+        <Label htmlFor="passGeneralCondition" className="text-sm font-semibold text-gray-700">
+          Does the patient pass the General Condition? <span className="text-red-500">*</span>
+        </Label>
+        <div className="flex gap-4 mt-2">
+          <label className="flex items-center space-x-2 text-sm font-normal">
+            <input
+              type="radio"
+              name="passGeneralCondition"
+              value="yes"
+              checked={formData.passGeneralCondition === 'yes'}
+              onChange={(e) => onChange('passGeneralCondition', e.target.value)}
+              className="h-4 w-4"
+            />
+            <span>Yes</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm font-normal">
+            <input
+              type="radio"
+              name="passGeneralCondition"
+              value="no"
+              checked={formData.passGeneralCondition === 'no'}
+              onChange={(e) => onChange('passGeneralCondition', e.target.value)}
+              className="h-4 w-4"
+            />
+            <span>No</span>
+          </label>
+        </div>
+        {errors.passGeneralCondition && <InlineError>{errors.passGeneralCondition}</InlineError>}
+      </div>
     </div>
   );
 }
