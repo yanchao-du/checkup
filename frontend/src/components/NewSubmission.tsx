@@ -850,9 +850,9 @@ export function NewSubmission() {
       // Mark current section as completed
       setCompletedSections(prev => new Set(prev).add(currentSection));
       
-      // For driver exams from patient-info, go directly to general-medical (first exam section)
+      // For driver exams from patient-info, go directly to medical-declaration (first exam section)
       if (currentSection === 'patient-info' && isDriverExamType(examType)) {
-        setActiveAccordion('general-medical');
+        setActiveAccordion('medical-declaration');
       } else {
         // Move to next section
         setActiveAccordion(nextSection);
