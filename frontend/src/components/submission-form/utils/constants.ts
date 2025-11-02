@@ -4,4 +4,5 @@
  */
 export const ERROR_MESSAGES = {
   REMARKS_REQUIRED: 'Remarks is required',
+  FIELD_REQUIRED: 'This field is required',
 } as const;

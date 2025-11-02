@@ -195,3 +195,129 @@ export function validateAbnormalityChecklist(
 
   return isValid;
 }
+
+/**
+ * Validates mandatory fields in General Medical Examination section
+ * @param formData The form data object
+ * @param onValidate Callback to set validation errors
+ * @returns true if validation passes, false otherwise
+ */
+export function validateGeneralMedical(
+  formData: Record<string, any>,
+  onValidate?: (field: string, error: string) => void
+): boolean {
+  let isValid = true;
+  let firstErrorField: string | null = null;
+
+  // Validate Blood Pressure
+  if (!formData.bloodPressure?.trim()) {
+    if (onValidate) {
+      onValidate('bloodPressure', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'bloodPressure';
+    }
+    isValid = false;
+  }
+
+  // Validate Pulse
+  if (!formData.pulse?.trim()) {
+    if (onValidate) {
+      onValidate('pulse', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'pulse';
+    }
+    isValid = false;
+  }
+
+  // Validate S1_S2 Reading
+  if (!formData.s1S2Reading?.trim()) {
+    if (onValidate) {
+      onValidate('s1S2Reading', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 's1S2Reading';
+    }
+    isValid = false;
+  }
+
+  // Validate Murmurs
+  if (!formData.murmurs?.trim()) {
+    if (onValidate) {
+      onValidate('murmurs', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'murmurs';
+    }
+    isValid = false;
+  }
+
+  // Validate Optical Aids
+  if (formData.opticalAids === undefined || formData.opticalAids === null || formData.opticalAids === '') {
+    if (onValidate) {
+      onValidate('opticalAids', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'opticalAids';
+    }
+    isValid = false;
+  }
+
+  // Validate Visual Acuity (should have format "RE: X, LE: Y")
+  if (!formData.visualAcuity?.trim() || !formData.visualAcuity.includes('RE:') || !formData.visualAcuity.includes('LE:')) {
+    if (onValidate) {
+      onValidate('visualAcuity', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'visualAcuity-re';
+    }
+    isValid = false;
+  }
+
+  // Validate Near Vision RE
+  if (!formData.nearVisionRE?.trim()) {
+    if (onValidate) {
+      onValidate('nearVisionRE', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'nearVision-re';
+    }
+    isValid = false;
+  }
+
+  // Validate Near Vision LE
+  if (!formData.nearVisionLE?.trim()) {
+    if (onValidate) {
+      onValidate('nearVisionLE', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'nearVision-le';
+    }
+    isValid = false;
+  }
+
+  // Validate General Condition (pass/fail)
+  if (formData.passGeneralCondition === undefined || formData.passGeneralCondition === null || formData.passGeneralCondition === '') {
+    if (onValidate) {
+      onValidate('passGeneralCondition', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'passGeneralCondition';
+    }
+    isValid = false;
+  }
+
+  // Scroll to first error if validation failed
+  if (!isValid && firstErrorField) {
+    setTimeout(() => {
+      const element = document.getElementById(firstErrorField!);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.focus();
+      }
+    }, 100);
+  }
+
+  return isValid;
+}

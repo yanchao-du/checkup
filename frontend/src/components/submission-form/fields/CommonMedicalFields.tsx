@@ -108,6 +108,11 @@ export function CommonMedicalFields({
             placeholder="e.g., 120/80"
             value={formData.bloodPressure || ''}
             onChange={(e) => onChange('bloodPressure', e.target.value)}
+            onBlur={(e) => {
+              if (e.target.value.trim() && errors.bloodPressure) {
+                onValidate?.('bloodPressure', '');
+              }
+            }}
             className={errors.bloodPressure ? 'border-red-500' : ''}
           />
           {errors.bloodPressure && <InlineError>{errors.bloodPressure}</InlineError>}
@@ -123,6 +128,11 @@ export function CommonMedicalFields({
             placeholder="e.g., 72"
             value={formData.pulse || ''}
             onChange={(e) => onChange('pulse', e.target.value)}
+            onBlur={(e) => {
+              if (e.target.value.trim() && errors.pulse) {
+                onValidate?.('pulse', '');
+              }
+            }}
             className={errors.pulse ? 'border-red-500' : ''}
           />
           {errors.pulse && <InlineError>{errors.pulse}</InlineError>}
@@ -137,6 +147,11 @@ export function CommonMedicalFields({
             placeholder="Enter S1_S2 reading"
             value={formData.s1S2Reading || ''}
             onChange={(e) => onChange('s1S2Reading', e.target.value)}
+            onBlur={(e) => {
+              if (e.target.value.trim() && errors.s1S2Reading) {
+                onValidate?.('s1S2Reading', '');
+              }
+            }}
             className={errors.s1S2Reading ? 'border-red-500' : ''}
           />
           {errors.s1S2Reading && <InlineError>{errors.s1S2Reading}</InlineError>}
@@ -151,6 +166,11 @@ export function CommonMedicalFields({
             placeholder="Enter murmurs reading"
             value={formData.murmurs || ''}
             onChange={(e) => onChange('murmurs', e.target.value)}
+            onBlur={(e) => {
+              if (e.target.value.trim() && errors.murmurs) {
+                onValidate?.('murmurs', '');
+              }
+            }}
             className={errors.murmurs ? 'border-red-500' : ''}
           />
           {errors.murmurs && <InlineError>{errors.murmurs}</InlineError>}
@@ -171,7 +191,12 @@ export function CommonMedicalFields({
                 name="opticalAids"
                 value="yes"
                 checked={formData.opticalAids === 'yes'}
-                onChange={(e) => onChange('opticalAids', e.target.value)}
+                onChange={(e) => {
+                  onChange('opticalAids', e.target.value);
+                  if (errors.opticalAids) {
+                    onValidate?.('opticalAids', '');
+                  }
+                }}
                 className="h-4 w-4"
               />
               <span>Yes</span>
@@ -182,7 +207,12 @@ export function CommonMedicalFields({
                 name="opticalAids"
                 value="no"
                 checked={formData.opticalAids === 'no'}
-                onChange={(e) => onChange('opticalAids', e.target.value)}
+                onChange={(e) => {
+                  onChange('opticalAids', e.target.value);
+                  if (errors.opticalAids) {
+                    onValidate?.('opticalAids', '');
+                  }
+                }}
                 className="h-4 w-4"
               />
               <span>No</span>
@@ -195,6 +225,8 @@ export function CommonMedicalFields({
         <VisualAcuityField
           value={formData.visualAcuity || ''}
           onChange={(value) => onChange('visualAcuity', value)}
+          error={errors.visualAcuity}
+          onValidate={onValidate}
         />
 
         {/* Near Vision */}
@@ -206,7 +238,12 @@ export function CommonMedicalFields({
               <Label htmlFor="nearVision-re" className="text-sm font-normal">Right Eye (RE)</Label>
               <Select 
                 value={formData.nearVisionRE || ''} 
-                onValueChange={(value: string) => onChange('nearVisionRE', value)}
+                onValueChange={(value: string) => {
+                  onChange('nearVisionRE', value);
+                  if (value && errors.nearVisionRE) {
+                    onValidate?.('nearVisionRE', '');
+                  }
+                }}
               >
                 <SelectTrigger id="nearVision-re" className="mt-1 bg-white">
                   <SelectValue placeholder="Select RE value" />
@@ -231,7 +268,12 @@ export function CommonMedicalFields({
               <Label htmlFor="nearVision-le" className="text-sm font-normal">Left Eye (LE)</Label>
               <Select 
                 value={formData.nearVisionLE || ''} 
-                onValueChange={(value: string) => onChange('nearVisionLE', value)}
+                onValueChange={(value: string) => {
+                  onChange('nearVisionLE', value);
+                  if (value && errors.nearVisionLE) {
+                    onValidate?.('nearVisionLE', '');
+                  }
+                }}
               >
                 <SelectTrigger id="nearVision-le" className="mt-1 bg-white">
                   <SelectValue placeholder="Select LE value" />
@@ -282,7 +324,12 @@ export function CommonMedicalFields({
               name="passGeneralCondition"
               value="yes"
               checked={formData.passGeneralCondition === 'yes'}
-              onChange={(e) => onChange('passGeneralCondition', e.target.value)}
+              onChange={(e) => {
+                onChange('passGeneralCondition', e.target.value);
+                if (errors.passGeneralCondition) {
+                  onValidate?.('passGeneralCondition', '');
+                }
+              }}
               className="h-4 w-4"
             />
             <span>Yes</span>
@@ -293,7 +340,12 @@ export function CommonMedicalFields({
               name="passGeneralCondition"
               value="no"
               checked={formData.passGeneralCondition === 'no'}
-              onChange={(e) => onChange('passGeneralCondition', e.target.value)}
+              onChange={(e) => {
+                onChange('passGeneralCondition', e.target.value);
+                if (errors.passGeneralCondition) {
+                  onValidate?.('passGeneralCondition', '');
+                }
+              }}
               className="h-4 w-4"
             />
             <span>No</span>

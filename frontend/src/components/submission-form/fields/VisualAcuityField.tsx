@@ -6,10 +6,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../ui/select';
+import { InlineError } from '../../ui/InlineError';
 
 interface VisualAcuityFieldProps {
   value: string;
   onChange: (value: string) => void;
+  error?: string;
+  onValidate?: (field: string, error: string) => void;
 }
 
 const SNELLEN_VALUES = [
@@ -22,7 +25,7 @@ const SNELLEN_VALUES = [
   '6/60',
 ];
 
-export function VisualAcuityField({ value, onChange }: VisualAcuityFieldProps) {
+export function VisualAcuityField({ value, onChange, error, onValidate }: VisualAcuityFieldProps) {
   // Parse the value to extract RE and LE
   const parseValue = () => {
     if (!value) return { re: '', le: '' };
@@ -38,11 +41,19 @@ export function VisualAcuityField({ value, onChange }: VisualAcuityFieldProps) {
   const handleREChange = (newRE: string) => {
     const newValue = `RE: ${newRE}, LE: ${le || ''}`;
     onChange(newValue);
+    // Clear error if both RE and LE are filled
+    if (newRE && le && error) {
+      onValidate?.('visualAcuity', '');
+    }
   };
 
   const handleLEChange = (newLE: string) => {
     const newValue = `RE: ${re || ''}, LE: ${newLE}`;
     onChange(newValue);
+    // Clear error if both RE and LE are filled
+    if (re && newLE && error) {
+      onValidate?.('visualAcuity', '');
+    }
   };
 
   return (
@@ -83,6 +94,7 @@ export function VisualAcuityField({ value, onChange }: VisualAcuityFieldProps) {
           </Select>
         </div>
       </div>
+      {error && <InlineError>{error}</InlineError>}
     </div>
   );
 }

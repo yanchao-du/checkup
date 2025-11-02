@@ -10,7 +10,8 @@ import {
   validateMedicalHistory, 
   isPatientCertificationChecked,
   isMedicalHistoryPatientCertificationChecked,
-  validateAbnormalityChecklist
+  validateAbnormalityChecklist,
+  validateGeneralMedical
 } from '../utils/validation';
 
 interface VocationalLicenceLtaAccordionsProps {
@@ -119,7 +120,10 @@ export function VocationalLicenceLtaAccordions({
               <Button 
                 type="button"
                 onClick={() => {
-                  if (validateAbnormalityChecklist(formData, onValidate)) {
+                  const isGeneralMedicalValid = validateGeneralMedical(formData, onValidate);
+                  const isAbnormalityValid = validateAbnormalityChecklist(formData, onValidate);
+                  
+                  if (isGeneralMedicalValid && isAbnormalityValid) {
                     onContinue('general-medical', 'lta-vocational');
                   }
                 }}
