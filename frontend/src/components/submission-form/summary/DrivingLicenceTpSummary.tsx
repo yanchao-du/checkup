@@ -441,10 +441,18 @@ export function DrivingLicenceTpSummary({
               </Button>
             )}
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Score</p>
-              <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Score</p>
+                <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Result</p>
+                <p className={`text-2xl font-bold ${amt.score >= 8 ? 'text-green-600' : 'text-red-600'}`}>
+                  {amt.score >= 8 ? 'Pass' : 'Fail'}
+                </p>
+              </div>
             </div>
             {amt.score < 8 && (
               <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
