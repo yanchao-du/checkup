@@ -83,6 +83,22 @@ export function DrivingVocationalTpLtaSummary({
   const checkedDeclarations = getCheckedDeclarations();
   const checkedHistoryItems = getCheckedHistory();
 
+  // Calculate age at examination
+  const calculateAge = (dateOfBirth: string, examDate: string) => {
+    const birth = new Date(dateOfBirth);
+    const exam = new Date(examDate);
+    let age = exam.getFullYear() - birth.getFullYear();
+    const monthDiff = exam.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && exam.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const ageAtExamination = patientInfo.dateOfBirth 
+    ? calculateAge(patientInfo.dateOfBirth, examinationDate) 
+    : null;
+
   return (
     <div className="space-y-6">
       {/* Patient Information */}
@@ -115,6 +131,12 @@ export function DrivingVocationalTpLtaSummary({
               <div>
                 <p className="text-slate-500">Date of Birth</p>
                 <p className="font-medium">{new Date(patientInfo.dateOfBirth).toLocaleDateString()}</p>
+              </div>
+            )}
+            {ageAtExamination !== null && (
+              <div>
+                <p className="text-slate-500">Age at Examination</p>
+                <p className="font-medium">{ageAtExamination} years</p>
               </div>
             )}
             {patientInfo.drivingLicenseClass && (
