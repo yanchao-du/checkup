@@ -5,7 +5,7 @@
  * Rules:
  * - Class 2B, 2A, 2, 3C(A), 3C, 3A, 3: 
  *   Exam within 2 months before birthdate at ages 65, 68, 71, 74, and every 3 years after
- * - Class 4, 4A, 5:
+ * - Class 4, 4P, 4A, 4AP, 5, 5P:
  *   Exam within 2 months before birthdate at age 65 and every year after until 75
  */
 
@@ -44,7 +44,7 @@ export function validateDrivingLicenceExamTiming(
 
   // Determine which licence class group
   const class2And3Group = ['2B', '2A', '2', '3C(A)', '3C', '3A', '3'];
-  const class4And5Group = ['4', '4A', '5'];
+  const class4And5Group = ['4', '4P', '4A', '4AP', '5', '5P'];
 
   // Check if exam is too early (more than 2 months before turning 65)
   if (actualAge < 65) {
@@ -64,8 +64,12 @@ export function validateDrivingLicenceExamTiming(
         };
       }
     }
-    // If within 2 months before turning 65, allow it
-    return { isValid: true };
+    // If within 2 months before turning 65, allow it and provide birthday info
+    return { 
+      isValid: true,
+      nextRequiredAge: 65,
+      nextBirthdayDate: age65Birthday
+    };
   }
 
   // For ages 65 and above, apply specific rules per class
@@ -157,7 +161,7 @@ function validateClass4And5Timing(
   if (actualAge > 75) {
     return {
       isValid: false,
-      error: 'For Class 4, 4A, or 5 licence, annual medical examinations are required only until age 75.'
+      error: 'For Class 4, 4P, 4A, 4AP, 5, or 5P licence, annual medical examinations are required only until age 75.'
     };
   }
 
@@ -165,33 +169,66 @@ function validateClass4And5Timing(
   // OR anytime after having turned that age (until next year's 2-month window starts)
   
   const examYear = examDate.getFullYear();
+  
+  // Determine if birthday has passed this year
+  const birthMonth = dob.getMonth();
+  const birthDay = dob.getDate();
+  const examMonth = examDate.getMonth();
+  const examDay = examDate.getDate();
+  const hasHadBirthdayThisYear = 
+    examMonth > birthMonth || (examMonth === birthMonth && examDay >= birthDay);
+  
+  // Check if exam is exactly ON a birthday from 65-75
   const birthdayThisYear = new Date(dob);
   birthdayThisYear.setFullYear(examYear);
+  const isOnBirthday = examMonth === birthMonth && examDay === birthDay;
   
-  // Check if exam is in valid period for this year's age
-  const twoMonthsBeforeThisYear = new Date(birthdayThisYear);
-  twoMonthsBeforeThisYear.setMonth(birthdayThisYear.getMonth() - 2);
-  
-  // Valid if: within 2 months before this year's birthday OR after this year's birthday
-  if (examDate >= twoMonthsBeforeThisYear) {
-    return { 
+  if (isOnBirthday && actualAge >= 65 && actualAge <= 75) {
+    // Exam is exactly on a required birthday
+    return {
       isValid: true,
-      nextRequiredAge: actualAge + 1 <= 75 ? actualAge + 1 : undefined,
+      nextRequiredAge: actualAge,
       nextBirthdayDate: birthdayThisYear
     };
   }
   
-  // If not, check if we're in valid period for last year's birthday (if patient already had birthday)
-  if (actualAge >= 65) {
-    const birthdayLastYear = new Date(dob);
-    birthdayLastYear.setFullYear(examYear - 1);
-    
-    // If we're after last year's birthday, it's valid (annual renewal window)
-    if (examDate >= birthdayLastYear) {
-      return { 
+  // For display purposes, we always want to show the NEXT birthday
+  // If birthday has passed, next birthday is next year. If not, it's this year.
+  const nextBirthday = new Date(dob);
+  nextBirthday.setFullYear(hasHadBirthdayThisYear ? examYear + 1 : examYear);
+  
+  const nextRequiredAge = hasHadBirthdayThisYear ? actualAge + 1 : actualAge;
+  
+  // Check if the next required age is within valid range
+  if (nextRequiredAge > 75) {
+    return {
+      isValid: false,
+      error: 'For Class 4, 4P, 4A, 4AP, 5, or 5P licence, annual medical examinations are required only until age 75.'
+    };
+  }
+  
+  // Check if exam is in valid period (within 2 months before next birthday)
+  const twoMonthsBeforeNext = new Date(nextBirthday);
+  twoMonthsBeforeNext.setMonth(nextBirthday.getMonth() - 2);
+  
+  // Valid if: within 2 months before next birthday
+  if (examDate >= twoMonthsBeforeNext) {
+    return { 
+      isValid: true,
+      nextRequiredAge: nextRequiredAge,
+      nextBirthdayDate: nextBirthday
+    };
+  }
+  
+  // If birthday has already passed this year, check if we're still in the "annual renewal window"
+  // (after this year's birthday but before the 2-month window for next year)
+  if (hasHadBirthdayThisYear) {
+    if (examDate >= birthdayThisYear) {
+      // Valid - in the renewal window after birthday
+      return {
         isValid: true,
-        nextRequiredAge: actualAge + 1 <= 75 ? actualAge + 1 : undefined,
-        nextBirthdayDate: birthdayThisYear
+        nextRequiredAge: nextRequiredAge,
+        nextBirthdayDate: nextBirthday
       };
     }
   }
@@ -199,7 +236,7 @@ function validateClass4And5Timing(
   // Otherwise, exam is too early
   return {
     isValid: false,
-    error: `Examination date is too early. For Class 4, 4A, or 5 licence, exam must be conducted within 2 months before the birthday (on or after ${twoMonthsBeforeThisYear.toLocaleDateString()}).`
+    error: `Examination date is too early. For Class 4, 4P, 4A, 4AP, 5, or 5P licence, exam must be conducted within 2 months before the birthday (on or after ${twoMonthsBeforeNext.toLocaleDateString()}).`
   };
 }
 
