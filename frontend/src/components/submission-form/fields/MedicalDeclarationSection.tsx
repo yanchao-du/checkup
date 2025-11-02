@@ -141,12 +141,12 @@ export function MedicalDeclarationSection({ formData, onChange, errors, onValida
         <Label className="text-sm font-medium">
           Declaration by Patient to Medical Practitioner <span className="text-red-500">*</span>
         </Label>
-        <div className="flex items-start space-x-2 bg-gray-50 p-4 rounded-md">
+        <div className="flex items-start space-x-3 bg-blue-50 p-4 rounded-md">
           <Checkbox
             id="patientCertification"
             checked={declaration.patientCertification || false}
             onCheckedChange={(checked) => handlePatientCertificationChange(checked as boolean)}
-            className="mt-1"
+            className="mt-1 bg-white border-2 border-gray-300"
           />
           <Label
             htmlFor="patientCertification"
