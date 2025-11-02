@@ -444,14 +444,14 @@ export function DrivingLicenceTpSummary({
           <div className="space-y-3">
             <div className="flex items-center gap-8">
               <div>
-                <p className="text-sm text-gray-600">Total Score</p>
-                <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-600">Result</p>
                 <p className={`text-2xl font-bold ${amt.score >= 8 ? 'text-green-600' : 'text-red-600'}`}>
                   {amt.score >= 8 ? 'Pass' : 'Fail'}
                 </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Score</p>
+                <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
               </div>
             </div>
             {amt.score < 8 && (
