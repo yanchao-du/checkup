@@ -6,6 +6,7 @@ import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Loader2, Eye, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useAuth } from './AuthContext';
 import {
   Select,
   SelectContent,
@@ -25,6 +26,7 @@ import {
 
 export function SubmissionsList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +34,8 @@ export function SubmissionsList() {
   const [filterExamType, setFilterExamType] = useState<string>('all');
   const [sortColumn, setSortColumn] = useState<string>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const isDoctor = user?.role === 'doctor';
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -79,7 +83,10 @@ export function SubmissionsList() {
     const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
     const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
 
-    return matchesSearch && matchesStatus && matchesExamType;
+    // For doctors, only show submitted status (exclude pending_approval and rejected)
+    const matchesRole = !isDoctor || submission.status === 'submitted';
+
+    return matchesSearch && matchesStatus && matchesExamType && matchesRole;
   });
 
   // Sort the filtered submissions
@@ -144,20 +151,22 @@ export function SubmissionsList() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              {/* <label className="text-sm text-slate-700">Status</label> */}
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="submitted">Submitted</SelectItem>
-                  <SelectItem value="pending_approval">Pending Approval</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className={`grid grid-cols-1 ${isDoctor ? '' : 'md:grid-cols-2'} gap-4`}>
+            {!isDoctor && (
+              <div className="space-y-2">
+                {/* <label className="text-sm text-slate-700">Status</label> */}
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="submitted">Submitted</SelectItem>
+                    <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               {/* <label className="text-sm text-slate-700">Exam Type</label> */}
@@ -243,12 +252,14 @@ export function SubmissionsList() {
                     >
                       Exam Type{getSortIcon('examType')}
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('status')}
-                    >
-                      Status{getSortIcon('status')}
-                    </TableHead>
+                    {!isDoctor && (
+                      <TableHead 
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('status')}
+                      >
+                        Status{getSortIcon('status')}
+                      </TableHead>
+                    )}
                     <TableHead 
                       className="cursor-pointer hover:bg-slate-50 select-none"
                       onClick={() => handleSort('createdBy')}
@@ -287,13 +298,15 @@ export function SubmissionsList() {
                           {submission.examType === 'LTVP_MEDICAL' && 'LTVP (ICA)'}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getSubmissionStatusBadgeVariant(submission.status)}
-                        >
-                          {getSubmissionStatusLabel(submission.status)}
-                        </Badge>
-                      </TableCell>
+                      {!isDoctor && (
+                        <TableCell>
+                          <Badge
+                            variant={getSubmissionStatusBadgeVariant(submission.status)}
+                          >
+                            {getSubmissionStatusLabel(submission.status)}
+                          </Badge>
+                        </TableCell>
+                      )}
                       <TableCell className="text-slate-600">{submission.createdByName}</TableCell>
                       <TableCell className="text-slate-600">
                         {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
