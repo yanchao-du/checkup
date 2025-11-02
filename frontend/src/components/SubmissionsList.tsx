@@ -141,32 +141,86 @@ export function SubmissionsList() {
           <CardDescription>Find submissions by patient name, NRIC, status, or exam type</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search by patient name or NRIC..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          <div className={`grid grid-cols-1 ${isDoctor ? '' : 'md:grid-cols-2'} gap-4`}>
-            {!isDoctor && (
+          {isDoctor ? (
+            // Doctor layout: Search and Exam Type side by side
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Search by patient name or NRIC..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
               <div className="space-y-2">
-                {/* <label className="text-sm text-slate-700">Status</label> */}
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <Select value={filterExamType} onValueChange={setFilterExamType}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="submitted">Submitted</SelectItem>
-                    <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                    <SelectItem value="all">All Exam Types</SelectItem>
+                    <SelectItem value="SIX_MONTHLY_MDW">
+                      MDW Six-monthly (MOM)
+                    </SelectItem>
+                    <SelectItem value="SIX_MONTHLY_FMW">
+                      FMW Six-monthly (MOM)
+                    </SelectItem>
+                    <SelectItem value="WORK_PERMIT">
+                      Work Permit (MOM)
+                    </SelectItem>
+                    <SelectItem value="AGED_DRIVERS">
+                      Aged Drivers (SPF)
+                    </SelectItem>
+                    <SelectItem value="DRIVING_LICENCE_TP">
+                      Driving Licence (TP)
+                    </SelectItem>
+                    <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
+                      Driving Vocational (TP/LTA)
+                    </SelectItem>
+                    <SelectItem value="VOCATIONAL_LICENCE_LTA">
+                      Vocational Licence (LTA)
+                    </SelectItem>
+                    <SelectItem value="PR_MEDICAL">
+                      PR Medical (ICA)
+                    </SelectItem>
+                    <SelectItem value="STUDENT_PASS_MEDICAL">
+                      Student Pass (ICA)
+                    </SelectItem>
+                    <SelectItem value="LTVP_MEDICAL">
+                      LTVP (ICA)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            </div>
+          ) : (
+            // Non-doctor layout: Search full width, then filters below
+            <>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Search by patient name or NRIC..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              {/* <label className="text-sm text-slate-700">Status</label> */}
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-2">
               {/* <label className="text-sm text-slate-700">Exam Type</label> */}
@@ -210,6 +264,8 @@ export function SubmissionsList() {
               </Select>
             </div>
           </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
