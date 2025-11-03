@@ -15,6 +15,8 @@ interface DrivingVocationalTpLtaSummaryProps {
   examinationDate: string;
   onEdit?: (section: string) => void;
   onChange?: (key: string, value: any) => void;
+  doctorName?: string;
+  doctorMcrNumber?: string;
 }
 
 export function DrivingVocationalTpLtaSummary({
@@ -23,6 +25,8 @@ export function DrivingVocationalTpLtaSummary({
   examinationDate,
   onEdit,
   onChange,
+  doctorName,
+  doctorMcrNumber,
 }: DrivingVocationalTpLtaSummaryProps) {
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
@@ -766,6 +770,25 @@ export function DrivingVocationalTpLtaSummary({
 
         {/* Medical Practitioner Declaration */}
         <div className="pt-4 border-t border-blue-200">
+          {/* Doctor Information Display */}
+          {doctorName && (
+            <div className="bg-white border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-sm text-blue-900 mb-2">Examining Doctor</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-start">
+                  <span className="font-medium text-gray-700 w-24">Name:</span>
+                  <span className="text-gray-900">{doctorName}</span>
+                </div>
+                {doctorMcrNumber && (
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-700 w-24">MCR Number:</span>
+                    <span className="text-gray-900">{doctorMcrNumber}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
           <label className="flex items-start space-x-3 cursor-pointer bg-white p-3 rounded border border-blue-300">
             <input

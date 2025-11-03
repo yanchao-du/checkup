@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
@@ -301,7 +302,7 @@ export function DraftsList() {
                         className={isDeleted ? 'bg-red-50 opacity-60' : pendingMemo ? 'bg-yellow-50' : ''}
                       >
                         <TableCell>
-                          {draft.patientName}
+                          {getDisplayName(draft.patientName, draft.examType, draft.status)}
                           {isDeleted && (
                             <span className="ml-2 text-xs text-red-600 font-medium">(Deleted)</span>
                           )}

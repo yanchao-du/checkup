@@ -92,14 +92,17 @@ export interface MedicalSubmission {
   createdById: string;
   createdBy: string;
   createdByName?: string;
+  createdByMcrNumber?: string;
   createdDate: string;
   submittedDate?: string;
   approvedById?: string;
   approvedBy?: string;
   approvedByName?: string;
+  approvedByMcrNumber?: string;
   approvedDate?: string;
   assignedDoctorId?: string;
   assignedDoctorName?: string;
+  assignedDoctorMcrNumber?: string;
   rejectedReason?: string;
   deletedAt?: string;
 }

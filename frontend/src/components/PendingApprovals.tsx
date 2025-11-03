@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
@@ -256,7 +257,7 @@ export function PendingApprovals() {
                       className="cursor-pointer hover:bg-slate-50"
                       onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/pending-approvals' } })}
                     >
-                      <TableCell>{submission.patientName}</TableCell>
+                      <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
                       <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
                       <TableCell>
                         <div className="text-sm">
@@ -328,13 +329,13 @@ export function PendingApprovals() {
             <AlertDialogDescription>
               {isApproving ? (
                 <>
-                  You are about to approve and submit the medical exam for <strong>{selectedSubmission?.patientName}</strong> to the relevant government agency.
+                  You are about to approve and submit the medical exam for <strong>{getDisplayName(selectedSubmission?.patientName || '', selectedSubmission?.examType || '', selectedSubmission?.status)}</strong> to the relevant government agency.
                   <br /><br />
                   This action will officially submit the results and cannot be undone.
                 </>
               ) : (
                 <>
-                  You are about to reject the medical exam for <strong>{selectedSubmission?.patientName}</strong>.
+                  You are about to reject the medical exam for <strong>{getDisplayName(selectedSubmission?.patientName || '', selectedSubmission?.examType || '', selectedSubmission?.status)}</strong>.
                   <br /><br />
                   This will return the submission to drafts for revision.
                 </>

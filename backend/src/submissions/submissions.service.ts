@@ -228,9 +228,9 @@ export class SubmissionsService {
     const submission = await this.prisma.medicalSubmission.findUnique({
       where: { id },
       include: {
-        createdBy: { select: { name: true } },
-        approvedBy: { select: { name: true } },
-        assignedDoctor: { select: { name: true } },
+        createdBy: { select: { name: true, mcrNumber: true } },
+        approvedBy: { select: { name: true, mcrNumber: true } },
+        assignedDoctor: { select: { name: true, mcrNumber: true } },
       },
     });
 
@@ -544,13 +544,16 @@ export class SubmissionsService {
       createdBy: submission.createdById,
       createdById: submission.createdById, // Add this for frontend compatibility
       createdByName: submission.createdBy?.name,
+      createdByMcrNumber: submission.createdBy?.mcrNumber,
       createdDate: submission.createdDate,
       submittedDate: submission.submittedDate,
       approvedBy: submission.approvedById,
       approvedByName: submission.approvedBy?.name,
+      approvedByMcrNumber: submission.approvedBy?.mcrNumber,
       approvedDate: submission.approvedDate,
       assignedDoctorId: submission.assignedDoctorId,
       assignedDoctorName: submission.assignedDoctor?.name,
+      assignedDoctorMcrNumber: submission.assignedDoctor?.mcrNumber,
       rejectedReason: submission.rejectedReason,
       deletedAt: submission.deletedAt,
       clinicId: submission.clinicId,

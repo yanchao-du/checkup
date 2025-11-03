@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
@@ -263,7 +264,7 @@ export function SubmissionsList() {
                       className="cursor-pointer hover:bg-slate-50"
                       onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/submissions' } })}
                     >
-                      <TableCell>{submission.patientName}</TableCell>
+                      <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
                       <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
                       <TableCell>
                         <div className="text-sm">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { approvalsApi, submissionsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { formatExamType } from '../lib/formatters';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
@@ -256,7 +257,7 @@ export function RejectedSubmissions() {
               <TableBody>
                 {sortedRejections.map((submission) => (
                   <TableRow key={submission.id}>
-                    <TableCell className="font-medium">{submission.patientName}</TableCell>
+                    <TableCell className="font-medium">{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
                     <TableCell>{submission.patientNric}</TableCell>
                     <TableCell className="text-sm">{formatExamType(submission.examType)}</TableCell>
                     <TableCell className="max-w-xs">

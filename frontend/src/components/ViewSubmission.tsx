@@ -4,6 +4,7 @@ import { submissionsApi } from '../services/submissions.service';
 import { approvalsApi } from '../services/approvals.service';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -179,7 +180,7 @@ export function ViewSubmission() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Name</p>
-                  <p className="text-slate-900">{submission.patientName}</p>
+                  <p className="text-slate-900">{getDisplayName(submission.patientName, submission.examType, submission.status)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500 mb-1">NRIC/FIN</p>
@@ -356,7 +357,10 @@ export function ViewSubmission() {
                   {(submission.examType === 'PR_MEDICAL' || 
                     submission.examType === 'STUDENT_PASS_MEDICAL' || 
                     submission.examType === 'LTVP_MEDICAL') && (
-                    <DeclarationView>
+                    <DeclarationView
+                      doctorName={submission.approvedByName || submission.createdByName}
+                      doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                    >
                       <IcaDeclarationContent />
                     </DeclarationView>
                   )}
@@ -364,7 +368,10 @@ export function ViewSubmission() {
                    submission.examType !== 'STUDENT_PASS_MEDICAL' && 
                    submission.examType !== 'LTVP_MEDICAL' &&
                    !isDriverExamType(submission.examType) && (
-                    <DeclarationView>
+                    <DeclarationView
+                      doctorName={submission.approvedByName || submission.createdByName}
+                      doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                    >
                       <MomDeclarationContent />
                     </DeclarationView>
                   )}
@@ -514,7 +521,7 @@ export function ViewSubmission() {
           <AlertDialogHeader>
             <AlertDialogTitle>Approve Medical Submission</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to approve this medical examination for <strong>{submission?.patientName}</strong>.
+              You are about to approve this medical examination for <strong>{getDisplayName(submission?.patientName || '', submission?.examType || '', submission?.status)}</strong>.
               This will submit it to the relevant agency.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -559,7 +566,7 @@ export function ViewSubmission() {
           <AlertDialogHeader>
             <AlertDialogTitle>Reject Medical Submission</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to reject this medical examination for <strong>{submission?.patientName}</strong>.
+              You are about to reject this medical examination for <strong>{getDisplayName(submission?.patientName || '', submission?.examType || '', submission?.status)}</strong>.
               Please provide a reason for rejection.
             </AlertDialogDescription>
           </AlertDialogHeader>

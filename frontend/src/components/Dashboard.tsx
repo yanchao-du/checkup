@@ -1,5 +1,6 @@
 import { useAuth } from './AuthContext';
 import { formatExamType } from '../lib/formatters';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -233,7 +234,7 @@ export function Dashboard() {
                   className="flex items-center justify-between p-3 bg-white rounded-lg border border-red-200"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-slate-900">{submission.patientName}</p>
+                    <p className="font-medium text-slate-900">{getDisplayName(submission.patientName, submission.examType, submission.status)}</p>
                     <p className="text-sm text-slate-600">{formatExamType(submission.examType)}</p>
                     {submission.rejectedReason && (
                       <p className="text-xs text-red-600 mt-1">
@@ -401,7 +402,7 @@ export function Dashboard() {
                           <Icon className={`w-5 h-5 ${iconColor}`} />
                         </div>
                         <div>
-                          <p className="text-slate-900">{activity.patientName}</p>
+                          <p className="text-slate-900">{getDisplayName(activity.patientName, activity.examType, activity.status)}</p>
                           <p className="text-sm text-slate-500">{formatExamType(activity.examType)}</p>
                         </div>
                       </div>

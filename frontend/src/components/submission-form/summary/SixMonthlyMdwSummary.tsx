@@ -1,6 +1,7 @@
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Edit } from 'lucide-react';
+import { maskName } from '../../../lib/nameMasking';
 
 interface SixMonthlyMdwSummaryProps {
   formData: Record<string, any>;
@@ -80,7 +81,7 @@ export function SixMonthlyMdwSummary({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-slate-500">Patient Name</p>
-              <p className="font-medium">{patientName}</p>
+              <p className="font-medium">{maskName(patientName)}</p>
             </div>
             <div>
               <p className="text-slate-500">NRIC/FIN</p>

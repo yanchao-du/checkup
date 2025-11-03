@@ -1972,6 +1972,8 @@ export function NewSubmission() {
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
                         userRole={role}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
                       />
                       
                       <div className="flex justify-end mt-4">
@@ -2067,6 +2069,8 @@ export function NewSubmission() {
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
                         userRole={role}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
                       />
                       
                       <div className="flex justify-end mt-4">
@@ -2160,6 +2164,8 @@ export function NewSubmission() {
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
                         userRole={role}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
                       />
                       
                       <div className="flex justify-end mt-4">
@@ -2221,6 +2227,8 @@ export function NewSubmission() {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
                         }}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
                       />
 
                       <div className="flex justify-end mt-4">
@@ -2265,6 +2273,8 @@ export function NewSubmission() {
                           mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
                         onChange={handleFormDataChange}
                         onEdit={(section) => {
                           setActiveAccordion(section);

@@ -12,6 +12,7 @@ export interface User {
   role: UserRole;
   clinicId: string;
   clinicName: string;
+  mcrNumber?: string; // Medical Council Registration number (for doctors)
 }
 
 interface AuthContextType {
