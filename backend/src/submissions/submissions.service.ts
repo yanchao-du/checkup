@@ -266,8 +266,15 @@ export class SubmissionsService {
 
     this.logger.debug(`Existing submission status: ${existing.status}, rejectedReason: ${existing.rejectedReason ? 'present' : 'null'}, approvedById: ${existing.approvedById || 'null'}`);
 
-    if (existing.createdById !== userId && userRole !== 'admin') {
-      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById})`);
+    // Access control:
+    // - Admin can edit any submission
+    // - Creator can edit their own submissions
+    // - Doctors can edit submissions in pending_approval status (routed to them by nurses)
+    const isCreator = existing.createdById === userId;
+    const isDoctorEditingPendingApproval = userRole === 'doctor' && existing.status === 'pending_approval';
+    
+    if (!isCreator && userRole !== 'admin' && !isDoctorEditingPendingApproval) {
+      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById}, status: ${existing.status})`);
       throw new ForbiddenException('Access denied');
     }
 
