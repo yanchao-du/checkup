@@ -1041,18 +1041,29 @@ export function NewSubmission() {
         if (newAmtRequired !== null && newAmtRequired !== formData.amtRequired) {
           setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
           console.log('✏️ Updated amtRequired to:', newAmtRequired);
+          
+          // If AMT newly became required, remove it from completed sections
+          if (newAmtRequired === true && formData.amtRequired === false) {
+            console.log('🔄 AMT became required - clearing completion status');
+            setCompletedSections(prev => {
+              const newSet = new Set(prev);
+              newSet.delete('amt');
+              return newSet;
+            });
+          }
         }
         
-        // If AMT is required OR we can't determine (null), check if questions are answered
+        // If AMT is required OR we can't determine (null), check if AMT section was completed
         if (newAmtRequired === true || newAmtRequired === null) {
-          const amtAnswered = formData.amt && Object.values(formData.amt).some(val => val === true);
-          console.log('amtAnswered:', amtAnswered);
+          // Check if AMT section was completed (user visited and clicked continue)
+          const amtSectionCompleted = completedSections.has('amt');
+          console.log('amtSectionCompleted:', amtSectionCompleted);
           console.log('formData.amt:', formData.amt);
           
-          if (!amtAnswered) {
-            // AMT is required/uncertain but not answered
+          if (!amtSectionCompleted) {
+            // AMT is required/uncertain but section not completed
             const oldAmtRequired = formData.amtRequired;
-            console.log('⚠️ AMT required/uncertain but not answered! Showing toast...');
+            console.log('⚠️ AMT required/uncertain but not completed! Showing toast...');
             if (newAmtRequired === null) {
               toast.warning('Please complete the AMT questions to continue.');
             } else if (newAmtRequired !== oldAmtRequired) {
@@ -1244,6 +1255,7 @@ export function NewSubmission() {
     
     // Condition 3: Cognitive impairment
     if (cognitiveImpairment) {
+      console.log('🧠 Cognitive impairment detected - AMT required');
       return true;
     }
 
@@ -1678,22 +1690,38 @@ export function NewSubmission() {
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
                     
+                    console.log('📍 onContinue (DRIVING_LICENCE_TP):', { current, next, isEditingFromSummary });
+                    
                     // Check AMT requirement when navigating to summary (from any section)
                     if (next === 'summary' || isEditingFromSummary) {
                       const newAmtRequired = recalculateAMTRequirement();
                       const oldAmtRequired = formData.amtRequired;
                       
+                      console.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
+                      
                       // Update formData.amtRequired if it changed
                       if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
                         setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
+                        
+                        // If AMT newly became required, remove it from completed sections
+                        if (newAmtRequired === true && oldAmtRequired === false) {
+                          console.log('🔄 AMT became required - clearing completion status');
+                          setCompletedSections(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete('amt');
+                            return newSet;
+                          });
+                        }
                       }
                       
-                      // If AMT is required OR uncertain (null), verify questions are answered
+                      // If AMT is required OR uncertain (null), verify AMT section was completed
                       if (newAmtRequired === true || newAmtRequired === null) {
-                        const amtAnswered = formData.amt && Object.values(formData.amt).some(val => val === true);
+                        // Check if AMT section was completed (includes current if we're on AMT)
+                        const amtSectionCompleted = current === 'amt' || completedSections.has('amt');
+                        console.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
                         
-                        if (!amtAnswered) {
-                          // AMT is required/uncertain but questions not answered
+                        if (!amtSectionCompleted) {
+                          // AMT is required/uncertain but section not completed
                           if (newAmtRequired === null) {
                             toast.warning('Please complete the AMT questions to continue.');
                           } else if (newAmtRequired !== oldAmtRequired) {
@@ -1743,22 +1771,38 @@ export function NewSubmission() {
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
                     
+                    console.log('📍 onContinue (DRIVING_VOCATIONAL_TP_LTA):', { current, next, isEditingFromSummary });
+                    
                     // Check AMT requirement when navigating to summary (from any section)
                     if (next === 'summary' || isEditingFromSummary) {
                       const newAmtRequired = recalculateAMTRequirement();
                       const oldAmtRequired = formData.amtRequired;
                       
+                      console.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
+                      
                       // Update formData.amtRequired if it changed
                       if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
                         setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
+                        
+                        // If AMT newly became required, remove it from completed sections
+                        if (newAmtRequired === true && oldAmtRequired === false) {
+                          console.log('🔄 AMT became required - clearing completion status');
+                          setCompletedSections(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete('amt');
+                            return newSet;
+                          });
+                        }
                       }
                       
-                      // If AMT is required OR uncertain (null), verify questions are answered
+                      // If AMT is required OR uncertain (null), verify AMT section was completed
                       if (newAmtRequired === true || newAmtRequired === null) {
-                        const amtAnswered = formData.amt && Object.values(formData.amt).some(val => val === true);
+                        // Check if AMT section was completed (includes current if we're on AMT)
+                        const amtSectionCompleted = current === 'amt' || completedSections.has('amt');
+                        console.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
                         
-                        if (!amtAnswered) {
-                          // AMT is required/uncertain but questions not answered
+                        if (!amtSectionCompleted) {
+                          // AMT is required/uncertain but section not completed
                           if (newAmtRequired === null) {
                             toast.warning('Please complete the AMT questions to continue.');
                           } else if (newAmtRequired !== oldAmtRequired) {
