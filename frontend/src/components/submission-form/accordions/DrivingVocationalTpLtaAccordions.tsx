@@ -170,11 +170,11 @@ export function DrivingVocationalTpLtaAccordions({
         </AccordionContent>
       </AccordionItem>
 
-      {/* Vocational License Medical Examination - X-ray */}
+      {/* Vocational License Medical Examination */}
       <AccordionItem value="vocational-xray">
         <AccordionTrigger isCompleted={completedSections.has('vocational-xray')} isDisabled={!isPatientInfoValid}>
           <div className="flex items-center gap-2">
-            <span>Vocational License Medical Examination - X-ray</span>
+            <span>Vocational License Medical Examination</span>
           </div>
         </AccordionTrigger>
         <AccordionContent>
