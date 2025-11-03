@@ -362,7 +362,7 @@ export function validateVocationalXray(
   // Scroll to first error if validation failed
   if (!isValid && firstErrorField) {
     setTimeout(() => {
-      const element = document.querySelector(\`[id*="\${firstErrorField}"]\`);
+      const element = document.querySelector(`[id*="${firstErrorField}"]`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
