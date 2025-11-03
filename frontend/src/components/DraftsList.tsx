@@ -30,12 +30,40 @@ import {
 } from './ui/alert-dialog';
 import { toast } from 'sonner';
 
+// Helper to check if a draft has pending memos
+const hasPendingMemos = (draft: MedicalSubmission): boolean => {
+  if (draft.examType !== 'DRIVING_VOCATIONAL_TP_LTA') return false;
+  
+  const formData = draft.formData as Record<string, any>;
+  const memoRequirements = formData.memoRequirements 
+    ? (typeof formData.memoRequirements === 'string' 
+        ? JSON.parse(formData.memoRequirements) 
+        : formData.memoRequirements)
+    : {};
+  
+  const checkedConditions = Object.entries(memoRequirements)
+    .filter(([_, value]) => value === true)
+    .map(([key]) => key);
+  
+  for (const conditionId of checkedConditions) {
+    const memoProvided = formData[`memoProvided_${conditionId}`];
+    const furtherMemoRequired = formData[`furtherMemoRequired_${conditionId}`];
+    
+    if (memoProvided === 'no' || (memoProvided === 'yes' && furtherMemoRequired === 'yes')) {
+      return true;
+    }
+  }
+  
+  return false;
+};
+
 export function DraftsList() {
   const { user } = useAuth();
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterExamType, setFilterExamType] = useState<string>('all');
+  const [filterMemoStatus, setFilterMemoStatus] = useState<'all' | 'pending' | 'complete'>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [includeDeleted] = useState(false);
   const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
@@ -69,7 +97,13 @@ export function DraftsList() {
     
     const matchesExamType = filterExamType === 'all' || draft.examType === filterExamType;
     
-    return matchesSearch && matchesExamType;
+    const pendingMemo = hasPendingMemos(draft);
+    const matchesMemoStatus = 
+      filterMemoStatus === 'all' ||
+      (filterMemoStatus === 'pending' && pendingMemo) ||
+      (filterMemoStatus === 'complete' && !pendingMemo);
+    
+    return matchesSearch && matchesExamType && matchesMemoStatus;
   });
 
   const handleSort = (field: keyof MedicalSubmission) => {
@@ -136,8 +170,42 @@ export function DraftsList() {
 
       <Card>
         <CardContent className="space-y-4">
-          {/* <Label className="text-base font-semibold">Search Drafts</Label> */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          {/* Memo Status Filter Tabs */}
+          <div className="mt-6 flex gap-2 border-b border-slate-200">
+            <button
+              onClick={() => setFilterMemoStatus('all')}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                filterMemoStatus === 'all'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              All Drafts ({drafts.length})
+            </button>
+            <button
+              onClick={() => setFilterMemoStatus('pending')}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                filterMemoStatus === 'pending'
+                  ? 'text-yellow-600 border-b-2 border-yellow-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Pending Memo/Report ({drafts.filter(hasPendingMemos).length})
+            </button>
+            <button
+              onClick={() => setFilterMemoStatus('complete')}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                filterMemoStatus === 'complete'
+                  ? 'text-green-600 border-b-2 border-green-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Ready to Submit ({drafts.filter(d => !hasPendingMemos(d)).length})
+            </button>
+          </div>
+
+          {/* Search and Exam Type Filter */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
@@ -226,15 +294,21 @@ export function DraftsList() {
                 <TableBody>
                   {sortedDrafts.map((draft) => {
                     const isDeleted = !!draft.deletedAt;
+                    const pendingMemo = hasPendingMemos(draft);
                     return (
                       <TableRow 
                         key={draft.id} 
-                        className={isDeleted ? 'bg-red-50 opacity-60' : ''}
+                        className={isDeleted ? 'bg-red-50 opacity-60' : pendingMemo ? 'bg-yellow-50' : ''}
                       >
                         <TableCell>
                           {draft.patientName}
                           {isDeleted && (
                             <span className="ml-2 text-xs text-red-600 font-medium">(Deleted)</span>
+                          )}
+                          {!isDeleted && pendingMemo && (
+                            <span className="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded font-medium">
+                              Pending Memo
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="text-slate-600">{draft.patientNric}</TableCell>
