@@ -4,7 +4,7 @@ import { validateNricOrFin, validateEmail, validateSingaporeMobile } from '../li
 import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
 import { getTodayInSingapore } from './submission-form/utils/date';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
 import { submissionsApi } from '../services';
@@ -81,6 +81,7 @@ export function NewSubmission() {
   const { user } = useAuth();
   const role = user?.role || 'nurse';
   const { hasUnsavedChanges, setHasUnsavedChanges, navigate, navigateWithConfirmation } = useUnsavedChanges();
+  const location = useLocation();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -138,6 +139,51 @@ export function NewSubmission() {
   });
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
   const lastLookedUpNricRef = useRef<string | null>(null);
+
+  // Reset form when refresh parameter is present (navigating to /new-submission from /new-submission)
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.has('refresh') && !id) {
+      // Reset all form state
+      setExamType('');
+      setPatientName('');
+      setPatientNric('');
+      setPatientDateOfBirth('');
+      setPatientEmail('');
+      setPatientMobile('');
+      setDrivingLicenseClass('');
+      setExaminationDate('');
+      setFormData({});
+      setActiveAccordion('patient-info');
+      setCompletedSections(new Set());
+      setShowSummary(false);
+      setDeclarationChecked(false);
+      setLastRecordedHeight('');
+      setLastRecordedWeight('');
+      setLastRecordedDate('');
+      setIsNameFromApi(false);
+      
+      // Clear all errors
+      setNricError(null);
+      setEmailError(null);
+      setMobileError(null);
+      setExaminationDateError(null);
+      setExaminationDateBlurred(false);
+      setDrivingLicenceTimingError(null);
+      setDrivingLicenceTimingWarning(null);
+      setHeightError(null);
+      setWeightError(null);
+      setPoliceReportError(null);
+      setRemarksError(null);
+      setMedicalDeclarationRemarksError(null);
+      setMedicalDeclarationPatientCertificationError(null);
+      setMedicalHistoryErrors({});
+      setAbnormalityChecklistErrors({});
+      
+      // Remove the refresh parameter from URL
+      navigate('/new-submission', { replace: true });
+    }
+  }, [location.search, id, navigate]);
 
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
