@@ -142,52 +142,56 @@ export function CommonMedicalFields({
 
         {/* S1_S2 Reading */}
         <div>
-          <Label htmlFor="s1S2Reading">S1_S2 Reading <span className="text-red-500">*</span></Label>
-          <div className="flex items-center space-x-2 mt-2">
-            <Checkbox
-              id="s1S2Reading"
-              checked={formData.s1S2Reading === 'Abnormal'}
-              onCheckedChange={(checked) => {
-                const value = checked ? 'Abnormal' : 'Normal';
-                onChange('s1S2Reading', value);
-                if (errors.s1S2Reading) {
-                  onValidate?.('s1S2Reading', '');
-                }
-              }}
-              className={formData.s1S2Reading === 'Abnormal' ? 'bg-red-600 border-red-600 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600' : ''}
-            />
-            <Label
-              htmlFor="s1S2Reading"
-              className={`text-sm font-medium cursor-pointer ${formData.s1S2Reading === 'Abnormal' ? 'text-red-600' : 'text-slate-600'}`}
-            >
-              Abnormal
-            </Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="s1S2Reading">S1_S2 Reading <span className="text-red-500">*</span></Label>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="s1S2Reading"
+                checked={formData.s1S2Reading === 'Abnormal'}
+                onCheckedChange={(checked) => {
+                  const value = checked ? 'Abnormal' : 'Normal';
+                  onChange('s1S2Reading', value);
+                  if (errors.s1S2Reading) {
+                    onValidate?.('s1S2Reading', '');
+                  }
+                }}
+                className={formData.s1S2Reading === 'Abnormal' ? 'data-[state=checked]:bg-white data-[state=checked]:border-red-600' : 'bg-white'}
+              />
+              <Label
+                htmlFor="s1S2Reading"
+                className={`text-sm font-medium cursor-pointer ${formData.s1S2Reading === 'Abnormal' ? 'text-red-600' : 'text-slate-600'}`}
+              >
+                Abnormal
+              </Label>
+            </div>
           </div>
           {errors.s1S2Reading && <InlineError>{errors.s1S2Reading}</InlineError>}
         </div>
 
         {/* Murmurs */}
         <div>
-          <Label htmlFor="murmurs">Murmurs <span className="text-red-500">*</span></Label>
-          <div className="flex items-center space-x-2 mt-2">
-            <Checkbox
-              id="murmurs"
-              checked={formData.murmurs === 'Yes'}
-              onCheckedChange={(checked) => {
-                const value = checked ? 'Yes' : 'No';
-                onChange('murmurs', value);
-                if (errors.murmurs) {
-                  onValidate?.('murmurs', '');
-                }
-              }}
-              className={formData.murmurs === 'Yes' ? 'bg-red-600 border-red-600 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600' : ''}
-            />
-            <Label
-              htmlFor="murmurs"
-              className={`text-sm font-medium cursor-pointer ${formData.murmurs === 'Yes' ? 'text-red-600' : 'text-slate-600'}`}
-            >
-              Yes
-            </Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="murmurs">Murmurs <span className="text-red-500">*</span></Label>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="murmurs"
+                checked={formData.murmurs === 'Yes'}
+                onCheckedChange={(checked) => {
+                  const value = checked ? 'Yes' : 'No';
+                  onChange('murmurs', value);
+                  if (errors.murmurs) {
+                    onValidate?.('murmurs', '');
+                  }
+                }}
+                className={formData.murmurs === 'Yes' ? 'data-[state=checked]:bg-white data-[state=checked]:border-red-600' : 'bg-white'}
+              />
+              <Label
+                htmlFor="murmurs"
+                className={`text-sm font-medium cursor-pointer ${formData.murmurs === 'Yes' ? 'text-red-600' : 'text-slate-600'}`}
+              >
+                Yes
+              </Label>
+            </div>
           </div>
           {errors.murmurs && <InlineError>{errors.murmurs}</InlineError>}
         </div>
