@@ -53,9 +53,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-[40]">
         <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {/* Sidebar toggle button for mobile */}
+            {/* Sidebar toggle button for mobile and tablets */}
             <button
-              className="md:hidden mr-2 bg-white border border-slate-200 rounded-full p-2 shadow-lg"
+              className="lg:hidden mr-2 bg-white border border-slate-200 rounded-full p-2 shadow-lg"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle sidebar"
             >
@@ -85,12 +85,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
       <div className="container mx-auto px-4 py-6 flex gap-6 flex-1">
 
-        {/* Sidebar - overlays entire screen on mobile, modern look */}
+        {/* Sidebar - overlays entire screen on mobile and tablets, modern look */}
         {sidebarOpen && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden" onClick={() => setSidebarOpen(false)}></div>
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 lg:hidden" onClick={() => setSidebarOpen(false)}></div>
         )}
         <aside
-          className={`w-64 flex flex-col justify-between flex-shrink-0 fixed md:sticky left-0 top-0 md:top-16 h-full md:h-[calc(100vh-4rem)] z-50 md:z-10 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:rounded-lg md:border md:bg-slate-50`}
+          className={`w-64 flex flex-col justify-between flex-shrink-0 fixed lg:sticky left-0 top-0 lg:top-16 h-full lg:h-[calc(100vh-4rem)] z-50 lg:z-10 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:rounded-lg lg:border lg:bg-slate-50`}
           style={{ maxWidth: '100vw' }}
         >
           {/* Navigation */}

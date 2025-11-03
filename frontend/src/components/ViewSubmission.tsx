@@ -479,24 +479,25 @@ export function ViewSubmission() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
               <Button
                 variant="outline"
                 onClick={() => navigate(`/draft/${submission.id}`)}
+                className="w-full sm:w-auto"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Submission
               </Button>
               <Button
                 variant="outline"
-                className="text-red-600 border-red-300 hover:bg-red-50"
+                className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
                 onClick={() => setShowRejectDialog(true)}
               >
                 <XCircle className="w-4 h-4 mr-2" />
                 Reject with Remarks
               </Button>
               <Button
-                className="bg-green-600 hover:bg-green-700"
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
                 onClick={() => setShowApproveDialog(true)}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
