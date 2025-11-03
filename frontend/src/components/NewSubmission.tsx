@@ -553,6 +553,23 @@ export function NewSubmission() {
     // Reset summary and declaration
     setShowSummary(false);
     setDeclarationChecked(false);
+    
+    // Clear all error states when changing exam type
+    setNricError(null);
+    setEmailError(null);
+    setMobileError(null);
+    setExaminationDateError(null);
+    setExaminationDateBlurred(false);
+    setDrivingLicenceTimingError(null);
+    setDrivingLicenceTimingWarning(null);
+    setHeightError(null);
+    setWeightError(null);
+    setPoliceReportError(null);
+    setRemarksError(null);
+    setMedicalDeclarationRemarksError(null);
+    setMedicalDeclarationPatientCertificationError(null);
+    setMedicalHistoryErrors({});
+    setAbnormalityChecklistErrors({});
   };
 
   const validatePatientInfo = (): boolean => {
@@ -1603,7 +1620,7 @@ export function NewSubmission() {
                             disabled={!declarationChecked}
                           >
                             <Send className="w-4 h-4 mr-2" />
-                            Submit to Agency
+                            Submit to MOM
                           </Button>
                         ) : role === 'nurse' ? (
                           <Button
@@ -1698,7 +1715,7 @@ export function NewSubmission() {
                             disabled={!declarationChecked}
                           >
                             <Send className="w-4 h-4 mr-2" />
-                            Submit to Agency
+                            Submit to MOM
                           </Button>
                         ) : role === 'nurse' ? (
                           <Button
