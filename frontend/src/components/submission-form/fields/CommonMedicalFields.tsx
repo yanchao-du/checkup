@@ -142,7 +142,7 @@ export function CommonMedicalFields({
 
         {/* S1_S2 Reading */}
         <div>
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-2 gap-4 items-center">
             <Label htmlFor="s1S2Reading">S1_S2 Reading <span className="text-red-500">*</span></Label>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -170,7 +170,7 @@ export function CommonMedicalFields({
 
         {/* Murmurs */}
         <div>
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-2 gap-4 items-center">
             <Label htmlFor="murmurs">Murmurs <span className="text-red-500">*</span></Label>
             <div className="flex items-center space-x-2">
               <Checkbox
