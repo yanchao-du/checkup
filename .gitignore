@@ -100,3 +100,6 @@ frontend/src/api/generated/
 
 # OS
 Thumbs.db
+
+# Demo and presentation materials
+demo/

@@ -4,6 +4,7 @@ import { validateNricOrFin, validateEmail, validateSingaporeMobile } from '../li
 import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
 import { getTodayInSingapore } from './submission-form/utils/date';
+import { maskName } from '../lib/nameMasking';
 import { useParams, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useUnsavedChanges } from './UnsavedChangesContext';
@@ -51,7 +52,6 @@ import { IcaExamSummary } from './submission-form/summary/IcaExamSummary';
 import { DrivingLicenceTpAccordions } from './submission-form/accordions/DrivingLicenceTpAccordions';
 import { DrivingVocationalTpLtaAccordions } from './submission-form/accordions/DrivingVocationalTpLtaAccordions';
 import { VocationalLicenceLtaAccordions } from './submission-form/accordions/VocationalLicenceLtaAccordions';
-import { SixMonthlyMdwSummaryAccordion } from './submission-form/accordions/SixMonthlyMdwSummaryAccordion';
 
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
@@ -580,7 +580,7 @@ export function NewSubmission() {
             }
           }
           
-          toast.success(`Patient found: ${patient.name}`);
+          toast.success(`Patient found: ${maskName(patient.name)}`);
         } else {
           // Clear name and vitals if no patient found
           if (isNameFromApi) {
@@ -1489,15 +1489,23 @@ export function NewSubmission() {
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
-                          <Input
-                            id="patientName"
-                            name="patientName"
-                            value={patientName}
-                            onChange={(e) => setPatientName(e.target.value)}
-                            placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
-                            readOnly={isNameFromApi}
-                            className={isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
-                          />
+                          <div className="space-y-2">
+                            <Input
+                              id="patientName"
+                              name="patientName"
+                              value={isNameFromApi && !id ? maskName(patientName) : patientName}
+                              onChange={(e) => setPatientName(e.target.value)}
+                              placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
+                              readOnly={isNameFromApi}
+                              className={isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                            />
+                            {isNameFromApi && !id && (
+                              <p className="text-xs text-slate-600 flex items-center gap-1">
+                                <span className="inline-block w-1 h-1 rounded-full bg-green-500"></span>
+                                Name retrieved and masked for verification. Full name will be visible after submission.
+                              </p>
+                            )}
+                          </div>
                         ) : (
                           <Input
                             id="patientName"
@@ -1517,9 +1525,6 @@ export function NewSubmission() {
                           readOnly={false}
                         />
                       )}
-                      {/* {(examType === 'SIX_MONTHLY_MDW' || examType === 'WORK_PERMIT') && isNameFromApi && patientNric.length === 9 && !nricError && (
-                        <p className="text-xs text-slate-500">Name retrieved from system based on NRIC/FIN</p>
-                      )} */}
                     </div>
                     </div>
                     {(examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && (
