@@ -36,19 +36,19 @@ export function formatExamType(examType: ExamType): string {
 export function formatExamTypeFull(examType: ExamType): string {
   switch (examType) {
     case 'SIX_MONTHLY_MDW':
-  return 'Six-monthly Medical Exam for Migrant Domestic Worker';
+  return 'Six-monthly Medical Exam (6ME) for Migrant Domestic Worker';
     case 'SIX_MONTHLY_FMW':
-      return 'Six-monthly Medical Exam for Female Migrant Worker';
+      return 'Six-monthly Medical Examination (6ME) for Female Migrant Worker';
     case 'WORK_PERMIT':
-      return 'Full Medical Exam for Work Permit';
+      return 'Full Medical Examination for Work Permit';
     case 'AGED_DRIVERS':
-      return 'Medical Exam for Aged Drivers';
+      return 'Medical Examination for Aged Drivers';
     case 'DRIVING_LICENCE_TP':
-      return 'Medical Examination Report for Driving Licence';
+      return 'Medical Examination for Driving Licence for Aged Drivers (65 and above)';
     case 'DRIVING_VOCATIONAL_TP_LTA':
-      return 'Medical Examination Report for Driving Vocational Licence';
+      return 'Medical Examination for Vocational Licence for Aged Drivers (65 and above)';
     case 'VOCATIONAL_LICENCE_LTA':
-      return 'Medical Examination Report for Vocational Licence';
+      return 'Medical Examination for Vocational Licence';
     case 'PR_MEDICAL':
       return 'Medical Examination for Permanent Residency';
     case 'STUDENT_PASS_MEDICAL':
