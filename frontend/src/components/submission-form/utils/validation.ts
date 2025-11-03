@@ -231,28 +231,6 @@ export function validateGeneralMedical(
     isValid = false;
   }
 
-  // Validate S1_S2 Reading
-  if (!formData.s1S2Reading?.trim()) {
-    if (onValidate) {
-      onValidate('s1S2Reading', ERROR_MESSAGES.FIELD_REQUIRED);
-    }
-    if (!firstErrorField) {
-      firstErrorField = 's1S2Reading';
-    }
-    isValid = false;
-  }
-
-  // Validate Murmurs
-  if (!formData.murmurs?.trim()) {
-    if (onValidate) {
-      onValidate('murmurs', ERROR_MESSAGES.FIELD_REQUIRED);
-    }
-    if (!firstErrorField) {
-      firstErrorField = 'murmurs';
-    }
-    isValid = false;
-  }
-
   // Validate Optical Aids
   if (formData.opticalAids === undefined || formData.opticalAids === null || formData.opticalAids === '') {
     if (onValidate) {
