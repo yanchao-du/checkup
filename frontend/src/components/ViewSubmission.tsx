@@ -423,28 +423,36 @@ export function ViewSubmission() {
         </div>
 
         <div className="space-y-6">
-          {submission.status === 'submitted' && (
+          {/* Exam Category - show for draft, pending_approval, rejected, and submitted */}
+          {(submission.status === 'draft' || 
+            submission.status === 'pending_approval' || 
+            submission.status === 'rejected' || 
+            submission.status === 'submitted') && (
             <Card>
               <CardHeader>
-                <CardTitle>Agency and Exam Information</CardTitle>
+                <CardTitle>
+                  {submission.status === 'submitted' ? 'Agency and Exam Information' : 'Exam Information'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-slate-500">Submitted To</p>
-                    <p className="text-slate-900">
-                      {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
-                      {(submission.examType === 'SIX_MONTHLY_MDW' || 
-                        submission.examType === 'SIX_MONTHLY_FMW' || 
-                        submission.examType === 'WORK_PERMIT') && 'Ministry of Manpower'}
-                      {(submission.examType === 'PR_MEDICAL' || 
-                        submission.examType === 'STUDENT_PASS_MEDICAL' || 
-                        submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
-                      {submission.examType === 'DRIVING_LICENCE_TP' && 'Traffic Police'}
-                      {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Traffic Police & Land Transport Authority'}
-                      {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Land Transport Authority'}
-                    </p>
-                  </div>
+                  {submission.status === 'submitted' && (
+                    <div>
+                      <p className="text-sm text-slate-500">Submitted To</p>
+                      <p className="text-slate-900">
+                        {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
+                        {(submission.examType === 'SIX_MONTHLY_MDW' || 
+                          submission.examType === 'SIX_MONTHLY_FMW' || 
+                          submission.examType === 'WORK_PERMIT') && 'Ministry of Manpower'}
+                        {(submission.examType === 'PR_MEDICAL' || 
+                          submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                          submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
+                        {submission.examType === 'DRIVING_LICENCE_TP' && 'Traffic Police'}
+                        {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Traffic Police & Land Transport Authority'}
+                        {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Land Transport Authority'}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <p className="text-sm text-slate-500">Exam Category</p>
                     <p className="text-slate-900 text-sm">
