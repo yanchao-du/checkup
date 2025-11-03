@@ -100,8 +100,8 @@ export function AbbreviatedMentalTestSection({
             Ask the following questions and check each question if the patient answers correctly (1 point each)
           </p>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={handleAllPassed}>
-          All Passed
+        <Button type="button" variant="outline" size="sm" onClick={handleAllPassed} className="border-blue-500 text-blue-500 hover:bg-blue-50">
+          Check All
         </Button>
       </div>
 

@@ -1,6 +1,8 @@
 import { Label } from '../../ui/label';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { Textarea } from '../../ui/textarea';
+import { Checkbox } from '../../ui/checkbox';
+import { Button } from '../../ui/button';
 
 interface VocationalXraySectionProps {
   formData: Record<string, any>;
@@ -8,6 +10,49 @@ interface VocationalXraySectionProps {
   errors?: Record<string, string>;
   onValidate?: (field: string, error: string) => void;
 }
+
+const MEMO_REQUIREMENTS = [
+  {
+    id: 'amputee',
+    label: 'Amputee',
+    description: 'Requires Driving Assessment Rehabilitation Programme (DARP) report',
+  },
+  {
+    id: 'cancerChemoRadio',
+    label: 'Cancer undergoing Chemotherapy or Radiotherapy',
+    description: 'Requires memo from attending physician',
+  },
+  {
+    id: 'endStageRenal',
+    label: 'End Stage Renal Failure on Hemodialysis',
+    description: 'Requires memo from attending physician for renal illness',
+  },
+  {
+    id: 'hearingProblems',
+    label: 'Hearing problems',
+    description: 'Requires Audiogram report and memo from hearing specialist/audiologist',
+  },
+  {
+    id: 'heartSurgeryPacemaker',
+    label: 'Heart Surgery (with Pacemaker)',
+    description: 'Requires memo from Cardiologist',
+  },
+  {
+    id: 'mentalIllness',
+    label: 'Mental illness (e.g. Anxiety, Depression, Schizophrenia & Bipolar)',
+    description: 'Requires memo from psychiatrist / attending physician for mental illness',
+  },
+  {
+    id: 'stroke',
+    label: 'Stroke',
+    description: 'Requires Driving Assessment Rehabilitation Programme (DARP) report and memo from Neurologist',
+  },
+  {
+    id: 'tuberculosis',
+    label: 'Tuberculosis',
+    description: 'Requires TB Certificate of Completion from Tuberculosis Control Unit (TBCU) or Ministry of Health (MOH)',
+  },
+];
 
 export function VocationalXraySection({
   formData,
@@ -122,6 +167,66 @@ export function VocationalXraySection({
             </div>
           </div>
         )}
+      </div>
+
+      {/* Section 2: Memo Requirements */}
+      <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-700">Memo Requirements</h3>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-gray-600">
+            If the patient has any of the following medical conditions, additional memo is required.
+            Please check all that apply to this patient:
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onChange('memoRequirements', JSON.stringify({}))}
+            className="border-blue-500 text-blue-500 hover:bg-blue-50"
+          >
+            Clear All
+          </Button>
+        </div>
+
+        <div className="space-y-3">
+          {MEMO_REQUIREMENTS.map((requirement) => {
+            const memoData = formData.memoRequirements ? 
+              (typeof formData.memoRequirements === 'string' ? 
+                JSON.parse(formData.memoRequirements) : 
+                formData.memoRequirements) 
+              : {};
+            
+            return (
+              <div
+                key={requirement.id}
+                className="flex items-start space-x-3 p-3 bg-white rounded border border-gray-100"
+              >
+                <Checkbox
+                  id={`memo-${requirement.id}`}
+                  checked={memoData[requirement.id] === true}
+                  onCheckedChange={(checked) => {
+                    const updated = {
+                      ...memoData,
+                      [requirement.id]: checked === true,
+                    };
+                    onChange('memoRequirements', JSON.stringify(updated));
+                  }}
+                />
+                <div className="flex-1">
+                  <Label
+                    htmlFor={`memo-${requirement.id}`}
+                    className="font-medium text-sm cursor-pointer"
+                  >
+                    {requirement.label}
+                  </Label>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {requirement.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
