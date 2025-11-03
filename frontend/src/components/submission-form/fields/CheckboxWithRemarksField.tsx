@@ -106,6 +106,7 @@ export function CheckboxWithRemarksField({
                 id={item.id}
                 checked={value[item.id] || false}
                 onCheckedChange={(checked) => handleCheckboxChange(item.id, checked as boolean)}
+                className="bg-white"
               />
               <Label
                 htmlFor={item.id}
