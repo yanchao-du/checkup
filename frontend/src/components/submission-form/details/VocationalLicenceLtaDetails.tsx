@@ -66,66 +66,8 @@ export function VocationalLicenceLtaDetails({ submission }: VocationalLicenceLta
   const checkedDeclarations = getCheckedDeclarations();
   const checkedHistoryItems = getCheckedHistory();
 
-  // Calculate age at examination
-  const calculateAge = (dateOfBirth: string, examDate: string) => {
-    const birth = new Date(dateOfBirth);
-    const exam = new Date(examDate);
-    let age = exam.getFullYear() - birth.getFullYear();
-    const monthDiff = exam.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && exam.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
-  const ageAtExamination = submission.patientDateOfBirth && submission.examinationDate
-    ? calculateAge(submission.patientDateOfBirth, submission.examinationDate)
-    : null;
-
   return (
     <div className="space-y-6">
-      {/* Submission Reference */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-lg mb-3">Submission Reference</h3>
-        <div className="text-sm">
-          <span className="text-gray-600">Reference Number:</span>
-          <p className="font-mono font-medium text-lg">{submission.id}</p>
-        </div>
-      </div>
-
-      {/* Patient Information */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 className="font-semibold text-lg mb-3">Patient Information</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Name:</span>
-            <p className="font-medium">{submission.patientName}</p>
-          </div>
-          <div>
-            <span className="text-gray-600">NRIC/FIN:</span>
-            <p className="font-medium">{submission.patientNric}</p>
-          </div>
-          {submission.patientDateOfBirth && (
-            <div>
-              <span className="text-gray-600">Date of Birth:</span>
-              <p className="font-medium">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
-            </div>
-          )}
-          {ageAtExamination !== null && (
-            <div>
-              <span className="text-gray-600">Age at Examination:</span>
-              <p className="font-medium">{ageAtExamination} years</p>
-            </div>
-          )}
-          {submission.examinationDate && (
-            <div>
-              <span className="text-gray-600">Examination Date:</span>
-              <p className="font-medium">{new Date(submission.examinationDate).toLocaleDateString()}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* General Medical Examination */}
       <div className="bg-white border-2 border-blue-200 rounded-lg p-6 shadow-sm">
         <h3 className="font-semibold text-lg mb-4 text-blue-900 bg-blue-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-blue-200">General Medical Examination</h3>
