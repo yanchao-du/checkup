@@ -1026,7 +1026,55 @@ export function NewSubmission() {
       // Mark current section as completed
       setCompletedSections(prev => new Set(prev).add(currentSection));
       
-      // If editing from summary, go back to summary
+      // If editing from summary, check AMT requirement for driver exams before returning
+      if (isEditingFromSummary && isDriverExamType(examType)) {
+        console.log('🔍 Checking AMT requirement...');
+        console.log('patientDateOfBirth:', patientDateOfBirth);
+        console.log('examinationDate:', examinationDate);
+        console.log('drivingLicenseClass:', drivingLicenseClass);
+        
+        const newAmtRequired = recalculateAMTRequirement();
+        console.log('newAmtRequired:', newAmtRequired);
+        console.log('oldAmtRequired:', formData.amtRequired);
+        
+        // Update formData.amtRequired if it changed
+        if (newAmtRequired !== null && newAmtRequired !== formData.amtRequired) {
+          setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
+          console.log('✏️ Updated amtRequired to:', newAmtRequired);
+        }
+        
+        // If AMT is required OR we can't determine (null), check if questions are answered
+        if (newAmtRequired === true || newAmtRequired === null) {
+          const amtAnswered = formData.amt && Object.values(formData.amt).some(val => val === true);
+          console.log('amtAnswered:', amtAnswered);
+          console.log('formData.amt:', formData.amt);
+          
+          if (!amtAnswered) {
+            // AMT is required/uncertain but not answered
+            const oldAmtRequired = formData.amtRequired;
+            console.log('⚠️ AMT required/uncertain but not answered! Showing toast...');
+            if (newAmtRequired === null) {
+              toast.warning('Please complete the AMT questions to continue.');
+            } else if (newAmtRequired !== oldAmtRequired) {
+              toast.warning('AMT is now required. Please complete the AMT questions.');
+            } else {
+              toast.warning('Please complete the AMT questions before continuing.');
+            }
+            console.log('📍 Setting accordion to amt');
+            setActiveAccordion('amt');
+            setIsEditingFromSummary(false);
+            return;
+          }
+        }
+        
+        console.log('✅ AMT check passed, going to summary');
+        // AMT check passed or not required, go back to summary
+        setActiveAccordion('summary');
+        setIsEditingFromSummary(false);
+        return;
+      }
+      
+      // If editing from summary for non-driver exams, go back to summary
       if (isEditingFromSummary) {
         setActiveAccordion('summary');
         setIsEditingFromSummary(false);
@@ -1158,6 +1206,94 @@ export function NewSubmission() {
     ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
     (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
     (examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? true : true);
+
+  // Helper function to recalculate AMT requirements based on current form data
+  const recalculateAMTRequirement = () => {
+    if (!drivingLicenseClass || !patientDateOfBirth || !examinationDate) {
+      return null; // Cannot determine
+    }
+
+    const AMT_AGE_CHECK_CLASSES = ['4', '4A', '4P', '4AP', '5', '5P'];
+    
+    const calculateAgeOnNextBirthday = (dob: string, examDate: string): number | null => {
+      if (!dob || !examDate) return null;
+      const dobDate = new Date(dob);
+      const examDateObj = new Date(examDate);
+      const nextBirthday = new Date(dobDate);
+      nextBirthday.setFullYear(examDateObj.getFullYear());
+      if (nextBirthday < examDateObj) {
+        nextBirthday.setFullYear(examDateObj.getFullYear() + 1);
+      }
+      return nextBirthday.getFullYear() - dobDate.getFullYear();
+    };
+
+    const calculateAgeOnExamDate = (dob: string, examDate: string): number | null => {
+      if (!dob || !examDate) return null;
+      const dobDate = new Date(dob);
+      const examDateObj = new Date(examDate);
+      let age = examDateObj.getFullYear() - dobDate.getFullYear();
+      const monthDiff = examDateObj.getMonth() - dobDate.getMonth();
+      const dayDiff = examDateObj.getDate() - dobDate.getDate();
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--;
+      }
+      return age;
+    };
+
+    const cognitiveImpairment = formData.abnormalityChecklist?.cognitiveImpairment || false;
+    
+    // Condition 3: Cognitive impairment
+    if (cognitiveImpairment) {
+      return true;
+    }
+
+    const ageNextBirthday = calculateAgeOnNextBirthday(patientDateOfBirth, examinationDate);
+    const ageOnExamDate = calculateAgeOnExamDate(patientDateOfBirth, examinationDate);
+    
+    // Check if age is outside critical ranges
+    const ageOutsideCriticalRange = (ageNextBirthday !== null && (ageNextBirthday < 70 || ageNextBirthday > 74)) &&
+                                    (ageOnExamDate !== null && ageOnExamDate < 70);
+    
+    if (ageOutsideCriticalRange) {
+      return false; // AMT definitely not required
+    }
+
+    // Condition 1: Class 4/4A/4P/4AP/5/5P or Private Driving Instructor AND next birthday age 70-74
+    if (ageNextBirthday !== null && ageNextBirthday >= 70 && ageNextBirthday <= 74) {
+      const isAMTAgeCheckClass = AMT_AGE_CHECK_CLASSES.includes(drivingLicenseClass);
+      if (isAMTAgeCheckClass || formData.isPrivateDrivingInstructor === 'yes') {
+        return true;
+      }
+    }
+
+    // Condition 2: LTA vocational licence AND aged 70+ on examination date
+    if (ageOnExamDate !== null && ageOnExamDate >= 70) {
+      if (formData.holdsLTAVocationalLicence === 'yes') {
+        return true;
+      }
+    }
+
+    // Need more info if we can't make determination
+    if (formData.isPrivateDrivingInstructor === undefined || formData.holdsLTAVocationalLicence === undefined) {
+      console.log('⚠️ Cannot determine AMT - missing fields:', {
+        isPrivateDrivingInstructor: formData.isPrivateDrivingInstructor,
+        holdsLTAVocationalLicence: formData.holdsLTAVocationalLicence,
+        ageNextBirthday,
+        ageOnExamDate,
+        drivingLicenseClass
+      });
+      return null;
+    }
+
+    console.log('AMT not required - all checks passed', {
+      ageNextBirthday,
+      ageOnExamDate,
+      drivingLicenseClass,
+      isPrivateDrivingInstructor: formData.isPrivateDrivingInstructor,
+      holdsLTAVocationalLicence: formData.holdsLTAVocationalLicence
+    });
+    return false; // AMT not required
+  };
 
   if (isLoading) {
     return (
@@ -1541,6 +1677,37 @@ export function NewSubmission() {
                   examinationDate={examinationDate}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
+                    
+                    // Check AMT requirement when navigating to summary (from any section)
+                    if (next === 'summary' || isEditingFromSummary) {
+                      const newAmtRequired = recalculateAMTRequirement();
+                      const oldAmtRequired = formData.amtRequired;
+                      
+                      // Update formData.amtRequired if it changed
+                      if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
+                        setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
+                      }
+                      
+                      // If AMT is required OR uncertain (null), verify questions are answered
+                      if (newAmtRequired === true || newAmtRequired === null) {
+                        const amtAnswered = formData.amt && Object.values(formData.amt).some(val => val === true);
+                        
+                        if (!amtAnswered) {
+                          // AMT is required/uncertain but questions not answered
+                          if (newAmtRequired === null) {
+                            toast.warning('Please complete the AMT questions to continue.');
+                          } else if (newAmtRequired !== oldAmtRequired) {
+                            toast.warning('AMT is now required. Please complete the AMT questions.');
+                          } else {
+                            toast.warning('Please complete the AMT questions before continuing.');
+                          }
+                          setActiveAccordion('amt');
+                          setIsEditingFromSummary(false);
+                          return; // Don't navigate to summary
+                        }
+                      }
+                    }
+                    
                     if (isEditingFromSummary) {
                       // When editing from summary, go back to summary
                       setActiveAccordion('summary');
@@ -1575,6 +1742,37 @@ export function NewSubmission() {
                   examinationDate={examinationDate}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
+                    
+                    // Check AMT requirement when navigating to summary (from any section)
+                    if (next === 'summary' || isEditingFromSummary) {
+                      const newAmtRequired = recalculateAMTRequirement();
+                      const oldAmtRequired = formData.amtRequired;
+                      
+                      // Update formData.amtRequired if it changed
+                      if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
+                        setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
+                      }
+                      
+                      // If AMT is required OR uncertain (null), verify questions are answered
+                      if (newAmtRequired === true || newAmtRequired === null) {
+                        const amtAnswered = formData.amt && Object.values(formData.amt).some(val => val === true);
+                        
+                        if (!amtAnswered) {
+                          // AMT is required/uncertain but questions not answered
+                          if (newAmtRequired === null) {
+                            toast.warning('Please complete the AMT questions to continue.');
+                          } else if (newAmtRequired !== oldAmtRequired) {
+                            toast.warning('AMT is now required. Please complete the AMT questions.');
+                          } else {
+                            toast.warning('Please complete the AMT questions before continuing.');
+                          }
+                          setActiveAccordion('amt');
+                          setIsEditingFromSummary(false);
+                          return; // Don't navigate to summary
+                        }
+                      }
+                    }
+                    
                     if (isEditingFromSummary) {
                       // When editing from summary, go back to summary
                       setActiveAccordion('summary');
