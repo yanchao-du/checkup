@@ -290,19 +290,19 @@ export function ViewSubmission() {
 
               {/* Exam type specific fields */}
               {submission.examType === 'SIX_MONTHLY_MDW' && (
-                <SixMonthlyMdwDetails formData={submission.formData} />
+                <SixMonthlyMdwDetails submission={submission} />
               )}
 
               {submission.examType === 'SIX_MONTHLY_FMW' && (
-                <SixMonthlyFmwDetails formData={submission.formData} />
+                <SixMonthlyFmwDetails submission={submission} />
               )}
 
               {submission.examType === 'WORK_PERMIT' && (
-                <WorkPermitDetails formData={submission.formData} />
+                <WorkPermitDetails submission={submission} />
               )}
 
               {submission.examType === 'AGED_DRIVERS' && (
-                <AgedDriversDetails formData={submission.formData} />
+                <AgedDriversDetails submission={submission} />
               )}
 
               {submission.examType === 'DRIVING_LICENCE_TP' && (
@@ -320,7 +320,7 @@ export function ViewSubmission() {
               {(submission.examType === 'PR_MEDICAL' || 
                 submission.examType === 'STUDENT_PASS_MEDICAL' || 
                 submission.examType === 'LTVP_MEDICAL') && (
-                <IcaExamDetails formData={submission.formData} />
+                <IcaExamDetails submission={submission} />
               )}
 
               {/* General Remarks section - for all exam types except ICA and driver exams (which include remarks in their detail components) */}
