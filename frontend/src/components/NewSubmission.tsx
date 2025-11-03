@@ -2304,7 +2304,12 @@ export function NewSubmission() {
                               setShowSubmitDialog(true);
                             }
                           }}
-                          disabled={isSaving || !formData.assessment?.declarationAgreed || hasPendingMemos(examType, formData)}
+                          disabled={
+                            isSaving || 
+                            !formData.assessment?.declarationAgreed || 
+                            formData.assessment?.fitToDrivePublicService === undefined ||
+                            hasPendingMemos(examType, formData)
+                          }
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP & LTA' : 'Route for Approval'}
                         </Button>
