@@ -254,7 +254,7 @@ export function Dashboard() {
                         onClick={() => handleReopenAndFix(submission.id)}
                         disabled={reopeningId === submission.id}
                       >
-                        {reopeningId === submission.id ? 'Reopening...' : 'Reopen & Fix'}
+                        {reopeningId === submission.id ? 'Reopening...' : 'Reopen'}
                       </Button>
                     )}
                   </div>
