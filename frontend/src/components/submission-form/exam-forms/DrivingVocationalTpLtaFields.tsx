@@ -4,8 +4,6 @@ import { CommonMedicalFields } from '../fields/CommonMedicalFields';
 import { MedicalDeclarationSection } from '../fields/MedicalDeclarationSection';
 import { MedicalHistorySection } from '../fields/MedicalHistorySection';
 import { AbbreviatedMentalTestSection } from '../fields/AbbreviatedMentalTestSection';
-import { LtaVocationalSection } from '../fields/LtaVocationalSection';
-import { AssessmentSection } from '../fields/AssessmentSection';
 
 interface DrivingVocationalTpLtaFieldsProps {
   formData: Record<string, any>;
@@ -77,30 +75,6 @@ export function DrivingVocationalTpLtaFields({
         </AccordionTrigger>
         <AccordionContent>
           <AbbreviatedMentalTestSection formData={formData} onChange={onChange} />
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* LTA Vocational Licence Medical Details */}
-      <AccordionItem value="lta-vocational">
-        <AccordionTrigger className="text-lg font-semibold">
-          LTA Vocational Licence Medical Details
-        </AccordionTrigger>
-        <AccordionContent>
-          <LtaVocationalSection formData={formData} onChange={onChange} />
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* Medical Practitioner Assessment */}
-      <AccordionItem value="assessment">
-        <AccordionTrigger className="text-lg font-semibold">
-          Medical Practitioner Assessment
-        </AccordionTrigger>
-        <AccordionContent>
-          <AssessmentSection
-            formData={formData}
-            onChange={onChange}
-            examType="DRIVING_VOCATIONAL_TP_LTA"
-          />
         </AccordionContent>
       </AccordionItem>
     </Accordion>
