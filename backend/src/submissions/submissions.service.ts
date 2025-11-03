@@ -513,6 +513,7 @@ export class SubmissionsService {
       examinationDate: submission.examinationDate ? submission.examinationDate.toISOString().split('T')[0] : null,
       status: submission.status,
       createdBy: submission.createdById,
+      createdById: submission.createdById, // Add this for frontend compatibility
       createdByName: submission.createdBy?.name,
       createdDate: submission.createdDate,
       submittedDate: submission.submittedDate,
