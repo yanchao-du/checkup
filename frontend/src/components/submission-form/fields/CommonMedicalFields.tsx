@@ -185,7 +185,7 @@ export function CommonMedicalFields({
         <div>
           <Label htmlFor="opticalAids">Does the patient use any optical aids (e.g., glasses or contact lenses)? <span className="text-red-500">*</span></Label>
           <div className="flex gap-4 mt-2">
-            <label className="flex items-center space-x-2 text-sm font-normal">
+            <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
               <input
                 type="radio"
                 name="opticalAids"
@@ -197,11 +197,11 @@ export function CommonMedicalFields({
                     onValidate?.('opticalAids', '');
                   }
                 }}
-                className="h-4 w-4"
+                className="h-4 w-4 cursor-pointer"
               />
               <span>Yes</span>
             </label>
-            <label className="flex items-center space-x-2 text-sm font-normal">
+            <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
               <input
                 type="radio"
                 name="opticalAids"
@@ -213,7 +213,7 @@ export function CommonMedicalFields({
                     onValidate?.('opticalAids', '');
                   }
                 }}
-                className="h-4 w-4"
+                className="h-4 w-4 cursor-pointer"
               />
               <span>No</span>
             </label>
@@ -318,7 +318,7 @@ export function CommonMedicalFields({
           Does the patient pass the General Condition? <span className="text-red-500">*</span>
         </Label>
         <div className="flex gap-4 mt-2">
-          <label className="flex items-center space-x-2 text-sm font-normal">
+          <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
             <input
               type="radio"
               name="passGeneralCondition"
@@ -330,11 +330,11 @@ export function CommonMedicalFields({
                   onValidate?.('passGeneralCondition', '');
                 }
               }}
-              className="h-4 w-4"
+              className="h-4 w-4 cursor-pointer"
             />
             <span>Yes</span>
           </label>
-          <label className="flex items-center space-x-2 text-sm font-normal">
+          <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
             <input
               type="radio"
               name="passGeneralCondition"
@@ -346,7 +346,7 @@ export function CommonMedicalFields({
                   onValidate?.('passGeneralCondition', '');
                 }
               }}
-              className="h-4 w-4"
+              className="h-4 w-4 cursor-pointer"
             />
             <span>No</span>
           </label>
