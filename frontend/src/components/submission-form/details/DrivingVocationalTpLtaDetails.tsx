@@ -140,7 +140,7 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* Patient Information */}
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 className="font-semibold text-lg mb-3">Patient Information</h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
@@ -157,6 +157,12 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
               <p className="font-medium">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
             </div>
           )}
+          {(submission as any).drivingLicenseClass && (
+            <div>
+              <span className="text-gray-600">Driving License Class:</span>
+              <p className="font-medium">{(submission as any).drivingLicenseClass}</p>
+            </div>
+          )}
           {ageAtExamination !== null && (
             <div>
               <span className="text-gray-600">Age at Examination:</span>
@@ -167,6 +173,18 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
             <div>
               <span className="text-gray-600">Examination Date:</span>
               <p className="font-medium">{new Date(submission.examinationDate).toLocaleDateString()}</p>
+            </div>
+          )}
+          {(submission as any).patientEmail && (
+            <div>
+              <span className="text-gray-600">Email:</span>
+              <p className="font-medium">{(submission as any).patientEmail}</p>
+            </div>
+          )}
+          {(submission as any).patientMobile && (
+            <div>
+              <span className="text-gray-600">Mobile:</span>
+              <p className="font-medium">+65 {(submission as any).patientMobile}</p>
             </div>
           )}
         </div>
