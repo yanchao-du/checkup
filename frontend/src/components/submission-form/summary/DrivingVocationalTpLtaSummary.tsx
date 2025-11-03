@@ -442,7 +442,7 @@ export function DrivingVocationalTpLtaSummary({
             )}
           </div>
           {formData.amtRequired === false ? (
-            <div className="text-center py-6">
+            <div className="py-6">
               <p className="text-lg text-slate-600">AMT not required</p>
             </div>
           ) : (
