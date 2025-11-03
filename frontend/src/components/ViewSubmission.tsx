@@ -161,77 +161,36 @@ export function ViewSubmission() {
       </div>
 
       {/* Submission Reference */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <h3 className="font-semibold text-lg mb-3">Submission Reference</h3>
-          <div className="text-sm">
-            <span className="text-gray-600">Reference Number:</span>
-            <p className="font-mono font-medium text-lg">{submission.id}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Patient Information Card */}
-      <Card className="bg-gray-50 border-gray-200">
-        <CardContent className="pt-6">
-          <h3 className="font-semibold text-lg mb-3">Patient Information</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Name:</span>
-              <p className="font-medium">{submission.patientName}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">NRIC/FIN:</span>
-              <p className="font-medium">{submission.patientNric}</p>
-            </div>
-            {submission.patientDateOfBirth && (
-              <div>
-                <span className="text-gray-600">Date of Birth:</span>
-                <p className="font-medium">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
-              </div>
-            )}
-            {(submission as any).drivingLicenseClass && (
-              <div>
-                <span className="text-gray-600">Driving License Class:</span>
-                <p className="font-medium">{(submission as any).drivingLicenseClass}</p>
-              </div>
-            )}
-            {submission.examinationDate && (
-              <div>
-                <span className="text-gray-600">Examination Date:</span>
-                <p className="font-medium">{new Date(submission.examinationDate).toLocaleDateString()}</p>
-              </div>
-            )}
-            {isDriverExamType(submission.examType) && submission.patientDateOfBirth && submission.examinationDate && (
-              <div>
-                <span className="text-gray-600">Age at Examination:</span>
-                <p className="font-medium">{formatAge(calculateAge(submission.patientDateOfBirth, submission.examinationDate))}</p>
-              </div>
-            )}
-            {isDriverExamType(submission.examType) && (submission as any).patientEmail && (
-              <div>
-                <span className="text-gray-600">Email:</span>
-                <p className="font-medium">{(submission as any).patientEmail}</p>
-              </div>
-            )}
-            {isDriverExamType(submission.examType) && (submission as any).patientMobile && (
-              <div>
-                <span className="text-gray-600">Mobile:</span>
-                <p className="font-medium">+65 {(submission as any).patientMobile}</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+        <p className="text-sm text-slate-600">
+          <span className="font-medium">Submission Reference:</span>{' '}
+          <span className="font-mono">{submission.id}</span>
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* Patient Information */}
           <Card>
             <CardHeader>
               <CardTitle>Patient Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Name</p>
+                  <p className="text-slate-900">{submission.patientName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">NRIC/FIN</p>
+                  <p className="text-slate-900">{submission.patientNric}</p>
+                </div>
+                {submission.patientDateOfBirth && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
+                    <p className="text-slate-900">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
+                  </div>
+                )}
                 {isDriverExamType(submission.examType) && submission.patientEmail && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Email Address</p>
@@ -241,7 +200,7 @@ export function ViewSubmission() {
                 {isDriverExamType(submission.examType) && submission.patientMobile && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Mobile Number</p>
-                    <p className="text-slate-900">{submission.patientMobile}</p>
+                    <p className="text-slate-900">+65 {submission.patientMobile}</p>
                   </div>
                 )}
                 {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (submission as any).drivingLicenseClass && (
@@ -267,27 +226,11 @@ export function ViewSubmission() {
                   </div>
                 )}
               </div>
-              <div>
-                <p className="text-sm text-slate-500 mb-1">Exam Type</p>
-                <p className="text-slate-900 text-sm">
-                  {submission.examType === 'SIX_MONTHLY_MDW' && 'Six-monthly Medical Exam for Migrant Domestic Worker'}
-                  {submission.examType === 'SIX_MONTHLY_FMW' && 'Six-monthly Medical Exam for Female Migrant Worker'}
-                  {submission.examType === 'WORK_PERMIT' && 'Full Medical Exam for Work Permit'}
-                  {submission.examType === 'AGED_DRIVERS' && 'Medical Exam for Aged Drivers'}
-                  {submission.examType === 'PR_MEDICAL' && 'Medical Examination for Permanent Residency'}
-                  {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Medical Examination for Student Pass'}
-                  {submission.examType === 'LTVP_MEDICAL' && 'Medical Examination for Long Term Visit Pass'}
-                  {submission.examType === 'DRIVING_LICENCE_TP' && 'Driving Licence Medical Examination Report (TP)'}
-                  {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Driving Licence and Vocational Licence (TP & LTA)'}
-                  {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Vocational Licence Medical Examination (LTA)'}
-                </p>
-              </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Medical Examination Results</CardTitle>
-              {/* <CardDescription>{submission.examType}</CardDescription> */}
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Body Measurements Section - exclude driver exams as they have their own details component */}
@@ -436,7 +379,7 @@ export function ViewSubmission() {
           {submission.status === 'submitted' && (
             <Card>
               <CardHeader>
-                <CardTitle>Agency Information</CardTitle>
+                <CardTitle>Agency and Exam Information</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
