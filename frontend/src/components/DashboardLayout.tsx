@@ -64,7 +64,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <img src="/logo.svg" alt="CheckUp logo" className="w-10 h-10 rounded-lg" />
             <div>
               <h1 className="text-slate-900 text-lg md:text-xl">CheckUp</h1>
-              <p className="text-sm text-slate-600 hidden sm:block">{user?.clinicName}</p>
             </div>
           </div>
 
@@ -73,6 +72,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <div>
                 <div className="text-sm text-slate-900">{user?.name}</div>
                 <div className="text-xs text-slate-500 capitalize">{user?.role}</div>
+                {/* <div className="text-xs text-slate-600">{user?.clinicName}</div> */}
               </div>
             </div>
             <Button variant="outline" size="sm" className="text-blue-600 focus:outline-none w-full sm:w-auto" onClick={handleLogout}>

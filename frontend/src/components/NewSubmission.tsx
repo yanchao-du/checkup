@@ -76,6 +76,36 @@ const isDriverExamType = (examType: ExamType | ''): boolean => {
   return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
 };
 
+// Helper to check if there are pending memos for TP_LTA exam
+const hasPendingMemos = (examType: ExamType | '', formData: Record<string, any>): boolean => {
+  if (examType !== 'DRIVING_VOCATIONAL_TP_LTA') return false;
+  
+  const memoRequirements = formData.memoRequirements 
+    ? (typeof formData.memoRequirements === 'string' 
+        ? JSON.parse(formData.memoRequirements) 
+        : formData.memoRequirements)
+    : {};
+  
+  const checkedConditions = Object.entries(memoRequirements)
+    .filter(([_, value]) => value === true)
+    .map(([key]) => key);
+  
+  // Check each checked condition for pending memos
+  for (const conditionId of checkedConditions) {
+    const memoProvided = formData[`memoProvided_${conditionId}`];
+    const furtherMemoRequired = formData[`furtherMemoRequired_${conditionId}`];
+    
+    // Memo is pending if:
+    // 1. Patient has not provided memo (answered "no")
+    // 2. Patient provided memo but further memo is required (answered "yes" to further memo)
+    if (memoProvided === 'no' || (memoProvided === 'yes' && furtherMemoRequired === 'yes')) {
+      return true;
+    }
+  }
+  
+  return false;
+};
+
 export function NewSubmission() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -2237,6 +2267,28 @@ export function NewSubmission() {
                         }}
                       />
 
+                      {/* Warning for pending memos */}
+                      {hasPendingMemos(examType, formData) && (
+                        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                              <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-sm font-semibold text-yellow-800 mb-1">
+                                Pending Memo/Report Required
+                              </h4>
+                              <p className="text-sm text-yellow-700">
+                                This report cannot be submitted yet. The patient has medical conditions that require additional memo/report to be provided.
+                                Please review the highlighted conditions in the Medical Conditions section above.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex justify-end mt-4">
                         <Button
                           type="button"
@@ -2249,7 +2301,7 @@ export function NewSubmission() {
                               setShowSubmitDialog(true);
                             }
                           }}
-                          disabled={isSaving || !formData.assessment?.declarationAgreed}
+                          disabled={isSaving || !formData.assessment?.declarationAgreed || hasPendingMemos(examType, formData)}
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP & LTA' : 'Route for Approval'}
                         </Button>
