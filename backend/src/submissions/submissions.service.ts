@@ -359,7 +359,15 @@ export class SubmissionsService {
       throw new NotFoundException('Submission not found');
     }
 
-    if (existing.createdById !== userId && userRole !== 'admin') {
+    // Access control:
+    // - Admin can submit any draft
+    // - Creator can submit their own drafts
+    // - Doctors can submit drafts that were converted from pending_approval (originally created by nurse)
+    const isCreator = existing.createdById === userId;
+    const isDoctorSubmittingConvertedDraft = userRole === 'doctor' && existing.status === 'draft';
+    
+    if (!isCreator && userRole !== 'admin' && !isDoctorSubmittingConvertedDraft) {
+      this.logger.warn(`Access denied for user ${userId} to submit submission ${id} (creator: ${existing.createdById})`);
       throw new ForbiddenException('Access denied');
     }
 
