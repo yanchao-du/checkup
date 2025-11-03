@@ -2280,9 +2280,12 @@ export function NewSubmission() {
                               <h4 className="text-sm font-semibold text-yellow-800 mb-1">
                                 Pending Memo/Report Required
                               </h4>
-                              <p className="text-sm text-yellow-700">
+                              <p className="text-sm text-yellow-700 mb-2">
                                 This report cannot be submitted yet. The patient has medical conditions that require additional memo/report to be provided.
                                 Please review the highlighted conditions in the Medical Conditions section above.
+                              </p>
+                              <p className="text-sm text-yellow-700 font-medium">
+                                💡 You can save this as a draft and submit later once the patient provides the required memo/report.
                               </p>
                             </div>
                           </div>

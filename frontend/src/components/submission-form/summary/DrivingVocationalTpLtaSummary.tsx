@@ -177,8 +177,11 @@ export function DrivingVocationalTpLtaSummary({
               <p className="text-sm text-red-700 mb-2">
                 This report cannot be submitted because the patient has medical conditions that require additional memo/report to be provided.
               </p>
-              <p className="text-sm text-red-700 font-medium">
+              <p className="text-sm text-red-700 font-medium mb-2">
                 Please check the highlighted conditions in the "Medical Conditions Requiring Additional Memo/Report" section below.
+              </p>
+              <p className="text-sm text-red-700 font-semibold">
+                💡 Tip: You can save this as a draft and submit later once the patient provides the required memo/report.
               </p>
             </div>
           </div>
