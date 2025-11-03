@@ -200,7 +200,7 @@ export function DraftsList() {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Ready to Submit ({drafts.filter(d => !hasPendingMemos(d)).length})
+              No Pending Memo ({drafts.filter(d => !hasPendingMemos(d)).length})
             </button>
           </div>
 
