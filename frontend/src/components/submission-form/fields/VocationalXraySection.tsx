@@ -47,16 +47,17 @@ export function VocationalXraySection({
       <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
         <h3 className="text-sm font-semibold text-gray-700">X-ray Examination</h3>
         
-        {/* Informational text */}
-        <p className="text-xs text-gray-600 italic">
-          X-ray examination is only required for new applicant of vocational licence or if instructed by LTA
-        </p>
-        
         {/* Question 1: X-ray Required */}
         <div className="space-y-3">
           <Label className="text-base font-semibold">
             Does the patient need to take X-ray? <span className="text-red-500">*</span>
           </Label>
+          
+          {/* Informational text */}
+          <p className="text-xs text-gray-600 italic">
+            X-ray examination is only required for new applicant of vocational licence or if instructed by LTA
+          </p>
+          
           <RadioGroup
             value={formData.vocationalXrayRequired || ''}
             onValueChange={handleXrayRequiredChange}
