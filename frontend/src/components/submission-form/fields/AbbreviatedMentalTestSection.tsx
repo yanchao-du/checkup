@@ -75,6 +75,11 @@ export function AbbreviatedMentalTestSection({
   const handleAMTRequirementChange = (isRequired: boolean, canDetermine: boolean) => {
     // Only show AMT questions if AMT is required AND we can make that determination
     setShowAMTQuestions(isRequired && canDetermine);
+    
+    // Save the amtRequired status to formData
+    if (canDetermine) {
+      onChange('amtRequired', isRequired);
+    }
   };
 
   return (
