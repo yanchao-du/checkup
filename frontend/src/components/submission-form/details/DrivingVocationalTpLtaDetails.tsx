@@ -172,45 +172,6 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
         </div>
       </div>
 
-      {/* General Medical Examination */}
-      <div className="bg-white border-2 border-blue-200 rounded-lg p-6 shadow-sm">
-        <h3 className="font-semibold text-lg mb-4 text-blue-900 bg-blue-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-blue-200">General Medical Examination</h3>
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Height:</span>
-            <p className="font-medium">{data.height || '-'} cm</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Weight:</span>
-            <p className="font-medium">{data.weight || '-'} kg</p>
-          </div>
-          <div>
-            <span className="text-gray-600">BMI:</span>
-            <p className="font-medium">
-              {data.height && data.weight
-                ? ((data.weight / ((data.height / 100) ** 2)).toFixed(1))
-                : '-'}
-            </p>
-          </div>
-          <div>
-            <span className="text-gray-600">Blood Pressure:</span>
-            <p className="font-medium">{data.bloodPressure || '-'} mmHg</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Pulse:</span>
-            <p className="font-medium">{data.pulse || '-'} bpm</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Visual Acuity:</span>
-            <p className="font-medium">{data.visualAcuity || '-'}</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Hearing Test:</span>
-            <p className="font-medium">{data.hearingTest || '-'}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Medical Declaration by Patient */}
       {checkedDeclarations.length > 0 && (
         <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
