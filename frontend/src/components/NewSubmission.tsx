@@ -1499,6 +1499,7 @@ export function NewSubmission() {
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
+                  isEditingFromSummary={isEditingFromSummary}
                   errors={{ 
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
@@ -1510,14 +1511,15 @@ export function NewSubmission() {
                   dateOfBirth={patientDateOfBirth}
                   examinationDate={examinationDate}
                   onContinue={(current, next) => {
-                    if (current === 'assessment') {
-                      if (validateExamSpecific()) {
-                        setCompletedSections(prev => new Set(prev).add(current));
-                        setShowSummary(true);
-                        setActiveAccordion(next);
-                      }
+                    setCompletedSections(prev => new Set(prev).add(current));
+                    if (isEditingFromSummary) {
+                      // When editing from summary, go back to summary
+                      setActiveAccordion('summary');
+                      setIsEditingFromSummary(false);
+                    } else if (next === 'summary') {
+                      setShowSummary(true);
+                      setActiveAccordion(next);
                     } else {
-                      setCompletedSections(prev => new Set(prev).add(current));
                       setActiveAccordion(next);
                     }
                   }}

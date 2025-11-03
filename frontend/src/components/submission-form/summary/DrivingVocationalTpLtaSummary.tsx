@@ -307,6 +307,133 @@ export function DrivingVocationalTpLtaSummary({
         </div>
       </div>
 
+      {/* Vocational Licence Medical Examination */}
+      <div className="mb-6 bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-slate-900">Vocational Licence Medical Examination</h4>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600"
+              onClick={() => onEdit('vocational-xray')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </div>
+        <div className="space-y-4 text-sm">
+          {/* X-ray Section */}
+          <div>
+            <p className="font-medium text-gray-700 mb-2">X-ray Examination</p>
+            <div className="space-y-2 pl-4">
+              <div>
+                <span className="text-gray-600">X-ray Required:</span>
+                <p className="font-medium inline ml-2">
+                  {formData.vocationalXrayRequired === 'yes' ? 'Yes' : formData.vocationalXrayRequired === 'no' ? 'No' : '-'}
+                </p>
+              </div>
+              {formData.vocationalXrayRequired === 'yes' && (
+                <>
+                  <div>
+                    <span className="text-gray-600">X-ray Findings:</span>
+                    <p className="font-medium inline ml-2">
+                      {formData.vocationalXrayFindings === 'no_lesion' 
+                        ? 'No radiological evidence of chest lesion' 
+                        : formData.vocationalXrayFindings === 'tb' 
+                        ? 'Patient is suffering from TB' 
+                        : '-'}
+                    </p>
+                  </div>
+                  {formData.vocationalXrayRemarks && (
+                    <div>
+                      <span className="text-gray-600">Remarks:</span>
+                      <p className="text-gray-700 bg-white p-2 rounded mt-1 whitespace-pre-wrap">
+                        {formData.vocationalXrayRemarks}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Memo Requirements Section */}
+          {(() => {
+            const memoRequirements = formData.memoRequirements 
+              ? (typeof formData.memoRequirements === 'string' 
+                  ? JSON.parse(formData.memoRequirements) 
+                  : formData.memoRequirements)
+              : {};
+            
+            const MEMO_LABELS: Record<string, string> = {
+              amputee: 'Amputee',
+              cancerChemoRadio: 'Cancer undergoing Chemotherapy or Radiotherapy',
+              endStageRenal: 'End Stage Renal Failure on Hemodialysis',
+              hearingProblems: 'Hearing problems',
+              heartSurgeryPacemaker: 'Heart Surgery (with Pacemaker)',
+              mentalIllness: 'Mental illness (e.g. Anxiety, Depression, Schizophrenia & Bipolar)',
+              stroke: 'Stroke',
+              tuberculosis: 'Tuberculosis',
+            };
+
+            const checkedConditions = Object.entries(memoRequirements)
+              .filter(([_, value]) => value === true)
+              .map(([key]) => key);
+
+            if (checkedConditions.length === 0) return null;
+
+            return (
+              <div>
+                <p className="font-medium text-gray-700 mb-2">Medical Conditions Requiring Additional Documentation</p>
+                <div className="space-y-3 pl-4">
+                  {checkedConditions.map((conditionId) => {
+                    const memoProvided = formData[`memoProvided_${conditionId}`];
+                    const furtherMemoRequired = formData[`furtherMemoRequired_${conditionId}`];
+                    const remarks = formData[`memoRemarks_${conditionId}`];
+
+                    return (
+                      <div key={conditionId} className="bg-white p-3 rounded border border-gray-200">
+                        <p className="font-medium text-amber-700 mb-2">
+                          ✓ {MEMO_LABELS[conditionId]}
+                        </p>
+                        <div className="ml-4 space-y-1 text-xs text-gray-700">
+                          <div>
+                            <span className="text-gray-600">Memo Provided:</span>
+                            <span className="ml-2 font-medium">
+                              {memoProvided === 'yes' ? 'Yes' : memoProvided === 'no' ? 'No' : '-'}
+                            </span>
+                          </div>
+                          {memoProvided === 'yes' && (
+                            <>
+                              <div>
+                                <span className="text-gray-600">Further Memo Required:</span>
+                                <span className="ml-2 font-medium">
+                                  {furtherMemoRequired === 'yes' ? 'Yes' : furtherMemoRequired === 'no' ? 'No' : '-'}
+                                </span>
+                              </div>
+                              {remarks && (
+                                <div>
+                                  <span className="text-gray-600">Remarks:</span>
+                                  <p className="ml-2 mt-1 bg-gray-50 p-2 rounded whitespace-pre-wrap">
+                                    {remarks}
+                                  </p>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
       {/* LTA Vocational Assessment */}
       <div className="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
         <div className="flex items-center justify-between mb-3">

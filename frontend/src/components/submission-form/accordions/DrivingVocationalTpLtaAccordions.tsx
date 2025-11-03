@@ -20,6 +20,7 @@ interface DrivingVocationalTpLtaAccordionsProps {
   onChange: (key: string, value: string) => void;
   completedSections: Set<string>;
   isPatientInfoValid: boolean;
+  isEditingFromSummary?: boolean;
   onContinue: (current: string, next: string) => void;
   errors?: Record<string, string>;
   onValidate?: (field: string, error: string) => void;
@@ -33,6 +34,7 @@ export function DrivingVocationalTpLtaAccordions({
   onChange,
   completedSections,
   isPatientInfoValid,
+  isEditingFromSummary = false,
   onContinue,
   errors,
   onValidate,
@@ -67,7 +69,7 @@ export function DrivingVocationalTpLtaAccordions({
                   }
                 }}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>
@@ -99,7 +101,7 @@ export function DrivingVocationalTpLtaAccordions({
                   }
                 }}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>
@@ -135,7 +137,7 @@ export function DrivingVocationalTpLtaAccordions({
                   }
                 }}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>
@@ -163,7 +165,7 @@ export function DrivingVocationalTpLtaAccordions({
                 type="button"
                 onClick={() => onContinue('amt', 'vocational-xray')}
               >
-                Continue
+                {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
             </div>
           </div>

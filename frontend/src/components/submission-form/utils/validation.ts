@@ -359,6 +359,55 @@ export function validateVocationalXray(
     }
   }
 
+  // Validate memo requirements follow-up questions
+  const memoRequirements = formData.memoRequirements 
+    ? (typeof formData.memoRequirements === 'string' 
+        ? JSON.parse(formData.memoRequirements) 
+        : formData.memoRequirements)
+    : {};
+
+  const MEMO_REQUIREMENT_IDS = [
+    'amputee',
+    'cancerChemoRadio',
+    'endStageRenal',
+    'hearingProblems',
+    'heartSurgeryPacemaker',
+    'mentalIllness',
+    'stroke',
+    'tuberculosis',
+  ];
+
+  // For each checked memo requirement, validate the follow-up questions
+  MEMO_REQUIREMENT_IDS.forEach(id => {
+    if (memoRequirements[id] === true) {
+      // Validate "Has memo been provided" question
+      const memoProvidedField = `memoProvided_${id}`;
+      if (!formData[memoProvidedField]) {
+        if (onValidate) {
+          onValidate(memoProvidedField, ERROR_MESSAGES.FIELD_REQUIRED);
+        }
+        if (!firstErrorField) {
+          firstErrorField = memoProvidedField;
+        }
+        isValid = false;
+      }
+
+      // If memo was provided (yes), validate "further memo required" question
+      if (formData[memoProvidedField] === 'yes') {
+        const furtherMemoField = `furtherMemoRequired_${id}`;
+        if (!formData[furtherMemoField]) {
+          if (onValidate) {
+            onValidate(furtherMemoField, ERROR_MESSAGES.FIELD_REQUIRED);
+          }
+          if (!firstErrorField) {
+            firstErrorField = furtherMemoField;
+          }
+          isValid = false;
+        }
+      }
+    }
+  });
+
   // Scroll to first error if validation failed
   if (!isValid && firstErrorField) {
     setTimeout(() => {
