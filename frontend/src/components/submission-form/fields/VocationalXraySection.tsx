@@ -42,10 +42,10 @@ export function VocationalXraySection({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Section 1: X-ray Examination */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-900 border-b pb-2">X-ray Examination</h3>
+      <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-700">X-ray Examination</h3>
         
         {/* Question 1: X-ray Required */}
         <div className="space-y-3">
