@@ -4,13 +4,15 @@ import { CommonMedicalFields } from '../fields/CommonMedicalFields';
 import { MedicalDeclarationSection } from '../fields/MedicalDeclarationSection';
 import { MedicalHistorySection } from '../fields/MedicalHistorySection';
 import { AbbreviatedMentalTestSection } from '../fields/AbbreviatedMentalTestSection';
+import { VocationalXraySection } from '../fields/VocationalXraySection';
 import { 
   validateMedicalDeclaration, 
   validateMedicalHistory, 
   isPatientCertificationChecked,
   isMedicalHistoryPatientCertificationChecked,
   validateAbnormalityChecklist,
-  validateGeneralMedical
+  validateGeneralMedical,
+  validateVocationalXray
 } from '../utils/validation';
 
 interface DrivingVocationalTpLtaAccordionsProps {
@@ -159,7 +161,38 @@ export function DrivingVocationalTpLtaAccordions({
             <div className="flex justify-end mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('amt', 'summary')}
+                onClick={() => onContinue('amt', 'vocational-xray')}
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+
+      {/* Vocational License Medical Examination - X-ray */}
+      <AccordionItem value="vocational-xray">
+        <AccordionTrigger isCompleted={completedSections.has('vocational-xray')} isDisabled={!isPatientInfoValid}>
+          <div className="flex items-center gap-2">
+            <span>Vocational License Medical Examination - X-ray</span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-4">
+            <VocationalXraySection 
+              formData={formData} 
+              onChange={onChange}
+              errors={errors}
+              onValidate={onValidate}
+            />
+            <div className="flex justify-end mt-4">
+              <Button 
+                type="button"
+                onClick={() => {
+                  if (validateVocationalXray(formData, onValidate)) {
+                    onContinue('vocational-xray', 'summary');
+                  }
+                }}
               >
                 Continue to Summary
               </Button>

@@ -321,3 +321,53 @@ export function validateGeneralMedical(
 
   return isValid;
 }
+
+/**
+ * Validates the vocational X-ray section
+ * @param formData The form data object
+ * @param onValidate Callback to set validation errors
+ * @returns true if validation passes, false otherwise
+ */
+export function validateVocationalXray(
+  formData: Record<string, any>,
+  onValidate?: (field: string, error: string) => void
+): boolean {
+  let isValid = true;
+  let firstErrorField: string | null = null;
+
+  // Validate X-ray required question
+  if (!formData.vocationalXrayRequired) {
+    if (onValidate) {
+      onValidate('vocationalXrayRequired', ERROR_MESSAGES.FIELD_REQUIRED);
+    }
+    if (!firstErrorField) {
+      firstErrorField = 'vocationalXrayRequired';
+    }
+    isValid = false;
+  }
+
+  // If X-ray is required (yes), validate findings
+  if (formData.vocationalXrayRequired === 'yes') {
+    if (!formData.vocationalXrayFindings) {
+      if (onValidate) {
+        onValidate('vocationalXrayFindings', ERROR_MESSAGES.FIELD_REQUIRED);
+      }
+      if (!firstErrorField) {
+        firstErrorField = 'vocationalXrayFindings';
+      }
+      isValid = false;
+    }
+  }
+
+  // Scroll to first error if validation failed
+  if (!isValid && firstErrorField) {
+    setTimeout(() => {
+      const element = document.querySelector(\`[id*="\${firstErrorField}"]\`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  return isValid;
+}
