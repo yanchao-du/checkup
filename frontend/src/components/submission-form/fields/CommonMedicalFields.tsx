@@ -155,7 +155,7 @@ export function CommonMedicalFields({
                     onValidate?.('s1S2Reading', '');
                   }
                 }}
-                className={formData.s1S2Reading === 'Abnormal' ? 'data-[state=checked]:bg-white data-[state=checked]:border-red-600 data-[state=checked]:text-red-600' : 'bg-white'}
+                className={formData.s1S2Reading === 'Abnormal' ? 'data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600 data-[state=checked]:text-white' : 'bg-white'}
               />
               <Label
                 htmlFor="s1S2Reading"
@@ -183,7 +183,7 @@ export function CommonMedicalFields({
                     onValidate?.('murmurs', '');
                   }
                 }}
-                className={formData.murmurs === 'Yes' ? 'data-[state=checked]:bg-white data-[state=checked]:border-red-600 data-[state=checked]:text-red-600' : 'bg-white'}
+                className={formData.murmurs === 'Yes' ? 'data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600 data-[state=checked]:text-white' : 'bg-white'}
               />
               <Label
                 htmlFor="murmurs"
