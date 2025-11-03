@@ -532,7 +532,7 @@ export function DrivingLicenceTpSummary({
             />
             <div>
               <p className="!text-sm !font-normal !leading-relaxed text-gray-700">
-                I certify that I have today examined and identified the patient named above: <span className="text-red-500">*</span>
+                I certify that I have examined and identified the patient named above: <span className="text-red-500">*</span>
               </p>
               <ul className="ml-6 mt-2 space-y-2 !text-sm !font-normal !leading-relaxed text-gray-700 list-disc">
                 <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>

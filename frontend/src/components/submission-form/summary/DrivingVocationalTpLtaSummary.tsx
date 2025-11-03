@@ -14,6 +14,7 @@ interface DrivingVocationalTpLtaSummaryProps {
   };
   examinationDate: string;
   onEdit?: (section: string) => void;
+  onChange?: (key: string, value: any) => void;
 }
 
 export function DrivingVocationalTpLtaSummary({
@@ -21,6 +22,7 @@ export function DrivingVocationalTpLtaSummary({
   patientInfo,
   examinationDate,
   onEdit,
+  onChange,
 }: DrivingVocationalTpLtaSummaryProps) {
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
@@ -547,7 +549,7 @@ export function DrivingVocationalTpLtaSummary({
             return (
               <div>
                 {/* <p className="font-medium text-gray-700 mb-2">Medical Conditions Requiring Additional Memo/Report</p> */}
-                <div className="space-y-3 pl-4">
+                <div className="space-y-3">
                   {checkedConditions.map((conditionId) => {
                     const memoProvided = formData[`memoProvided_${conditionId}`];
                     const furtherMemoRequired = formData[`furtherMemoRequired_${conditionId}`];
@@ -606,41 +608,130 @@ export function DrivingVocationalTpLtaSummary({
         </CardContent>
       </Card>
 
-      {/* Overall Result - Assessment (this was previously mixed with LTA Vocational Assessment) */}
+      {/* Overall Result - Assessment */}
       <Card>
         <CardContent className="pt-6 bg-blue-50">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Overall Result of Medical Examination</h3>
-          
-          <div className="space-y-3 text-sm">
-            <div>
-              <span className="text-gray-600">Requires Specialist Review:</span>
-              <p className="font-medium">{assessment.requiresSpecialistReview ? 'Yes' : 'No'}</p>
+        
+        {/* Fit to Drive Public Service Vehicle Question */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-gray-700 mb-3">
+            Is the patient physically and mentally fit to drive a public service vehicle? <span className="text-red-500">*</span>
+          </p>
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="fitToDrivePublicService"
+                value="true"
+                checked={assessment.fitToDrivePublicService === true}
+                onChange={() => {
+                  if (onChange) {
+                    onChange('assessment', { ...assessment, fitToDrivePublicService: true });
+                  }
+                }}
+                className="h-4 w-4"
+              />
+              <span className="text-sm font-medium">Yes</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="fitToDrivePublicService"
+                value="false"
+                checked={assessment.fitToDrivePublicService === false}
+                onChange={() => {
+                  if (onChange) {
+                    onChange('assessment', { ...assessment, fitToDrivePublicService: false });
+                  }
+                }}
+                className="h-4 w-4"
+              />
+              <span className="text-sm font-medium">No</span>
+            </label>
+          </div>
+          {assessment.fitToDrivePublicService !== undefined && (
+            <div className="mt-3">
+              <p className={`font-bold text-lg ${assessment.fitToDrivePublicService ? 'text-green-600' : 'text-red-600'}`}>
+                {assessment.fitToDrivePublicService ? '✓ YES - Patient is fit to drive a public service vehicle' : '✗ NO - Patient is not fit to drive a public service vehicle'}
+              </p>
             </div>
-            {assessment.requiresSpecialistReview && assessment.specialistType && (
-              <div>
-                <span className="text-gray-600">Specialist Type:</span>
-                <p className="font-medium">{assessment.specialistType}</p>
+          )}
+        </div>
+
+        {/* Bus Attendant Question - only show if not fit for public service vehicle */}
+        {assessment.fitToDrivePublicService === false && (
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Is the patient fit to hold a Bus Attendant Vocational Licence? <span className="text-red-500">*</span>
+            </p>
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fitForBusAttendant"
+                  value="true"
+                  checked={assessment.fitForBusAttendant === true}
+                  onChange={() => {
+                    if (onChange) {
+                      onChange('assessment', { ...assessment, fitForBusAttendant: true });
+                    }
+                  }}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm font-medium">Yes</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fitForBusAttendant"
+                  value="false"
+                  checked={assessment.fitForBusAttendant === false}
+                  onChange={() => {
+                    if (onChange) {
+                      onChange('assessment', { ...assessment, fitForBusAttendant: false });
+                    }
+                  }}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm font-medium">No</span>
+              </label>
+            </div>
+            {assessment.fitForBusAttendant !== undefined && (
+              <div className="mt-3">
+                <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
+                  {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
+                </p>
               </div>
             )}
-            <div>
-              <span className="text-gray-600">Remarks:</span>
-              <p className="font-medium whitespace-pre-wrap">{assessment.remarks || '-'}</p>
-            </div>
           </div>
+        )}
 
-          {/* Medical Practitioner Declaration */}
-          <div className="pt-6 border-t border-gray-200 mt-6">
-            <h3 className="font-semibold mb-3">Medical Practitioner Declaration</h3>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-700 leading-relaxed">
-                I certify that I have today examined and identified the patient named above:
+        {/* Medical Practitioner Declaration */}
+        <div className="pt-4 border-t border-blue-200">
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
+          <label className="flex items-start space-x-3 cursor-pointer bg-white p-3 rounded border border-blue-300">
+            <input
+              type="checkbox"
+              checked={assessment.declarationAgreed === true}
+              onChange={(e) => {
+                if (onChange) {
+                  onChange('assessment', { ...assessment, declarationAgreed: e.target.checked });
+                }
+              }}
+              className="h-4 w-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <div>
+              <p className="!text-sm !font-normal !leading-relaxed text-gray-700">
+                I certify that I have examined and identified the patient named above: <span className="text-red-500">*</span>
               </p>
-              <ul className="mt-3 ml-6 space-y-2 text-sm text-gray-700 list-disc">
+              <ul className="ml-6 mt-2 space-y-2 !text-sm !font-normal !leading-relaxed text-gray-700 list-disc">
                 <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
                 <li>The answers to the questions above are correct to the best of my knowledge.</li>
               </ul>
             </div>
-          </div>
+          </label>
+        </div>
         </CardContent>
       </Card>
     </div>

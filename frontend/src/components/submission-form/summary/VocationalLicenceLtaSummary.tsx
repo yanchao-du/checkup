@@ -391,7 +391,7 @@ export function VocationalLicenceLtaSummary({
         <h3 className="font-semibold mb-3">Medical Practitioner Declaration</h3>
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-sm text-gray-700 leading-relaxed">
-            I certify that I have today examined and identified the patient named above:
+            I certify that I have examined and identified the patient named above:
           </p>
           <ul className="mt-3 ml-6 space-y-2 text-sm text-gray-700 list-disc">
             <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>

@@ -154,7 +154,7 @@ export function AssessmentSection({ formData, onChange, examType }: AssessmentSe
         <div className="bg-gray-50 p-4 rounded-lg">
           <h4 className="font-semibold mb-3 text-gray-900">Medical Practitioner Declaration</h4>
           <p className="text-sm text-gray-700 leading-relaxed mb-3">
-            I certify that I have today examined and identified the patient named above:
+            I certify that I have examined and identified the patient named above:
           </p>
           <ul className="ml-6 mb-4 space-y-2 text-sm text-gray-700 list-disc">
             <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>

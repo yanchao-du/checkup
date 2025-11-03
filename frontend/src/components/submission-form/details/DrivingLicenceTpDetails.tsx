@@ -317,7 +317,7 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
               <div className="bg-green-50 p-3 rounded border border-green-300">
                 <p className="text-green-700 font-medium mb-2">✓ Declaration confirmed</p>
                 <p className="text-sm leading-relaxed text-gray-700">
-                  I certify that I have today examined and identified the patient named above:
+                  I certify that I have examined and identified the patient named above:
                 </p>
                 <ul className="ml-6 mt-2 space-y-2 text-sm leading-relaxed text-gray-700 list-disc">
                   <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>

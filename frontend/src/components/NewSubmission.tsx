@@ -1877,6 +1877,7 @@ export function NewSubmission() {
                           mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
+                        onChange={handleFormDataChange}
                         onEdit={(section) => {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
