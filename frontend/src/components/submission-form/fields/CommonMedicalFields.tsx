@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../ui/select';
+import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { VisualAcuityField } from './VisualAcuityField';
 import { AbnormalityChecklistField } from './AbnormalityChecklistField';
 import { useEffect, useState } from 'react';
@@ -184,40 +185,29 @@ export function CommonMedicalFields({
         {/* Optical Aids */}
         <div>
           <Label htmlFor="opticalAids">Does the patient use any optical aids (e.g., glasses or contact lenses)? <span className="text-red-500">*</span></Label>
-          <div className="flex gap-4 mt-2">
-            <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
-              <input
-                type="radio"
-                name="opticalAids"
-                value="yes"
-                checked={formData.opticalAids === 'yes'}
-                onChange={(e) => {
-                  onChange('opticalAids', e.target.value);
-                  if (errors.opticalAids) {
-                    onValidate?.('opticalAids', '');
-                  }
-                }}
-                className="h-4 w-4 cursor-pointer"
-              />
-              <span>Yes</span>
-            </label>
-            <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
-              <input
-                type="radio"
-                name="opticalAids"
-                value="no"
-                checked={formData.opticalAids === 'no'}
-                onChange={(e) => {
-                  onChange('opticalAids', e.target.value);
-                  if (errors.opticalAids) {
-                    onValidate?.('opticalAids', '');
-                  }
-                }}
-                className="h-4 w-4 cursor-pointer"
-              />
-              <span>No</span>
-            </label>
-          </div>
+          <RadioGroup
+            value={formData.opticalAids || ''}
+            onValueChange={(value: string) => {
+              onChange('opticalAids', value);
+              if (errors.opticalAids) {
+                onValidate?.('opticalAids', '');
+              }
+            }}
+            className="flex gap-4 mt-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="opticalAids-yes" />
+              <Label htmlFor="opticalAids-yes" className="font-normal cursor-pointer">
+                Yes
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id="opticalAids-no" />
+              <Label htmlFor="opticalAids-no" className="font-normal cursor-pointer">
+                No
+              </Label>
+            </div>
+          </RadioGroup>
           {errors.opticalAids && <InlineError>{errors.opticalAids}</InlineError>}
         </div>
 
@@ -317,40 +307,29 @@ export function CommonMedicalFields({
         <Label htmlFor="passGeneralCondition" className="text-sm font-semibold text-gray-700">
           Does the patient pass the General Condition? <span className="text-red-500">*</span>
         </Label>
-        <div className="flex gap-4 mt-2">
-          <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
-            <input
-              type="radio"
-              name="passGeneralCondition"
-              value="yes"
-              checked={formData.passGeneralCondition === 'yes'}
-              onChange={(e) => {
-                onChange('passGeneralCondition', e.target.value);
-                if (errors.passGeneralCondition) {
-                  onValidate?.('passGeneralCondition', '');
-                }
-              }}
-              className="h-4 w-4 cursor-pointer"
-            />
-            <span>Yes</span>
-          </label>
-          <label className="flex items-center space-x-2 text-sm font-normal cursor-pointer">
-            <input
-              type="radio"
-              name="passGeneralCondition"
-              value="no"
-              checked={formData.passGeneralCondition === 'no'}
-              onChange={(e) => {
-                onChange('passGeneralCondition', e.target.value);
-                if (errors.passGeneralCondition) {
-                  onValidate?.('passGeneralCondition', '');
-                }
-              }}
-              className="h-4 w-4 cursor-pointer"
-            />
-            <span>No</span>
-          </label>
-        </div>
+        <RadioGroup
+          value={formData.passGeneralCondition || ''}
+          onValueChange={(value: string) => {
+            onChange('passGeneralCondition', value);
+            if (errors.passGeneralCondition) {
+              onValidate?.('passGeneralCondition', '');
+            }
+          }}
+          className="flex gap-4 mt-2"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="yes" id="passGeneralCondition-yes" />
+            <Label htmlFor="passGeneralCondition-yes" className="font-normal cursor-pointer">
+              Yes
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="no" id="passGeneralCondition-no" />
+            <Label htmlFor="passGeneralCondition-no" className="font-normal cursor-pointer">
+              No
+            </Label>
+          </div>
+        </RadioGroup>
         {errors.passGeneralCondition && <InlineError>{errors.passGeneralCondition}</InlineError>}
       </div>
     </div>
