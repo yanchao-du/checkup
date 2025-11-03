@@ -177,8 +177,8 @@ export function MedicalHistorySection({ formData, onChange, errors, onValidate }
               </Label>
             </div>
             {history[item.id] && (
-              <div className="mt-2 ml-6">
-                <Label htmlFor={`${item.id}-remarks`} className="text-sm">
+              <div className="mt-2 ml-8 p-4 border-l-2 border-blue-200 bg-blue-50/30 space-y-2">
+                <Label htmlFor={`${item.id}-remarks`} className="text-sm font-semibold">
                   Remarks <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
