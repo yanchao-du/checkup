@@ -142,38 +142,46 @@ export function CommonMedicalFields({
         {/* S1_S2 Reading */}
         <div>
           <Label htmlFor="s1S2Reading">S1_S2 Reading <span className="text-red-500">*</span></Label>
-          <Input
-            id="s1S2Reading"
-            type="text"
-            placeholder="Enter S1_S2 reading"
+          <Select
             value={formData.s1S2Reading || ''}
-            onChange={(e) => onChange('s1S2Reading', e.target.value)}
-            onBlur={(e) => {
-              if (e.target.value.trim() && errors.s1S2Reading) {
+            onValueChange={(value: string) => {
+              onChange('s1S2Reading', value);
+              if (value && errors.s1S2Reading) {
                 onValidate?.('s1S2Reading', '');
               }
             }}
-            className={errors.s1S2Reading ? 'border-red-500' : ''}
-          />
+          >
+            <SelectTrigger className={errors.s1S2Reading ? 'border-red-500' : ''}>
+              <SelectValue placeholder="Select S1_S2 reading" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Normal">Normal</SelectItem>
+              <SelectItem value="Abnormal">Abnormal</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.s1S2Reading && <InlineError>{errors.s1S2Reading}</InlineError>}
         </div>
 
         {/* Murmurs */}
         <div>
           <Label htmlFor="murmurs">Murmurs <span className="text-red-500">*</span></Label>
-          <Input
-            id="murmurs"
-            type="text"
-            placeholder="Enter murmurs reading"
+          <Select
             value={formData.murmurs || ''}
-            onChange={(e) => onChange('murmurs', e.target.value)}
-            onBlur={(e) => {
-              if (e.target.value.trim() && errors.murmurs) {
+            onValueChange={(value: string) => {
+              onChange('murmurs', value);
+              if (value && errors.murmurs) {
                 onValidate?.('murmurs', '');
               }
             }}
-            className={errors.murmurs ? 'border-red-500' : ''}
-          />
+          >
+            <SelectTrigger className={errors.murmurs ? 'border-red-500' : ''}>
+              <SelectValue placeholder="Select murmurs" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">No</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.murmurs && <InlineError>{errors.murmurs}</InlineError>}
         </div>
       </div>
