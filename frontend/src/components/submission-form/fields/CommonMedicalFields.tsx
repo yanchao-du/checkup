@@ -1,6 +1,7 @@
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
 import { InlineError } from '../../ui/InlineError';
+import { Checkbox } from '../../ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -142,46 +143,52 @@ export function CommonMedicalFields({
         {/* S1_S2 Reading */}
         <div>
           <Label htmlFor="s1S2Reading">S1_S2 Reading <span className="text-red-500">*</span></Label>
-          <Select
-            value={formData.s1S2Reading || ''}
-            onValueChange={(value: string) => {
-              onChange('s1S2Reading', value);
-              if (value && errors.s1S2Reading) {
-                onValidate?.('s1S2Reading', '');
-              }
-            }}
-          >
-            <SelectTrigger className={errors.s1S2Reading ? 'border-red-500' : ''}>
-              <SelectValue placeholder="Select S1_S2 reading" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Normal">Normal</SelectItem>
-              <SelectItem value="Abnormal">Abnormal</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-2 mt-2">
+            <Checkbox
+              id="s1S2Reading"
+              checked={formData.s1S2Reading === 'Abnormal'}
+              onCheckedChange={(checked) => {
+                const value = checked ? 'Abnormal' : 'Normal';
+                onChange('s1S2Reading', value);
+                if (errors.s1S2Reading) {
+                  onValidate?.('s1S2Reading', '');
+                }
+              }}
+              className={formData.s1S2Reading === 'Abnormal' ? 'bg-red-600 border-red-600 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600' : ''}
+            />
+            <Label
+              htmlFor="s1S2Reading"
+              className={`text-sm font-medium cursor-pointer ${formData.s1S2Reading === 'Abnormal' ? 'text-red-600' : 'text-slate-600'}`}
+            >
+              Abnormal
+            </Label>
+          </div>
           {errors.s1S2Reading && <InlineError>{errors.s1S2Reading}</InlineError>}
         </div>
 
         {/* Murmurs */}
         <div>
           <Label htmlFor="murmurs">Murmurs <span className="text-red-500">*</span></Label>
-          <Select
-            value={formData.murmurs || ''}
-            onValueChange={(value: string) => {
-              onChange('murmurs', value);
-              if (value && errors.murmurs) {
-                onValidate?.('murmurs', '');
-              }
-            }}
-          >
-            <SelectTrigger className={errors.murmurs ? 'border-red-500' : ''}>
-              <SelectValue placeholder="Select murmurs" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-2 mt-2">
+            <Checkbox
+              id="murmurs"
+              checked={formData.murmurs === 'Yes'}
+              onCheckedChange={(checked) => {
+                const value = checked ? 'Yes' : 'No';
+                onChange('murmurs', value);
+                if (errors.murmurs) {
+                  onValidate?.('murmurs', '');
+                }
+              }}
+              className={formData.murmurs === 'Yes' ? 'bg-red-600 border-red-600 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600' : ''}
+            />
+            <Label
+              htmlFor="murmurs"
+              className={`text-sm font-medium cursor-pointer ${formData.murmurs === 'Yes' ? 'text-red-600' : 'text-slate-600'}`}
+            >
+              Yes
+            </Label>
+          </div>
           {errors.murmurs && <InlineError>{errors.murmurs}</InlineError>}
         </div>
       </div>
