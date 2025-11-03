@@ -126,6 +126,18 @@ export function NewSubmission() {
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [testFin, setTestFin] = useState<string>('');
+  
+  // Track last saved state to detect actual changes
+  const [lastSavedState, setLastSavedState] = useState<{
+    examType: ExamType | '';
+    patientName: string;
+    patientNric: string;
+    patientDateOfBirth: string;
+    drivingLicenseClass: string;
+    examinationDate: string;
+    formData: Record<string, any>;
+  } | null>(null);
+  
   const [requiredTests, setRequiredTests] = useState<{
     pregnancy: boolean;
     syphilis: boolean;
@@ -267,6 +279,17 @@ export function NewSubmission() {
           }
           
           setCompletedSections(completed);
+          
+          // Initialize last saved state when loading existing draft
+          setLastSavedState({
+            examType: existing.examType,
+            patientName: existing.patientName,
+            patientNric: existing.patientNric,
+            patientDateOfBirth: existing.patientDateOfBirth,
+            drivingLicenseClass: existing.drivingLicenseClass || '',
+            examinationDate: existing.examinationDate || '',
+            formData: JSON.parse(JSON.stringify(existing.formData)), // Deep copy
+          });
         } catch (error) {
           console.error('Failed to load submission:', error);
           toast.error('Failed to load submission');
@@ -339,11 +362,25 @@ export function NewSubmission() {
 
   // Track form changes
   useEffect(() => {
-    // Mark as changed if any field has data (for new submissions) or if editing an existing draft
-    const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || drivingLicenseClass ||
-                    examinationDate || Object.keys(formData).length > 0);
-    setHasUnsavedChanges(hasData);
-  }, [examType, patientName, patientNric, patientDateOfBirth, drivingLicenseClass, examinationDate, formData, setHasUnsavedChanges]);
+    // If we have a saved state, compare current state with it
+    if (lastSavedState) {
+      const hasChanges = 
+        examType !== lastSavedState.examType ||
+        patientName !== lastSavedState.patientName ||
+        patientNric !== lastSavedState.patientNric ||
+        patientDateOfBirth !== lastSavedState.patientDateOfBirth ||
+        drivingLicenseClass !== lastSavedState.drivingLicenseClass ||
+        examinationDate !== lastSavedState.examinationDate ||
+        JSON.stringify(formData) !== JSON.stringify(lastSavedState.formData);
+      
+      setHasUnsavedChanges(hasChanges);
+    } else {
+      // No saved state - mark as changed if any field has data (for new submissions)
+      const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || drivingLicenseClass ||
+                      examinationDate || Object.keys(formData).length > 0);
+      setHasUnsavedChanges(hasData);
+    }
+  }, [examType, patientName, patientNric, patientDateOfBirth, drivingLicenseClass, examinationDate, formData, setHasUnsavedChanges, lastSavedState]);
 
   // Reset unsaved changes when component unmounts
   useEffect(() => {
@@ -1107,7 +1144,6 @@ export function NewSubmission() {
 
     try {
       setIsSaving(true);
-      setHasUnsavedChanges(false); // Clear unsaved changes before navigation
 
       const submissionData = {
         examType,
@@ -1135,10 +1171,22 @@ export function NewSubmission() {
         // Navigate to /draft/:id which will load the draft into the form
         navigate(`/draft/${created.id}`, { replace: true });
       }
+      
+      // Save current state as the last saved state
+      setLastSavedState({
+        examType,
+        patientName,
+        patientNric,
+        patientDateOfBirth,
+        drivingLicenseClass,
+        examinationDate,
+        formData: JSON.parse(JSON.stringify(formData)), // Deep copy
+      });
+      
+      setHasUnsavedChanges(false); // Clear unsaved changes after saving state
     } catch (error) {
       console.error('Failed to save draft:', error);
       toast.error('Failed to save draft');
-      setHasUnsavedChanges(true); // Restore unsaved changes flag on error
     } finally {
       setIsSaving(false);
     }
