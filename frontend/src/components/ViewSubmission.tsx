@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { ArrowLeft, CheckCircle, Loader2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Edit, Loader2, XCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
@@ -480,6 +480,13 @@ export function ViewSubmission() {
           </CardHeader>
           <CardContent>
             <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/draft/${submission.id}`)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Submission
+              </Button>
               <Button
                 variant="outline"
                 className="text-red-600 border-red-300 hover:bg-red-50"
