@@ -47,8 +47,8 @@ export function LoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
               <img src="/logo.svg" alt="CheckUp logo" className="w-16 h-16" />
             </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">CheckUp Medical Portal</h1>
-          <p className="text-slate-600">Submit medical examinations to Singapore government agencies</p>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">CheckUp Medical Examination Portal</h1>
+          <p className="text-slate-600">A one-stop portal to submit statutory medical examinations to government agencies</p>
           <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-sm font-semibold">
             This website is for demo and testing purposes only. Do not submit real patient data.
           </div>
@@ -123,9 +123,10 @@ export function LoginPage() {
               <p className="text-sm font-semibold text-slate-600 mb-2">Demo Accounts:</p>
               <div className="space-y-1 text-xs text-slate-500">
                 <p className="text-sm">Doctor1: S1234567D</p>
+                <p className="text-sm">Doctor2: S4567890C</p>
                 <p className="text-sm">Nurse1: S2345678H</p>
                 <p className="text-sm">Nurse2: S7890123C</p>
-                <p className="text-sm">Admin1: S3456789A</p>
+                {/* <p className="text-sm">Admin1: S3456789A</p> */}
                 <p className="text-sm">UEN: 123456789D</p>
               </div>
             </div>
