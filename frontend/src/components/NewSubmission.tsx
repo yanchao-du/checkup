@@ -115,7 +115,6 @@ export function NewSubmission() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
   const [examType, setExamType] = useState<ExamType | ''>('');
   const [patientName, setPatientName] = useState('');
   const [patientNric, setPatientNric] = useState('');
@@ -282,7 +281,6 @@ export function NewSubmission() {
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setFormData(existing.formData);
-          setSubmissionStatus(existing.status);
           
           // Restore required tests from formData
           if (existing.formData) {
@@ -1230,15 +1228,6 @@ export function NewSubmission() {
     // For nurses routing for approval, require a doctor to be selected
     if (user.role === 'nurse' && isRouteForApproval && !assignedDoctorId) {
       toast.warning('Please select a doctor to route this submission to');
-      return;
-    }
-
-    // If editing a pending_approval submission (doctor editing nurse's submission)
-    // Just save changes and redirect to view page to approve
-    if (id && submissionStatus === 'pending_approval') {
-      await handleSaveDraft();
-      toast.success('Changes saved. Please return to the review page to approve and submit.');
-      navigate(`/view/${id}`, { replace: true });
       return;
     }
 

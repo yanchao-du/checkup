@@ -290,6 +290,10 @@ export class SubmissionsService {
 
     this.logger.log(`Proceeding with update for submission ${id} (status: ${existing.status})`);
 
+    // If a doctor is editing a pending_approval submission, convert it to draft
+    // so they can submit it directly (which auto-approves for doctors)
+    const shouldConvertToDraft = userRole === 'doctor' && existing.status === 'pending_approval';
+
     try {
       const submission = await this.prisma.medicalSubmission.update({
         where: { id },
@@ -304,6 +308,8 @@ export class SubmissionsService {
           ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
           ...(dto.formData && { formData: dto.formData }),
           ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
+          // Convert to draft if doctor is editing pending_approval
+          ...(shouldConvertToDraft && { status: 'draft' as any }),
         },
         include: {
           createdBy: { select: { name: true } },
@@ -318,11 +324,19 @@ export class SubmissionsService {
           submissionId: id,
           userId,
           eventType: 'updated',
-          changes: dto as any,
+          changes: {
+            ...dto,
+            ...(shouldConvertToDraft && { statusChange: { from: 'pending_approval', to: 'draft' } }),
+          } as any,
         },
       });
 
-      this.logger.log(`Successfully updated submission ${id}`);
+      if (shouldConvertToDraft) {
+        this.logger.log(`Converted submission ${id} from pending_approval to draft for doctor ${userId}`);
+      } else {
+        this.logger.log(`Successfully updated submission ${id}`);
+      }
+      
       return this.formatSubmission(submission);
     } catch (error) {
       this.logger.error('Error updating submission', {
