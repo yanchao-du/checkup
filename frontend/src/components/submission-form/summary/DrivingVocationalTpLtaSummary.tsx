@@ -25,20 +25,18 @@ export function DrivingVocationalTpLtaSummary({
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
   const amt = formData.amt || {};
-  const ltaVocational = formData.ltaVocational || {};
   const assessment = formData.assessment || {};
 
   // Helper to get checked declaration items
   const getCheckedDeclarations = () => {
-    const items = [];
+    const items: string[] = [];
     const labels: Record<string, string> = {
-      lossOfConsciousness: 'Loss of consciousness/fainting',
-      seizures: 'Seizures or fits',
-      suddenDizziness: 'Sudden dizziness or blackouts',
-      chestPain: 'Chest pain or discomfort',
-      breathlessness: 'Breathlessness during mild exertion',
-      substanceAbuse: 'Alcohol or substance abuse',
-      psychiatricCondition: 'Psychiatric condition requiring treatment',
+      consultingPractitioner: 'Currently consulting a medical practitioner for a pre-existing or newly diagnosed medical condition',
+      takingMedication: 'Currently taking medication for a pre-existing or newly diagnosed medical condition',
+      hospitalAdmission: 'Recently warded in or discharged from hospital',
+      rehabilitativeTreatment: 'Currently receiving or recently received rehabilitative treatment (for stroke patients)',
+      driverRehabilitation: 'Has attended a driver rehabilitation and medical fitness assessment programme',
+      otherMedicalProblems: 'Has any other relevant medical problems or injuries not mentioned above',
     };
 
     Object.entries(labels).forEach(([key, label]) => {
@@ -47,41 +45,77 @@ export function DrivingVocationalTpLtaSummary({
       }
     });
 
-    if (medicalDeclaration.otherConditions) {
-      items.push(`Other: ${medicalDeclaration.otherConditions}`);
-    }
-
     return items;
   };
 
   // Helper to get checked history items
   const getCheckedHistory = () => {
-    const items = [];
+    const items: Array<{ label: string; remarks?: string }> = [];
     const labels: Record<string, string> = {
-      cardiovascular: 'Cardiovascular disease',
-      neurological: 'Neurological disorder',
-      psychiatric: 'Psychiatric condition',
-      diabetes: 'Diabetes mellitus',
-      vision: 'Vision problems',
-      hearing: 'Hearing problems',
-      musculoskeletal: 'Musculoskeletal disorder',
+      arthritisJointDisease: 'Arthritis / joint disease / numbness in hands and fingers',
+      asthmaBronchitisCopd: 'Asthma / bronchitis / COPD',
+      chestPain: 'Chest pain on exertion or at night',
+      deafness: 'Deafness',
+      diabetes: 'Diabetes',
+      difficultySeeing: 'Difficulty seeing in the dark',
+      epilepsySeizuresFaints: 'Epilepsy, seizures or fits of any kind / faints',
+      eyeTrouble: 'Eye trouble of any kind (e.g. cataracts, glaucoma, strabismus)',
+      headachesMigraine: 'Severe headaches or migraine',
+      headInjuryConcussion: 'Head injury or concussion',
+      heartAttackDisease: 'Heart attack / disease',
+      highBloodPressure: 'High blood pressure',
+      muscleDiseaseWeakness: 'Muscle disease or weakness',
+      palpitationsBreathlessness: 'Palpitations or breathlessness',
+      psychiatricIllness: 'Psychiatric illness',
+      strokeTia: 'Stroke / TIA',
+      surgicalOperations: 'Surgical operations',
+      thyroidDisease: 'Thyroid disease',
+      otherRelevant: 'Any relevant medical problems or injuries not mentioned above',
     };
 
     Object.entries(labels).forEach(([key, label]) => {
       if (medicalHistory[key]) {
-        items.push(label);
+        const remarks = medicalHistory[`${key}Remarks`];
+        items.push({ label, remarks });
       }
     });
 
-    if (medicalHistory.other) {
-      items.push(`Other: ${medicalHistory.other}`);
-    }
+    return items;
+  };
+
+  // Helper to get abnormalities
+  const getAbnormalities = () => {
+    const abnormalityChecklist = formData.abnormalityChecklist || {};
+    const items: Array<{ label: string; remarks?: string }> = [];
+    const labels: Record<string, string> = {
+      abdomen: 'Abdomen abnormality',
+      abnormalityJointMovement: 'Abnormality or limitation in range of movement of the joints',
+      defectInHearing: 'Defect in hearing',
+      deformitiesPhysicalDisabilities: 'Deformities and/or physical disabilities observed',
+      colourPerception: 'Difficulty in accurately recognising the colours red, green and amber',
+      fingerNoseCoordination: 'Finger-nose coordination abnormality',
+      limitationLimbStrength: 'Limitation in strength of upper limbs and lower limbs',
+      lungs: 'Lungs abnormality',
+      nervousSystem: 'Nervous system abnormality',
+      neuroMuscularSystem: 'Neuro-muscular system abnormality',
+      alcoholDrugAddiction: 'Evidence of being addicted to the excessive use of alcohol or drug',
+      psychiatricDisorder: 'Psychiatric disorder',
+      cognitiveImpairment: 'Sign of cognitive impairment',
+    };
+
+    Object.entries(labels).forEach(([key, label]) => {
+      if (abnormalityChecklist[key]) {
+        const remarks = abnormalityChecklist[`${key}Remarks`];
+        items.push({ label, remarks });
+      }
+    });
 
     return items;
   };
 
   const checkedDeclarations = getCheckedDeclarations();
   const checkedHistoryItems = getCheckedHistory();
+  const abnormalities = getAbnormalities();
 
   // Calculate age at examination
   const calculateAge = (dateOfBirth: string, examDate: string) => {
@@ -165,169 +199,292 @@ export function DrivingVocationalTpLtaSummary({
         </CardContent>
       </Card>
 
-      {/* Examination Details */}
+      {/* Medical Declaration by Patient */}
       <Card>
         <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Examination Details</h3>
-
-          {/* General Medical Examination */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3 border-b pb-2">
-              <h4 className="text-sm font-semibold text-slate-900">General Medical Examination</h4>
-              {onEdit && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-blue-600"
-                  onClick={() => onEdit('general-medical')}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Medical Declaration by Patient</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('medical-declaration')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+          <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
+          {checkedDeclarations.length > 0 ? (
+            <>
+              <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
+                {checkedDeclarations.map((item, index) => (
+                  <li key={index} className="text-amber-700">{item}</li>
+                ))}
+              </ul>
+              
+              {/* Remarks */}
+              {medicalDeclaration.remarks && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Remarks</h4>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">
+                    {medicalDeclaration.remarks}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-gray-600 italic">No conditions declared</p>
+          )}
+          
+          {/* Patient Certification */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+            <div className={`p-3 rounded-md ${medicalDeclaration.patientCertification ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}`}>
+              {medicalDeclaration.patientCertification ? (
+                <>
+                  <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+                  <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+                  <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                    <li>I have explained this declaration to the patient</li>
+                    <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                    <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                    <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+                  </ul>
+                </>
+              ) : (
+                <p className="text-gray-600 italic">Patient certification not completed</p>
               )}
             </div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Height:</span>
-            <p className="font-medium">{formData.height || '-'} cm</p>
           </div>
-          <div>
-            <span className="text-gray-600">Weight:</span>
-            <p className="font-medium">{formData.weight || '-'} kg</p>
-          </div>
-          <div>
-            <span className="text-gray-600">BMI:</span>
-            <p className="font-medium">
-              {formData.height && formData.weight
-                ? ((formData.weight / ((formData.height / 100) ** 2)).toFixed(1))
-                : '-'}
-            </p>
-          </div>
-          <div>
-            <span className="text-gray-600">Blood Pressure:</span>
-            <p className="font-medium">{formData.bloodPressure || '-'} mmHg</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Pulse:</span>
-            <p className="font-medium">{formData.pulse || '-'} bpm</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Visual Acuity:</span>
-            <p className="font-medium">{formData.visualAcuity || '-'}</p>
-          </div>
-          <div>
-            <span className="text-gray-600">Hearing Test:</span>
-            <p className="font-medium">{formData.hearingTest || '-'}</p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Medical Declaration */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3 border-b pb-2">
-          <h4 className="text-sm font-semibold text-slate-900">Medical Declaration (Past 6 Months)</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('medical-declaration')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        {checkedDeclarations.length > 0 ? (
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            {checkedDeclarations.map((item, index) => (
-              <li key={index} className="text-amber-700">✓ {item}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-gray-600 italic">No conditions declared</p>
-        )}
-      </div>
-
-      {/* Medical History */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3 border-b pb-2">
-          <h4 className="text-sm font-semibold text-slate-900">Medical History</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('medical-history')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        {checkedHistoryItems.length > 0 ? (
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            {checkedHistoryItems.map((item, index) => (
-              <li key={index} className="text-amber-700">✓ {item}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
-        )}
-      </div>
-
-      {/* AMT Score */}
-      <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-slate-900">Abbreviated Mental Test (AMT)</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('amt')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">Total Score</p>
-            <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
+      {/* Medical History of Patient */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Medical History of Patient</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('medical-history')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
-          {amt.score < 8 && (
-            <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
-              <p className="text-sm font-medium text-amber-800">
-                ⚠️ Low AMT score may indicate cognitive impairment
-              </p>
+          {checkedHistoryItems.length > 0 ? (
+            <>
+              <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
+                {checkedHistoryItems.map((item, index) => (
+                  <li key={index} className="text-amber-700">
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      {item.remarks && (
+                        <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                          <span className="font-semibold">Remarks: </span>{item.remarks}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
+          )}
+          
+          {/* Patient Certification */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+            <div className={`p-3 rounded-md ${medicalHistory.patientCertification ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}`}>
+              {medicalHistory.patientCertification ? (
+                <>
+                  <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+                  <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+                  <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                    <li>I have explained this declaration to the patient</li>
+                    <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                    <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                    <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+                  </ul>
+                </>
+              ) : (
+                <p className="text-gray-600 italic">Patient certification not completed</p>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* General Medical Examination */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">General Medical Examination</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('general-medical')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+          <div className="space-y-4">
+            {/* Cardiovascular Assessment */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Cardiovascular Assessment</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Blood Pressure:</span>
+                  <p className="font-medium">{formData.bloodPressure || '-'} mmHg</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Pulse:</span>
+                  <p className="font-medium">{formData.pulse || '-'} bpm</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">S1_S2 Reading:</span>
+                  <p className="font-medium">{formData.s1S2Reading || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Murmurs:</span>
+                  <p className="font-medium">{formData.murmurs || '-'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Vision Assessment */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Vision Assessment</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Optical Aids:</span>
+                  <p className="font-medium">{formData.opticalAids === 'yes' ? 'Yes' : formData.opticalAids === 'no' ? 'No' : '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Visual Acuity:</span>
+                  <p className="font-medium">{formData.visualAcuity || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Near Vision:</span>
+                  <p className="font-medium">
+                    RE: {formData.nearVisionRE || '-'}, LE: {formData.nearVisionLE || '-'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* General Condition */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">General Condition</h4>
+              <div className="text-sm">
+                <span className="text-gray-600">Pass General Condition:</span>
+                <p className={`font-medium inline ml-2 ${formData.passGeneralCondition === 'yes' ? 'text-green-600' : formData.passGeneralCondition === 'no' ? 'text-red-600' : ''}`}>
+                  {formData.passGeneralCondition === 'yes' ? '✓ Yes' : formData.passGeneralCondition === 'no' ? '✗ No' : '-'}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Physical & Mental Health Assessment */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
+            {abnormalities.length > 0 ? (
+              <ul className="list-disc ml-6 space-y-3 text-sm">
+                {abnormalities.map((item, index) => (
+                  <li key={index} className="text-red-700">
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      {item.remarks && (
+                        <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                          <span className="font-semibold">Remarks: </span>{item.remarks}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-600 italic">No abnormalities observed</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Abbreviated Mental Test (AMT) */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Abbreviated Mental Test (AMT)</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('amt')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center gap-8">
+              <div>
+                <p className="text-sm text-gray-600">Result</p>
+                <p className={`text-2xl font-bold ${amt.score >= 8 ? 'text-green-600' : 'text-red-600'}`}>
+                  {amt.score >= 8 ? 'Pass' : 'Fail'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Score</p>
+                <p className="text-3xl font-bold text-blue-700">{amt.score || 0}/10</p>
+              </div>
+            </div>
+            {amt.score < 8 && (
+              <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
+                <p className="text-sm font-medium text-amber-800">
+                  ⚠️ A score of less than 7 suggests cognitive impairment and may require specialist referral for further diagnosis.
+                </p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Vocational Licence Medical Examination */}
-      <div className="mb-6 bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-slate-900">Vocational Licence Medical Examination</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('vocational-xray')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        <div className="space-y-4 text-sm">
-          {/* X-ray Section */}
-          <div>
-            <p className="font-medium text-gray-700 mb-2">X-ray Examination</p>
-            <div className="space-y-2 pl-4">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Vocational Licence Medical Examination</h3>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                onClick={() => onEdit('vocational-xray')}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+          
+          {/* X-ray Examination Section */}
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">X-ray Examination</h4>
+            <div className="space-y-2 text-sm pl-4">
               <div>
                 <span className="text-gray-600">X-ray Required:</span>
                 <p className="font-medium inline ml-2">
@@ -349,7 +506,7 @@ export function DrivingVocationalTpLtaSummary({
                   {formData.vocationalXrayRemarks && (
                     <div>
                       <span className="text-gray-600">Remarks:</span>
-                      <p className="text-gray-700 bg-white p-2 rounded mt-1 whitespace-pre-wrap">
+                      <p className="text-gray-700 bg-gray-50 p-2 rounded mt-1 whitespace-pre-wrap">
                         {formData.vocationalXrayRemarks}
                       </p>
                     </div>
@@ -359,7 +516,10 @@ export function DrivingVocationalTpLtaSummary({
             </div>
           </div>
 
-          {/* Memo Requirements Section */}
+          {/* Medical Conditions Requiring Additional Memo/Report Section */}
+          <div className="pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Conditions Requiring Additional Memo/Report</h4>
+            <div className="text-sm pl-4">
           {(() => {
             const memoRequirements = formData.memoRequirements 
               ? (typeof formData.memoRequirements === 'string' 
@@ -386,22 +546,32 @@ export function DrivingVocationalTpLtaSummary({
 
             return (
               <div>
-                <p className="font-medium text-gray-700 mb-2">Medical Conditions Requiring Additional Documentation</p>
+                {/* <p className="font-medium text-gray-700 mb-2">Medical Conditions Requiring Additional Memo/Report</p> */}
                 <div className="space-y-3 pl-4">
                   {checkedConditions.map((conditionId) => {
                     const memoProvided = formData[`memoProvided_${conditionId}`];
                     const furtherMemoRequired = formData[`furtherMemoRequired_${conditionId}`];
                     const remarks = formData[`memoRemarks_${conditionId}`];
+                    
+                    // Highlight if memo not provided OR further memo required
+                    const needsAttention = memoProvided === 'no' || (memoProvided === 'yes' && furtherMemoRequired === 'yes');
 
                     return (
-                      <div key={conditionId} className="bg-white p-3 rounded border border-gray-200">
+                      <div 
+                        key={conditionId} 
+                        className={`p-3 rounded border ${
+                          needsAttention 
+                            ? 'bg-red-50 border-red-300' 
+                            : 'bg-white border-gray-200'
+                        }`}
+                      >
                         <p className="font-medium text-amber-700 mb-2">
-                          ✓ {MEMO_LABELS[conditionId]}
+                          {MEMO_LABELS[conditionId]}
                         </p>
                         <div className="ml-4 space-y-1 text-xs text-gray-700">
                           <div>
-                            <span className="text-gray-600">Memo Provided:</span>
-                            <span className="ml-2 font-medium">
+                            <span className="text-gray-600">Memo Provided by Patient:</span>
+                            <span className={`ml-2 font-medium ${memoProvided === 'no' ? 'text-red-600' : ''}`}>
                               {memoProvided === 'yes' ? 'Yes' : memoProvided === 'no' ? 'No' : '-'}
                             </span>
                           </div>
@@ -409,14 +579,14 @@ export function DrivingVocationalTpLtaSummary({
                             <>
                               <div>
                                 <span className="text-gray-600">Further Memo Required:</span>
-                                <span className="ml-2 font-medium">
+                                <span className={`ml-2 font-medium ${furtherMemoRequired === 'yes' ? 'text-red-600' : ''}`}>
                                   {furtherMemoRequired === 'yes' ? 'Yes' : furtherMemoRequired === 'no' ? 'No' : '-'}
                                 </span>
                               </div>
                               {remarks && (
                                 <div>
                                   <span className="text-gray-600">Remarks:</span>
-                                  <p className="ml-2 mt-1 bg-gray-50 p-2 rounded whitespace-pre-wrap">
+                                  <p className="ml-2 mt-1 text-xs whitespace-pre-wrap">
                                     {remarks}
                                   </p>
                                 </div>
@@ -431,148 +601,46 @@ export function DrivingVocationalTpLtaSummary({
               </div>
             );
           })()}
-        </div>
-      </div>
-
-      {/* LTA Vocational Assessment */}
-      <div className="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-slate-900">LTA Vocational Licence Assessment</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('lta-vocational')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <span className="text-gray-600">Color Vision:</span>
-              <p className="font-medium">{ltaVocational.colorVision || '-'}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Peripheral Vision:</span>
-              <p className="font-medium">{ltaVocational.peripheralVision || '-'}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Night Vision:</span>
-              <p className="font-medium">{ltaVocational.nightVision || '-'}</p>
             </div>
           </div>
-          {(ltaVocational.cardiovascularCondition || ltaVocational.neurologicalCondition || 
-            ltaVocational.psychiatricCondition || ltaVocational.musculoskeletalCondition) && (
+        </CardContent>
+      </Card>
+
+      {/* Overall Result - Assessment (this was previously mixed with LTA Vocational Assessment) */}
+      <Card>
+        <CardContent className="pt-6 bg-blue-50">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Overall Result of Medical Examination</h3>
+          
+          <div className="space-y-3 text-sm">
             <div>
-              <p className="font-medium text-gray-700 mb-2">Condition Assessments:</p>
-              <div className="space-y-2 pl-4">
-                {ltaVocational.cardiovascularCondition && (
-                  <div>
-                    <span className="text-gray-600">Cardiovascular:</span>
-                    <p className="text-sm">{ltaVocational.cardiovascularCondition}</p>
-                  </div>
-                )}
-                {ltaVocational.neurologicalCondition && (
-                  <div>
-                    <span className="text-gray-600">Neurological:</span>
-                    <p className="text-sm">{ltaVocational.neurologicalCondition}</p>
-                  </div>
-                )}
-                {ltaVocational.psychiatricCondition && (
-                  <div>
-                    <span className="text-gray-600">Psychiatric:</span>
-                    <p className="text-sm">{ltaVocational.psychiatricCondition}</p>
-                  </div>
-                )}
-                {ltaVocational.musculoskeletalCondition && (
-                  <div>
-                    <span className="text-gray-600">Musculoskeletal:</span>
-                    <p className="text-sm">{ltaVocational.musculoskeletalCondition}</p>
-                  </div>
-                )}
+              <span className="text-gray-600">Requires Specialist Review:</span>
+              <p className="font-medium">{assessment.requiresSpecialistReview ? 'Yes' : 'No'}</p>
+            </div>
+            {assessment.requiresSpecialistReview && assessment.specialistType && (
+              <div>
+                <span className="text-gray-600">Specialist Type:</span>
+                <p className="font-medium">{assessment.specialistType}</p>
               </div>
-            </div>
-          )}
-          <div>
-            <span className="text-gray-600">Fit for Vocational Duty:</span>
-            <p className={`font-bold text-lg ${ltaVocational.fitForVocationalDuty ? 'text-green-600' : 'text-red-600'}`}>
-              {ltaVocational.fitForVocationalDuty ? '✓ YES' : '✗ NO'}
-            </p>
-          </div>
-          {ltaVocational.restrictions && (
+            )}
             <div>
-              <span className="text-gray-600">Restrictions/Conditions:</span>
-              <p className="font-medium whitespace-pre-wrap">{ltaVocational.restrictions}</p>
+              <span className="text-gray-600">Remarks:</span>
+              <p className="font-medium whitespace-pre-wrap">{assessment.remarks || '-'}</p>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Assessment */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-slate-900">Medical Practitioner Assessment</h4>
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-600"
-              onClick={() => onEdit('assessment')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-        <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-gray-600">Fit to Drive (TP):</span>
-              <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
-                {assessment.fitToDrive ? '✓ YES' : '✗ NO'}
+          {/* Medical Practitioner Declaration */}
+          <div className="pt-6 border-t border-gray-200 mt-6">
+            <h3 className="font-semibold mb-3">Medical Practitioner Declaration</h3>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                I certify that I have today examined and identified the patient named above:
               </p>
-            </div>
-            <div>
-              <span className="text-gray-600">Fit for Vocational Duty (LTA):</span>
-              <p className={`font-bold text-lg ${assessment.fitForVocationalDuty ? 'text-green-600' : 'text-red-600'}`}>
-                {assessment.fitForVocationalDuty ? '✓ YES' : '✗ NO'}
-              </p>
+              <ul className="mt-3 ml-6 space-y-2 text-sm text-gray-700 list-disc">
+                <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
+                <li>The answers to the questions above are correct to the best of my knowledge.</li>
+              </ul>
             </div>
           </div>
-          <div>
-            <span className="text-gray-600">Requires Specialist Review:</span>
-            <p className="font-medium">{assessment.requiresSpecialistReview ? 'Yes' : 'No'}</p>
-          </div>
-          {assessment.requiresSpecialistReview && assessment.specialistType && (
-            <div>
-              <span className="text-gray-600">Specialist Type:</span>
-              <p className="font-medium">{assessment.specialistType}</p>
-            </div>
-          )}
-          <div>
-            <span className="text-gray-600">Remarks:</span>
-            <p className="font-medium whitespace-pre-wrap">{assessment.remarks || '-'}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Medical Practitioner Declaration */}
-      <div className="pt-6 border-t border-gray-200">
-        <h3 className="font-semibold mb-3">Medical Practitioner Declaration</h3>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <p className="text-sm text-gray-700 leading-relaxed">
-            I certify that I have today examined and identified the patient named above:
-          </p>
-          <ul className="mt-3 ml-6 space-y-2 text-sm text-gray-700 list-disc">
-            <li>He/she has presented his/her identity card, which bears the same name and identification number as on this form.</li>
-            <li>The answers to the questions above are correct to the best of my knowledge.</li>
-          </ul>
-        </div>
-      </div>
         </CardContent>
       </Card>
     </div>
