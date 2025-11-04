@@ -220,8 +220,8 @@ export function Dashboard() {
                 </CardTitle>
                 <CardDescription className="text-red-700">
                   {rejectedSubmissions.length === 1 
-                    ? 'You have a submission that was rejected and needs attention'
-                    : 'You have submissions that were rejected and need attention'}
+                    ? 'You have a submission that was rejected by doctor and needs attention'
+                    : 'You have submissions that were rejected by doctor and need attention'}
                 </CardDescription>
               </div>
             </div>
@@ -264,7 +264,7 @@ export function Dashboard() {
               {rejectedSubmissions.length > 3 && (
                 <Link to="/rejected-submissions">
                   <Button variant="link" className="w-full text-red-700 hover:text-red-800">
-                    View all {rejectedSubmissions.length} rejected submissions →
+                    View all {rejectedSubmissions.length} reports rejected by doctor →
                   </Button>
                 </Link>
               )}
@@ -305,7 +305,7 @@ export function Dashboard() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-2xl text-slate-900">{submissions.length}</span>
-              <span className="text-xs text-slate-500 truncate">All Submissions</span>
+              <span className="text-xs text-slate-500 truncate">All Reports</span>
             </div>
           </div>
         </Card>
@@ -358,7 +358,7 @@ export function Dashboard() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-2xl text-slate-900">{rejectedSubmissions.length}</span>
-              <span className="text-xs text-slate-500 truncate">Rejected</span>
+              <span className="text-xs text-slate-500 truncate">Rejected by Doctor</span>
             </div>
           </div>
         </Card>

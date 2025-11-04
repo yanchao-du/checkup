@@ -127,7 +127,7 @@ export function RejectedSubmissions() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Rejected Submissions</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Reports Rejected by Doctor</h2>
         <p className="text-slate-600">
           {user?.role === 'doctor' 
             ? 'Review submissions you have rejected'
@@ -163,7 +163,7 @@ export function RejectedSubmissions() {
           {sortedRejections.length === 0 ? (
             <div className="text-center py-12">
               <XCircle className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Rejected Submissions Found</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Reports Rejected by Doctor</h3>
               {searchQuery && <p className="text-sm mt-1">Try adjusting your search</p>}
               {!searchQuery && <p className="text-sm mt-1">You haven't rejected any submissions yet</p>}
             </div>
