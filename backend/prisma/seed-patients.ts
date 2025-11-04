@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { generateValidNRIC } from '../src/common/utils/nric-validator';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
