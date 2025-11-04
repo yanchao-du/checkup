@@ -42,6 +42,8 @@ export function PendingApprovals() {
   const [isApproving, setIsApproving] = useState(false);
   const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   useEffect(() => {
     const fetchPendingApprovals = async () => {
@@ -108,6 +110,17 @@ export function PendingApprovals() {
 
     return sortDirection === 'asc' ? comparison : -comparison;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedApprovals.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedApprovals = sortedApprovals.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterExamType]);
 
   const handleApprove = async () => {
     if (!selectedSubmission || !user) return;
@@ -240,7 +253,7 @@ export function PendingApprovals() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedApprovals.map((submission) => (
+                  {paginatedApprovals.map((submission) => (
                     <TableRow 
                       key={submission.id}
                       className="cursor-pointer hover:bg-slate-50"
@@ -304,6 +317,34 @@ export function PendingApprovals() {
                   ))}
                 </TableBody>
               </Table>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-4">
+                  <div className="text-sm text-slate-600">
+                    Showing {startIndex + 1}-{Math.min(endIndex, sortedApprovals.length)} of {sortedApprovals.length} approvals
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <div className="text-sm text-slate-600">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

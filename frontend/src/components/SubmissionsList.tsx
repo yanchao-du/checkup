@@ -37,6 +37,8 @@ export function SubmissionsList() {
   const [filterExamType, setFilterExamType] = useState<string>('all');
   const [sortColumn, setSortColumn] = useState<string>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   const isDoctor = user?.role === 'doctor';
 
@@ -130,6 +132,17 @@ export function SubmissionsList() {
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedSubmissions.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedSubmissions = sortedSubmissions.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, filterExamType]);
 
   return (
     <div className="space-y-6">
@@ -258,7 +271,7 @@ export function SubmissionsList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedSubmissions.map((submission: any) => (
+                  {paginatedSubmissions.map((submission: any) => (
                     <TableRow 
                       key={submission.id}
                       className="cursor-pointer hover:bg-slate-50"
@@ -309,6 +322,34 @@ export function SubmissionsList() {
                   ))}
                 </TableBody>
               </Table>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-4">
+                  <div className="text-sm text-slate-600">
+                    Showing {startIndex + 1}-{Math.min(endIndex, sortedSubmissions.length)} of {sortedSubmissions.length} submissions
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <div className="text-sm text-slate-600">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

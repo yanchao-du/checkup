@@ -69,6 +69,8 @@ export function DraftsList() {
   const [includeDeleted] = useState(false);
   const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   useEffect(() => {
     const fetchDrafts = async () => {
@@ -145,6 +147,17 @@ export function DraftsList() {
 
     return sortDirection === 'asc' ? comparison : -comparison;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedDrafts.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedDrafts = sortedDrafts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterExamType, filterMemoStatus]);
 
   const handleDelete = async () => {
     if (deleteId) {
@@ -282,7 +295,7 @@ export function DraftsList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedDrafts.map((draft) => {
+                  {paginatedDrafts.map((draft) => {
                     const isDeleted = !!draft.deletedAt;
                     const pendingMemo = hasPendingMemos(draft);
                     return (
@@ -358,6 +371,34 @@ export function DraftsList() {
                   })}
                 </TableBody>
               </Table>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-4">
+                  <div className="text-sm text-slate-600">
+                    Showing {startIndex + 1}-{Math.min(endIndex, sortedDrafts.length)} of {sortedDrafts.length} drafts
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <div className="text-sm text-slate-600">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
