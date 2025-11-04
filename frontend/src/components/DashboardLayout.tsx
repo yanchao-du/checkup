@@ -35,11 +35,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
+    { path: '/new-submission', label: 'New Report', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/submissions', label: 'Submitted Reports', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
-    { path: '/rejected-submissions', label: 'Reports Rejected by Doctor', icon: XCircle, roles: ['doctor', 'nurse', 'admin'] },
+    { 
+      path: '/rejected-submissions', 
+      label: user?.role === 'doctor' ? 'Rejected by Me' : 'Rejected by Doctor', 
+      icon: XCircle, 
+      roles: ['doctor', 'nurse', 'admin'] 
+    },
     { path: '/settings', label: 'Settings', icon: Settings, roles: ['nurse', 'admin'] },
   ];
 
