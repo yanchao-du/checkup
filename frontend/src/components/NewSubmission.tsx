@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateNricOrFin, validateEmail, validateSingaporeMobile } from '../lib/validationRules';
+import { validateNricOrFin, validateEmail, validateSingaporeMobile, validatePatientName } from '../lib/validationRules';
 import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
 import { getTodayInSingapore } from './submission-form/utils/date';
@@ -106,6 +106,7 @@ export function NewSubmission() {
   const [patientName, setPatientName] = useState('');
   const [patientNric, setPatientNric] = useState('');
   const [nricError, setNricError] = useState<string | null>(null);
+  const [patientNameError, setPatientNameError] = useState<string | null>(null);
   const [patientDateOfBirth, setPatientDateOfBirth] = useState('');
   const [patientEmail, setPatientEmail] = useState('');
   const [patientMobile, setPatientMobile] = useState('');
@@ -198,6 +199,7 @@ export function NewSubmission() {
       
       // Clear all errors
       setNricError(null);
+      setPatientNameError(null);
       setEmailError(null);
       setMobileError(null);
       setExaminationDateError(null);
@@ -686,6 +688,7 @@ export function NewSubmission() {
     
     // Clear all error states when changing exam type
     setNricError(null);
+    setPatientNameError(null);
     setEmailError(null);
     setMobileError(null);
     setExaminationDateError(null);
@@ -720,8 +723,9 @@ export function NewSubmission() {
     }
     
     // Validate Patient Name
-    if (!patientName.trim()) {
-      toast.error('Patient Name is required');
+    const patientNameValidationError = validatePatientName(patientName);
+    if (patientNameValidationError) {
+      setPatientNameError(patientNameValidationError);
       return false;
     }
     
@@ -1309,12 +1313,6 @@ export function NewSubmission() {
     }
   };
 
-  const isFormValid = examType && patientName && patientNric && 
-    ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
-    ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
-    (examType === 'SIX_MONTHLY_MDW' ? (!!formData.height && !!formData.weight) : true) &&
-    (examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType) ? true : true);
-
   // Helper function to recalculate AMT requirements based on current form data
   const recalculateAMTRequirement = () => {
     if (!drivingLicenseClass || !patientDateOfBirth || !examinationDate) {
@@ -1435,7 +1433,7 @@ export function NewSubmission() {
       <Card>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="examType" className="pt-4">Examination Type *</Label>
+            <Label htmlFor="examType" className="pt-4">Examination Type <span className="text-red-500">*</span></Label>
             <Select value={examType} onValueChange={handleExamTypeChange} name="examType">
               <SelectTrigger id="examType" data-testid="examType">
                 <SelectValue placeholder="Select examination type" />
@@ -1480,7 +1478,7 @@ export function NewSubmission() {
           {/* Clinic Selection - Only show for doctors and nurses */}
           {examType && (user?.role === 'doctor' || user?.role === 'nurse') && clinics.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="clinic">Clinic *</Label>
+              <Label htmlFor="clinic">Clinic <span className="text-red-500">*</span></Label>
               <Select value={selectedClinicId} onValueChange={setSelectedClinicId} name="clinic">
                 <SelectTrigger id="clinic">
                   <SelectValue placeholder="Select clinic" />
@@ -1519,7 +1517,7 @@ export function NewSubmission() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="patientNric">NRIC / FIN *</Label>
+                        <Label htmlFor="patientNric">NRIC / FIN <span className="text-red-500">*</span></Label>
                         {testFin && (
                           <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
                             <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
@@ -1561,7 +1559,7 @@ export function NewSubmission() {
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="patientName">Patient Name *</Label>
+                      <Label htmlFor="patientName">Full Name (as in NRIC/FIN) <span className="text-red-500">*</span></Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
@@ -1570,11 +1568,24 @@ export function NewSubmission() {
                               id="patientName"
                               name="patientName"
                               value={isNameFromApi && !id ? maskName(patientName) : patientName}
-                              onChange={(e) => setPatientName(e.target.value)}
+                              onChange={(e) => {
+                                setPatientName(e.target.value);
+                                // Clear error on change
+                                if (patientNameError) setPatientNameError(null);
+                              }}
+                              onBlur={(e) => {
+                                // Trim whitespace
+                                const trimmed = e.target.value.trim();
+                                setPatientName(trimmed);
+                                // Validate
+                                const error = validatePatientName(trimmed);
+                                setPatientNameError(error);
+                              }}
                               placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
                               readOnly={isNameFromApi}
-                              className={isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                              className={`${isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} ${patientNameError ? 'border-red-500' : ''}`}
                             />
+                            {patientNameError && !isNameFromApi && <InlineError>{patientNameError}</InlineError>}
                             {isNameFromApi && !id && (
                               <p className="text-xs text-slate-600 flex items-center gap-1">
                                 <span className="inline-block w-1 h-1 rounded-full bg-green-500"></span>
@@ -1592,14 +1603,30 @@ export function NewSubmission() {
                           />
                         )
                       ) : (
-                        <Input
-                          id="patientName"
-                          name="patientName"
-                          value={patientName}
-                          onChange={(e) => setPatientName(e.target.value)}
-                          placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
-                          readOnly={false}
-                        />
+                        <>
+                          <Input
+                            id="patientName"
+                            name="patientName"
+                            value={patientName}
+                            onChange={(e) => {
+                              setPatientName(e.target.value);
+                              // Clear error on change
+                              if (patientNameError) setPatientNameError(null);
+                            }}
+                            onBlur={(e) => {
+                              // Trim whitespace
+                              const trimmed = e.target.value.trim();
+                              setPatientName(trimmed);
+                              // Validate
+                              const error = validatePatientName(trimmed);
+                              setPatientNameError(error);
+                            }}
+                            placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
+                            readOnly={false}
+                            className={patientNameError ? 'border-red-500' : ''}
+                          />
+                          {patientNameError && <InlineError>{patientNameError}</InlineError>}
+                        </>
                       )}
                     </div>
                     </div>
@@ -1700,7 +1727,7 @@ export function NewSubmission() {
                       </div>
                     )}
                     <div className="space-y-2">
-                      <Label htmlFor="examinationDate">Examination Date *</Label>
+                      <Label htmlFor="examinationDate">Examination Date <span className="text-red-500">*</span></Label>
                       <Input
                         id="examinationDate"
                         name="examinationDate"
@@ -2493,7 +2520,7 @@ export function NewSubmission() {
 
       {examType && (
         <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={handleSaveDraft} disabled={!isFormValid || isSaving}>
+          <Button variant="outline" onClick={handleSaveDraft} disabled={!examType || isSaving}>
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save as Draft'}
           </Button>
@@ -2523,7 +2550,7 @@ export function NewSubmission() {
           
           {user?.role === 'nurse' && isRouteForApproval && (
             <div className="space-y-2 px-6 pb-4">
-              <Label htmlFor="assignedDoctor">Assign to Doctor *</Label>
+              <Label htmlFor="assignedDoctor">Assign to Doctor <span className="text-red-500">*</span></Label>
               <Select value={assignedDoctorId} onValueChange={setAssignedDoctorId}>
                 <SelectTrigger id="assignedDoctor" data-testid="assignedDoctor">
                   <SelectValue placeholder="Select a doctor" />

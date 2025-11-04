@@ -16,7 +16,7 @@ const LICENCE_CATEGORIES = {
 export function DrivingLicenceClassField({ value, onChange, required = true }: DrivingLicenceClassFieldProps) {
   return (
     <div className="space-y-2">
-      <Label htmlFor="drivingLicenseClass">Class of Driving Licence {required && '*'}</Label>
+      <Label htmlFor="drivingLicenseClass">Class of Driving Licence {required && <span className="text-red-500">*</span>}</Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger id="drivingLicenseClass">
           <SelectValue placeholder="Select driving licence class" />

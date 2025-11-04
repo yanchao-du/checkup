@@ -297,7 +297,7 @@ export function ClinicManagement() {
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Clinic Name *</Label>
+                <Label htmlFor="name">Clinic Name <span className="text-red-500">*</span></Label>
                 <Input
                   id="name"
                   value={formData.name}

@@ -57,7 +57,7 @@ export function SetDefaultDoctorDialog({ open, doctors, onClose, onSave }: SetDe
         </AlertDialogHeader>
         
         <div className="space-y-2 px-6 pb-4">
-          <Label htmlFor="defaultDoctor">Select Default Doctor *</Label>
+          <Label htmlFor="defaultDoctor">Select Default Doctor <span className="text-red-500">*</span></Label>
           <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
             <SelectTrigger id="defaultDoctor" data-testid="defaultDoctor">
               <SelectValue placeholder="Select a doctor" />

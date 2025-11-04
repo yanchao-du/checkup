@@ -84,6 +84,76 @@ export function validateNricOrFin(value: string, validateNRIC: (nric: string) =>
   return null;
 }
 
+/**
+ * Validates patient name input
+ * 
+ * Validation Rules:
+ * - Minimum length: 2 characters (after trimming whitespace)
+ * - Maximum length: 120 characters (after trimming whitespace)
+ * - Allowed characters:
+ *   * Letters: A-Z, a-z (both uppercase and lowercase)
+ *   * Spaces (but not leading/trailing - they are trimmed)
+ *   * Hyphens: -
+ *   * Apostrophes: '
+ *   * Periods: .
+ *   * Parentheses: ( )
+ * 
+ * Regex Pattern: ^[A-Za-z\s'\.\-\(\)]{2,120}$
+ * Breakdown:
+ *   ^                    - Start of string
+ *   [A-Za-z\s'\.\-\(\)]  - Character class allowing:
+ *                          A-Z (uppercase letters)
+ *                          a-z (lowercase letters)
+ *                          \s (whitespace/spaces)
+ *                          ' (apostrophe)
+ *                          \. (period/dot - escaped)
+ *                          \- (hyphen - escaped)
+ *                          \( (left parenthesis - escaped)
+ *                          \) (right parenthesis - escaped)
+ *   {2,120}              - Length must be between 2 and 120 characters
+ *   $                    - End of string
+ * 
+ * Examples of valid names:
+ * - "John Smith"
+ * - "Mary O'Brien"
+ * - "Jean-Paul Dubois"
+ * - "Dr. Jane Doe"
+ * - "Anne-Marie D'Angelo"
+ * - "John Smith (Alias)"
+ * - "李明 (Lee Ming)"
+ * 
+ * @param value - The patient name to validate
+ * @returns Error message string if invalid, null if valid
+ */
+export function validatePatientName(value: string): string | null {
+  if (!value) {
+    return 'Patient name is required';
+  }
+  
+  // Trim whitespace from the value
+  const trimmedValue = value.trim();
+  
+  // Check minimum length
+  if (trimmedValue.length < 2) {
+    return 'Patient name must be at least 2 characters';
+  }
+  
+  // Check maximum length
+  if (trimmedValue.length > 120) {
+    return 'Patient name must not exceed 120 characters';
+  }
+  
+  // Regex: ^[A-Za-z\s'\.\-\(\)]+$
+  // Allows letters, spaces, hyphens, apostrophes, periods, and parentheses
+  const nameRegex = /^[A-Za-z\s'\.\-\(\)]+$/;
+  
+  if (!nameRegex.test(trimmedValue)) {
+    return 'Patient name can only contain letters, spaces, hyphens, apostrophes, periods, and parentheses';
+  }
+  
+  return null;
+}
+
 export function validateEmail(value: string): string | null {
   if (!value) return null; // Optional field
   // Regex: ^[^\s@]+@[^\s@]+\.[^\s@]+$
