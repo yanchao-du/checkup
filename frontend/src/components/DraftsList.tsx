@@ -166,7 +166,7 @@ export function DraftsList() {
     <div className="space-y-6">
       <div>
         <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Draft Submissions</h2>
-        <p className="text-slate-600">Resume editing your saved medical exam drafts</p>
+        <p className="text-slate-600">Resume editing your saved medical examination drafts</p>
       </div>
 
       <Card>
@@ -265,7 +265,7 @@ export function DraftsList() {
                         onClick={() => handleSort('examType')}
                         className="h-8 px-2 hover:bg-slate-100 font-semibold"
                       >
-                        Exam Type
+                        Examination Type
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>

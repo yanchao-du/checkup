@@ -111,7 +111,7 @@ export function PendingApprovals() {
       
       // Remove from pending list
       setPendingApprovals(pendingApprovals.filter(s => s.id !== selectedSubmission.id));
-      toast.success('Medical exam approved and submitted successfully');
+      toast.success('Medical examination approved and submitted successfully');
       setSelectedSubmission(null);
     } catch (error) {
       console.error('Failed to approve submission:', error);
@@ -132,7 +132,7 @@ export function PendingApprovals() {
       
       // Remove from pending list
       setPendingApprovals(pendingApprovals.filter(s => s.id !== selectedSubmission.id));
-      toast.success('Medical exam rejected and returned to drafts');
+      toast.success('Medical examination rejected and returned to drafts');
       setSelectedSubmission(null);
     } catch (error) {
       console.error('Failed to reject submission:', error);
@@ -157,7 +157,7 @@ export function PendingApprovals() {
     <div className="space-y-6">
       <div>
         <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Pending Approvals</h2>
-        <p className="text-slate-600">Review and approve medical exam submissions</p>
+        <p className="text-slate-600">Review and approve medical examination submissions</p>
       </div>
 
       <Card>
@@ -223,7 +223,7 @@ export function PendingApprovals() {
                         onClick={() => handleSort('examType')}
                         className="h-8 px-2 hover:bg-slate-100 font-semibold"
                       >
-                        Exam Type
+                        Examination Type
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>
@@ -324,18 +324,18 @@ export function PendingApprovals() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isApproving ? 'Approve Medical Exam?' : 'Reject Medical Exam?'}
+              {isApproving ? 'Approve Medical Examination?' : 'Reject Medical Examination?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isApproving ? (
                 <>
-                  You are about to approve and submit the medical exam for <strong>{getDisplayName(selectedSubmission?.patientName || '', selectedSubmission?.examType || '', selectedSubmission?.status)}</strong> to the relevant government agency.
+                  You are about to approve and submit the medical examination for <strong>{getDisplayName(selectedSubmission?.patientName || '', selectedSubmission?.examType || '', selectedSubmission?.status)}</strong> to the relevant government agency.
                   <br /><br />
                   This action will officially submit the results and cannot be undone.
                 </>
               ) : (
                 <>
-                  You are about to reject the medical exam for <strong>{getDisplayName(selectedSubmission?.patientName || '', selectedSubmission?.examType || '', selectedSubmission?.status)}</strong>.
+                  You are about to reject the medical examination for <strong>{getDisplayName(selectedSubmission?.patientName || '', selectedSubmission?.examType || '', selectedSubmission?.status)}</strong>.
                   <br /><br />
                   This will return the submission to drafts for revision.
                 </>

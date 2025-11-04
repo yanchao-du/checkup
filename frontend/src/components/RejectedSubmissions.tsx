@@ -197,7 +197,7 @@ export function RejectedSubmissions() {
                       onClick={() => handleSort('examType')}
                       className="h-8 px-2 hover:bg-slate-100 font-semibold"
                     >
-                      Exam Type
+                      Examination Type
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>

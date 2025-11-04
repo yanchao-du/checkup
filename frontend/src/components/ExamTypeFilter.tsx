@@ -18,7 +18,7 @@ export function ExamTypeFilter({ value, onValueChange }: ExamTypeFilterProps) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All Exam Types</SelectItem>
+        <SelectItem value="all">All Examination Types</SelectItem>
         <SelectItem value="SIX_MONTHLY_MDW">
           MDW Six-monthly (MOM)
         </SelectItem>

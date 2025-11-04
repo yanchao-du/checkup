@@ -232,7 +232,7 @@ export function SubmissionsList() {
                       className="cursor-pointer hover:bg-slate-50 select-none"
                       onClick={() => handleSort('examType')}
                     >
-                      Exam Type{getSortIcon('examType')}
+                      Examination Type{getSortIcon('examType')}
                     </TableHead>
                     {!isDoctor && (
                       <TableHead 

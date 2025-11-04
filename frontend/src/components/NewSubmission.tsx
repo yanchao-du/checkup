@@ -1295,7 +1295,7 @@ export function NewSubmission() {
           } else if (user.role === 'doctor') {
             // Doctor submitting directly to agency
             const submitted = await submissionsApi.submitForApproval(id);
-            toast.success('Medical exam submitted successfully');
+            toast.success('Medical examination submitted successfully');
             navigate(`/acknowledgement/${submitted.id}`, { replace: true });
           } else {
             toast.success('Submission updated successfully');
@@ -1306,7 +1306,7 @@ export function NewSubmission() {
           const created = await submissionsApi.create(submissionData);
 
           if (user.role === 'doctor' || !isRouteForApproval) {
-            toast.success('Medical exam submitted successfully');
+            toast.success('Medical examination submitted successfully');
             navigate(`/acknowledgement/${created.id}`, { replace: true });
           } else {
             toast.success('Routed for approval successfully');
@@ -1315,7 +1315,7 @@ export function NewSubmission() {
       }
     } catch (error) {
       console.error('Failed to submit:', error);
-      toast.error('Failed to submit medical exam');
+      toast.error('Failed to submit medical examination');
       setHasUnsavedChanges(true); // Restore unsaved changes flag on error
     } finally {
       setIsSaving(false);
@@ -1448,10 +1448,10 @@ export function NewSubmission() {
       <Card>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="examType" className="pt-4">Exam Type *</Label>
+            <Label htmlFor="examType" className="pt-4">Examination Type *</Label>
             <Select value={examType} onValueChange={handleExamTypeChange} name="examType">
               <SelectTrigger id="examType" data-testid="examType">
-                <SelectValue placeholder="Select exam type" />
+                <SelectValue placeholder="Select examination type" />
               </SelectTrigger>
               <SelectContent>
                 {examTypes.map((type) => (
@@ -2496,14 +2496,14 @@ export function NewSubmission() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isRouteForApproval ? 'Route for Approval?' : 'Submit Medical Exam?'}
+              {isRouteForApproval ? 'Route for Approval?' : 'Submit Medical Examination?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isRouteForApproval 
-                ? 'This will send the medical exam to a doctor for review and approval before submission.'
+                ? 'This will send the medical examination to a doctor for review and approval before submission.'
                 : user?.role === 'doctor'
-                ? 'This will submit the medical exam results to the relevant government agency. This action cannot be undone.'
-                : 'This will submit the medical exam results. Please ensure all information is accurate.'}
+                ? 'This will submit the medical examination results to the relevant government agency. This action cannot be undone.'
+                : 'This will submit the medical examination results. Please ensure all information is accurate.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           

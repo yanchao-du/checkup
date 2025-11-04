@@ -150,7 +150,7 @@ export function ViewSubmission() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">
-          <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Exam Details</h2>
+          <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examination Details</h2>
           <p className="text-slate-600">View submission information</p>
         </div>
         <Badge
@@ -439,7 +439,7 @@ export function ViewSubmission() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {submission.status === 'submitted' ? 'Agency and Exam Information' : 'Exam Information'}
+                  {submission.status === 'submitted' ? 'Agency and Examination Information' : 'Examination Information'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -462,7 +462,7 @@ export function ViewSubmission() {
                     </div>
                   )}
                   <div>
-                    <p className="text-sm text-slate-500">Exam Category</p>
+                    <p className="text-sm text-slate-500">Examination Category</p>
                     <p className="text-slate-900 text-sm">
                       {formatExamTypeFull(submission.examType)}
                     </p>
