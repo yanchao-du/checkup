@@ -49,7 +49,7 @@ export function AssignedToMe() {
     setClaimingId(id);
     try {
       await submissionsApi.claimSubmission(id);
-      // Navigate to draft editor for in_progress submissions
+      // Navigate to draft editor after claiming
       navigate(`/draft/${id}`);
     } catch (err: any) {
       console.error('Failed to claim submission:', err);
@@ -60,7 +60,7 @@ export function AssignedToMe() {
   };
 
   const handleView = (id: string) => {
-    // Navigate to draft editor for in_progress submissions
+    // Just navigate to draft editor without claiming (silent)
     navigate(`/draft/${id}`);
   };
 
@@ -81,7 +81,7 @@ export function AssignedToMe() {
             Assigned to Me
           </h2>
           <p className="text-muted-foreground mt-1">
-            Collaborative drafts assigned to you for review or completion
+            Collaborative drafts assigned to you. Click <strong>Open</strong> to view/edit, or <strong>Claim</strong> to acknowledge and start working.
           </p>
         </div>
         <Button
