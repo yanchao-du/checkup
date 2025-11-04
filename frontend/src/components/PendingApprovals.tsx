@@ -9,7 +9,7 @@ import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { CheckCircle, Eye, Clock, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { CheckCircle, Eye, Clock, Search, ArrowUp, ArrowDown, ArrowUpDown, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { ExamTypeFilter } from './ExamTypeFilter';
 import {
   Table,
@@ -326,13 +326,36 @@ export function PendingApprovals() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      title="First page"
+                    >
+                      <ChevronsLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
                     >
                       Previous
                     </Button>
-                    <div className="text-sm text-slate-600">
-                      Page {currentPage} of {totalPages}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-slate-600">Page</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={totalPages}
+                        value={currentPage}
+                        onChange={(e) => {
+                          const page = parseInt(e.target.value);
+                          if (page >= 1 && page <= totalPages) {
+                            setCurrentPage(page);
+                          }
+                        }}
+                        className="w-16 h-8 text-center"
+                      />
+                      <span className="text-sm text-slate-600">of {totalPages}</span>
                     </div>
                     <Button
                       variant="outline"
@@ -341,6 +364,15 @@ export function PendingApprovals() {
                       disabled={currentPage === totalPages}
                     >
                       Next
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      title="Last page"
+                    >
+                      <ChevronsRight className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
