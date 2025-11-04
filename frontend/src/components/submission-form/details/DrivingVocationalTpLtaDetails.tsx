@@ -240,7 +240,11 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-600">Blood Pressure:</span>
-              <p className="font-medium">{data.bloodPressure || '-'} mmHg</p>
+              <p className="font-medium">
+                {data.systolic && data.diastolic 
+                  ? `${data.systolic}/${data.diastolic}` 
+                  : data.bloodPressure || '-'} mmHg
+              </p>
             </div>
             <div>
               <span className="text-gray-600">Pulse:</span>

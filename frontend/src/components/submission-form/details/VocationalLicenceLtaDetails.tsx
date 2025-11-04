@@ -90,7 +90,11 @@ export function VocationalLicenceLtaDetails({ submission }: VocationalLicenceLta
           </div>
           <div>
             <span className="text-gray-600">Blood Pressure:</span>
-            <p className="font-medium">{data.bloodPressure || '-'} mmHg</p>
+            <p className="font-medium">
+              {data.systolic && data.diastolic 
+                ? `${data.systolic}/${data.diastolic}` 
+                : data.bloodPressure || '-'} mmHg
+            </p>
           </div>
           <div>
             <span className="text-gray-600">Pulse:</span>

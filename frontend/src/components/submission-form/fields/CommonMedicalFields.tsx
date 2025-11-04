@@ -12,6 +12,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { VisualAcuityField } from './VisualAcuityField';
 import { AbnormalityChecklistField } from './AbnormalityChecklistField';
+import { BloodPressureField } from './BloodPressureField';
 import { useEffect, useState } from 'react';
 
 interface CommonMedicalFieldsProps {
@@ -21,6 +22,7 @@ interface CommonMedicalFieldsProps {
   hideHeightWeightBmi?: boolean;
   showAbnormalityChecklist?: boolean;
   onValidate?: (field: string, error: string) => void;
+  isDriverExam?: boolean; // New prop to indicate if it's a driver exam
 }
 
 export function CommonMedicalFields({ 
@@ -30,8 +32,20 @@ export function CommonMedicalFields({
   hideHeightWeightBmi = false, 
   showAbnormalityChecklist = false,
   onValidate,
+  isDriverExam = false, // Default to false for backward compatibility
 }: CommonMedicalFieldsProps) {
   const [bmi, setBmi] = useState<string>('');
+
+  // Parse existing blood pressure format "120/80" into separate fields if needed
+  useEffect(() => {
+    if (formData.bloodPressure && !formData.systolic && !formData.diastolic) {
+      const parts = formData.bloodPressure.split('/');
+      if (parts.length === 2) {
+        onChange('systolic', parts[0].trim());
+        onChange('diastolic', parts[1].trim());
+      }
+    }
+  }, []);
 
   // Auto-calculate BMI when height or weight changes
   useEffect(() => {
@@ -101,25 +115,34 @@ export function CommonMedicalFields({
       <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
         <h3 className="text-sm font-semibold text-gray-700">Cardiovascular Assessment</h3>
         
-        {/* Blood Pressure */}
-        <div>
-          <Label htmlFor="bloodPressure">Blood Pressure (mmHg) <span className="text-red-500">*</span></Label>
-          <Input
-            id="bloodPressure"
-            type="text"
-            placeholder="e.g., 120/80"
-            value={formData.bloodPressure || ''}
-            onChange={(e) => onChange('bloodPressure', e.target.value)}
-            onBlur={(e) => {
-              if (e.target.value.trim() && errors.bloodPressure) {
-                onValidate?.('bloodPressure', '');
-              }
-            }}
-            className={errors.bloodPressure ? 'border-red-500' : ''}
+        {/* Blood Pressure - Use separate fields for driver exams */}
+        {isDriverExam ? (
+          <BloodPressureField
+            systolic={formData.systolic || ''}
+            diastolic={formData.diastolic || ''}
+            onSystolicChange={(value) => onChange('systolic', value)}
+            onDiastolicChange={(value) => onChange('diastolic', value)}
           />
-          {errors.bloodPressure && <InlineError>{errors.bloodPressure}</InlineError>}
-          <p className="text-xs text-gray-500 mt-1">Format: systolic/diastolic (e.g., 120/80)</p>
-        </div>
+        ) : (
+          <div>
+            <Label htmlFor="bloodPressure">Blood Pressure (mmHg) <span className="text-red-500">*</span></Label>
+            <Input
+              id="bloodPressure"
+              type="text"
+              placeholder="e.g., 120/80"
+              value={formData.bloodPressure || ''}
+              onChange={(e) => onChange('bloodPressure', e.target.value)}
+              onBlur={(e) => {
+                if (e.target.value.trim() && errors.bloodPressure) {
+                  onValidate?.('bloodPressure', '');
+                }
+              }}
+              className={errors.bloodPressure ? 'border-red-500' : ''}
+            />
+            {errors.bloodPressure && <InlineError>{errors.bloodPressure}</InlineError>}
+            <p className="text-xs text-gray-500 mt-1">Format: systolic/diastolic (e.g., 120/80)</p>
+          </div>
+        )}
 
         {/* Pulse */}
         <div>

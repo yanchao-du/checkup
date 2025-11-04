@@ -197,7 +197,11 @@ export function VocationalLicenceLtaSummary({
           </div>
           <div>
             <span className="text-gray-600">Blood Pressure:</span>
-            <p className="font-medium">{formData.bloodPressure || '-'} mmHg</p>
+            <p className="font-medium">
+              {formData.systolic && formData.diastolic 
+                ? `${formData.systolic}/${formData.diastolic}` 
+                : formData.bloodPressure || '-'} mmHg
+            </p>
           </div>
           <div>
             <span className="text-gray-600">Pulse:</span>

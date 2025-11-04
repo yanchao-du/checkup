@@ -2,9 +2,9 @@ export function validateSystolic(value: string): string | null {
   if (!value) return null;
   const num = Number(value);
   // Regex: ^[0-9]{2,3}$ - Must be 2-3 digits only (no decimals, letters, or special chars)
-  // Range: 50-250 mmHg (typical systolic blood pressure range)
-  if (!/^[0-9]{2,3}$/.test(value) || num < 50 || num > 250) {
-    return 'Systolic (high) must be 2-3 digits, between 50 and 250.';
+  // Range: 50-300 mmHg (systolic blood pressure range)
+  if (!/^[0-9]{2,3}$/.test(value) || num < 50 || num > 300) {
+    return 'Please enter a value between 50 and 300 mmHg.';
   }
   return null;
 }
@@ -13,10 +13,32 @@ export function validateDiastolic(value: string): string | null {
   if (!value) return null;
   const num = Number(value);
   // Regex: ^[0-9]{2,3}$ - Must be 2-3 digits only (no decimals, letters, or special chars)
-  // Range: 30-150 mmHg (typical diastolic blood pressure range)
-  if (!/^[0-9]{2,3}$/.test(value) || num < 30 || num > 150) {
-    return 'Diastolic (low) must be 2-3 digits, between 30 and 150.';
+  // Range: 30-200 mmHg (diastolic blood pressure range)
+  if (!/^[0-9]{2,3}$/.test(value) || num < 30 || num > 200) {
+    return 'Please enter a value between 30 and 200 mmHg.';
   }
+  return null;
+}
+
+export function validateBloodPressure(systolic: string, diastolic: string): string | null {
+  // First validate individual values
+  const systolicError = validateSystolic(systolic);
+  const diastolicError = validateDiastolic(diastolic);
+  
+  if (systolicError) return systolicError;
+  if (diastolicError) return diastolicError;
+  
+  // Check if both are provided
+  if (!systolic || !diastolic) return null;
+  
+  // Validate that systolic is higher than diastolic
+  const systolicNum = Number(systolic);
+  const diastolicNum = Number(diastolic);
+  
+  if (systolicNum <= diastolicNum) {
+    return 'Systolic pressure must be higher than diastolic pressure.';
+  }
+  
   return null;
 }
 export function validateWeight(value: string): string | null {
