@@ -1484,9 +1484,6 @@ export function NewSubmission() {
                   ))}
                 </SelectContent>
               </Select>
-              {selectedClinicId && clinics.find(c => c.id === selectedClinicId)?.isPrimary && (
-                <p className="text-xs text-blue-600">Primary clinic</p>
-              )}
             </div>
           )}
 
