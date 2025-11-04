@@ -38,7 +38,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/new-submission', label: 'New Report', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/submissions', label: 'Submitted Reports', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
+    { 
+      path: '/pending-approvals', 
+      label: user?.role === 'doctor' ? 'Pending My Approval' : 'Pending Doctor Approval', 
+      icon: CheckCircle, 
+      roles: ['doctor', 'admin'] 
+    },
     { 
       path: '/rejected-submissions', 
       label: user?.role === 'doctor' ? 'Rejected by Me' : 'Rejected by Doctor', 
