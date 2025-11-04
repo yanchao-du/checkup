@@ -1476,14 +1476,20 @@ export function NewSubmission() {
                     <SelectItem key={clinic.id} value={clinic.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{clinic.name}</span>
-                        <span className="text-xs text-slate-500">
-                          {[clinic.hciCode, clinic.phone].filter(Boolean).join(' • ')}
-                        </span>
+                        {clinic.hciCode && (
+                          <span className="text-xs text-slate-500">HCI: {clinic.hciCode}</span>
+                        )}
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {selectedClinicId && (() => {
+                const selectedClinic = clinics.find(c => c.id === selectedClinicId);
+                return selectedClinic?.phone && (
+                  <p className="text-sm text-slate-600">Contact: {selectedClinic.phone}</p>
+                );
+              })()}
             </div>
           )}
 
