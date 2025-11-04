@@ -305,7 +305,7 @@ export function Dashboard() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-2xl text-slate-900">{submissions.length}</span>
-              <span className="text-xs text-slate-500 truncate">Total Submissions</span>
+              <span className="text-xs text-slate-500 truncate">All Submissions</span>
             </div>
           </div>
         </Card>
@@ -331,7 +331,7 @@ export function Dashboard() {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-2xl text-slate-900">{submissions.filter(s => s.status === 'submitted').length}</span>
-                <span className="text-xs text-slate-500 truncate">Submitted</span>
+                <span className="text-xs text-slate-500 truncate">Approved & Sent</span>
               </div>
             </div>
           </Card>
