@@ -15,6 +15,7 @@ import {
   FileEdit, 
   CheckCircle,
   XCircle,
+  UserCheck,
   Settings,
   LogOut
 } from 'lucide-react';
@@ -36,6 +37,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/new-submission', label: 'New Report', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
+    { 
+      path: '/assigned-to-me', 
+      label: 'Assigned to Me', 
+      icon: UserCheck, 
+      roles: ['doctor', 'nurse', 'admin'] 
+    },
     { 
       path: '/pending-approvals', 
       label: user?.role === 'doctor' ? 'Pending My Approval' : 'Pending Doctor Approval', 

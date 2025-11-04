@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard';
 import { NewSubmission } from './components/NewSubmission';
 import { SubmissionsList } from './components/SubmissionsList';
 import { DraftsList } from './components/DraftsList';
+import { AssignedToMe } from './components/AssignedToMe';
 import { PendingApprovals } from './components/PendingApprovals';
 import { RejectedSubmissions } from './components/RejectedSubmissions';
 import { ViewSubmission } from './components/ViewSubmission';
@@ -78,6 +79,14 @@ function AppRoutes() {
                   <Route path="/new-submission" element={<NewSubmission />} />
                   <Route path="/submissions" element={<SubmissionsList />} />
                   <Route path="/drafts" element={<DraftsList />} />
+                  <Route 
+                    path="/assigned-to-me" 
+                    element={
+                      <RoleProtectedRoute allowedRoles={['doctor', 'nurse', 'admin']}>
+                        <AssignedToMe />
+                      </RoleProtectedRoute>
+                    } 
+                  />
                   <Route 
                     path="/pending-approvals" 
                     element={

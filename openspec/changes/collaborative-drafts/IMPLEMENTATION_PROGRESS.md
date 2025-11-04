@@ -205,56 +205,72 @@ All assignment operations logged:
 
 ---
 
-## 🔲 Phase 3: Frontend UI (IN PROGRESS)
+## � Phase 3: Frontend UI (IN PROGRESS)
 
-### 3.1 Status Constants & Utilities
+### 3.1 Status Constants & Utilities ✅ COMPLETED
 
-**Files to Update**:
-- `frontend/src/constants/` or wherever status constants are defined
-- Add `in_progress` status mapping
-- Add status badge colors/labels
+**Files Updated**:
+- ✅ `frontend/src/lib/badge-utils.ts`
+- ✅ Added `in_progress` to `SubmissionStatus` type
+- ✅ Updated `getSubmissionStatusBadgeVariant()` to return "info" (blue) for `in_progress`
+- ✅ Updated `getSubmissionStatusLabel()` to return "In Progress" for `in_progress`
 
 **Status Badge Design**:
-- `draft` - Gray "Draft"
-- `in_progress` - Blue "In Progress" ⬅️ NEW
-- `pending_approval` - Yellow "Pending Approval"
-- `submitted` - Green "Submitted"
-- `rejected` - Red "Rejected"
+- `draft` - Gray "Draft" ✅
+- `in_progress` - Blue "In Progress" ✅ NEW
+- `pending_approval` - Yellow "Pending Approval" ✅
+- `submitted` - Green "Submitted" ✅
+- `rejected` - Red "Rejected" ✅
 
 ---
 
-### 3.2 Assignment Dialog Component
+### 3.2 Assignment Dialog Component ✅ COMPLETED
 
-**File to Create**: `frontend/src/components/AssignmentDialog.tsx`
+**File Created**: `frontend/src/components/AssignmentDialog.tsx`
 
-**Requirements**:
-- Modal dialog for assigning submissions
-- Dropdown to select doctor or nurse from clinic
-- Optional note/message textarea
-- "Cancel" and "Assign" buttons
-- Loading state during API call
-- Error handling
+**Features Implemented**:
+- ✅ Modal dialog for assigning submissions
+- ✅ Role selector (Doctor/Nurse) with automatic default to opposite of current user
+- ✅ Dropdown to select specific doctor or nurse from clinic
+- ✅ Optional note/message textarea (visible in timeline)
+- ✅ "Cancel" and "Assign" buttons with proper states
+- ✅ Loading states during API calls (user list load, assignment)
+- ✅ Error handling with alert messages
+- ✅ Assignment summary preview
+- ✅ Shows MCR numbers for doctors in dropdown
 
 **Props**:
 ```typescript
 {
   isOpen: boolean;
   onClose: () => void;
-  submissionId: string;
-  currentStatus: SubmissionStatus;
+  submission: MedicalSubmission;
+  currentUserRole: UserRole;
   onAssigned: (submission: MedicalSubmission) => void;
 }
 ```
 
 **API Integration**:
-- GET `/users?role=doctor,nurse&clinicId=X` to get assignable users
-- POST `/submissions/:id/assign` with `{ assignToId, note }`
+- ✅ Uses `usersApi.getDoctors()` and `usersApi.getNurses()` to get assignable users
+- ✅ Calls `submissionsApi.assignSubmission(id, { assignToId, note })`
 
 ---
 
-### 3.3 "Assigned to Me" View
+### 3.3 Submissions Service Enhancement ✅ COMPLETED
 
-**File to Update**: `frontend/src/pages/Submissions.tsx` (or wherever submissions list is)
+**File Updated**: `frontend/src/services/submissions.service.ts`
+
+**New Methods Added**:
+- ✅ `getAssignedToMe()` - GET `/submissions/assigned-to-me`
+- ✅ `assignSubmission(id, data)` - POST `/submissions/:id/assign`
+- ✅ `claimSubmission(id)` - POST `/submissions/:id/claim`
+- ✅ `submitCollaborativeDraft(id)` - POST `/submissions/:id/submit-collaborative`
+
+---
+
+### 3.3 "Assigned to Me" View 🔄 IN PROGRESS
+
+**File to Update**: `frontend/src/pages/Submissions.tsx` or similar
 
 **Requirements**:
 - New tab: "Assigned to Me" alongside "All", "Drafts", "Pending Approval"
@@ -273,7 +289,7 @@ All assignment operations logged:
 
 ---
 
-### 3.4 Form Editor Actions
+### 3.4 Form Editor Actions 🔲 TODO
 
 **File to Update**: `frontend/src/components/NewSubmission.tsx`
 
@@ -301,7 +317,7 @@ All assignment operations logged:
 
 ---
 
-### 3.5 Status Badges & UI Indicators
+### 3.5 Status Badges & UI Indicators 🔲 TODO
 
 **Files to Update**:
 - Submission list components
@@ -327,7 +343,7 @@ All assignment operations logged:
 
 ---
 
-### 3.6 Timeline/Activity Log
+### 3.6 Timeline/Activity Log 🔲 TODO
 
 **File to Update**: Wherever submission history/audit trail is displayed
 
@@ -417,10 +433,17 @@ All assignment operations logged:
    - Frontend type definitions
    - Proposal document
 
+2. ✅ `feat: Add collaborative draft frontend components` (commit: 3258bca)
+   - Badge utilities for in_progress status
+   - AssignmentDialog component
+   - Submissions service collaborative methods
+   - Implementation progress documentation
+
 **Next Commits** (planned):
-2. 🔲 `feat: Add collaborative draft frontend UI` - UI components and views
-3. 🔲 `test: Add collaborative draft tests` - Backend and E2E tests
-4. 🔲 `docs: Document collaborative draft workflow` - Documentation updates
+3. � `feat: Add Assigned to Me view and form actions` - Currently in progress
+4. 🔲 `feat: Add status indicators and timeline updates` - UI enhancements
+5. 🔲 `test: Add collaborative draft tests` - Backend and E2E tests
+6. 🔲 `docs: Document collaborative draft workflow` - Documentation updates
 
 ---
 
@@ -502,7 +525,14 @@ Doctor workflow:
 
 **Immediate**:
 1. ✅ Document progress (this file)
-2. 🔄 Implement frontend UI components
+2. 🔄 Implement frontend UI components (In Progress)
+   - ✅ Badge utilities
+   - ✅ AssignmentDialog component
+   - ✅ Submissions service methods
+   - 🔄 Assigned to Me view (Next)
+   - 🔲 Form editor actions
+   - 🔲 Status indicators
+   - 🔲 Timeline updates
 3. 🔲 Add comprehensive tests
 4. 🔲 Update documentation
 5. 🔲 User acceptance testing
@@ -517,5 +547,5 @@ Doctor workflow:
 
 ---
 
-**Last Updated**: 2025-11-04  
-**Status**: Backend complete, starting frontend implementation
+**Last Updated**: 2025-11-04 13:45  
+**Status**: Backend complete ✅ | Frontend UI in progress 🔄 (3/6 components done)
