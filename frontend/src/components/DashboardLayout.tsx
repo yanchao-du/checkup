@@ -61,9 +61,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             >
               <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
-            <img src="/logo.svg" alt="CheckUp logo" className="w-10 h-10 rounded-lg" />
+            <img src="/logo.svg" alt="goCheckUp logo" className="w-10 h-10 rounded-lg" />
             <div>
-              <h1 className="text-slate-900 text-lg md:text-xl">CheckUp</h1>
+              <h1 className="text-slate-900 text-lg md:text-xl">goCheckUp</h1>
             </div>
           </div>
 
