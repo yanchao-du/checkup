@@ -1,11 +1,14 @@
 import { cn } from '../ui/utils';
 import { Separator } from '../ui/separator';
+import { MedicalSubmission } from '@/types/api';
 
 interface SixMonthlyMdwDetailsProps {
-  formData: Record<string, any>;
+  submission: MedicalSubmission;
 }
 
-export function SixMonthlyMdwDetails({ formData }: SixMonthlyMdwDetailsProps) {
+export function SixMonthlyMdwDetails({ submission }: SixMonthlyMdwDetailsProps) {
+  const formData = submission.formData as Record<string, any>;
+  
   // Extract required tests from formData
   const tests = {
     pregnancy: true, // Always required for MDW

@@ -1,8 +1,12 @@
+import { MedicalSubmission } from '@/types/api';
+
 interface AgedDriversDetailsProps {
-  formData: Record<string, any>;
+  submission: MedicalSubmission;
 }
 
-export function AgedDriversDetails({ formData }: AgedDriversDetailsProps) {
+export function AgedDriversDetails({ submission }: AgedDriversDetailsProps) {
+  const formData = submission.formData as Record<string, any>;
+  
   return (
     <div>
       <h4 className="text-sm font-semibold text-slate-900 mb-3">Medical Assessment</h4>

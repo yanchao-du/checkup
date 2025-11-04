@@ -1,10 +1,15 @@
+import { MedicalSubmission } from '@/types/api';
+
 interface WorkPermitDetailsProps {
-  formData: Record<string, any>;
+  submission: MedicalSubmission;
 }
 
-export function WorkPermitDetails({ formData }: WorkPermitDetailsProps) {
+export function WorkPermitDetails({ submission }: WorkPermitDetailsProps) {
+  const formData = submission.formData as Record<string, any>;
+  
   return (
-    <div>
+    <>
+      <div>
       <h4 className="text-sm font-semibold text-slate-900 mb-3">Test Results</h4>
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -17,5 +22,6 @@ export function WorkPermitDetails({ formData }: WorkPermitDetailsProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

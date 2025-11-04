@@ -1,10 +1,13 @@
 import { cn } from '../ui/utils';
+import { MedicalSubmission } from '@/types/api';
 
 interface SixMonthlyFmwDetailsProps {
-  formData: Record<string, any>;
+  submission: MedicalSubmission;
 }
 
-export function SixMonthlyFmwDetails({ formData }: SixMonthlyFmwDetailsProps) {
+export function SixMonthlyFmwDetails({ submission }: SixMonthlyFmwDetailsProps) {
+  const formData = submission.formData as Record<string, any>;
+  
   // Extract required tests from formData
   const tests = {
     pregnancy: true, // Always required for FMW
@@ -14,7 +17,8 @@ export function SixMonthlyFmwDetails({ formData }: SixMonthlyFmwDetailsProps) {
   };
 
   return (
-    <div>
+    <>
+      <div>
       <h4 className="text-sm font-semibold text-slate-900 mb-3">Test Results</h4>
       <div className="grid grid-cols-2 gap-4">
         {tests.pregnancy && (
@@ -62,5 +66,6 @@ export function SixMonthlyFmwDetails({ formData }: SixMonthlyFmwDetailsProps) {
         )}
       </div>
     </div>
+    </>
   );
 }

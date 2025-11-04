@@ -35,11 +35,21 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/new-submission', label: 'New Submission', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
+    { path: '/new-submission', label: 'New Report', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
+    { 
+      path: '/pending-approvals', 
+      label: user?.role === 'doctor' ? 'Pending My Approval' : 'Pending Doctor Approval', 
+      icon: CheckCircle, 
+      roles: ['doctor', 'admin'] 
+    },
     { path: '/submissions', label: 'Submitted Reports', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
     { path: '/drafts', label: 'Drafts', icon: FileEdit, roles: ['doctor', 'nurse', 'admin'] },
-    { path: '/pending-approvals', label: 'Pending Approvals', icon: CheckCircle, roles: ['doctor', 'admin'] },
-    { path: '/rejected-submissions', label: 'Rejected Submissions', icon: XCircle, roles: ['doctor', 'nurse', 'admin'] },
+    { 
+      path: '/rejected-submissions', 
+      label: user?.role === 'doctor' ? 'Rejected by Me' : 'Rejected by Doctor', 
+      icon: XCircle, 
+      roles: ['doctor', 'nurse', 'admin'] 
+    },
     { path: '/settings', label: 'Settings', icon: Settings, roles: ['nurse', 'admin'] },
   ];
 
@@ -53,18 +63,17 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-[40]">
         <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {/* Sidebar toggle button for mobile */}
+            {/* Sidebar toggle button for mobile and tablets */}
             <button
-              className="md:hidden mr-2 bg-white border border-slate-200 rounded-full p-2 shadow-lg"
+              className="lg:hidden mr-2 bg-white border border-slate-200 rounded-full p-2 shadow-lg"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle sidebar"
             >
               <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
-            <img src="/logo.svg" alt="CheckUp logo" className="w-10 h-10 rounded-lg" />
+            <img src="/logo.svg" alt="goCheckUp logo" className="w-10 h-10 rounded-lg" />
             <div>
-              <h1 className="text-slate-900 text-lg md:text-xl">CheckUp</h1>
-              <p className="text-sm text-slate-600 hidden sm:block">{user?.clinicName}</p>
+              <h1 className="text-slate-900 text-lg md:text-xl">goCheckUp</h1>
             </div>
           </div>
 
@@ -73,6 +82,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <div>
                 <div className="text-sm text-slate-900">{user?.name}</div>
                 <div className="text-xs text-slate-500 capitalize">{user?.role}</div>
+                {/* <div className="text-xs text-slate-600">{user?.clinicName}</div> */}
               </div>
             </div>
             <Button variant="outline" size="sm" className="text-blue-600 focus:outline-none w-full sm:w-auto" onClick={handleLogout}>
@@ -85,12 +95,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
       <div className="container mx-auto px-4 py-6 flex gap-6 flex-1">
 
-        {/* Sidebar - overlays entire screen on mobile, modern look */}
+        {/* Sidebar - overlays entire screen on mobile and tablets, modern look */}
         {sidebarOpen && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden" onClick={() => setSidebarOpen(false)}></div>
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 lg:hidden" onClick={() => setSidebarOpen(false)}></div>
         )}
         <aside
-          className={`w-64 flex flex-col justify-between flex-shrink-0 fixed md:sticky left-0 top-0 md:top-16 h-full md:h-[calc(100vh-4rem)] z-50 md:z-10 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:rounded-lg md:border md:bg-slate-50`}
+          className={`w-64 flex flex-col justify-between flex-shrink-0 fixed lg:sticky left-0 top-0 lg:top-16 h-full lg:h-[calc(100vh-4rem)] z-50 lg:z-10 bg-slate-50 border-r border-slate-200 shadow-lg transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:rounded-lg lg:border lg:bg-slate-50`}
           style={{ maxWidth: '100vw' }}
         >
           {/* Navigation */}
@@ -133,7 +143,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                       </ProtectedLink>
                       <ProtectedLink to="/settings?tab=nurse-assignments" className="group flex items-center gap-3 px-4 py-2 text-base text-slate-700 hover:bg-blue-50 hover:text-blue-700">
                         <span className="w-5 h-5"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 1115 0v.75a.75.75 0 01-.75.75h-13.5a.75.75 0 01-.75-.75v-.75z" /></svg></span>
-                        <span>Nurse Assignment</span>
+                        <span>Nurse/Assistant Assignment</span>
                       </ProtectedLink>
                     </div>
                   </div>

@@ -71,6 +71,7 @@ export class AuthService {
         role: user.role,
         clinicId: user.clinicId,
         clinicName: user.clinic.name,
+        ...(user.role === 'doctor' && user.mcrNumber ? { mcrNumber: user.mcrNumber } : {}),
         authMethod: 'email' as const,
       },
     };
@@ -93,6 +94,7 @@ export class AuthService {
       role: user.role,
       clinicId: user.clinicId,
       clinicName: user.clinic.name,
+      ...(user.role === 'doctor' && user.mcrNumber ? { mcrNumber: user.mcrNumber } : {}),
     };
   }
 
@@ -133,6 +135,7 @@ export class AuthService {
         role: user.role,
         clinicId: user.clinicId,
         clinicName: user.clinic.name,
+        ...(user.role === 'doctor' && user.mcrNumber ? { mcrNumber: user.mcrNumber } : {}),
         authMethod: 'corppass' as const,
       };
     }

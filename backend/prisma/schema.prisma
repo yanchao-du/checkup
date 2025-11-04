@@ -123,6 +123,9 @@ model MedicalSubmission {
   patientName      String            @map("patient_name")
   patientNric      String            @map("patient_nric")
   patientDob       DateTime?         @map("patient_dob") @db.Date
+  patientEmail     String?           @map("patient_email")
+  patientMobile    String?           @map("patient_mobile")
+  drivingLicenseClass String?        @map("driving_license_class")
   examinationDate  DateTime?         @map("examination_date") @db.Date
   status           SubmissionStatus  @default(draft)
   formData         Json              @map("form_data")
@@ -186,6 +189,9 @@ enum ExamType {
   PR_MEDICAL           @map("Medical Examination for Permanent Residency (ICA)")
   STUDENT_PASS_MEDICAL @map("Medical Examination for Student Pass (ICA)")
   LTVP_MEDICAL         @map("Medical Examination for Long Term Visit Pass (ICA)")
+  DRIVING_LICENCE_TP   @map("Driving Licence Medical Examination Report (TP)")
+  DRIVING_VOCATIONAL_TP_LTA @map("Driving Licence and Vocational Licence (TP & LTA)")
+  VOCATIONAL_LICENCE_LTA    @map("Vocational Licence Medical Examination (LTA)")
 }
 
 enum SubmissionStatus {

@@ -128,3 +128,9 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Custom styling for native radio buttons */
+input[type="radio"] {
+  accent-color: black;
+  background-color: white;
+}

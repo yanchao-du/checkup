@@ -887,4 +887,124 @@ export class UsersService {
       isPrimary: nc.isPrimary,
     }));
   }
+
+  /**
+   * Get all clinics associated with the current user (doctor or nurse)
+   * Returns clinic details including name, HCI code, and phone number
+   */
+  async getUserClinics(userId: string, role: string) {
+    if (role === 'doctor') {
+      const doctor = await this.prisma.user.findFirst({
+        where: {
+          id: userId,
+          role: 'doctor',
+        },
+      });
+
+      if (!doctor) {
+        throw new NotFoundException('Doctor not found');
+      }
+
+      const doctorClinics = await this.prisma.doctorClinic.findMany({
+        where: { doctorId: userId },
+        select: {
+          isPrimary: true,
+          clinic: {
+            select: {
+              id: true,
+              name: true,
+              hciCode: true,
+              phone: true,
+              address: true,
+            },
+          },
+        },
+        orderBy: {
+          isPrimary: 'desc', // Primary clinic first
+        },
+      });
+
+      return doctorClinics.map(dc => ({
+        id: dc.clinic.id,
+        name: dc.clinic.name,
+        hciCode: dc.clinic.hciCode,
+        phone: dc.clinic.phone,
+        address: dc.clinic.address,
+        isPrimary: dc.isPrimary,
+      }));
+    } else if (role === 'nurse') {
+      const nurse = await this.prisma.user.findFirst({
+        where: {
+          id: userId,
+          role: 'nurse',
+        },
+      });
+
+      if (!nurse) {
+        throw new NotFoundException('Nurse not found');
+      }
+
+      const nurseClinics = await this.prisma.nurseClinic.findMany({
+        where: { nurseId: userId },
+        select: {
+          isPrimary: true,
+          clinic: {
+            select: {
+              id: true,
+              name: true,
+              hciCode: true,
+              phone: true,
+              address: true,
+            },
+          },
+        },
+        orderBy: {
+          isPrimary: 'desc', // Primary clinic first
+        },
+      });
+
+      return nurseClinics.map(nc => ({
+        id: nc.clinic.id,
+        name: nc.clinic.name,
+        hciCode: nc.clinic.hciCode,
+        phone: nc.clinic.phone,
+        address: nc.clinic.address,
+        isPrimary: nc.isPrimary,
+      }));
+    } else {
+      // Admins work with a single clinic
+      const admin = await this.prisma.user.findFirst({
+        where: {
+          id: userId,
+          role: 'admin',
+        },
+        include: {
+          clinic: {
+            select: {
+              id: true,
+              name: true,
+              hciCode: true,
+              phone: true,
+              address: true,
+            },
+          },
+        },
+      });
+
+      if (!admin) {
+        throw new NotFoundException('User not found');
+      }
+
+      return [
+        {
+          id: admin.clinic.id,
+          name: admin.clinic.name,
+          hciCode: admin.clinic.hciCode,
+          phone: admin.clinic.phone,
+          address: admin.clinic.address,
+          isPrimary: true,
+        },
+      ];
+    }
+  }
 }

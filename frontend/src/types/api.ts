@@ -14,6 +14,16 @@ export interface Clinic {
   updatedAt?: string;
 }
 
+// User's associated clinic (for dropdown selection)
+export interface UserClinic {
+  id: string;
+  name: string;
+  hciCode?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  isPrimary: boolean;
+}
+
 export interface DoctorClinic {
   doctorId: string;
   clinicId: string;
@@ -64,7 +74,10 @@ export type ExamType =
   | 'AGED_DRIVERS'
   | 'PR_MEDICAL'
   | 'STUDENT_PASS_MEDICAL'
-  | 'LTVP_MEDICAL';
+  | 'LTVP_MEDICAL'
+  | 'DRIVING_LICENCE_TP'
+  | 'DRIVING_VOCATIONAL_TP_LTA'
+  | 'VOCATIONAL_LICENCE_LTA';
 export type SubmissionStatus = 
   | 'draft' 
   | 'pending_approval' 
@@ -79,21 +92,30 @@ export interface MedicalSubmission {
   patientName: string;
   patientNric: string;
   patientDateOfBirth: string;
+  patientEmail?: string;
+  patientMobile?: string;
+  drivingLicenseClass?: string;
   examinationDate?: string;
   status: SubmissionStatus;
   formData: Record<string, any>;
   clinicId: string;
+  clinicName?: string;
+  clinicHciCode?: string;
+  clinicPhone?: string;
   createdById: string;
   createdBy: string;
   createdByName?: string;
+  createdByMcrNumber?: string;
   createdDate: string;
   submittedDate?: string;
   approvedById?: string;
   approvedBy?: string;
   approvedByName?: string;
+  approvedByMcrNumber?: string;
   approvedDate?: string;
   assignedDoctorId?: string;
   assignedDoctorName?: string;
+  assignedDoctorMcrNumber?: string;
   rejectedReason?: string;
   deletedAt?: string;
 }
@@ -107,6 +129,7 @@ export interface CreateSubmissionRequest {
   formData: Record<string, any>;
   routeForApproval?: boolean;
   assignedDoctorId?: string;
+  clinicId?: string;
 }
 
 export interface UpdateSubmissionRequest {
@@ -116,6 +139,7 @@ export interface UpdateSubmissionRequest {
   examinationDate?: string;
   formData?: Record<string, any>;
   assignedDoctorId?: string;
+  clinicId?: string;
 }
 
 export interface SubmissionQueryParams {

@@ -180,7 +180,7 @@ async function main() {
       hciCode: 'HCI0002',  // HCI format: 7 alphanumeric characters
       registrationNumber: 'RC002345',
       address: '456 Thomson Road, #02-03, Singapore 307591',
-      phone: '+65 6234 5678',
+      phone: '+65 6789 0123',
       email: 'info@carewell.sg',
     },
   });
@@ -314,52 +314,6 @@ async function main() {
     },
   });
 
-  const submission2 = await prisma.medicalSubmission.create({
-    data: {
-      examType: 'WORK_PERMIT',
-      patientName: 'John Tan',
-      patientNric: 'S2345678B',
-      patientDob: new Date('1985-08-22'),
-      examinationDate: new Date('2025-10-18'),
-      status: 'submitted',
-      formData: {
-        height: '175',
-        weight: '70',
-        bloodPressure: '118/75',
-        hivTest: 'Negative',
-        tbTest: 'Negative',
-      },
-      clinicId: clinic.id,
-      createdById: doctor.id,
-      approvedById: doctor.id,
-      createdDate: new Date('2025-10-18T09:15:00'),
-      submittedDate: new Date('2025-10-18T09:15:00'),
-      approvedDate: new Date('2025-10-18T09:15:00'),
-      updatedAt: new Date('2025-10-18T09:15:00'),
-    },
-  });
-
-  const submission3 = await prisma.medicalSubmission.create({
-    data: {
-      examType: 'AGED_DRIVERS',
-      patientName: 'Lim Ah Kow',
-      patientNric: 'S3456789C',
-      patientDob: new Date('1955-03-10'),
-      examinationDate: new Date('2025-10-20'),
-      status: 'pending_approval',
-      formData: {
-        visualAcuity: '6/6',
-        hearingTest: 'Normal',
-        bloodPressure: '130/85',
-        diabetes: 'No',
-      },
-      clinicId: clinic.id,
-      createdById: nurse.id,
-      createdDate: new Date('2025-10-20T11:00:00'),
-      updatedAt: new Date('2025-10-20T11:00:00'),
-    },
-  });
-
   // Add more pending approvals for testing
   const submission4 = await prisma.medicalSubmission.create({
     data: {
@@ -380,28 +334,6 @@ async function main() {
       createdById: nurse.id,
       createdDate: new Date('2025-10-21T09:30:00'),
       updatedAt: new Date('2025-10-21T09:30:00'),
-    },
-  });
-
-  const submission5 = await prisma.medicalSubmission.create({
-    data: {
-      examType: 'WORK_PERMIT',
-      patientName: 'Kumar Ravi',
-      patientNric: 'S6789012F',
-      patientDob: new Date('1987-04-18'),
-      examinationDate: new Date('2025-10-22'),
-      status: 'pending_approval',
-      formData: {
-        height: '172',
-        weight: '75',
-        bloodPressure: '122/78',
-        hivTest: 'Negative',
-        tbTest: 'Negative',
-      },
-      clinicId: clinic.id,
-      createdById: nurse.id,
-      createdDate: new Date('2025-10-22T14:00:00'),
-      updatedAt: new Date('2025-10-22T14:00:00'),
     },
   });
 
@@ -454,34 +386,11 @@ async function main() {
     },
   });
 
-  const draft1 = await prisma.medicalSubmission.create({
-    data: {
-      examType: 'WORK_PERMIT',
-      patientName: 'Wang Wei',
-      patientNric: 'S5678901E',
-      patientDob: new Date('1988-07-14'),
-      examinationDate: new Date('2025-10-23'),
-      status: 'draft',
-      formData: {
-        height: '170',
-        weight: '68',
-      },
-      clinicId: clinic.id,
-      createdById: nurse.id,
-      createdDate: new Date('2025-10-22T08:30:00'),
-      updatedAt: new Date('2025-10-22T08:30:00'),
-    },
-  });
-
   console.log('✅ Created sample submissions and drafts');
   console.log('   - Maria Santos (SIX_MONTHLY_MDW): submitted');
-  console.log('   - John Tan (WORK_PERMIT): submitted');
-  console.log('   - Lim Ah Kow (AGED_DRIVERS): pending_approval');
   console.log('   - Chen Li Hua (SIX_MONTHLY_MDW): pending_approval');
-  console.log('   - Kumar Ravi (WORK_PERMIT): pending_approval');
   console.log('   - Nguyen Thi Mai (SIX_MONTHLY_FMW): submitted');
   console.log('   - Lim Siew Hong (SIX_MONTHLY_FMW): pending_approval');
-  console.log('   - Wang Wei (WORK_PERMIT): draft');
 
   // Create CorpPass user associations
   // Link doctor@clinic.sg to CorpPass account

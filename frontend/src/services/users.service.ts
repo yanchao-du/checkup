@@ -7,6 +7,7 @@ import type {
   DoctorClinic,
   AssignDoctorToClinicRequest,
   Clinic,
+  UserClinic,
 } from '../types/api';
 
 export interface Doctor {
@@ -17,6 +18,11 @@ export interface Doctor {
 }
 
 export const usersApi = {
+  // Get current user's associated clinics
+  getMyClinics: async (): Promise<UserClinic[]> => {
+    return apiClient.get<UserClinic[]>('/users/me/clinics');
+  },
+
   // Get list of doctors (for assignment)
   getDoctors: async (): Promise<Doctor[]> => {
     return apiClient.get<Doctor[]>('/users/doctors/list');

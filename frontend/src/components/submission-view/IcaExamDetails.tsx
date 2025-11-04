@@ -1,10 +1,13 @@
 import { cn } from '../ui/utils';
+import { MedicalSubmission } from '@/types/api';
 
 interface IcaExamDetailsProps {
-  formData: Record<string, any>;
+  submission: MedicalSubmission;
 }
 
-export function IcaExamDetails({ formData }: IcaExamDetailsProps) {
+export function IcaExamDetails({ submission }: IcaExamDetailsProps) {
+  const formData = submission.formData as Record<string, any>;
+  
   return (
     <div className="space-y-6">
       {/* Test Results */}

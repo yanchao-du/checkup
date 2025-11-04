@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
+import { validateDriverExam } from './validation/driver-exam.validation';
 
 @Injectable()
 export class SubmissionsService {
@@ -10,8 +11,12 @@ export class SubmissionsService {
 
   async create(userId: string, userRole: string, clinicId: string, dto: CreateSubmissionDto) {
     // When routeForApproval is explicitly false, it's a draft
-    // When routeForApproval is true or undefined, check the logic
     const isDraft = dto.routeForApproval === false;
+    
+    // Only validate driver exam submissions if not a draft
+    if (!isDraft) {
+      validateDriverExam(dto);
+    }
     
     let status: string;
     if (isDraft) {
@@ -30,10 +35,13 @@ export class SubmissionsService {
         patientName: dto.patientName,
         patientNric: dto.patientNric,
         ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
+        ...(dto.patientEmail && { patientEmail: dto.patientEmail }),
+        ...(dto.patientMobile && { patientMobile: dto.patientMobile }),
+        ...(dto.drivingLicenseClass && { drivingLicenseClass: dto.drivingLicenseClass }),
         examinationDate: dto.examinationDate ? new Date(dto.examinationDate) : undefined,
         status: status as any,
         formData: dto.formData,
-        clinicId,
+        clinicId: dto.clinicId || clinicId, // Use provided clinicId or fall back to user's primary clinic
         createdById: userId,
         assignedDoctorId: dto.assignedDoctorId,
         submittedDate: status === 'submitted' ? new Date() : undefined,
@@ -44,6 +52,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -152,6 +161,7 @@ export class SubmissionsService {
           createdBy: { select: { name: true } },
           approvedBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
+          clinic: { select: { name: true, hciCode: true, phone: true } },
         },
         orderBy,
         skip: (page - 1) * limit,
@@ -195,6 +205,7 @@ export class SubmissionsService {
           createdBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
           approvedBy: { select: { name: true } }, // This will be the rejector
+          clinic: { select: { name: true, hciCode: true, phone: true } },
         },
         orderBy: { createdDate: 'desc' },
         skip: (page - 1) * limit,
@@ -220,9 +231,10 @@ export class SubmissionsService {
     const submission = await this.prisma.medicalSubmission.findUnique({
       where: { id },
       include: {
-        createdBy: { select: { name: true } },
-        approvedBy: { select: { name: true } },
-        assignedDoctor: { select: { name: true } },
+        createdBy: { select: { name: true, mcrNumber: true } },
+        approvedBy: { select: { name: true, mcrNumber: true } },
+        assignedDoctor: { select: { name: true, mcrNumber: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -258,8 +270,15 @@ export class SubmissionsService {
 
     this.logger.debug(`Existing submission status: ${existing.status}, rejectedReason: ${existing.rejectedReason ? 'present' : 'null'}, approvedById: ${existing.approvedById || 'null'}`);
 
-    if (existing.createdById !== userId && userRole !== 'admin') {
-      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById})`);
+    // Access control:
+    // - Admin can edit any submission
+    // - Creator can edit their own submissions
+    // - Doctors can edit submissions in pending_approval status (routed to them by nurses)
+    const isCreator = existing.createdById === userId;
+    const isDoctorEditingPendingApproval = userRole === 'doctor' && existing.status === 'pending_approval';
+    
+    if (!isCreator && userRole !== 'admin' && !isDoctorEditingPendingApproval) {
+      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById}, status: ${existing.status})`);
       throw new ForbiddenException('Access denied');
     }
 
@@ -275,6 +294,10 @@ export class SubmissionsService {
 
     this.logger.log(`Proceeding with update for submission ${id} (status: ${existing.status})`);
 
+    // If a doctor is editing a pending_approval submission, convert it to draft
+    // so they can submit it directly (which auto-approves for doctors)
+    const shouldConvertToDraft = userRole === 'doctor' && existing.status === 'pending_approval';
+
     try {
       const submission = await this.prisma.medicalSubmission.update({
         where: { id },
@@ -283,14 +306,21 @@ export class SubmissionsService {
           ...(dto.patientName && { patientName: dto.patientName }),
           ...(dto.patientNric && { patientNric: dto.patientNric }),
           ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
+          ...(dto.patientEmail !== undefined && { patientEmail: dto.patientEmail }),
+          ...(dto.patientMobile !== undefined && { patientMobile: dto.patientMobile }),
+          ...(dto.drivingLicenseClass !== undefined && { drivingLicenseClass: dto.drivingLicenseClass }),
           ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
           ...(dto.formData && { formData: dto.formData }),
           ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
+          ...(dto.clinicId && { clinicId: dto.clinicId }),
+          // Convert to draft if doctor is editing pending_approval
+          ...(shouldConvertToDraft && { status: 'draft' as any }),
         },
         include: {
           createdBy: { select: { name: true } },
           approvedBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
+          clinic: { select: { name: true, hciCode: true, phone: true } },
         },
       });
 
@@ -300,11 +330,19 @@ export class SubmissionsService {
           submissionId: id,
           userId,
           eventType: 'updated',
-          changes: dto as any,
+          changes: {
+            ...dto,
+            ...(shouldConvertToDraft && { statusChange: { from: 'pending_approval', to: 'draft' } }),
+          } as any,
         },
       });
 
-      this.logger.log(`Successfully updated submission ${id}`);
+      if (shouldConvertToDraft) {
+        this.logger.log(`Converted submission ${id} from pending_approval to draft for doctor ${userId}`);
+      } else {
+        this.logger.log(`Successfully updated submission ${id}`);
+      }
+      
       return this.formatSubmission(submission);
     } catch (error) {
       this.logger.error('Error updating submission', {
@@ -327,7 +365,15 @@ export class SubmissionsService {
       throw new NotFoundException('Submission not found');
     }
 
-    if (existing.createdById !== userId && userRole !== 'admin') {
+    // Access control:
+    // - Admin can submit any draft
+    // - Creator can submit their own drafts
+    // - Doctors can submit drafts that were converted from pending_approval (originally created by nurse)
+    const isCreator = existing.createdById === userId;
+    const isDoctorSubmittingConvertedDraft = userRole === 'doctor' && existing.status === 'draft';
+    
+    if (!isCreator && userRole !== 'admin' && !isDoctorSubmittingConvertedDraft) {
+      this.logger.warn(`Access denied for user ${userId} to submit submission ${id} (creator: ${existing.createdById})`);
       throw new ForbiddenException('Access denied');
     }
 
@@ -354,6 +400,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -403,6 +450,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -496,20 +544,30 @@ export class SubmissionsService {
       patientName: submission.patientName,
       patientNric: submission.patientNric,
       patientDateOfBirth: submission.patientDob ? submission.patientDob.toISOString().split('T')[0] : null,
+      patientEmail: submission.patientEmail,
+      patientMobile: submission.patientMobile,
+      drivingLicenseClass: submission.drivingLicenseClass,
       examinationDate: submission.examinationDate ? submission.examinationDate.toISOString().split('T')[0] : null,
       status: submission.status,
       createdBy: submission.createdById,
+      createdById: submission.createdById, // Add this for frontend compatibility
       createdByName: submission.createdBy?.name,
+      createdByMcrNumber: submission.createdBy?.mcrNumber,
       createdDate: submission.createdDate,
       submittedDate: submission.submittedDate,
       approvedBy: submission.approvedById,
       approvedByName: submission.approvedBy?.name,
+      approvedByMcrNumber: submission.approvedBy?.mcrNumber,
       approvedDate: submission.approvedDate,
       assignedDoctorId: submission.assignedDoctorId,
       assignedDoctorName: submission.assignedDoctor?.name,
+      assignedDoctorMcrNumber: submission.assignedDoctor?.mcrNumber,
       rejectedReason: submission.rejectedReason,
       deletedAt: submission.deletedAt,
       clinicId: submission.clinicId,
+      clinicName: submission.clinic?.name,
+      clinicHciCode: submission.clinic?.hciCode,
+      clinicPhone: submission.clinic?.phone,
       formData: submission.formData,
     };
   }

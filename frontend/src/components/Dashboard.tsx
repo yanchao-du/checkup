@@ -1,5 +1,6 @@
 import { useAuth } from './AuthContext';
 import { formatExamType } from '../lib/formatters';
+import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -199,9 +200,9 @@ export function Dashboard() {
   return (
     <div className="space-y-6" role="main">
       <div>
-        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Welcome, {user?.name}</h2>
+        <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Hello, {user?.name}</h2>
         <p className="text-slate-600">
-          {user?.role === 'admin' ? "Here's an overview of all medical exam submissions" : "Here's an overview of your medical exam submissions"}
+          {user?.role === 'admin' ? "Here's an overview of all medical examination reports" : "Here's an overview of medical examination reports"}
         </p>
       </div>
 
@@ -215,12 +216,12 @@ export function Dashboard() {
               </div>
               <div className="flex-1">
                 <CardTitle className="text-red-900">
-                  {rejectedSubmissions.length} Rejected Submission{rejectedSubmissions.length !== 1 ? 's' : ''}
+                  {rejectedSubmissions.length} Rejected Report{rejectedSubmissions.length !== 1 ? 's' : ''}
                 </CardTitle>
                 <CardDescription className="text-red-700">
                   {rejectedSubmissions.length === 1 
-                    ? 'You have a submission that was rejected and needs attention'
-                    : 'You have submissions that were rejected and need attention'}
+                    ? 'You have a report that was rejected by doctor and needs attention'
+                    : 'You have reports that were rejected by doctor and need attention'}
                 </CardDescription>
               </div>
             </div>
@@ -233,7 +234,7 @@ export function Dashboard() {
                   className="flex items-center justify-between p-3 bg-white rounded-lg border border-red-200"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-slate-900">{submission.patientName}</p>
+                    <p className="font-medium text-slate-900">{getDisplayName(submission.patientName, submission.examType, submission.status)}</p>
                     <p className="text-sm text-slate-600">{formatExamType(submission.examType)}</p>
                     {submission.rejectedReason && (
                       <p className="text-xs text-red-600 mt-1">
@@ -254,7 +255,7 @@ export function Dashboard() {
                         onClick={() => handleReopenAndFix(submission.id)}
                         disabled={reopeningId === submission.id}
                       >
-                        {reopeningId === submission.id ? 'Reopening...' : 'Reopen & Fix'}
+                        {reopeningId === submission.id ? 'Reopening...' : 'Reopen'}
                       </Button>
                     )}
                   </div>
@@ -263,7 +264,7 @@ export function Dashboard() {
               {rejectedSubmissions.length > 3 && (
                 <Link to="/rejected-submissions">
                   <Button variant="link" className="w-full text-red-700 hover:text-red-800">
-                    View all {rejectedSubmissions.length} rejected submissions →
+                    View all {rejectedSubmissions.length} reports rejected by doctor →
                   </Button>
                 </Link>
               )}
@@ -281,7 +282,7 @@ export function Dashboard() {
               <CardTitle className="text-orange-900">Action Required</CardTitle>
             </div>
             <CardDescription className="text-orange-700">
-              You have {pendingApprovals.length} submission(s) waiting for your approval
+              You have {pendingApprovals.length} report(s) waiting for your approval
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -304,7 +305,7 @@ export function Dashboard() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-2xl text-slate-900">{submissions.length}</span>
-              <span className="text-xs text-slate-500 truncate">Total Submissions</span>
+              <span className="text-xs text-slate-500 truncate">All Reports</span>
             </div>
           </div>
         </Card>
@@ -330,7 +331,7 @@ export function Dashboard() {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-2xl text-slate-900">{submissions.filter(s => s.status === 'submitted').length}</span>
-                <span className="text-xs text-slate-500 truncate">Submitted</span>
+                <span className="text-xs text-slate-500 truncate">Approved & Sent</span>
               </div>
             </div>
           </Card>
@@ -357,7 +358,9 @@ export function Dashboard() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-2xl text-slate-900">{rejectedSubmissions.length}</span>
-              <span className="text-xs text-slate-500 truncate">Rejected</span>
+              <span className="text-xs text-slate-500 truncate">
+                {user?.role === 'doctor' ? 'Rejected by Me' : 'Rejected by Doctor'}
+              </span>
             </div>
           </div>
         </Card>
@@ -401,7 +404,7 @@ export function Dashboard() {
                           <Icon className={`w-5 h-5 ${iconColor}`} />
                         </div>
                         <div>
-                          <p className="text-slate-900">{activity.patientName}</p>
+                          <p className="text-slate-900">{getDisplayName(activity.patientName, activity.examType, activity.status)}</p>
                           <p className="text-sm text-slate-500">{formatExamType(activity.examType)}</p>
                         </div>
                       </div>
@@ -475,8 +478,8 @@ export function Dashboard() {
                       <FileEdit className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-900">Nurse Assignment</p>
-                      <p className="text-xs text-slate-500">Assign nurses to clinics</p>
+                      <p className="text-sm font-medium text-slate-900">Nurse/Assistant Assignment</p>
+                      <p className="text-xs text-slate-500">Assign nurses/assistants to clinics</p>
                     </div>
                   </div>
                 </Link>
@@ -490,8 +493,8 @@ export function Dashboard() {
                         <FileText className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">New Submission</p>
-                        <p className="text-xs text-slate-500">Create a new medical exam</p>
+                        <p className="text-sm font-medium text-slate-900">New Report</p>
+                        <p className="text-xs text-slate-500">Create a new medical examination</p>
                       </div>
                     </div>
                   </Link>
