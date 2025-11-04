@@ -226,21 +226,29 @@ export function ViewSubmission() {
                     </p>
                   </div>
                 )}
-                {/* Clinic Information */}
-                {submission.clinicName && (
-                  <div className="col-span-2">
-                    <p className="text-sm text-slate-500 mb-1">Clinic</p>
-                    <p className="text-slate-900 font-medium">{submission.clinicName}</p>
-                    {(submission.clinicHciCode || submission.clinicPhone) && (
-                      <p className="text-sm text-slate-600">
-                        {[submission.clinicHciCode, submission.clinicPhone].filter(Boolean).join(' • ')}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Clinic Information */}
+          {submission.clinicName && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Clinic Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-slate-900 font-medium">{submission.clinicName}</p>
+                  {(submission.clinicHciCode || submission.clinicPhone) && (
+                    <p className="text-sm text-slate-600">
+                      {[submission.clinicHciCode, submission.clinicPhone].filter(Boolean).join(' • ')}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Medical Examination Results</CardTitle>
