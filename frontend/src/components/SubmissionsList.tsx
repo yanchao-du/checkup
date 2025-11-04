@@ -302,11 +302,18 @@ export function SubmissionsList() {
                       </TableCell>
                       {!isDoctor && (
                         <TableCell>
-                          <Badge
-                            variant={getSubmissionStatusBadgeVariant(submission.status)}
-                          >
-                            {getSubmissionStatusLabel(submission.status)}
-                          </Badge>
+                          <div className="space-y-1">
+                            <Badge
+                              variant={getSubmissionStatusBadgeVariant(submission.status)}
+                            >
+                              {getSubmissionStatusLabel(submission.status)}
+                            </Badge>
+                            {submission.status === 'in_progress' && submission.assignedToName && (
+                              <div className="text-xs text-slate-600">
+                                Assigned to: {submission.assignedToName} ({submission.assignedToRole})
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
                       )}
                       <TableCell className="text-slate-600">{submission.createdByName}</TableCell>

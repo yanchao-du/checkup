@@ -153,12 +153,19 @@ export function ViewSubmission() {
           <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examination Details</h2>
           <p className="text-slate-600">View submission information</p>
         </div>
-        <Badge
-          variant={getSubmissionStatusBadgeVariant(submission.status)}
-          className="text-sm px-3 py-1"
-        >
-          {getSubmissionStatusLabel(submission.status)}
-        </Badge>
+        <div className="flex flex-col items-end gap-2">
+          <Badge
+            variant={getSubmissionStatusBadgeVariant(submission.status)}
+            className="text-sm px-3 py-1"
+          >
+            {getSubmissionStatusLabel(submission.status)}
+          </Badge>
+          {submission.status === 'in_progress' && submission.assignedToName && (
+            <div className="text-sm text-slate-600">
+              Assigned to: <span className="font-medium">{submission.assignedToName}</span> ({submission.assignedToRole})
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Submission Reference */}
