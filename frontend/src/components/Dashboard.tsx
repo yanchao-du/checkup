@@ -476,8 +476,8 @@ export function Dashboard() {
                       <FileEdit className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-900">Nurse Assignment</p>
-                      <p className="text-xs text-slate-500">Assign nurses to clinics</p>
+                      <p className="text-sm font-medium text-slate-900">Nurse/Assistant Assignment</p>
+                      <p className="text-xs text-slate-500">Assign nurses/assistants to clinics</p>
                     </div>
                   </div>
                 </Link>

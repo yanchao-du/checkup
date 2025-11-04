@@ -209,7 +209,7 @@ export function UserManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-slate-600">Nurses</CardTitle>
+            <CardTitle className="text-sm text-slate-600">Nurses/Assistants</CardTitle>
             <Users className="w-4 h-4 text-slate-400" />
           </CardHeader>
           <CardContent>
@@ -353,7 +353,7 @@ export function UserManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="doctor" data-testid="role-option-doctor">Doctor</SelectItem>
-                  <SelectItem value="nurse" data-testid="role-option-nurse">Nurse</SelectItem>
+                  <SelectItem value="nurse" data-testid="role-option-nurse">Nurse/Assistant</SelectItem>
                   <SelectItem value="admin" data-testid="role-option-admin">Admin</SelectItem>
                 </SelectContent>
               </Select>

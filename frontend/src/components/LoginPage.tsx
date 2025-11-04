@@ -124,8 +124,8 @@ export function LoginPage() {
               <div className="space-y-1 text-xs text-slate-500">
                 <p className="text-sm">Doctor1: S1234567D</p>
                 <p className="text-sm">Doctor2: S4567890C</p>
-                <p className="text-sm">Nurse1: S2345678H</p>
-                <p className="text-sm">Nurse2: S7890123C</p>
+                <p className="text-sm">Nurse/Assistant1: S2345678H</p>
+                <p className="text-sm">Nurse/Assistant2: S7890123C</p>
                 {/* <p className="text-sm">Admin1: S3456789A</p> */}
                 <p className="text-sm">UEN: 123456789D</p>
               </div>
