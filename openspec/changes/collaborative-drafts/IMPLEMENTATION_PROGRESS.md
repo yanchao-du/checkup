@@ -298,22 +298,35 @@ All assignment operations logged:
 
 **For Draft Submissions**:
 - ✅ Existing: "Save as Draft"
-- ➕ NEW: "Assign to Doctor" (for nurses)
-- ➕ NEW: "Assign to Nurse" (for doctors)
+- ✅ NEW: "Assign to Doctor" (for nurses)
+- ✅ NEW: "Assign to Nurse" (for doctors)
 - ✅ Existing: "Route for Approval" (for nurses - existing workflow)
 - ✅ Existing: "Submit to Agency" (for doctors - existing workflow)
 
 **For In Progress Submissions** (when user is assigned):
-- ➕ NEW: "Save Changes" (keep status as in_progress)
-- ➕ NEW: "Assign to Doctor" (reassign)
-- ➕ NEW: "Assign to Nurse" (reassign)
+- ✅ NEW: "Save as Draft" (keep status as in_progress)
+- ✅ NEW: "Assign to Doctor" (reassign)
+- ✅ NEW: "Assign to Nurse" (reassign)
 - ➕ NEW: "Submit to Agency" (doctors only - uses submitCollaborativeDraft)
 
 **Implementation**:
-- Add state for showing AssignmentDialog
-- Add handlers for assignment actions
-- Update button visibility logic
-- Call appropriate API endpoints
+- ✅ Add state for showing AssignmentDialog
+- ✅ Add handlers for assignment actions
+- ✅ Update button visibility logic
+- ✅ Call appropriate API endpoints
+- ✅ Track submission status (draft/in_progress)
+- ✅ Import and integrate AssignmentDialog component
+- ✅ Navigate to "Assigned to Me" after assignment
+
+**Changes Made**:
+- ✅ Added `showAssignmentDialog` and `currentSubmission` state
+- ✅ Added `submissionStatus` state to track current status
+- ✅ Added `handleAssign()` - saves draft, reloads submission, opens dialog
+- ✅ Added `handleAssignmentComplete()` - closes dialog and navigates to /assigned-to-me
+- ✅ Updated `loadSubmission()` to set `currentSubmission` and `submissionStatus`
+- ✅ Added "Assign to Doctor/Nurse" button visible for draft and in_progress
+- ✅ Added AssignmentDialog component at bottom of form
+- ✅ Imported UserPlus icon from lucide-react
 
 ---
 
@@ -439,11 +452,17 @@ All assignment operations logged:
    - Submissions service collaborative methods
    - Implementation progress documentation
 
+3. ✅ `feat(collab): add AssignedToMe view with navigation` (commit: 0fbdc04)
+   - AssignedToMe component with claim functionality
+   - Route configuration in App.tsx
+   - Navigation menu item in DashboardLayout
+   - Updated implementation progress
+
 **Next Commits** (planned):
-3. � `feat: Add Assigned to Me view and form actions` - Currently in progress
-4. 🔲 `feat: Add status indicators and timeline updates` - UI enhancements
-5. 🔲 `test: Add collaborative draft tests` - Backend and E2E tests
-6. 🔲 `docs: Document collaborative draft workflow` - Documentation updates
+4. 🟡 `feat(collab): add assignment actions to form editor` - Currently in progress
+5. 🔲 `feat: Add status indicators and timeline updates` - UI enhancements
+6. 🔲 `test: Add collaborative draft tests` - Backend and E2E tests
+7. 🔲 `docs: Document collaborative draft workflow` - Documentation updates
 
 ---
 

@@ -20,7 +20,7 @@ import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send } from 'lucide-react';
+import { ArrowLeft, Save, Send, UserPlus } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,7 @@ import {
 } from './ui/alert-dialog';
 
 import { SetDefaultDoctorDialog } from './SetDefaultDoctorDialog';
+import { AssignmentDialog } from './AssignmentDialog';
 import { RemarksField } from './submission-form/fields/RemarksField';
 import { DateOfBirthField } from './submission-form/fields/DateOfBirthField';
 import { DrivingLicenceClassField } from './submission-form/fields/DrivingLicenceClassField';
@@ -148,6 +149,11 @@ export function NewSubmission() {
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [testFin, setTestFin] = useState<string>('');
+  
+  // Assignment dialog state for collaborative workflow
+  const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
+  const [currentSubmission, setCurrentSubmission] = useState<any>(null);
+  const [submissionStatus, setSubmissionStatus] = useState<string>('draft');
   
   // Track last saved state to detect actual changes
   const [lastSavedState, setLastSavedState] = useState<{
@@ -289,6 +295,11 @@ export function NewSubmission() {
         try {
           setIsLoading(true);
           const existing = await submissionsApi.getById(id);
+          
+          // Store submission data for assignment dialog
+          setCurrentSubmission(existing);
+          setSubmissionStatus(existing.status || 'draft');
+          
           setExamType(existing.examType);
           setPatientName(existing.patientName);
           setPatientNric(existing.patientNric);
@@ -1242,6 +1253,32 @@ export function NewSubmission() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleAssign = async () => {
+    // Save draft first if there are changes
+    if (hasUnsavedChanges) {
+      await handleSaveDraft();
+    }
+    
+    // Reload submission to get latest data
+    if (id) {
+      try {
+        const submission = await submissionsApi.getById(id);
+        setCurrentSubmission(submission);
+        setShowAssignmentDialog(true);
+      } catch (error) {
+        console.error('Failed to load submission:', error);
+        toast.error('Failed to load submission');
+      }
+    }
+  };
+  
+  const handleAssignmentComplete = async () => {
+    setShowAssignmentDialog(false);
+    toast.success('Submission assigned successfully');
+    // Navigate to assigned submissions list
+    navigate('/assigned-to-me');
   };
 
   const handleSubmit = async () => {
@@ -2526,6 +2563,18 @@ export function NewSubmission() {
           </Button>
 
           <div className="flex gap-3">
+            {/* Show collaborative assignment button for draft and in_progress submissions */}
+            {id && (submissionStatus === 'draft' || submissionStatus === 'in_progress') && (
+              <Button
+                variant="outline"
+                onClick={handleAssign}
+                disabled={isSaving}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Assign to {role === 'doctor' ? 'Nurse' : 'Doctor'}
+              </Button>
+            )}
+            
             {/* Nurses submit for approval from the Summary section only; no footer button here for MDW/FMW. */}
             
             {/* Doctors submit from the Summary section only; no footer button here for MDW/FMW. */}
@@ -2590,6 +2639,14 @@ export function NewSubmission() {
           setIsRouteForApproval(true);
           setShowSubmitDialog(true);
         }}
+      />
+      
+      <AssignmentDialog
+        isOpen={showAssignmentDialog}
+        onClose={() => setShowAssignmentDialog(false)}
+        submission={currentSubmission}
+        currentUserRole={role}
+        onAssigned={handleAssignmentComplete}
       />
     </div>
   );
