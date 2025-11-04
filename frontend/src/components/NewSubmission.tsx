@@ -1474,7 +1474,7 @@ export function NewSubmission() {
                 <SelectContent>
                   {clinics.map((clinic) => (
                     <SelectItem key={clinic.id} value={clinic.id}>
-                      <div className="flex flex-col">
+                      <div className="flex items-center justify-between w-full gap-4">
                         <span className="font-medium">{clinic.name}</span>
                         {clinic.hciCode && (
                           <span className="text-xs text-slate-500">HCI: {clinic.hciCode}</span>
