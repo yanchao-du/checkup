@@ -1224,13 +1224,19 @@ export function NewSubmission() {
 
       if (id) {
         // Update existing draft - stay on the same page
-        await submissionsApi.update(id, submissionData);
+        const updated = await submissionsApi.update(id, submissionData);
         toast.success('Draft updated successfully');
+        // Update current submission and status
+        setCurrentSubmission(updated);
+        setSubmissionStatus(updated.status || 'draft');
         // Do not navigate away; remain on the draft edit page
       } else {
         // Create new draft and navigate to its draft edit URL so user stays on the page
         const created = await submissionsApi.create(submissionData);
         toast.success('Draft saved successfully');
+        // Update current submission and status immediately
+        setCurrentSubmission(created);
+        setSubmissionStatus(created.status || 'draft');
         // Navigate to /draft/:id which will load the draft into the form
         navigate(`/draft/${created.id}`, { replace: true });
       }
