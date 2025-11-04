@@ -49,8 +49,8 @@ export function AssignedToMe() {
     setClaimingId(id);
     try {
       await submissionsApi.claimSubmission(id);
-      // Optionally reload or just navigate
-      navigate(`/submissions/${id}`);
+      // Navigate to draft editor for in_progress submissions
+      navigate(`/draft/${id}`);
     } catch (err: any) {
       console.error('Failed to claim submission:', err);
       alert(err?.message || 'Failed to claim submission');
@@ -60,7 +60,8 @@ export function AssignedToMe() {
   };
 
   const handleView = (id: string) => {
-    navigate(`/submissions/${id}`);
+    // Navigate to draft editor for in_progress submissions
+    navigate(`/draft/${id}`);
   };
 
   if (isLoading) {
