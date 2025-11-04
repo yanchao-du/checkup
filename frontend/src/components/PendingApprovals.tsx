@@ -236,7 +236,7 @@ export function PendingApprovals() {
                     >
                       Date Submitted{getSortIcon('createdDate')}
                     </TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

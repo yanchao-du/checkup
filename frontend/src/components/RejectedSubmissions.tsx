@@ -238,11 +238,11 @@ export function RejectedSubmissions() {
               <TableBody>
                 {sortedRejections.map((submission) => (
                   <TableRow key={submission.id}>
-                    <TableCell className="font-medium">{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
+                    <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
                     <TableCell>{submission.patientNric}</TableCell>
                     <TableCell className="text-sm">{formatExamType(submission.examType)}</TableCell>
-                    <TableCell className="max-w-xs">
-                      <p className="text-sm text-slate-600 truncate" title={submission.rejectedReason}>
+                    <TableCell className="max-w-[200px]">
+                      <p className="text-sm text-slate-600 truncate" title={submission.rejectedReason || 'No reason provided'}>
                         {submission.rejectedReason || 'No reason provided'}
                       </p>
                     </TableCell>
