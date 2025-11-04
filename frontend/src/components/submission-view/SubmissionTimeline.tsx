@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { FileText, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, UserPlus, UserCheck } from 'lucide-react';
 
 interface SubmissionTimelineProps {
   history: any;
@@ -24,6 +24,11 @@ export function SubmissionTimeline({ history, submission }: SubmissionTimelinePr
         return { icon: CheckCircle, bgColor: 'bg-green-100', iconColor: 'text-green-600' };
       case 'rejected':
         return { icon: XCircle, bgColor: 'bg-red-100', iconColor: 'text-red-600' };
+      case 'assigned':
+      case 'reassigned':
+        return { icon: UserPlus, bgColor: 'bg-indigo-100', iconColor: 'text-indigo-600' };
+      case 'claimed':
+        return { icon: UserCheck, bgColor: 'bg-teal-100', iconColor: 'text-teal-600' };
       default:
         return { icon: FileText, bgColor: 'bg-gray-100', iconColor: 'text-gray-600' };
     }
@@ -55,6 +60,12 @@ export function SubmissionTimeline({ history, submission }: SubmissionTimelinePr
         return 'Approved by Doctor';
       case 'rejected':
         return 'Rejected';
+      case 'assigned':
+        return 'Assigned';
+      case 'reassigned':
+        return 'Reassigned';
+      case 'claimed':
+        return 'Claimed';
       default:
         return eventType.charAt(0).toUpperCase() + eventType.slice(1);
     }
@@ -64,6 +75,22 @@ export function SubmissionTimeline({ history, submission }: SubmissionTimelinePr
     // Check if this is a reopen action
     if (eventType === 'updated' && details?.action === 'reopened') {
       return `Changed from ${details.previousStatus} back to ${details.newStatus}`;
+    }
+    
+    // Handle assignment events
+    if (eventType === 'assigned' || eventType === 'reassigned') {
+      const parts = [];
+      if (details?.assignedToName && details?.assignedToRole) {
+        parts.push(`To: ${details.assignedToName} (${details.assignedToRole})`);
+      }
+      if (details?.note) {
+        parts.push(`Note: ${details.note}`);
+      }
+      return parts.join(' • ');
+    }
+    
+    if (eventType === 'claimed') {
+      return 'Started working on this submission';
     }
     
     if (eventType === 'submitted') {

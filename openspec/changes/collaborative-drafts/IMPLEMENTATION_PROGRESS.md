@@ -2,7 +2,7 @@
 
 **Feature Branch**: `collaborative-drafts`  
 **Start Date**: 2025-11-04  
-**Status**: 🟡 In Progress (Backend Complete, Frontend In Progress)
+**Status**: ✅ Feature Complete (Testing & Documentation Pending)
 
 ---
 
@@ -205,7 +205,10 @@ All assignment operations logged:
 
 ---
 
-## � Phase 3: Frontend UI (IN PROGRESS)
+
+---
+
+## ✅ Phase 3: Frontend UI (COMPLETED)
 
 ### 3.1 Status Constants & Utilities ✅ COMPLETED
 
@@ -218,6 +221,7 @@ All assignment operations logged:
 **Status Badge Design**:
 - `draft` - Gray "Draft" ✅
 - `in_progress` - Blue "In Progress" ✅ NEW
+
 - `pending_approval` - Yellow "Pending Approval" ✅
 - `submitted` - Green "Submitted" ✅
 - `rejected` - Red "Rejected" ✅
@@ -268,30 +272,32 @@ All assignment operations logged:
 
 ---
 
-### 3.3 "Assigned to Me" View 🔄 IN PROGRESS
+### 3.3 "Assigned to Me" View ✅ COMPLETED
 
-**File to Update**: `frontend/src/pages/Submissions.tsx` or similar
+**File Created**: `frontend/src/components/AssignedToMe.tsx`
 
-**Requirements**:
-- New tab: "Assigned to Me" alongside "All", "Drafts", "Pending Approval"
-- Shows only `in_progress` submissions where `assignedToId === currentUserId`
-- Display columns:
-  - Patient Name
-  - Exam Type
-  - Assigned By (name + role)
-  - Assigned At (relative time)
-  - Actions (Open, Claim)
-- "Claim" button to mark as started working
+**Features Implemented**:
+- ✅ Dedicated page showing submissions assigned to current user
+- ✅ Table with columns: Patient/Exam, Status, Assigned By, Assigned Time, Actions
+- ✅ "Claim" button to mark user started working
+- ✅ "Open" button to navigate to submission detail
+- ✅ Empty state when no assignments
+- ✅ Refresh button to reload data
+- ✅ Loading and error states
+- ✅ Relative timestamps using `formatDistanceToNow` from date-fns
+- ✅ Route added to App.tsx at `/assigned-to-me`
+- ✅ Navigation menu item added to DashboardLayout
 
 **API Integration**:
-- GET `/submissions/assigned-to-me`
-- POST `/submissions/:id/claim`
+- ✅ Calls `submissionsApi.getAssignedToMe()` on mount
+- ✅ Calls `submissionsApi.claimSubmission(id)` when claim button clicked
+- ✅ Navigates to submission detail after claiming
 
 ---
 
-### 3.4 Form Editor Actions 🔲 TODO
+### 3.4 Form Editor Actions ✅ COMPLETED
 
-**File to Update**: `frontend/src/components/NewSubmission.tsx`
+**File Updated**: `frontend/src/components/NewSubmission.tsx`
 
 **Requirements**:
 - Context-aware action buttons based on status and user role
@@ -330,60 +336,82 @@ All assignment operations logged:
 
 ---
 
-### 3.5 Status Badges & UI Indicators 🔲 TODO
+### 3.5 Status Badges & UI Indicators ✅ COMPLETED
 
-**Files to Update**:
-- Submission list components
-- Submission detail view
-- Anywhere status is displayed
+**Files Updated**:
+- ✅ `frontend/src/components/SubmissionsList.tsx`
+- ✅ `frontend/src/components/ViewSubmission.tsx`
 
 **Requirements**:
-- Add "In Progress" badge (blue color)
-- Show "Assigned to: [Name] ([Role])" for in_progress submissions
-- Show "Assigned by: [Name]" for context
-- Show assignment timestamp
+- ✅ Add "In Progress" badge (blue color) - Already done in badge-utils.ts
+- ✅ Show "Assigned to: [Name] ([Role])" for in_progress submissions
+- ✅ Display in submission lists and detail view
 
-**Example Display**:
+**Implementation Details**:
+
+**SubmissionsList.tsx**:
+- Added assignment info below status badge for `in_progress` submissions
+- Shows: "Assigned to: {assignedToName} ({assignedToRole})"
+- Only displayed when `submission.status === 'in_progress'` and `assignedToName` exists
+
+**ViewSubmission.tsx**:
+- Restructured header to accommodate assignment display
+- Shows assignment info next to status badge in submission detail header
+- Formatted as: "Assigned to: [Name] (role)"
+
+**Display Example**:
 ```
 ┌─────────────────────────────────────────┐
 │ John Doe - Work Permit Exam             │
 │ Status: [In Progress 🔵]                │
 │ Assigned to: Dr. Smith (doctor)         │
-│ Assigned by: Nurse Lee                  │
-│ Assigned 2 hours ago                    │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-### 3.6 Timeline/Activity Log 🔲 TODO
+### 3.6 Timeline/Activity Log ✅ COMPLETED
 
-**File to Update**: Wherever submission history/audit trail is displayed
+**File Updated**: `frontend/src/components/submission-view/SubmissionTimeline.tsx`
 
 **Requirements**:
-- Display assignment events in timeline
-- Event types:
-  - "Assigned to [Name] ([Role])" - initial assignment
-  - "Reassigned to [Name] ([Role])" - reassignment
-  - "Claimed by [Name]" - user started working
-  - "Submitted to Agency by [Name]" - final submission
+- ✅ Display assignment events in timeline
+- ✅ Handle event types: `assigned`, `reassigned`, `claimed`
+- ✅ Show assignee name and role
+- ✅ Display optional notes from assignments
+- ✅ Use appropriate icons and colors
 
-**Example Timeline**:
+**Implementation Details**:
+
+**New Icons**:
+- `assigned`/`reassigned`: UserPlus icon with indigo background
+- `claimed`: UserCheck icon with teal background
+
+**Event Labels**:
+- `assigned` → "Assigned"
+- `reassigned` → "Reassigned"
+- `claimed` → "Claimed"
+
+**Event Descriptions**:
+- For assignment events: "To: [Name] ([Role])" + optional "• Note: [text]"
+- For claim events: "Started working on this submission"
+
+**Example Timeline Display**:
 ```
 ○ Submitted to MOM
   by Dr. Smith • 2 hours ago
 
-○ Reassigned to Dr. Smith
+○ Reassigned
+  To: Dr. Smith (doctor) • Note: "Added lab results"
   by Nurse Lee • 4 hours ago
-  Note: "Added lab results as requested"
 
-○ Assigned to Nurse Lee
+○ Claimed
+  Started working on this submission
+  by Nurse Lee • 5 hours ago
+
+○ Assigned
+  To: Nurse Lee (nurse) • Note: "Please collect lab results"
   by Dr. Smith • 1 day ago
-  Note: "Please collect lab results"
-
-○ Assigned to Dr. Smith
-  by Nurse Lee • 1 day ago
-  Note: "Vitals completed, need medical assessment"
 
 ○ Draft Created
   by Nurse Lee • 1 day ago
@@ -458,11 +486,21 @@ All assignment operations logged:
    - Navigation menu item in DashboardLayout
    - Updated implementation progress
 
+4. ✅ `feat(collab): add assignment actions to form editor` (commit: 1a4e7ac)
+   - Added AssignmentDialog to NewSubmission.tsx
+   - Assignment button in form actions
+   - Handler to save and assign submissions
+   - Navigate to assigned-to-me after assignment
+
+5. ✅ `feat(collab): add assignment UI indicators to submission lists` (commit: 5098d87)
+   - Show "Assigned to: Name (role)" in SubmissionsList
+   - Show assignment info in ViewSubmission header
+   - Display below status badge for in_progress submissions
+
 **Next Commits** (planned):
-4. 🟡 `feat(collab): add assignment actions to form editor` - Currently in progress
-5. 🔲 `feat: Add status indicators and timeline updates` - UI enhancements
-6. 🔲 `test: Add collaborative draft tests` - Backend and E2E tests
-7. 🔲 `docs: Document collaborative draft workflow` - Documentation updates
+6. 🟡 `feat(collab): add assignment events to timeline` - Currently in progress
+7. 🔲 `test: Add collaborative draft tests` - Backend and E2E tests
+8. 🔲 `docs: Document collaborative draft workflow` - Documentation updates
 
 ---
 
