@@ -25,33 +25,33 @@ export function ExamTypeFilter({ value, onValueChange }: ExamTypeFilterProps) {
         <SelectGroup>
           <SelectLabel>Ministry of Manpower (MOM)</SelectLabel>
           <SelectItem value="SIX_MONTHLY_MDW">
-            MDW Six-monthly
+            Six-monthly Medical Exam for Migrant Domestic Worker
           </SelectItem>
           <SelectItem value="SIX_MONTHLY_FMW">
-            FMW Six-monthly
+            Six-monthly Medical Exam for Female Migrant Worker
           </SelectItem>
         </SelectGroup>
         
         <SelectGroup>
           <SelectLabel>Immigration & Checkpoints Authority (ICA)</SelectLabel>
           <SelectItem value="PR_MEDICAL">
-            PR Medical
+            Medical Examination for Permanent Residency
           </SelectItem>
           <SelectItem value="STUDENT_PASS_MEDICAL">
-            Student Pass
+            Medical Examination for Student Pass
           </SelectItem>
           <SelectItem value="LTVP_MEDICAL">
-            LTVP
+            Medical Examination for Long Term Visit Pass
           </SelectItem>
         </SelectGroup>
         
         <SelectGroup>
           <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
           <SelectItem value="DRIVING_LICENCE_TP">
-            Driving Licence (TP)
+            Driving Licence Medical Examination Report (TP)
           </SelectItem>
           <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-            Driving Vocational (TP/LTA)
+            Driving Licence and Vocational Licence (TP & LTA)
           </SelectItem>
         </SelectGroup>
       </SelectContent>
