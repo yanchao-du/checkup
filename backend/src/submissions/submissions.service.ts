@@ -41,7 +41,7 @@ export class SubmissionsService {
         examinationDate: dto.examinationDate ? new Date(dto.examinationDate) : undefined,
         status: status as any,
         formData: dto.formData,
-        clinicId,
+        clinicId: dto.clinicId || clinicId, // Use provided clinicId or fall back to user's primary clinic
         createdById: userId,
         assignedDoctorId: dto.assignedDoctorId,
         submittedDate: status === 'submitted' ? new Date() : undefined,
@@ -52,6 +52,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -160,6 +161,7 @@ export class SubmissionsService {
           createdBy: { select: { name: true } },
           approvedBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
+          clinic: { select: { name: true, hciCode: true, phone: true } },
         },
         orderBy,
         skip: (page - 1) * limit,
@@ -203,6 +205,7 @@ export class SubmissionsService {
           createdBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
           approvedBy: { select: { name: true } }, // This will be the rejector
+          clinic: { select: { name: true, hciCode: true, phone: true } },
         },
         orderBy: { createdDate: 'desc' },
         skip: (page - 1) * limit,
@@ -231,6 +234,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true, mcrNumber: true } },
         approvedBy: { select: { name: true, mcrNumber: true } },
         assignedDoctor: { select: { name: true, mcrNumber: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -308,6 +312,7 @@ export class SubmissionsService {
           ...(dto.examinationDate && { examinationDate: new Date(dto.examinationDate) }),
           ...(dto.formData && { formData: dto.formData }),
           ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
+          ...(dto.clinicId && { clinicId: dto.clinicId }),
           // Convert to draft if doctor is editing pending_approval
           ...(shouldConvertToDraft && { status: 'draft' as any }),
         },
@@ -315,6 +320,7 @@ export class SubmissionsService {
           createdBy: { select: { name: true } },
           approvedBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
+          clinic: { select: { name: true, hciCode: true, phone: true } },
         },
       });
 
@@ -394,6 +400,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -443,6 +450,7 @@ export class SubmissionsService {
         createdBy: { select: { name: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
 
@@ -557,6 +565,9 @@ export class SubmissionsService {
       rejectedReason: submission.rejectedReason,
       deletedAt: submission.deletedAt,
       clinicId: submission.clinicId,
+      clinicName: submission.clinic?.name,
+      clinicHciCode: submission.clinic?.hciCode,
+      clinicPhone: submission.clinic?.phone,
       formData: submission.formData,
     };
   }

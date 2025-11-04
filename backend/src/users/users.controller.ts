@@ -45,6 +45,12 @@ export class UsersController {
     return this.usersService.findNurses(user.clinicId);
   }
 
+  @Get('me/clinics')
+  @Roles('doctor', 'nurse')
+  async getMyClinics(@CurrentUser() user: any) {
+    return this.usersService.getUserClinics(user.id, user.role);
+  }
+
   @Get('me/default-doctor')
   @Roles('nurse')
   async getDefaultDoctor(@CurrentUser() user: any) {

@@ -49,6 +49,10 @@ export class CreateSubmissionDto {
   @IsOptional()
   @IsString()
   assignedDoctorId?: string;
+
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
 }
 
 export class UpdateSubmissionDto {
@@ -103,6 +107,10 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsBoolean()
   routeForApproval?: boolean;
+
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
 }
 
 export class SubmissionQueryDto {
