@@ -80,6 +80,7 @@ export type ExamType =
   | 'VOCATIONAL_LICENCE_LTA';
 export type SubmissionStatus = 
   | 'draft' 
+  | 'in_progress'
   | 'pending_approval' 
   | 'submitted' 
   | 'rejected' 
@@ -116,6 +117,15 @@ export interface MedicalSubmission {
   assignedDoctorId?: string;
   assignedDoctorName?: string;
   assignedDoctorMcrNumber?: string;
+  // Collaborative draft fields
+  assignedToId?: string;
+  assignedToName?: string;
+  assignedToRole?: UserRole;
+  assignedAt?: string;
+  assignedById?: string;
+  assignedByName?: string;
+  assignedByRole?: UserRole;
+  createdByRole?: UserRole;
   rejectedReason?: string;
   deletedAt?: string;
 }
@@ -125,21 +135,35 @@ export interface CreateSubmissionRequest {
   patientName: string;
   patientNric: string;
   patientDateOfBirth?: string;
+  patientEmail?: string;
+  patientMobile?: string;
+  drivingLicenseClass?: string;
   examinationDate?: string;
   formData: Record<string, any>;
   routeForApproval?: boolean;
   assignedDoctorId?: string;
   clinicId?: string;
+  assignTo?: string; // User ID to assign collaborative draft to
 }
 
 export interface UpdateSubmissionRequest {
   patientName?: string;
   patientNric?: string;
   patientDateOfBirth?: string;
+  patientEmail?: string;
+  patientMobile?: string;
+  drivingLicenseClass?: string;
   examinationDate?: string;
   formData?: Record<string, any>;
   assignedDoctorId?: string;
   clinicId?: string;
+  assignTo?: string; // User ID to assign/reassign collaborative draft to
+}
+
+// Collaborative Draft Types
+export interface AssignSubmissionRequest {
+  assignToId: string; // User ID to assign to
+  note?: string; // Optional note about the assignment
 }
 
 export interface SubmissionQueryParams {

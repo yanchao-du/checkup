@@ -52,6 +52,8 @@ model User {
   createdSubmissions  MedicalSubmission[] @relation("CreatedBy")
   approvedSubmissions MedicalSubmission[] @relation("ApprovedBy")
   assignedSubmissions MedicalSubmission[] @relation("AssignedDoctor")
+  assignedToSubmissions MedicalSubmission[] @relation("AssignedTo")  // Collaborative draft assignments
+  assignmentsCreated  MedicalSubmission[] @relation("AssignedBy")    // Assignments they created
   auditLogs           AuditLog[]
   corpPassUsers       CorpPassUser[]      // CorpPass authentication associations
 
@@ -119,6 +121,13 @@ model MedicalSubmission {
   createdById      String            @map("created_by")
   approvedById     String?           @map("approved_by")
   assignedDoctorId String?           @map("assigned_doctor_id")
+  
+  // Collaborative draft fields
+  assignedToId     String?           @map("assigned_to_id")
+  assignedToRole   UserRole?         @map("assigned_to_role")
+  assignedAt       DateTime?         @map("assigned_at")
+  assignedById     String?           @map("assigned_by_id")
+  
   examType         ExamType          @map("exam_type")
   patientName      String            @map("patient_name")
   patientNric      String            @map("patient_nric")
@@ -140,6 +149,8 @@ model MedicalSubmission {
   createdBy        User              @relation("CreatedBy", fields: [createdById], references: [id])
   approvedBy       User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
   assignedDoctor   User?             @relation("AssignedDoctor", fields: [assignedDoctorId], references: [id])
+  assignedTo       User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignedBy       User?             @relation("AssignedBy", fields: [assignedById], references: [id])
   auditLogs        AuditLog[]
 
   @@index([clinicId])
@@ -147,6 +158,7 @@ model MedicalSubmission {
   @@index([status])
   @@index([patientNric])
   @@index([examType])
+  @@index([assignedToId])
   @@index([createdDate(sort: Desc)])
   @@index([deletedAt])
   @@map("medical_submissions")
@@ -196,6 +208,7 @@ enum ExamType {
 
 enum SubmissionStatus {
   draft
+  in_progress
   pending_approval
   submitted
   rejected
@@ -208,4 +221,7 @@ enum EventType {
   approved
   rejected
   deleted
+  assigned
+  reassigned
+  claimed
 }

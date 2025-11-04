@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
+import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto, AssignSubmissionDto } from './dto/submission.dto';
 import { validateDriverExam } from './validation/driver-exam.validation';
 
 @Injectable()
@@ -13,13 +13,41 @@ export class SubmissionsService {
     // When routeForApproval is explicitly false, it's a draft
     const isDraft = dto.routeForApproval === false;
     
-    // Only validate driver exam submissions if not a draft
-    if (!isDraft) {
+    // Only validate driver exam submissions if not a draft or collaborative in_progress
+    if (!isDraft && !dto.assignTo) {
       validateDriverExam(dto);
     }
     
     let status: string;
-    if (isDraft) {
+    let assignedToId: string | undefined;
+    let assignedToRole: string | undefined;
+    let assignedAt: Date | undefined;
+    let assignedById: string | undefined;
+
+    // Handle collaborative assignment (new workflow)
+    if (dto.assignTo) {
+      const assignee = await this.prisma.user.findUnique({
+        where: { id: dto.assignTo },
+        select: { role: true, clinicId: true, id: true },
+      });
+
+      if (!assignee) {
+        throw new NotFoundException('Assigned user not found');
+      }
+
+      // Verify assignee is doctor or nurse
+      if (assignee.role !== 'doctor' && assignee.role !== 'nurse') {
+        throw new ForbiddenException('Can only assign to doctors or nurses');
+      }
+
+      status = 'in_progress';
+      assignedToId = dto.assignTo;
+      assignedToRole = assignee.role;
+      assignedAt = new Date();
+      assignedById = userId;
+    }
+    // Handle existing workflows
+    else if (isDraft) {
       status = 'draft';
     } else if (userRole === 'doctor') {
       status = 'submitted';
@@ -44,14 +72,20 @@ export class SubmissionsService {
         clinicId: dto.clinicId || clinicId, // Use provided clinicId or fall back to user's primary clinic
         createdById: userId,
         assignedDoctorId: dto.assignedDoctorId,
+        ...(assignedToId && { assignedToId }),
+        ...(assignedToRole && { assignedToRole: assignedToRole as any }),
+        ...(assignedAt && { assignedAt }),
+        ...(assignedById && { assignedById }),
         submittedDate: status === 'submitted' ? new Date() : undefined,
         approvedById: status === 'submitted' && userRole === 'doctor' ? userId : undefined,
         approvedDate: status === 'submitted' && userRole === 'doctor' ? new Date() : undefined,
       },
       include: {
-        createdBy: { select: { name: true } },
+        createdBy: { select: { name: true, role: true } },
         approvedBy: { select: { name: true } },
         assignedDoctor: { select: { name: true } },
+        assignedTo: { select: { name: true, role: true } },
+        assignedBy: { select: { name: true, role: true } },
         clinic: { select: { name: true, hciCode: true, phone: true } },
       },
     });
@@ -69,6 +103,23 @@ export class SubmissionsService {
         },
       },
     });
+
+    // If created with collaborative assignment
+    if (status === 'in_progress' && submission.assignedTo) {
+      await this.prisma.auditLog.create({
+        data: {
+          submissionId: submission.id,
+          userId,
+          eventType: 'assigned',
+          changes: { 
+            status: 'in_progress',
+            assignedToId: submission.assignedToId,
+            assignedToName: submission.assignedTo.name,
+            assignedToRole: submission.assignedTo.role,
+          },
+        },
+      });
+    }
 
     // If created with pending_approval status, also create a 'submitted' event for routing
     if (status === 'pending_approval') {
@@ -274,15 +325,18 @@ export class SubmissionsService {
     // - Admin can edit any submission
     // - Creator can edit their own submissions
     // - Doctors can edit submissions in pending_approval status (routed to them by nurses)
+    // - Assigned users can edit in_progress submissions
     const isCreator = existing.createdById === userId;
     const isDoctorEditingPendingApproval = userRole === 'doctor' && existing.status === 'pending_approval';
+    const isAssignedUserEditingInProgress = 
+      existing.status === 'in_progress' && existing.assignedToId === userId;
     
-    if (!isCreator && userRole !== 'admin' && !isDoctorEditingPendingApproval) {
-      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById}, status: ${existing.status})`);
+    if (!isCreator && userRole !== 'admin' && !isDoctorEditingPendingApproval && !isAssignedUserEditingInProgress) {
+      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById}, status: ${existing.status}, assignedTo: ${existing.assignedToId})`);
       throw new ForbiddenException('Access denied');
     }
 
-    // Allow editing drafts and pending_approval, but not submitted submissions
+    // Allow editing drafts, in_progress, and pending_approval, but not submitted submissions
     // Rejected submissions that have been reopened will have status='draft'
     if (existing.status === 'submitted') {
       this.logger.warn(`Cannot edit submitted submission ${id}`);
@@ -297,6 +351,31 @@ export class SubmissionsService {
     // If a doctor is editing a pending_approval submission, convert it to draft
     // so they can submit it directly (which auto-approves for doctors)
     const shouldConvertToDraft = userRole === 'doctor' && existing.status === 'pending_approval';
+
+    // Handle assignTo parameter for collaborative workflow
+    let assignmentData: any = {};
+    if (dto.assignTo) {
+      const assignee = await this.prisma.user.findUnique({
+        where: { id: dto.assignTo },
+        select: { id: true, role: true },
+      });
+
+      if (!assignee) {
+        throw new NotFoundException('Assigned user not found');
+      }
+
+      if (assignee.role !== 'doctor' && assignee.role !== 'nurse') {
+        throw new ForbiddenException('Can only assign to doctors or nurses');
+      }
+
+      assignmentData = {
+        status: 'in_progress',
+        assignedToId: dto.assignTo,
+        assignedToRole: assignee.role,
+        assignedAt: new Date(),
+        assignedById: userId,
+      };
+    }
 
     try {
       const submission = await this.prisma.medicalSubmission.update({
@@ -315,29 +394,37 @@ export class SubmissionsService {
           ...(dto.clinicId && { clinicId: dto.clinicId }),
           // Convert to draft if doctor is editing pending_approval
           ...(shouldConvertToDraft && { status: 'draft' as any }),
+          // Apply assignment data if assignTo was specified
+          ...assignmentData,
         },
         include: {
-          createdBy: { select: { name: true } },
+          createdBy: { select: { name: true, role: true } },
           approvedBy: { select: { name: true } },
           assignedDoctor: { select: { name: true } },
+          assignedTo: { select: { name: true, role: true } },
+          assignedBy: { select: { name: true, role: true } },
           clinic: { select: { name: true, hciCode: true, phone: true } },
         },
       });
 
       // Audit log
+      const auditChanges: any = {
+        ...dto,
+        ...(shouldConvertToDraft && { statusChange: { from: 'pending_approval', to: 'draft' } }),
+      };
+
       await this.prisma.auditLog.create({
         data: {
           submissionId: id,
           userId,
-          eventType: 'updated',
-          changes: {
-            ...dto,
-            ...(shouldConvertToDraft && { statusChange: { from: 'pending_approval', to: 'draft' } }),
-          } as any,
+          eventType: dto.assignTo ? 'reassigned' : 'updated',
+          changes: auditChanges,
         },
       });
 
-      if (shouldConvertToDraft) {
+      if (dto.assignTo) {
+        this.logger.log(`Updated and assigned submission ${id} to ${dto.assignTo}`);
+      } else if (shouldConvertToDraft) {
         this.logger.log(`Converted submission ${id} from pending_approval to draft for doctor ${userId}`);
       } else {
         this.logger.log(`Successfully updated submission ${id}`);
@@ -518,6 +605,247 @@ export class SubmissionsService {
     return { success: true, message: 'Draft deleted successfully' };
   }
 
+  /**
+   * Assign a draft or in_progress submission to a doctor or nurse
+   * Part of the collaborative draft workflow
+   */
+  async assignSubmission(
+    id: string,
+    userId: string,
+    userRole: string,
+    dto: AssignSubmissionDto,
+  ) {
+    const submission = await this.prisma.medicalSubmission.findUnique({
+      where: { id },
+      include: {
+        assignedTo: { select: { name: true, role: true } },
+      },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Cannot assign deleted submissions
+    if (submission.deletedAt) {
+      throw new ForbiddenException('Cannot assign deleted submissions');
+    }
+
+    // Can only assign draft or in_progress submissions
+    if (submission.status !== 'draft' && submission.status !== 'in_progress') {
+      throw new ForbiddenException(
+        'Can only assign draft or in_progress submissions. Use "Route for Approval" for the approval workflow.',
+      );
+    }
+
+    // Verify user has permission to assign
+    // Must be the creator, current assignee, or admin
+    const canAssign =
+      userRole === 'admin' ||
+      submission.createdById === userId ||
+      (submission.status === 'in_progress' && submission.assignedToId === userId);
+
+    if (!canAssign) {
+      throw new ForbiddenException(
+        'Only the creator, current assignee, or admin can assign this submission',
+      );
+    }
+
+    // Get assignee details
+    const assignee = await this.prisma.user.findUnique({
+      where: { id: dto.assignToId },
+      select: { id: true, name: true, role: true, clinicId: true },
+    });
+
+    if (!assignee) {
+      throw new NotFoundException('Assigned user not found');
+    }
+
+    // Can only assign to doctor or nurse
+    if (assignee.role !== 'doctor' && assignee.role !== 'nurse') {
+      throw new ForbiddenException('Can only assign to doctors or nurses');
+    }
+
+    // Update submission with assignment
+    const wasInProgress = submission.status === 'in_progress';
+    const updated = await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        status: 'in_progress',
+        assignedToId: assignee.id,
+        assignedToRole: assignee.role,
+        assignedAt: new Date(),
+        assignedById: userId,
+      },
+      include: {
+        createdBy: { select: { name: true, role: true } },
+        approvedBy: { select: { name: true } },
+        assignedDoctor: { select: { name: true } },
+        assignedTo: { select: { name: true, role: true } },
+        assignedBy: { select: { name: true, role: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
+      },
+    });
+
+    // Create audit log
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: wasInProgress ? 'reassigned' : 'assigned',
+        changes: {
+          previousAssignedToId: submission.assignedToId,
+          previousAssignedToName: submission.assignedTo?.name,
+          assignedToId: assignee.id,
+          assignedToName: assignee.name,
+          assignedToRole: assignee.role,
+          note: dto.note,
+        },
+      },
+    });
+
+    this.logger.log(
+      `Submission ${id} ${wasInProgress ? 'reassigned' : 'assigned'} to ${assignee.name} (${assignee.role}) by user ${userId}`,
+    );
+
+    return this.formatSubmission(updated);
+  }
+
+  /**
+   * Get all submissions assigned to the current user (in_progress status)
+   * Part of the collaborative draft workflow
+   */
+  async getAssignedSubmissions(userId: string, userRole: string, clinicId: string) {
+    const where: any = {
+      status: 'in_progress',
+      assignedToId: userId,
+      deletedAt: null,
+    };
+
+    // Role-based filtering
+    if (userRole !== 'admin') {
+      where.clinicId = clinicId;
+    }
+
+    const submissions = await this.prisma.medicalSubmission.findMany({
+      where,
+      include: {
+        createdBy: { select: { name: true, role: true, mcrNumber: true } },
+        assignedBy: { select: { name: true, role: true } },
+        assignedTo: { select: { name: true, role: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
+      },
+      orderBy: { assignedAt: 'desc' },
+    });
+
+    return submissions.map(s => this.formatSubmission(s));
+  }
+
+  /**
+   * Claim a submission assigned to you (marks that you've started working on it)
+   * Part of the collaborative draft workflow
+   */
+  async claimSubmission(id: string, userId: string, userRole: string) {
+    const submission = await this.prisma.medicalSubmission.findUnique({
+      where: { id },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Must be in_progress and assigned to the user
+    if (submission.status !== 'in_progress') {
+      throw new ForbiddenException('Submission must be in progress to claim');
+    }
+
+    if (submission.assignedToId !== userId) {
+      throw new ForbiddenException('You can only claim submissions assigned to you');
+    }
+
+    // Create audit log for claiming
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'claimed',
+        changes: {
+          status: 'in_progress',
+          message: 'User started working on assigned submission',
+        },
+      },
+    });
+
+    this.logger.log(`Submission ${id} claimed by user ${userId}`);
+
+    return { success: true, message: 'Submission claimed successfully' };
+  }
+
+  /**
+   * Submit a collaborative draft to agency (doctor only)
+   * Converts in_progress -> submitted
+   */
+  async submitCollaborativeDraft(id: string, userId: string, userRole: string) {
+    const submission = await this.prisma.medicalSubmission.findUnique({
+      where: { id },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Only doctors can submit
+    if (userRole !== 'doctor' && userRole !== 'admin') {
+      throw new ForbiddenException('Only doctors can submit to agency');
+    }
+
+    // Must be in_progress
+    if (submission.status !== 'in_progress') {
+      throw new ForbiddenException('Can only submit in_progress submissions');
+    }
+
+    // Validate the submission
+    validateDriverExam({
+      examType: submission.examType,
+      formData: submission.formData,
+    } as any);
+
+    // Update to submitted
+    const updated = await this.prisma.medicalSubmission.update({
+      where: { id },
+      data: {
+        status: 'submitted',
+        submittedDate: new Date(),
+        approvedById: userId,
+        approvedDate: new Date(),
+      },
+      include: {
+        createdBy: { select: { name: true, role: true } },
+        approvedBy: { select: { name: true, mcrNumber: true } },
+        assignedTo: { select: { name: true, role: true } },
+        assignedBy: { select: { name: true, role: true } },
+        clinic: { select: { name: true, hciCode: true, phone: true } },
+      },
+    });
+
+    // Create audit log
+    await this.prisma.auditLog.create({
+      data: {
+        submissionId: id,
+        userId,
+        eventType: 'submitted',
+        changes: {
+          previousStatus: 'in_progress',
+          status: 'submitted',
+        },
+      },
+    });
+
+    this.logger.log(`Collaborative draft ${id} submitted to agency by user ${userId}`);
+
+    return this.formatSubmission(updated);
+  }
+
   async getAuditTrail(submissionId: string) {
     const logs = await this.prisma.auditLog.findMany({
       where: { submissionId },
@@ -552,6 +880,7 @@ export class SubmissionsService {
       createdBy: submission.createdById,
       createdById: submission.createdById, // Add this for frontend compatibility
       createdByName: submission.createdBy?.name,
+      createdByRole: submission.createdBy?.role,
       createdByMcrNumber: submission.createdBy?.mcrNumber,
       createdDate: submission.createdDate,
       submittedDate: submission.submittedDate,
@@ -562,6 +891,14 @@ export class SubmissionsService {
       assignedDoctorId: submission.assignedDoctorId,
       assignedDoctorName: submission.assignedDoctor?.name,
       assignedDoctorMcrNumber: submission.assignedDoctor?.mcrNumber,
+      // Collaborative draft fields
+      assignedToId: submission.assignedToId,
+      assignedToName: submission.assignedTo?.name,
+      assignedToRole: submission.assignedTo?.role,
+      assignedAt: submission.assignedAt,
+      assignedById: submission.assignedById,
+      assignedByName: submission.assignedBy?.name,
+      assignedByRole: submission.assignedBy?.role,
       rejectedReason: submission.rejectedReason,
       deletedAt: submission.deletedAt,
       clinicId: submission.clinicId,

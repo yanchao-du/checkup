@@ -53,6 +53,10 @@ export class CreateSubmissionDto {
   @IsOptional()
   @IsString()
   clinicId?: string;
+
+  @IsOptional()
+  @IsString()
+  assignTo?: string;  // User ID to assign collaborative draft to
 }
 
 export class UpdateSubmissionDto {
@@ -111,6 +115,10 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsString()
   clinicId?: string;
+
+  @IsOptional()
+  @IsString()
+  assignTo?: string;  // User ID to assign/reassign collaborative draft to
 }
 
 export class SubmissionQueryDto {
@@ -154,4 +162,13 @@ export class SubmissionQueryDto {
   @IsInt()
   @Min(1)
   limit?: number;
+}
+
+export class AssignSubmissionDto {
+  @IsString()
+  assignToId: string;  // User ID to assign to
+
+  @IsOptional()
+  @IsString()
+  note?: string;  // Optional note about the assignment
 }
