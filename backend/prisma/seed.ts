@@ -180,7 +180,7 @@ async function main() {
       hciCode: 'HCI0002',  // HCI format: 7 alphanumeric characters
       registrationNumber: 'RC002345',
       address: '456 Thomson Road, #02-03, Singapore 307591',
-      phone: '+65 6234 5678',
+      phone: '+65 6789 0123',
       email: 'info@carewell.sg',
     },
   });
