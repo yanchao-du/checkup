@@ -26,7 +26,8 @@
     "seed:patients:verify": "ts-node prisma/verify-patients.ts",
     "seed:patients:check-dates": "ts-node prisma/check-dates.ts",
     "seed:patients:analyze-names": "ts-node prisma/analyze-names.ts",
-    "test:patient-api": "node scripts/test-patient-api.js"
+    "test:patient-api": "node scripts/test-patient-api.js",
+    "cleanup:test-users": "ts-node scripts/cleanup-test-users.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
