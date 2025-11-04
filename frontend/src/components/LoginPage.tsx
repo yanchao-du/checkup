@@ -47,8 +47,8 @@ export function LoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
               <img src="/logo.svg" alt="goCheckUp logo" className="w-16 h-16" />
             </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">goCheckUp Medical Examination Portal</h1>
-          <p className="text-slate-600">A one-stop portal to submit statutory medical examinations to government agencies</p>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">goCheckUp</h1>
+          <p className="text-slate-600">Your one-stop portal to manage, submit, and track statutory medical examinations</p>
           <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-sm font-semibold">
             This website is for demo and testing purposes only. Do not submit real patient data.
           </div>

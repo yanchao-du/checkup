@@ -202,7 +202,7 @@ export function Dashboard() {
       <div>
         <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Hello, {user?.name}</h2>
         <p className="text-slate-600">
-          {user?.role === 'admin' ? "Here's an overview of all medical examination submissions" : "Here's an overview of your medical examination submissions"}
+          {user?.role === 'admin' ? "Here's an overview of all medical examination reports" : "Here's an overview of medical examination reports"}
         </p>
       </div>
 
