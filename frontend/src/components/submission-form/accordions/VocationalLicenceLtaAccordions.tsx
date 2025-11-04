@@ -50,7 +50,7 @@ export function VocationalLicenceLtaAccordions({
               errors={errors}
               onValidate={onValidate}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 disabled={!isPatientCertificationChecked(formData)}
@@ -82,7 +82,7 @@ export function VocationalLicenceLtaAccordions({
               errors={errors}
               onValidate={onValidate}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 disabled={!isMedicalHistoryPatientCertificationChecked(formData)}
@@ -117,7 +117,7 @@ export function VocationalLicenceLtaAccordions({
               onValidate={onValidate}
               isDriverExam={true}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 onClick={() => {
@@ -146,7 +146,7 @@ export function VocationalLicenceLtaAccordions({
         <AccordionContent>
           <div className="space-y-4">
             <VocationalLicenceLtaFields formData={formData} onChange={onChange} />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 onClick={() => onContinue('lta-vocational', 'assessment')}
@@ -172,7 +172,7 @@ export function VocationalLicenceLtaAccordions({
               onChange={onChange}
               examType="VOCATIONAL_LICENCE_LTA"
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 onClick={() => onContinue('assessment', 'summary')}

@@ -59,7 +59,7 @@ export function DrivingVocationalTpLtaAccordions({
               errors={errors}
               onValidate={onValidate}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 disabled={!isPatientCertificationChecked(formData)}
@@ -91,7 +91,7 @@ export function DrivingVocationalTpLtaAccordions({
               errors={errors}
               onValidate={onValidate}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 disabled={!isMedicalHistoryPatientCertificationChecked(formData)}
@@ -126,7 +126,7 @@ export function DrivingVocationalTpLtaAccordions({
               onValidate={onValidate}
               isDriverExam={true}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 onClick={() => {
@@ -161,7 +161,7 @@ export function DrivingVocationalTpLtaAccordions({
               dateOfBirth={dateOfBirth}
               examinationDate={examinationDate}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 onClick={() => onContinue('amt', 'vocational-xray')}
@@ -188,7 +188,7 @@ export function DrivingVocationalTpLtaAccordions({
               errors={errors}
               onValidate={onValidate}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-start mt-4">
               <Button 
                 type="button"
                 onClick={() => {

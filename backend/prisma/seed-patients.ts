@@ -1,8 +1,33 @@
 import { PrismaClient } from '@prisma/client';
-import { generateValidNRIC } from '../src/common/utils/nric-validator';
 import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
+
+// NRIC/FIN generation utility (copied to avoid import issues with ts-node)
+const NRIC_WEIGHTS = [2, 7, 6, 5, 4, 3, 2];
+const ST_FG_CHECKSUM = ['J', 'Z', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
+const M_CHECKSUM = ['K', 'L', 'J', 'N', 'P', 'Q', 'R', 'T', 'U', 'W', 'X'];
+
+function generateValidNRIC(prefix: 'S' | 'T' | 'F' | 'G' | 'M' = 'S', digits?: string): string {
+  // Generate random 7 digits if not provided
+  const numDigits = digits || String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
+  
+  // Calculate checksum
+  let sum = 0;
+  for (let i = 0; i < 7; i++) {
+    sum += parseInt(numDigits.charAt(i)) * NRIC_WEIGHTS[i];
+  }
+  
+  // Add offset for M prefix
+  if (prefix === 'M') {
+    sum += 4;
+  }
+  
+  const checksumArray = (prefix === 'M') ? M_CHECKSUM : ST_FG_CHECKSUM;
+  const checksum = checksumArray[sum % 11];
+  
+  return `${prefix}${numDigits}${checksum}`;
+}
 
 // Female names from Indonesia, Myanmar, and Philippines
 const indonesianNames = [

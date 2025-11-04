@@ -1559,7 +1559,7 @@ export function NewSubmission() {
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="patientName">Full Name (as in NRIC/FIN) <span className="text-red-500">*</span></Label>
+                      <Label htmlFor="patientName">Full Name (as in NRIC / FIN) <span className="text-red-500">*</span></Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
@@ -1765,7 +1765,7 @@ export function NewSubmission() {
                       )}
                     </div>
                   </div>
-                  <div className="flex justify-end mt-4">
+                  <div className="flex justify-start mt-4">
                     <Button 
                       type="button"
                       onClick={() => handleContinue('patient-info', 'exam-specific')}
@@ -1832,7 +1832,7 @@ export function NewSubmission() {
                       remarksError={remarksError}
                     />
                   )}
-                  <div className="flex justify-end mt-4">
+                  <div className="flex justify-start mt-4">
                     <Button 
                       type="button"
                       onClick={() => {
@@ -2080,7 +2080,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                       />
                       
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
                             type="button"
@@ -2177,7 +2177,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                       />
                       
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
                             type="button"
@@ -2272,7 +2272,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                       />
                       
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
                             type="button"
@@ -2335,7 +2335,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                       />
 
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         <Button
                           type="button"
                           onClick={() => {
@@ -2411,7 +2411,7 @@ export function NewSubmission() {
                         </div>
                       )}
 
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         <Button
                           type="button"
                           onClick={() => {
@@ -2463,7 +2463,7 @@ export function NewSubmission() {
                         }}
                       />
 
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         <Button
                           type="button"
                           onClick={() => {
@@ -2497,7 +2497,7 @@ export function NewSubmission() {
                       value={formData.remarks || ''}
                       onChange={(value) => handleFormDataChange('remarks', value)}
                     />
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-start mt-4">
                       <Button 
                         type="button"
                         onClick={() => {
