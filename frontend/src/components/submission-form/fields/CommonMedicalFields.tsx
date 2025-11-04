@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { VisualAcuityField } from './VisualAcuityField';
 import { AbnormalityChecklistField } from './AbnormalityChecklistField';
 import { BloodPressureField } from './BloodPressureField';
+import { validatePulse } from '../../../lib/validationRules';
 import { useEffect, useState } from 'react';
 
 interface CommonMedicalFieldsProps {
@@ -149,12 +150,22 @@ export function CommonMedicalFields({
           <Label htmlFor="pulse">Pulse (bpm) <span className="text-red-500">*</span></Label>
           <Input
             id="pulse"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            maxLength={3}
             placeholder="e.g., 72"
             value={formData.pulse || ''}
-            onChange={(e) => onChange('pulse', e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9]/g, '');
+              if (val.length <= 3) {
+                onChange('pulse', val);
+              }
+            }}
             onBlur={(e) => {
-              if (e.target.value.trim() && errors.pulse) {
+              const error = validatePulse(e.target.value);
+              if (error) {
+                onValidate?.('pulse', error);
+              } else if (errors.pulse) {
                 onValidate?.('pulse', '');
               }
             }}

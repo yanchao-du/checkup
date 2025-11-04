@@ -41,6 +41,18 @@ export function validateBloodPressure(systolic: string, diastolic: string): stri
   
   return null;
 }
+
+export function validatePulse(value: string): string | null {
+  if (!value) return null;
+  const num = Number(value);
+  // Regex: ^[0-9]{2,3}$ - Must be 2-3 digits only (no decimals, letters, or special chars)
+  // Range: 30-250 bpm (realistic heart rate range)
+  if (!/^[0-9]{2,3}$/.test(value) || num < 30 || num > 250) {
+    return 'Please enter a valid heart rate between 30 and 250 bpm.';
+  }
+  return null;
+}
+
 export function validateWeight(value: string): string | null {
   if (!value) return null;
   const num = Number(value);
