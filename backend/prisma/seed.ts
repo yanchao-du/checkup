@@ -288,6 +288,58 @@ async function main() {
   console.log('   - Dr. Emily Chen: HealthFirst + CareWell (primary)');
   console.log('   - Dr. Michael Tan: CareWell only');
 
+  // Create nurse-clinic relationships (many-to-many)
+  // Nurse Mary Lim - works at both clinics (primary at HealthFirst)
+  await prisma.nurseClinic.upsert({
+    where: { 
+      nurseId_clinicId: {
+        nurseId: nurse.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      nurseId: nurse.id,
+      clinicId: clinic.id,
+      isPrimary: true,  // Primary clinic
+    },
+  });
+
+  await prisma.nurseClinic.upsert({
+    where: { 
+      nurseId_clinicId: {
+        nurseId: nurse.id,
+        clinicId: clinic2.id,
+      }
+    },
+    update: {},
+    create: {
+      nurseId: nurse.id,
+      clinicId: clinic2.id,
+      isPrimary: false,  // Secondary clinic
+    },
+  });
+
+  // Nurse Linda Koh - works only at HealthFirst
+  await prisma.nurseClinic.upsert({
+    where: { 
+      nurseId_clinicId: {
+        nurseId: nurse2.id,
+        clinicId: clinic.id,
+      }
+    },
+    update: {},
+    create: {
+      nurseId: nurse2.id,
+      clinicId: clinic.id,
+      isPrimary: true,
+    },
+  });
+
+  console.log('✅ Created nurse-clinic relationships');
+  console.log('   - Nurse Mary Lim: HealthFirst (primary) + CareWell');
+  console.log('   - Nurse Linda Koh: HealthFirst only');
+
   // Create sample submissions
   const submission1 = await prisma.medicalSubmission.create({
     data: {
