@@ -2,7 +2,7 @@
  * Utility functions for badge styling across the application
  */
 
-export type SubmissionStatus = 'draft' | 'pending_approval' | 'submitted' | 'rejected';
+export type SubmissionStatus = 'draft' | 'in_progress' | 'pending_approval' | 'submitted' | 'rejected';
 export type UserStatus = 'active' | 'inactive';
 
 /**
@@ -15,7 +15,8 @@ export type UserStatus = 'active' | 'inactive';
  */
 export function getSubmissionStatusBadgeVariant(status: string): 
   | "success" 
-  | "warning" 
+  | "warning"
+  | "info"
   | "error" 
   | "inactive" 
   | "default" {
@@ -30,6 +31,8 @@ export function getSubmissionStatusBadgeVariant(status: string):
     case 'pending_approval':
     case 'routed_for_approval':
       return "warning";
+    case 'in_progress':
+      return "info";
     case 'rejected':
       return "error";
     case 'draft':
@@ -86,6 +89,8 @@ export function getSubmissionStatusLabel(status: string): string {
   switch (normalizedStatus) {
     case 'draft':
       return 'Draft';
+    case 'in_progress':
+      return 'In Progress';
     case 'pending_approval':
       return 'Pending Approval';
     case 'submitted':

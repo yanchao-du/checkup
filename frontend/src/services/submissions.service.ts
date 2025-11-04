@@ -6,6 +6,7 @@ import type {
   SubmissionQueryParams,
   PaginatedResponse,
   AuditLog,
+  AssignSubmissionRequest,
 } from '../types/api';
 
 export const submissionsApi = {
@@ -72,5 +73,27 @@ export const submissionsApi = {
   // Delete a draft submission
   delete: async (id: string): Promise<{ success: boolean; message: string }> => {
     return apiClient.delete<{ success: boolean; message: string }>(`/submissions/${id}`);
+  },
+
+  // Collaborative Draft Methods
+
+  // Get submissions assigned to current user
+  getAssignedToMe: async (): Promise<MedicalSubmission[]> => {
+    return apiClient.get<MedicalSubmission[]>('/submissions/assigned-to-me');
+  },
+
+  // Assign submission to doctor or nurse
+  assignSubmission: async (id: string, data: AssignSubmissionRequest): Promise<MedicalSubmission> => {
+    return apiClient.post<MedicalSubmission>(`/submissions/${id}/assign`, data);
+  },
+
+  // Claim an assigned submission
+  claimSubmission: async (id: string): Promise<{ success: boolean; message: string }> => {
+    return apiClient.post<{ success: boolean; message: string }>(`/submissions/${id}/claim`);
+  },
+
+  // Submit collaborative draft to agency (doctor only)
+  submitCollaborativeDraft: async (id: string): Promise<MedicalSubmission> => {
+    return apiClient.post<MedicalSubmission>(`/submissions/${id}/submit-collaborative`);
   },
 };
