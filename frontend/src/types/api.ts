@@ -14,6 +14,16 @@ export interface Clinic {
   updatedAt?: string;
 }
 
+// User's associated clinic (for dropdown selection)
+export interface UserClinic {
+  id: string;
+  name: string;
+  hciCode?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  isPrimary: boolean;
+}
+
 export interface DoctorClinic {
   doctorId: string;
   clinicId: string;
@@ -89,6 +99,9 @@ export interface MedicalSubmission {
   status: SubmissionStatus;
   formData: Record<string, any>;
   clinicId: string;
+  clinicName?: string;
+  clinicHciCode?: string;
+  clinicPhone?: string;
   createdById: string;
   createdBy: string;
   createdByName?: string;
@@ -116,6 +129,7 @@ export interface CreateSubmissionRequest {
   formData: Record<string, any>;
   routeForApproval?: boolean;
   assignedDoctorId?: string;
+  clinicId?: string;
 }
 
 export interface UpdateSubmissionRequest {
@@ -125,6 +139,7 @@ export interface UpdateSubmissionRequest {
   examinationDate?: string;
   formData?: Record<string, any>;
   assignedDoctorId?: string;
+  clinicId?: string;
 }
 
 export interface SubmissionQueryParams {
