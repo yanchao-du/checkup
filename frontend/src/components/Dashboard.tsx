@@ -216,12 +216,12 @@ export function Dashboard() {
               </div>
               <div className="flex-1">
                 <CardTitle className="text-red-900">
-                  {rejectedSubmissions.length} Rejected Submission{rejectedSubmissions.length !== 1 ? 's' : ''}
+                  {rejectedSubmissions.length} Rejected Report{rejectedSubmissions.length !== 1 ? 's' : ''}
                 </CardTitle>
                 <CardDescription className="text-red-700">
                   {rejectedSubmissions.length === 1 
-                    ? 'You have a submission that was rejected by doctor and needs attention'
-                    : 'You have submissions that were rejected by doctor and need attention'}
+                    ? 'You have a report that was rejected by doctor and needs attention'
+                    : 'You have reports that were rejected by doctor and need attention'}
                 </CardDescription>
               </div>
             </div>
@@ -282,7 +282,7 @@ export function Dashboard() {
               <CardTitle className="text-orange-900">Action Required</CardTitle>
             </div>
             <CardDescription className="text-orange-700">
-              You have {pendingApprovals.length} submission(s) waiting for your approval
+              You have {pendingApprovals.length} report(s) waiting for your approval
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -358,7 +358,9 @@ export function Dashboard() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-2xl text-slate-900">{rejectedSubmissions.length}</span>
-              <span className="text-xs text-slate-500 truncate">Rejected by Doctor</span>
+              <span className="text-xs text-slate-500 truncate">
+                {user?.role === 'doctor' ? 'Rejected by Me' : 'Rejected by Doctor'}
+              </span>
             </div>
           </div>
         </Card>
@@ -491,7 +493,7 @@ export function Dashboard() {
                         <FileText className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">New Submission</p>
+                        <p className="text-sm font-medium text-slate-900">New Report</p>
                         <p className="text-xs text-slate-500">Create a new medical examination</p>
                       </div>
                     </div>
