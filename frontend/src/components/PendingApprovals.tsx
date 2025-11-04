@@ -183,7 +183,7 @@ export function PendingApprovals() {
       <Card>
         <CardContent>
           <div className="my-4">
-            <Label className="text-base font-semibold">Submissions Awaiting Approval ({sortedApprovals.length})</Label>
+            <Label className="text-base font-semibold">Reports Awaiting Approval ({sortedApprovals.length})</Label>
           </div>
           {sortedApprovals.length === 0 ? (
             <div className="text-center py-12 text-slate-500">

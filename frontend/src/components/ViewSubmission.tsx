@@ -439,7 +439,7 @@ export function ViewSubmission() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {submission.status === 'submitted' ? 'Agency and Examination Information' : 'Examination Information'}
+                  {submission.status === 'submitted' ? 'Agency & Examination Information' : 'Examination Information'}
                 </CardTitle>
               </CardHeader>
               <CardContent>

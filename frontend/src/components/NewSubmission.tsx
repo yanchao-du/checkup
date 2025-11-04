@@ -1444,10 +1444,10 @@ export function NewSubmission() {
                 <SelectGroup>
                   <SelectLabel>Ministry of Manpower (MOM)</SelectLabel>
                   <SelectItem value="SIX_MONTHLY_MDW">
-                    Six-monthly Medical Exam for Migrant Domestic Worker
+                    Six-monthly Medical Exam (6ME) for Migrant Domestic Worker
                   </SelectItem>
                   <SelectItem value="SIX_MONTHLY_FMW">
-                    Six-monthly Medical Exam for Female Migrant Worker
+                    Six-monthly Medical Exam (6ME) for Female Migrant Worker
                   </SelectItem>
                 </SelectGroup>
                 
