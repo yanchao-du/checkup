@@ -232,7 +232,7 @@ export function RejectedSubmissions() {
                   >
                     Status{getSortIcon('status')}
                   </TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
