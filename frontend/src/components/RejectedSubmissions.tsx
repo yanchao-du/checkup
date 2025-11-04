@@ -33,6 +33,7 @@ export function RejectedSubmissions() {
   const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageInput, setPageInput] = useState('1');
   const rowsPerPage = 10;
 
   useEffect(() => {
@@ -113,7 +114,13 @@ export function RejectedSubmissions() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
+    setPageInput('1');
   }, [searchQuery, filterExamType]);
+
+  // Sync pageInput with currentPage when currentPage changes externally
+  useEffect(() => {
+    setPageInput(currentPage.toString());
+  }, [currentPage]);
 
   const handleReopen = async (submissionId: string) => {
     try {
@@ -346,12 +353,18 @@ export function RejectedSubmissions() {
                       type="number"
                       min={1}
                       max={totalPages}
-                      value={currentPage}
+                      value={pageInput}
                       onChange={(e) => {
-                        const page = parseInt(e.target.value);
-                        if (page >= 1 && page <= totalPages) {
+                        const value = e.target.value;
+                        setPageInput(value);
+                        const page = parseInt(value);
+                        if (!isNaN(page) && page >= 1 && page <= totalPages) {
                           setCurrentPage(page);
                         }
+                      }}
+                      onBlur={() => {
+                        // Reset to current page if input is invalid
+                        setPageInput(currentPage.toString());
                       }}
                       className="w-16 h-8 text-center"
                     />
