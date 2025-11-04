@@ -9,7 +9,7 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { XCircle, Eye, Loader2, RotateCcw, Search, ArrowUpDown } from 'lucide-react';
+import { XCircle, Eye, Loader2, RotateCcw, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { ExamTypeFilter } from './ExamTypeFilter';
 import {
   Table,
@@ -52,6 +52,15 @@ export function RejectedSubmissions() {
 
     fetchRejectedSubmissions();
   }, [user?.role]);
+
+  const getSortIcon = (column: string) => {
+    if (sortField !== column) {
+      return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-30" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="w-4 h-4 ml-1 inline" />
+      : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
 
   const filteredRejections = rejectedSubmissions.filter(submission => {
     const matchesSearch = 
@@ -175,87 +184,55 @@ export function RejectedSubmissions() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('patientName')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Patient Name
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('patientName')}
+                  >
+                    Patient Name{getSortIcon('patientName')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('patientNric')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      NRIC/FIN
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('patientNric')}
+                  >
+                    NRIC/FIN{getSortIcon('patientNric')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('examType')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Examination Type
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('examType')}
+                  >
+                    Examination Type{getSortIcon('examType')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('rejectedReason')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Rejection Reason
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('rejectedReason')}
+                  >
+                    Rejection Reason{getSortIcon('rejectedReason')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('createdByName')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Submitted By
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('createdByName')}
+                  >
+                    Submitted By{getSortIcon('createdByName')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('approvedByName')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Rejected By
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('approvedByName')}
+                  >
+                    Rejected By{getSortIcon('approvedByName')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('createdDate')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Rejected Date
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('createdDate')}
+                  >
+                    Rejected Date{getSortIcon('createdDate')}
                   </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('status')}
-                      className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                    >
-                      Status
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('status')}
+                  >
+                    Status{getSortIcon('status')}
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -287,8 +264,8 @@ export function RejectedSubmissions() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <TableCell>
+                      <div className="flex items-center gap-2">
                         <Link to={`/view-submission/${submission.id}`}>
                           <Button 
                             variant="ghost" 

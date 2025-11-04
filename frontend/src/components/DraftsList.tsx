@@ -9,7 +9,7 @@ import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Edit, FileEdit, Search, Trash2, ArrowUpDown } from 'lucide-react';
+import { Edit, FileEdit, Search, Trash2, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { ExamTypeFilter } from './ExamTypeFilter';
 import {
   Table,
@@ -90,6 +90,15 @@ export function DraftsList() {
 
     fetchDrafts();
   }, [user?.role, includeDeleted]);
+
+  const getSortIcon = (column: string) => {
+    if (sortField !== column) {
+      return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-30" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="w-4 h-4 ml-1 inline" />
+      : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
 
   const filteredDrafts = drafts.filter(draft => {
     const matchesSearch = 
@@ -226,7 +235,7 @@ export function DraftsList() {
       <Card>
         <CardContent>
           <div className="my-4">
-            <Label className="text-base font-semibold">Your Drafts ({sortedDrafts.length})</Label>
+            <Label className="text-base font-semibold">Drafts ({sortedDrafts.length})</Label>
           </div>
           {sortedDrafts.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
@@ -239,55 +248,35 @@ export function DraftsList() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('patientName')}
-                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                      >
-                        Patient Name
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('patientName')}
+                    >
+                      Patient Name{getSortIcon('patientName')}
                     </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('patientNric')}
-                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                      >
-                        NRIC/FIN
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('patientNric')}
+                    >
+                      NRIC/FIN{getSortIcon('patientNric')}
                     </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('examType')}
-                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                      >
-                        Examination Type
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('examType')}
+                    >
+                      Examination Type{getSortIcon('examType')}
                     </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('createdByName')}
-                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                      >
-                        Created By
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('createdByName')}
+                    >
+                      Created By{getSortIcon('createdByName')}
                     </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('createdDate')}
-                        className="h-8 px-2 hover:bg-slate-100 font-semibold"
-                      >
-                        Last Modified
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('createdDate')}
+                    >
+                      Last Modified{getSortIcon('createdDate')}
                     </TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
