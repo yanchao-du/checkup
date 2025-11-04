@@ -56,13 +56,13 @@ import { VocationalLicenceLtaAccordions } from './submission-form/accordions/Voc
 const examTypes: { value: ExamType; label: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam for Migrant Domestic Worker (MOM)' },
   { value: 'SIX_MONTHLY_FMW', label: 'Six-monthly Medical Exam for Female Migrant Worker (MOM)' },
-  { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
+  // { value: 'WORK_PERMIT', label: 'Full Medical Exam for Work Permit (MOM)' },
   { value: 'PR_MEDICAL', label: 'Medical Examination for Permanent Residency (ICA)' },
   { value: 'STUDENT_PASS_MEDICAL', label: 'Medical Examination for Student Pass (ICA)' },
   { value: 'LTVP_MEDICAL', label: 'Medical Examination for Long Term Visit Pass (ICA)' },
   { value: 'DRIVING_LICENCE_TP', label: 'Driving Licence Medical Examination Report (TP)' },
   { value: 'DRIVING_VOCATIONAL_TP_LTA', label: 'Driving Licence and Vocational Licence (TP & LTA)' },
-  { value: 'VOCATIONAL_LICENCE_LTA', label: 'Vocational Licence Medical Examination (LTA)' },
+  // { value: 'VOCATIONAL_LICENCE_LTA', label: 'Vocational Licence Medical Examination (LTA)' },
 ];
 
 // Helper to check if exam type is ICA
