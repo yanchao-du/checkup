@@ -11,7 +11,7 @@ import { useUnsavedChanges } from './UnsavedChangesContext';
 import { submissionsApi } from '../services';
 import { usersApi, type Doctor } from '../services/users.service';
 import { patientsApi } from '../services/patients.service';
-import type { ExamType } from '../services';
+import type { ExamType, UserClinic } from '../services';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -143,6 +143,10 @@ export function NewSubmission() {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [lastRecordedHeight, setLastRecordedHeight] = useState<string>('');
   const [lastRecordedWeight, setLastRecordedWeight] = useState<string>('');
+  
+  // Clinic selection state
+  const [clinics, setClinics] = useState<UserClinic[]>([]);
+  const [selectedClinicId, setSelectedClinicId] = useState<string>('');
   const [lastRecordedDate, setLastRecordedDate] = useState<string>('');
   const [heightError, setHeightError] = useState<string | null>(null);
   const [weightError, setWeightError] = useState<string | null>(null);
@@ -241,6 +245,31 @@ export function NewSubmission() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
+  // Load user's clinics
+  useEffect(() => {
+    const fetchClinics = async () => {
+      if (user?.role === 'nurse' || user?.role === 'doctor') {
+        try {
+          const userClinics = await usersApi.getMyClinics();
+          setClinics(userClinics);
+          
+          // Set primary clinic as default
+          const primaryClinic = userClinics.find(c => c.isPrimary);
+          if (primaryClinic && !id) {
+            // Only set default for new submissions, not when editing drafts
+            setSelectedClinicId(primaryClinic.id);
+          }
+        } catch (error) {
+          console.error('Failed to fetch clinics:', error);
+        }
+      } else if (user?.clinicId) {
+        // Admin users have a single clinic
+        setSelectedClinicId(user.clinicId);
+      }
+    };
+    fetchClinics();
+  }, [user, id]);
+
   // Load doctors list for nurse
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -280,6 +309,7 @@ export function NewSubmission() {
           setDrivingLicenseClass(existing.drivingLicenseClass || '');
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
+          setSelectedClinicId(existing.clinicId || '');
           setFormData(existing.formData);
           
           // Restore required tests from formData
@@ -1187,6 +1217,7 @@ export function NewSubmission() {
         formData,
         routeForApproval: false,
         assignedDoctorId: assignedDoctorId || undefined,
+        ...(selectedClinicId && { clinicId: selectedClinicId }),
       };
 
       if (id) {
@@ -1249,6 +1280,7 @@ export function NewSubmission() {
         // Only send routeForApproval: true when nurse is routing for approval
         ...(user.role === 'nurse' && isRouteForApproval && { routeForApproval: true }),
         assignedDoctorId: assignedDoctorId || undefined,
+        ...(selectedClinicId && { clinicId: selectedClinicId }),
       };
 
         if (id) {
@@ -1430,6 +1462,33 @@ export function NewSubmission() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Clinic Selection - Only show for doctors and nurses */}
+          {examType && (user?.role === 'doctor' || user?.role === 'nurse') && clinics.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="clinic">Clinic *</Label>
+              <Select value={selectedClinicId} onValueChange={setSelectedClinicId} name="clinic">
+                <SelectTrigger id="clinic">
+                  <SelectValue placeholder="Select clinic" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clinics.map((clinic) => (
+                    <SelectItem key={clinic.id} value={clinic.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{clinic.name}</span>
+                        <span className="text-xs text-slate-500">
+                          {[clinic.hciCode, clinic.phone].filter(Boolean).join(' • ')}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedClinicId && clinics.find(c => c.id === selectedClinicId)?.isPrimary && (
+                <p className="text-xs text-blue-600">Primary clinic</p>
+              )}
+            </div>
+          )}
 
           {examType && (
             <Accordion type="single" collapsible value={activeAccordion} onValueChange={setActiveAccordion} className="w-full">
@@ -1961,6 +2020,7 @@ export function NewSubmission() {
                         lastRecordedWeight={lastRecordedWeight}
                         lastRecordedDate={lastRecordedDate}
                         requiredTests={requiredTests}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                         onEdit={(section) => {
                           // Navigate to the requested section for editing
                           setActiveAccordion(section);

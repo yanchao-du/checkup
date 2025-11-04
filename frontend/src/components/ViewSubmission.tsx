@@ -192,6 +192,18 @@ export function ViewSubmission() {
                     <p className="text-slate-900">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
                   </div>
                 )}
+                {/* Clinic Information */}
+                {submission.clinicName && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-slate-500 mb-1">Clinic</p>
+                    <p className="text-slate-900 font-medium">{submission.clinicName}</p>
+                    {(submission.clinicHciCode || submission.clinicPhone) && (
+                      <p className="text-sm text-slate-600">
+                        {[submission.clinicHciCode, submission.clinicPhone].filter(Boolean).join(' • ')}
+                      </p>
+                    )}
+                  </div>
+                )}
                 {isDriverExamType(submission.examType) && submission.patientEmail && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Email Address</p>
