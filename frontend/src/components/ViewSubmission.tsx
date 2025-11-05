@@ -20,6 +20,7 @@ import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
 import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { DrivingLicenceTpDetails } from './submission-form/details/DrivingLicenceTpDetails';
+import { DrivingVocationalTpLtaDetails } from './submission-form/details/DrivingVocationalTpLtaDetails';
 import { VocationalLicenceLtaDetails } from './submission-form/details/VocationalLicenceLtaDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import { DeclarationView } from './submission-view/DeclarationView';
@@ -326,8 +327,21 @@ export function ViewSubmission() {
                 <AgedDriversDetails submission={submission} />
               )}
 
-              {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
+              {/* Driver Licence / Vocational Licence routing based on purposeOfExam */}
+              {submission.examType === 'DRIVING_LICENCE_TP' && (
                 <DrivingLicenceTpDetails submission={submission} />
+              )}
+
+              {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' && (
+                <DrivingLicenceTpDetails submission={submission} />
+              )}
+
+              {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && (
+                <DrivingVocationalTpLtaDetails submission={submission} />
+              )}
+
+              {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && (submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || submission.purposeOfExam === 'BAVL_ANY_AGE') && (
+                <VocationalLicenceLtaDetails submission={submission} />
               )}
 
               {submission.examType === 'VOCATIONAL_LICENCE_LTA' && (

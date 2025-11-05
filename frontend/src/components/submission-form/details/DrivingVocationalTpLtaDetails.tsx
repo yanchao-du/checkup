@@ -10,7 +10,6 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
   const medicalHistory = data.medicalHistory || {};
   const amt = data.amt || {};
   const abnormalityChecklist = data.abnormalityChecklist || {};
-  const ltaVocational = data.ltaVocational || {};
   const assessment = data.assessment || {};
 
   // Helper to get checked declaration items
@@ -153,49 +152,51 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       )}
 
       {/* Medical Declaration by Patient */}
-      {checkedDeclarations.length > 0 && (
-        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical Declaration by Patient</h3>
-          <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical Declaration by Patient</h3>
+        <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
+        {checkedDeclarations.length > 0 ? (
           <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
             {checkedDeclarations.map((item, index) => (
               <li key={index} className="text-amber-700">{item}</li>
             ))}
           </ul>
-          
-          {/* Remarks */}
-          {medicalDeclaration.remarks && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Remarks</h4>
-              <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">
-                {medicalDeclaration.remarks}
-              </p>
-            </div>
-          )}
+        ) : (
+          <p className="text-sm text-gray-600 italic">No conditions declared</p>
+        )}
+        
+        {/* Remarks */}
+        {medicalDeclaration.remarks && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Remarks</h4>
+            <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">
+              {medicalDeclaration.remarks}
+            </p>
+          </div>
+        )}
 
-          {/* Patient Certification */}
-          {medicalDeclaration.patientCertification && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
-              <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
-                <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
-                <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
-                <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
-                  <li>I have explained this declaration to the patient</li>
-                  <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
-                  <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
-                  <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
-                </ul>
-              </div>
+        {/* Patient Certification */}
+        {medicalDeclaration.patientCertification && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+            <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
+              <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
+              <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+              <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                <li>I have explained this declaration to the patient</li>
+                <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+              </ul>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Medical History of Patient */}
-      {checkedHistoryItems.length > 0 && (
-        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical History of Patient</h3>
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical History of Patient</h3>
+        {checkedHistoryItems.length > 0 ? (
           <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
             {checkedHistoryItems.map((item, index) => (
               <li key={index} className="text-amber-700">
@@ -210,25 +211,27 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
               </li>
             ))}
           </ul>
+        ) : (
+          <p className="text-sm text-gray-600 italic">No declared medical conditions</p>
+        )}
 
-          {/* Patient Certification */}
-          {medicalHistory.patientCertification && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
-              <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
-                <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
-                <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
-                <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
-                  <li>I have explained this declaration to the patient</li>
-                  <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
-                  <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
-                  <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
-                </ul>
-              </div>
+        {/* Patient Certification */}
+        {medicalHistory.patientCertification && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+            <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
+              <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
+              <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+              <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                <li>I have explained this declaration to the patient</li>
+                <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+              </ul>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* General Medical Examination */}
       <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
@@ -320,90 +323,133 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       </div>
 
       {/* Abbreviated Mental Test (AMT) */}
-      {amt.score !== undefined && (
+      {(data.amtRequired === false || data.amtRequired === 'false') ? (
         <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
           <h3 className="font-semibold text-lg mb-4 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Abbreviated Mental Test (AMT)</h3>
-          <div className="space-y-3">
-            <div className="flex items-center gap-8">
-              <div>
-                <p className="text-sm text-gray-600">Result</p>
-                <p className={`text-2xl font-bold ${Number(amt.score) >= 8 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Number(amt.score) >= 8 ? 'Pass' : 'Fail'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Score</p>
-                <p className="text-2xl font-bold">{amt.score}/10</p>
-              </div>
-            </div>
-            {Number(amt.score) < 8 && (
-              <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
-                <p className="text-sm font-medium text-amber-800">
-                  ⚠️ A score of less than 7 suggests cognitive impairment and may require specialist referral for further diagnosis.
-                </p>
-              </div>
-            )}
-          </div>
+          <p className="text-lg text-slate-600">AMT not required</p>
         </div>
+      ) : (
+        amt.score !== undefined && (
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Abbreviated Mental Test (AMT)</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-8">
+                <div>
+                  <p className="text-sm text-gray-600">Result</p>
+                  <p className={`text-2xl font-bold ${Number(amt.score) >= 8 ? 'text-green-600' : 'text-red-600'}`}>
+                    {Number(amt.score) >= 8 ? 'Pass' : 'Fail'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Score</p>
+                  <p className="text-2xl font-bold">{amt.score}/10</p>
+                </div>
+              </div>
+              {Number(amt.score) < 8 && (
+                <div className="bg-amber-100 border border-amber-300 rounded-md px-4 py-2">
+                  <p className="text-sm font-medium text-amber-800">
+                    ⚠️ A score of less than 7 suggests cognitive impairment and may require specialist referral for further diagnosis.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )
       )}
 
       {/* Vocational Licence Medical Examination (LTA) */}
-      {ltaVocational && Object.keys(ltaVocational).length > 0 && (
-        <div className="bg-white border-2 border-indigo-200 rounded-lg shadow-sm">
-          <h3 className="font-semibold text-lg mb-0 text-indigo-900 bg-indigo-50 px-6 py-4 rounded-t-lg border-b-2 border-indigo-200">Vocational Licence Medical Examination (LTA)</h3>
-          <div className="p-6 space-y-4">
-            {/* X-ray Requirements */}
-            {(ltaVocational.xrayRequired !== undefined || ltaVocational.xrayDate) && (
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">X-ray Requirements</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">X-ray Required:</span>
-                    <p className={`font-medium ${ltaVocational.xrayRequired ? 'text-red-600' : 'text-green-600'}`}>
-                      {ltaVocational.xrayRequired ? 'Yes' : 'No'}
-                    </p>
-                  </div>
-                  {ltaVocational.xrayDate && (
+      <div className="bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+        <h3 className="font-semibold text-lg mb-0 text-gray-900 bg-gray-50 px-6 py-4 rounded-t-lg border-b-2 border-gray-200">Vocational Licence Medical Examination (LTA)</h3>
+        <div className="p-6 space-y-4">
+          {/* X-ray Requirements */}
+          {data.vocationalXrayRequired && (
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">X-ray Examination</h4>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-gray-600">X-ray Required:</span>
+                  <p className="font-medium inline ml-2">
+                    {data.vocationalXrayRequired === 'yes' ? 'Yes' : data.vocationalXrayRequired === 'no' ? 'No' : '-'}
+                  </p>
+                </div>
+                {data.vocationalXrayRequired === 'yes' && (
+                  <>
                     <div>
-                      <span className="text-gray-600">X-ray Date:</span>
-                      <p className="font-medium">{new Date(ltaVocational.xrayDate).toLocaleDateString()}</p>
+                      <span className="text-gray-600">X-ray Findings:</span>
+                      <p className={`font-medium inline ml-2 ${data.vocationalXrayFindings === 'tb' ? 'text-red-600' : ''}`}>
+                        {data.vocationalXrayFindings === 'no_lesion' 
+                          ? 'No radiological evidence of chest lesion' 
+                          : data.vocationalXrayFindings === 'tb' 
+                          ? 'Patient is suffering from TB' 
+                          : '-'}
+                      </p>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Memo Requirements */}
-            {(ltaVocational.furtherMemoRequired !== undefined || ltaVocational.memoProvided !== undefined) && (
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">Memo Requirements</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Further Memo Required:</span>
-                    <p className={`font-medium ${ltaVocational.furtherMemoRequired ? 'text-red-600' : 'text-green-600'}`}>
-                      {ltaVocational.furtherMemoRequired ? 'Yes' : 'No'}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Memo Provided:</span>
-                    <p className={`font-medium ${!ltaVocational.memoProvided ? 'text-red-600' : 'text-green-600'}`}>
-                      {ltaVocational.memoProvided ? 'Yes' : 'No'}
-                    </p>
-                  </div>
-                </div>
-                {ltaVocational.memoRemarks && (
-                  <div className="mt-2">
-                    <span className="text-gray-600 text-sm">Remarks:</span>
-                    <p className="font-medium text-sm whitespace-pre-wrap bg-gray-50 p-2 rounded border mt-1">
-                      {ltaVocational.memoRemarks}
-                    </p>
-                  </div>
+                    {data.vocationalXrayRemarks && (
+                      <div>
+                        <span className="text-gray-600">Remarks:</span>
+                        <p className="text-gray-700 bg-gray-50 p-2 rounded mt-1 whitespace-pre-wrap">
+                          {data.vocationalXrayRemarks}
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Medical Conditions Requiring Additional Memo/Report */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Medical Conditions Requiring Additional Memo/Report</h4>
+            {(() => {
+              const memoRequirements = data.memoRequirements 
+                ? (typeof data.memoRequirements === 'string' ? JSON.parse(data.memoRequirements) : data.memoRequirements)
+                : {};
+              const memoFields = Object.keys(memoRequirements).filter(key => memoRequirements[key]);
+              
+              return memoFields.length > 0 ? (
+                <div className="space-y-3">
+                  {memoFields.map((field, index) => {
+                    const memoProvided = data[`memoProvided_${field}`];
+                    const furtherMemoRequired = data[`furtherMemoRequired_${field}`];
+                    const memoRemarks = data[`memoRemarks_${field}`] || '';
+                    
+                    return (
+                      <div key={index} className="mb-4 last:mb-0">
+                        <p className="text-sm font-medium text-amber-700 mb-2 capitalize">{field.replace(/_/g, ' ')}</p>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Memo Provided:</span>
+                            <p className={`font-medium ${memoProvided !== 'yes' ? 'text-red-600' : 'text-green-600'}`}>
+                              {memoProvided === 'yes' ? 'Yes' : 'No'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Further Memo Required:</span>
+                            <p className={`font-medium ${furtherMemoRequired === 'yes' ? 'text-red-600' : 'text-green-600'}`}>
+                              {furtherMemoRequired === 'yes' ? 'Yes' : 'No'}
+                            </p>
+                          </div>
+                        </div>
+                        {memoRemarks && (
+                          <div className="mt-2">
+                            <span className="text-gray-600 text-sm">Remarks:</span>
+                            <p className="font-medium text-sm whitespace-pre-wrap bg-gray-50 p-2 rounded border mt-1">
+                              {memoRemarks}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600">Nil</p>
+              );
+            })()}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Overall Result of Medical Examination */}
       {assessment && (
@@ -411,22 +457,95 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
           <h3 className="font-semibold text-lg mb-0 text-slate-900 bg-slate-100 px-6 py-4 rounded-t-lg border-b-2 border-slate-300">Overall Result of Medical Examination</h3>
           
           <div className="p-6">
-          {/* Fit to Drive Public Service Vehicle */}
-          <div className="mb-6">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Is the patient physically and mentally fit to drive a public service vehicle?
-            </p>
-            {assessment.fitToDrivePublicService !== undefined && (
+          {/* For AGE_65_ABOVE_TP_ONLY - show fit to drive motor vehicle */}
+          {submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' && (
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Is the patient physically and mentally fit to drive a motor vehicle?
+              </p>
+              {assessment.fitToDrive !== undefined && (
+                <div className="mt-3">
+                  <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
+                    {assessment.fitToDrive ? '✓ YES - Patient is fit to drive' : '✗ NO - Patient is not fit to drive'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* For AGE_64_BELOW_LTA_ONLY - show fit to drive public service vehicle */}
+          {submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' && (
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Is the patient physically and mentally fit to drive a public service vehicle?
+              </p>
+              {assessment.fitToDrivePublicService !== undefined && (
+                <div className="mt-3">
+                  <p className={`font-bold text-lg ${assessment.fitToDrivePublicService ? 'text-green-600' : 'text-red-600'}`}>
+                    {assessment.fitToDrivePublicService ? '✓ YES - Patient is fit to drive a public service vehicle' : '✗ NO - Patient is not fit to drive a public service vehicle'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* For BAVL_ANY_AGE - show bus attendant only */}
+          {submission.purposeOfExam === 'BAVL_ANY_AGE' && assessment.fitForBusAttendant !== undefined && (
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Is the patient fit to hold a Bus Attendant Vocational Licence?
+              </p>
               <div className="mt-3">
-                <p className={`font-bold text-lg ${assessment.fitToDrivePublicService ? 'text-green-600' : 'text-red-600'}`}>
-                  {assessment.fitToDrivePublicService ? '✓ YES - Patient is fit to drive a public service vehicle' : '✗ NO - Patient is not fit to drive a public service vehicle'}
+                <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
+                  {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Bus Attendant Licence (conditional) */}
-          {assessment.fitToDrivePublicService === false && assessment.fitForBusAttendant !== undefined && (
+          {/* For AGE_65_ABOVE_TP_LTA - show both questions */}
+          {submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && (
+            <>
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Is the patient physically and mentally fit to drive a motor vehicle?
+                </p>
+                <div className="mt-3">
+                  <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
+                    {assessment.fitToDrive ? '✓ YES - Patient is fit to drive a motor vehicle' : '✗ NO - Patient is not fit to drive a motor vehicle'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Is the patient physically and mentally fit to drive a public service vehicle?
+                </p>
+                <div className="mt-3">
+                  <p className={`font-bold text-lg ${assessment.fitToDrivePublicService ? 'text-green-600' : 'text-red-600'}`}>
+                    {assessment.fitToDrivePublicService ? '✓ YES - Patient is fit to drive a public service vehicle' : '✗ NO - Patient is not fit to drive a public service vehicle'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Bus Attendant - if not fit for public service vehicle */}
+              {assessment.fitToDrivePublicService === false && assessment.fitForBusAttendant !== undefined && (
+                <div className="mb-6">
+                  <p className="text-sm font-medium text-gray-700 mb-3">
+                    Is the patient fit to hold a Bus Attendant Vocational Licence?
+                  </p>
+                  <div className="mt-3">
+                    <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
+                      {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Bus Attendant Licence (conditional for AGE_64_BELOW_LTA_ONLY) */}
+          {submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' && assessment.fitToDrivePublicService === false && assessment.fitForBusAttendant !== undefined && (
             <div className="mb-6">
               <p className="text-sm font-medium text-gray-700 mb-3">
                 Is the patient fit to hold a Bus Attendant Vocational Licence?
