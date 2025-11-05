@@ -13,6 +13,7 @@ import { RejectedSubmissions } from './components/RejectedSubmissions';
 import { ViewSubmission } from './components/ViewSubmission';
 import { Acknowledgement } from './components/Acknowledgement';
 import { Settings } from './components/Settings';
+import Help from './pages/Help';
 import { AuthProvider, useAuth } from './components/AuthContext';
 import { UnsavedChangesProvider } from './components/UnsavedChangesContext';
 
@@ -114,6 +115,7 @@ function AppRoutes() {
                   <Route path="/view-submission/:id" element={<ViewSubmission />} />
                   <Route path="/acknowledgement/:id" element={<Acknowledgement />} />
                   <Route path="/draft/:id" element={<NewSubmission />} />
+                  <Route path="/help" element={<Help />} />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>

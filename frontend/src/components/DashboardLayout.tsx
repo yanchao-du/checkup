@@ -35,11 +35,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   const handleHelp = () => {
-    // Determine which guide to show based on user role
-    const guideUrl = user?.role === 'doctor' 
-      ? 'https://github.com/yanchao-du/checkup/blob/main/docs/guides/DOCTOR_USER_GUIDE.md'
-      : 'https://github.com/yanchao-du/checkup/blob/main/docs/guides/NURSE_USER_GUIDE.md';
-    window.open(guideUrl, '_blank');
+    navigate('/help');
   };
 
   const navItems = [
