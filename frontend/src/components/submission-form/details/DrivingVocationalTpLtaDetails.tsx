@@ -177,8 +177,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
           {medicalDeclaration.patientCertification && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
-              <div className="p-3 rounded-md bg-green-50 border border-green-200">
-                <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+              <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
+                <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
                 <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
                 <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
                   <li>I have explained this declaration to the patient</li>
@@ -215,8 +215,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
           {medicalHistory.patientCertification && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
-              <div className="p-3 rounded-md bg-green-50 border border-green-200">
-                <p className="text-green-700 font-medium mb-2">✓ Patient certification confirmed</p>
+              <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
+                <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
                 <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
                 <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
                   <li>I have explained this declaration to the patient</li>
