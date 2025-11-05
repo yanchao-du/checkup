@@ -100,7 +100,7 @@ export function AMTRequirementSection({
         // Age is in or near critical range, need to check license details
         
         // Condition 1: Class 4/4A/4P/4AP/5/5P or Private Driving Instructor AND next birthday age 70-74
-        if (ageNextBirthday !== null && ageNextBirthday >= 70 && ageNextBirthday <= 74) {
+        if (!required && ageNextBirthday !== null && ageNextBirthday >= 70 && ageNextBirthday <= 74) {
           const isAMTAgeCheckClass = AMT_AGE_CHECK_CLASSES.includes(drivingLicenseClass);
           
           if (isAMTAgeCheckClass) {
@@ -109,6 +109,8 @@ export function AMTRequirementSection({
           } else if (formData.isPrivateDrivingInstructor === 'yes') {
             required = true;
             reasons.push(`Patient holds Private Driving Instructor licence and next birthday age is ${ageNextBirthday} (70-74)`);
+          } else if (formData.isPrivateDrivingInstructor === 'no') {
+            // Private Driving Instructor status is known and is 'no', continue checking
           } else if (formData.isPrivateDrivingInstructor === undefined) {
             // Need to know if they're a Private Driving Instructor
             needsMoreInfo = true;
@@ -128,8 +130,8 @@ export function AMTRequirementSection({
           }
         }
         
-        // If we need more info, persist that these questions have been shown
-        if (needsMoreInfo && (!hasShownPrivateDrivingInstructor || !hasShownLTAVocational)) {
+        // If we need more info and AMT is not already required, persist that these questions have been shown
+        if (needsMoreInfo && !required && (!hasShownPrivateDrivingInstructor || !hasShownLTAVocational)) {
           onChange('hasShownPrivateDrivingInstructor', true);
           onChange('hasShownLTAVocational', true);
         }
@@ -138,14 +140,15 @@ export function AMTRequirementSection({
 
     setIsAMTRequired(required);
     setRequirementReason(reasons);
-    setNeedsAdditionalInfo(needsMoreInfo);
-    setCanMakeDetermination(!needsMoreInfo); // Can only make determination if we don't need more info
+    // If AMT is required, we don't need more info - we've made the determination
+    setNeedsAdditionalInfo(required ? false : needsMoreInfo);
+    setCanMakeDetermination(required || !needsMoreInfo); // Can make determination if required OR don't need more info
     
     // Notify parent about requirement status
     if (onRequirementChange) {
-      onRequirementChange(required, !needsMoreInfo);
+      onRequirementChange(required, required || !needsMoreInfo);
     }
-  }, [drivingLicenseClass, dateOfBirth, examinationDate, cognitiveImpairment, formData, onRequirementChange]);
+  }, [drivingLicenseClass, dateOfBirth, examinationDate, cognitiveImpairment, formData, onRequirementChange, autoSetLTAVocational]);
 
   return (
     <div className="space-y-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
