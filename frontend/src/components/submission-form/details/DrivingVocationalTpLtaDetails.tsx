@@ -154,8 +154,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
 
       {/* Medical Declaration by Patient */}
       {checkedDeclarations.length > 0 && (
-        <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-3 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Medical Declaration by Patient</h3>
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical Declaration by Patient</h3>
           <p className="text-sm text-gray-600 mb-3 italic">Conditions experienced in the past 6 months:</p>
           <ul className="list-disc ml-6 space-y-1 text-sm mb-4">
             {checkedDeclarations.map((item, index) => (
@@ -194,8 +194,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
 
       {/* Medical History of Patient */}
       {checkedHistoryItems.length > 0 && (
-        <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-3 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Medical History of Patient</h3>
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical History of Patient</h3>
           <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
             {checkedHistoryItems.map((item, index) => (
               <li key={index} className="text-amber-700">
@@ -231,8 +231,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
       )}
 
       {/* General Medical Examination */}
-      <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
-        <h3 className="font-semibold text-lg mb-4 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">General Medical Examination</h3>
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-4 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">General Medical Examination</h3>
         
         {/* Cardiovascular Assessment */}
         <div className="mb-4">
@@ -317,8 +317,8 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
 
       {/* Abbreviated Mental Test (AMT) */}
       {amt.score !== undefined && (
-        <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-4 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Abbreviated Mental Test (AMT)</h3>
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-4 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Abbreviated Mental Test (AMT)</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-8">
               <div>
