@@ -85,39 +85,9 @@ export default function Help() {
           </div>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-h1:text-3xl prose-h1:font-bold prose-h1:mb-4 prose-h1:pb-3 prose-h1:border-b prose-h1:border-slate-200 prose-h2:text-2xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4 prose-h2:text-blue-900 prose-h3:text-xl prose-h3:font-semibold prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-slate-800 prose-h4:text-lg prose-h4:font-medium prose-h4:mt-4 prose-h4:mb-2 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-slate-900 prose-strong:font-semibold prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-ul:list-disc prose-ol:list-decimal prose-li:text-slate-700 prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:bg-slate-100 prose-th:px-4 prose-th:py-2 prose-th:text-left prose-td:border prose-td:border-slate-300 prose-td:px-4 prose-td:py-2 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic prose-hr:border-slate-200">
+          <div className="prose prose-lg prose-slate max-w-none">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
-              components={{
-                // Custom rendering for checkboxes in task lists
-                input: ({ node, ...props }) => {
-                  if (props.type === 'checkbox') {
-                    return <input {...props} className="mr-2" />;
-                  }
-                  return <input {...props} />;
-                },
-                // Add proper table styling
-                table: ({ node, ...props }) => (
-                  <div className="overflow-x-auto my-6">
-                    <table {...props} className="min-w-full divide-y divide-slate-300" />
-                  </div>
-                ),
-                // Style code blocks
-                code: ({ className, children, ...props }: any) => {
-                  const isInline = !className?.includes('language-');
-                  return !isInline ? (
-                    <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto my-4">
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    </pre>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  );
-                },
-              }}
             >
               {markdown}
             </ReactMarkdown>
