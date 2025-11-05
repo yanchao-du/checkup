@@ -117,6 +117,7 @@ export function NewSubmission() {
   const [medicalHistoryErrors, setMedicalHistoryErrors] = useState<Record<string, string>>({});
   const [abnormalityChecklistErrors, setAbnormalityChecklistErrors] = useState<Record<string, string>>({});
   const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
+  const [purposeOfExam, setPurposeOfExam] = useState('');
   const [examinationDate, setExaminationDate] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
@@ -156,6 +157,7 @@ export function NewSubmission() {
     patientNric: string;
     patientDateOfBirth: string;
     drivingLicenseClass: string;
+    purposeOfExam: string;
     examinationDate: string;
     formData: Record<string, any>;
   } | null>(null);
@@ -314,6 +316,7 @@ export function NewSubmission() {
           setPatientEmail(existing.patientEmail || '');
           setPatientMobile(existing.patientMobile || '');
           setDrivingLicenseClass(existing.drivingLicenseClass || '');
+          setPurposeOfExam((existing as any).purposeOfExam || '');
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setSelectedClinicId(existing.clinicId || '');
@@ -354,6 +357,7 @@ export function NewSubmission() {
             patientNric: existing.patientNric,
             patientDateOfBirth: existing.patientDateOfBirth,
             drivingLicenseClass: existing.drivingLicenseClass || '',
+            purposeOfExam: (existing as any).purposeOfExam || '',
             examinationDate: existing.examinationDate || '',
             formData: JSON.parse(JSON.stringify(existing.formData)), // Deep copy
           });
@@ -437,6 +441,7 @@ export function NewSubmission() {
         patientNric !== lastSavedState.patientNric ||
         patientDateOfBirth !== lastSavedState.patientDateOfBirth ||
         drivingLicenseClass !== lastSavedState.drivingLicenseClass ||
+        purposeOfExam !== lastSavedState.purposeOfExam ||
         examinationDate !== lastSavedState.examinationDate ||
         JSON.stringify(formData) !== JSON.stringify(lastSavedState.formData);
       
@@ -444,10 +449,10 @@ export function NewSubmission() {
     } else {
       // No saved state - mark as changed if any field has data (for new submissions)
       const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || drivingLicenseClass ||
-                      examinationDate || Object.keys(formData).length > 0);
+                      purposeOfExam || examinationDate || Object.keys(formData).length > 0);
       setHasUnsavedChanges(hasData);
     }
-  }, [examType, patientName, patientNric, patientDateOfBirth, drivingLicenseClass, examinationDate, formData, setHasUnsavedChanges, lastSavedState]);
+  }, [examType, patientName, patientNric, patientDateOfBirth, drivingLicenseClass, purposeOfExam, examinationDate, formData, setHasUnsavedChanges, lastSavedState]);
 
   // Reset unsaved changes when component unmounts
   useEffect(() => {
@@ -756,6 +761,12 @@ export function NewSubmission() {
     // Validate Driving Licence Class for TP and TP_LTA exams
     if ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && !drivingLicenseClass) {
       toast.error('Class of Driving Licence is required for this exam type');
+      return false;
+    }
+
+    // Validate Purpose of Exam for TP_LTA exams
+    if (examType === 'DRIVING_VOCATIONAL_TP_LTA' && !purposeOfExam) {
+      toast.error('Purpose of Exam is required for this exam type');
       return false;
     }
 
@@ -1104,6 +1115,7 @@ export function NewSubmission() {
     patientName.trim() &&
     ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
     ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
+    (examType === 'DRIVING_VOCATIONAL_TP_LTA' ? purposeOfExam : true) &&
     examinationDate &&
     !examinationDateError &&
     !drivingLicenceTimingError &&
@@ -1229,6 +1241,7 @@ export function NewSubmission() {
         ...(patientEmail && { patientEmail }), // Only include if not empty
         ...(patientMobile && { patientMobile }), // Only include if not empty
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
+        ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData: enhancedFormData,
         routeForApproval: false,
@@ -1256,6 +1269,7 @@ export function NewSubmission() {
         patientNric,
         patientDateOfBirth,
         drivingLicenseClass,
+        purposeOfExam,
         examinationDate,
         formData: JSON.parse(JSON.stringify(enhancedFormData)), // Deep copy with masked/full names
       });
@@ -1297,6 +1311,7 @@ export function NewSubmission() {
         ...(patientEmail && { patientEmail }), // Only include if not empty
         ...(patientMobile && { patientMobile }), // Only include if not empty
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
+        ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
         formData: enhancedFormData,
         // Don't send routeForApproval: false for doctors - backend treats that as draft
@@ -1725,6 +1740,22 @@ export function NewSubmission() {
                         value={drivingLicenseClass}
                         onChange={setDrivingLicenseClass}
                       />
+                    )}
+                    {examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="purposeOfExam">Purpose of Exam <span className="text-red-500">*</span></Label>
+                        <Select value={purposeOfExam} onValueChange={setPurposeOfExam}>
+                          <SelectTrigger id="purposeOfExam" className={!purposeOfExam ? 'text-muted-foreground' : ''}>
+                            <SelectValue placeholder="Select purpose of exam" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AGE_65_ABOVE_TP_ONLY">Age 65 and above - Renew Traffic Police Driving Licence only</SelectItem>
+                            <SelectItem value="AGE_65_ABOVE_TP_LTA">Age 65 and above - Renew both Traffic Police & LTA Vocational Licence</SelectItem>
+                            <SelectItem value="AGE_64_BELOW_LTA_ONLY">Age 64 and below - Renew LTA Vocational Licence only</SelectItem>
+                            <SelectItem value="BAVL_ANY_AGE">Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     )}
                     {isDriverExamType(examType) && patientDateOfBirth && examinationDate && (
                       <div className="space-y-2 bg-slate-50 p-4 rounded-lg border border-slate-200">
@@ -2404,6 +2435,7 @@ export function NewSubmission() {
                           nric: patientNric,
                           dateOfBirth: patientDateOfBirth,
                           drivingLicenseClass: drivingLicenseClass,
+                          purposeOfExam: purposeOfExam,
                           email: patientEmail,
                           mobile: patientMobile,
                         }}

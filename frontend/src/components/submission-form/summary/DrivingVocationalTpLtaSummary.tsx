@@ -10,6 +10,7 @@ interface DrivingVocationalTpLtaSummaryProps {
     nric: string;
     dateOfBirth?: string;
     drivingLicenseClass?: string;
+    purposeOfExam?: string;
     email?: string;
     mobile?: string;
   };
@@ -237,6 +238,17 @@ export function DrivingVocationalTpLtaSummary({
               <div>
                 <p className="text-slate-500">Class of Driving Licence</p>
                 <p className="font-medium">{patientInfo.drivingLicenseClass}</p>
+              </div>
+            )}
+            {patientInfo.purposeOfExam && (
+              <div className="col-span-2">
+                <p className="text-slate-500">Purpose of Exam</p>
+                <p className="font-medium">
+                  {patientInfo.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' && 'Age 65 and above - Renew Traffic Police Driving Licence only'}
+                  {patientInfo.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && 'Age 65 and above - Renew both Traffic Police & LTA Vocational Licence'}
+                  {patientInfo.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' && 'Age 64 and below - Renew LTA Vocational Licence only'}
+                  {patientInfo.purposeOfExam === 'BAVL_ANY_AGE' && "Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age"}
+                </p>
               </div>
             )}
             {patientInfo.email && (
