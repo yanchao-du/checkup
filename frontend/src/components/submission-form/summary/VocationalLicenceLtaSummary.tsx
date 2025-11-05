@@ -15,6 +15,8 @@ interface VocationalLicenceLtaSummaryProps {
   examinationDate: string;
   onEdit?: (section: string) => void;
   clinicInfo?: UserClinic;
+  doctorName?: string;
+  doctorMcrNumber?: string;
 }
 
 export function VocationalLicenceLtaSummary({
@@ -23,6 +25,8 @@ export function VocationalLicenceLtaSummary({
   examinationDate,
   onEdit,
   clinicInfo,
+  doctorName,
+  doctorMcrNumber,
 }: VocationalLicenceLtaSummaryProps) {
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
@@ -392,6 +396,27 @@ export function VocationalLicenceLtaSummary({
           </div>
         </div>
       </div>
+
+      {/* Doctor Information Display */}
+      {doctorName && (
+        <div className="pt-6 border-t border-gray-200">
+          <div className="bg-white border border-blue-200 rounded-lg p-4">
+            <h4 className="font-semibold text-sm text-blue-900 mb-2">Examining Doctor</h4>
+            <div className="space-y-1 text-sm">
+              <div className="flex items-start">
+                <span className="font-medium text-gray-700 w-24">Name:</span>
+                <span className="text-gray-900">{doctorName}</span>
+              </div>
+              {doctorMcrNumber && (
+                <div className="flex items-start">
+                  <span className="font-medium text-gray-700 w-24">MCR Number:</span>
+                  <span className="text-gray-900">{doctorMcrNumber}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Clinic Information Display */}
       {clinicInfo && (

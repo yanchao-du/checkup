@@ -2489,6 +2489,8 @@ export function NewSubmission() {
                           mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
                         clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                         onEdit={(section) => {
                           setActiveAccordion(section);
