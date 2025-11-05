@@ -6,9 +6,12 @@ interface DeclarationViewProps {
   children: ReactNode;
   doctorName?: string;
   doctorMcrNumber?: string;
+  clinicName?: string;
+  clinicHciCode?: string;
+  clinicPhone?: string;
 }
 
-export function DeclarationView({ children, doctorName, doctorMcrNumber }: DeclarationViewProps) {
+export function DeclarationView({ children, doctorName, doctorMcrNumber, clinicName, clinicHciCode, clinicPhone }: DeclarationViewProps) {
   return (
     <Card className="border-2 border-blue-60 bg-blue-50">
       <CardContent className="pt-6">
@@ -28,6 +31,31 @@ export function DeclarationView({ children, doctorName, doctorMcrNumber }: Decla
                   <div className="flex items-start">
                     <span className="font-medium text-gray-700 w-24">MCR Number:</span>
                     <span className="text-gray-900">{doctorMcrNumber}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Clinic Information Display */}
+          {clinicName && (
+            <div className="bg-white border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-sm text-blue-900 mb-2">Clinic Information</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-start">
+                  <span className="font-medium text-gray-700 w-24">Name:</span>
+                  <span className="text-gray-900">{clinicName}</span>
+                </div>
+                {clinicHciCode && (
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-700 w-24">HCI Code:</span>
+                    <span className="text-gray-900">{clinicHciCode}</span>
+                  </div>
+                )}
+                {clinicPhone && (
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-700 w-24">Phone:</span>
+                    <span className="text-gray-900">{clinicPhone}</span>
                   </div>
                 )}
               </div>

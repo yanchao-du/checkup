@@ -372,6 +372,9 @@ export function ViewSubmission() {
                     <DeclarationView
                       doctorName={submission.approvedByName || submission.createdByName}
                       doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                      clinicName={submission.clinicName}
+                      clinicHciCode={submission.clinicHciCode}
+                      clinicPhone={submission.clinicPhone}
                     >
                       <MomDeclarationContent />
                     </DeclarationView>
@@ -472,10 +475,12 @@ export function ViewSubmission() {
             </Card>
           )}
 
-          {/* Clinic Information - hide for TP and TP_LTA exams as they show it in declaration section */}
+          {/* Clinic Information - hide for TP, TP_LTA, MDW, and FMW exams as they show it in declaration section */}
           {submission.clinicName && 
            submission.examType !== 'DRIVING_LICENCE_TP' && 
-           submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' && (
+           submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
+           submission.examType !== 'SIX_MONTHLY_MDW' &&
+           submission.examType !== 'SIX_MONTHLY_FMW' && (
             <Card>
               <CardHeader>
                 <CardTitle>Clinic Information</CardTitle>
