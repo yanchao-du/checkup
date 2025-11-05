@@ -1,6 +1,7 @@
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Edit } from 'lucide-react';
+import type { UserClinic } from '../../../types/api';
 
 interface DrivingVocationalTpLtaSummaryProps {
   formData: Record<string, any>;
@@ -17,6 +18,7 @@ interface DrivingVocationalTpLtaSummaryProps {
   onChange?: (key: string, value: any) => void;
   doctorName?: string;
   doctorMcrNumber?: string;
+  clinicInfo?: UserClinic;
 }
 
 export function DrivingVocationalTpLtaSummary({
@@ -27,6 +29,7 @@ export function DrivingVocationalTpLtaSummary({
   onChange,
   doctorName,
   doctorMcrNumber,
+  clinicInfo,
 }: DrivingVocationalTpLtaSummaryProps) {
   const medicalDeclaration = formData.medicalDeclaration || {};
   const medicalHistory = formData.medicalHistory || {};
@@ -787,6 +790,31 @@ export function DrivingVocationalTpLtaSummary({
                   <div className="flex items-start">
                     <span className="font-medium text-gray-700 w-24">MCR Number:</span>
                     <span className="text-gray-900">{doctorMcrNumber}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Clinic Information Display */}
+          {clinicInfo && (
+            <div className="bg-white border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-sm text-blue-900 mb-2">Clinic</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-start">
+                  <span className="font-medium text-gray-700 w-24">Name:</span>
+                  <span className="text-gray-900">{clinicInfo.name}</span>
+                </div>
+                {clinicInfo.hciCode && (
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-700 w-24">HCI Code:</span>
+                    <span className="text-gray-900">{clinicInfo.hciCode}</span>
+                  </div>
+                )}
+                {clinicInfo.phone && (
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-700 w-24">Phone:</span>
+                    <span className="text-gray-900">{clinicInfo.phone}</span>
                   </div>
                 )}
               </div>

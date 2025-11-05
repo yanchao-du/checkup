@@ -2,7 +2,6 @@ import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Edit } from 'lucide-react';
 import { maskName } from '../../../lib/nameMasking';
-import type { UserClinic } from '../../../types/api';
 
 interface SixMonthlyMdwSummaryProps {
   formData: Record<string, any>;
@@ -13,7 +12,6 @@ interface SixMonthlyMdwSummaryProps {
   lastRecordedWeight?: string;
   lastRecordedDate?: string;
   onEdit: (section: string) => void;
-  clinicInfo?: UserClinic;
   requiredTests?: {
     pregnancy: boolean;
     syphilis: boolean;
@@ -30,7 +28,6 @@ export function SixMonthlyMdwSummary({
   lastRecordedHeight,
   lastRecordedWeight,
   lastRecordedDate,
-  clinicInfo,
   onEdit,
   requiredTests,
 }: SixMonthlyMdwSummaryProps) {
@@ -94,17 +91,6 @@ export function SixMonthlyMdwSummary({
               <p className="text-slate-500">Examination Date</p>
               <p className="font-medium">{formatDate(examinationDate)}</p>
             </div>
-            {clinicInfo && (
-              <div className="col-span-2">
-                <p className="text-slate-500">Clinic</p>
-                <p className="font-medium">{clinicInfo.name}</p>
-                {(clinicInfo.hciCode || clinicInfo.phone) && (
-                  <p className="text-xs text-slate-600 mt-1">
-                    {[clinicInfo.hciCode, clinicInfo.phone].filter(Boolean).join(' • ')}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

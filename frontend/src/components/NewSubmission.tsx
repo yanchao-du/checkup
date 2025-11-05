@@ -2092,7 +2092,6 @@ export function NewSubmission() {
                         lastRecordedWeight={lastRecordedWeight}
                         lastRecordedDate={lastRecordedDate}
                         requiredTests={requiredTests}
-                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                         onEdit={(section) => {
                           // Navigate to the requested section for editing
                           setActiveAccordion(section);
@@ -2106,6 +2105,7 @@ export function NewSubmission() {
                         userRole={role}
                         doctorName={user?.name}
                         doctorMcrNumber={user?.mcrNumber}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
                       
                       <div className="flex justify-start mt-4">
@@ -2203,6 +2203,7 @@ export function NewSubmission() {
                         userRole={role}
                         doctorName={user?.name}
                         doctorMcrNumber={user?.mcrNumber}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
                       
                       <div className="flex justify-start mt-4">
@@ -2298,6 +2299,7 @@ export function NewSubmission() {
                         userRole={role}
                         doctorName={user?.name}
                         doctorMcrNumber={user?.mcrNumber}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
                       
                       <div className="flex justify-start mt-4">
@@ -2354,6 +2356,7 @@ export function NewSubmission() {
                           mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                         onChange={handleFormDataChange}
                         onEdit={(section) => {
                           setActiveAccordion(section);
@@ -2407,6 +2410,7 @@ export function NewSubmission() {
                         examinationDate={examinationDate}
                         doctorName={user?.name}
                         doctorMcrNumber={user?.mcrNumber}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                         onChange={handleFormDataChange}
                         onEdit={(section) => {
                           setActiveAccordion(section);
@@ -2485,6 +2489,7 @@ export function NewSubmission() {
                           mobile: patientMobile,
                         }}
                         examinationDate={examinationDate}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                         onEdit={(section) => {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
