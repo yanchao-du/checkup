@@ -472,8 +472,10 @@ export function ViewSubmission() {
             </Card>
           )}
 
-          {/* Clinic Information */}
-          {submission.clinicName && (
+          {/* Clinic Information - hide for TP and TP_LTA exams as they show it in declaration section */}
+          {submission.clinicName && 
+           submission.examType !== 'DRIVING_LICENCE_TP' && 
+           submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' && (
             <Card>
               <CardHeader>
                 <CardTitle>Clinic Information</CardTitle>
