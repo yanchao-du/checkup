@@ -11,6 +11,7 @@ interface AbbreviatedMentalTestSectionProps {
   drivingLicenseClass?: string;
   dateOfBirth?: string;
   examinationDate?: string;
+  purposeOfExam?: string;
 }
 
 export function AbbreviatedMentalTestSection({ 
@@ -18,7 +19,8 @@ export function AbbreviatedMentalTestSection({
   onChange,
   drivingLicenseClass,
   dateOfBirth,
-  examinationDate 
+  examinationDate,
+  purposeOfExam
 }: AbbreviatedMentalTestSectionProps) {
   const amt = formData.amt || {};
   const [score, setScore] = useState(0);
@@ -94,6 +96,7 @@ export function AbbreviatedMentalTestSection({
           onChange={onChange}
           formData={formData}
           onRequirementChange={handleAMTRequirementChange}
+          autoSetLTAVocational={purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE' || purposeOfExam === 'AGE_65_ABOVE_TP_LTA'}
         />
       )}
 

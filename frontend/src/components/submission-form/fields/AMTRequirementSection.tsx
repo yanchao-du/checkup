@@ -11,6 +11,7 @@ interface AMTRequirementSectionProps {
   onChange: (field: string, value: any) => void;
   formData: Record<string, any>;
   onRequirementChange?: (isRequired: boolean, canDetermine: boolean) => void;
+  autoSetLTAVocational?: boolean; // Indicates if LTA vocational was auto-set based on purpose
 }
 
 export function AMTRequirementSection({
@@ -21,6 +22,7 @@ export function AMTRequirementSection({
   onChange,
   formData,
   onRequirementChange,
+  autoSetLTAVocational = false,
 }: AMTRequirementSectionProps) {
   const [isAMTRequired, setIsAMTRequired] = useState(false);
   const [requirementReason, setRequirementReason] = useState<string[]>([]);
@@ -199,8 +201,8 @@ export function AMTRequirementSection({
             </div>
           )}
 
-          {/* LTA Vocational Licence */}
-          {hasShownLTAVocational && (
+          {/* LTA Vocational Licence - Only show if not auto-set */}
+          {hasShownLTAVocational && !autoSetLTAVocational && (
             <div>
               <Label htmlFor="holdsLTAVocationalLicence">
                 Is the patient a holder of any LTA vocational licence?
@@ -279,6 +281,9 @@ export function AMTRequirementSection({
             </>
           )}
           <li>• Cognitive Impairment: {cognitiveImpairment ? 'Yes' : 'No'}</li>
+          {formData.holdsLTAVocationalLicence && (
+            <li>• Holder of LTA vocational licence: {formData.holdsLTAVocationalLicence === 'yes' ? 'Yes' : 'No'}{autoSetLTAVocational && formData.holdsLTAVocationalLicence === 'yes' ? ' (auto-detected from purpose of exam)' : ''}</li>
+          )}
         </ul>
       </div>
     </div>

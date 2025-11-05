@@ -166,6 +166,7 @@ export function DrivingVocationalTpLtaAccordions({
               drivingLicenseClass={drivingLicenseClass}
               dateOfBirth={dateOfBirth}
               examinationDate={examinationDate}
+              purposeOfExam={purposeOfExam}
             />
             <div className="flex justify-start mt-4">
               <Button 

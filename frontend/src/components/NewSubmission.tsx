@@ -441,6 +441,25 @@ export function NewSubmission() {
     }
   }, [examType, patientDateOfBirth, examinationDate, drivingLicenseClass, purposeOfExam]);
 
+  // Auto-set LTA vocational licence holder based on purpose of exam
+  useEffect(() => {
+    if (examType === 'DRIVING_VOCATIONAL_TP_LTA' && purposeOfExam) {
+      // Patient holds LTA vocational licence if purpose is:
+      // - AGE_64_BELOW_LTA_ONLY (LTA vocational only)
+      // - BAVL_ANY_AGE (Bus Attendant's Vocational Licence)
+      // - AGE_65_ABOVE_TP_LTA (Both TP and LTA vocational)
+      const holdsLTAVocational = purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || 
+                                 purposeOfExam === 'BAVL_ANY_AGE' || 
+                                 purposeOfExam === 'AGE_65_ABOVE_TP_LTA';
+      
+      setFormData(prev => ({
+        ...prev,
+        holdsLTAVocationalLicence: holdsLTAVocational ? 'yes' : 'no',
+        hasShownLTAVocational: true, // Mark that this field has been set
+      }));
+    }
+  }, [examType, purposeOfExam]);
+
   // Track form changes
   useEffect(() => {
     // If we have a saved state, compare current state with it
