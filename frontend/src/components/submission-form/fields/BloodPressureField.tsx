@@ -72,7 +72,7 @@ export function BloodPressureField({
   return (
     <div className="space-y-2">
       <Label>Blood Pressure (mmHg) <span className="text-red-500">*</span></Label>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
         <div className="space-y-1">
           <Input
             id="systolic"
@@ -83,7 +83,7 @@ export function BloodPressureField({
             value={systolic}
             onChange={handleSystolicChange}
             onBlur={handleSystolicBlur}
-            placeholder="120"
+            placeholder="e.g., 120"
             className={systolicError || comparisonError ? 'border-red-500' : ''}
           />
           <p className="text-xs text-slate-500">Systolic (high)</p>
@@ -99,7 +99,7 @@ export function BloodPressureField({
             value={diastolic}
             onChange={handleDiastolicChange}
             onBlur={handleDiastolicBlur}
-            placeholder="80"
+            placeholder="e.g., 80"
             className={diastolicError || comparisonError ? 'border-red-500' : ''}
           />
           <p className="text-xs text-slate-500">Diastolic (low)</p>

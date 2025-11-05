@@ -59,15 +59,15 @@ export function VisualAcuityField({ value, onChange, error, onValidate }: Visual
   return (
     <div className="space-y-2">
       <Label>Visual Acuity (Snellen Eye Chart) <span className="text-red-500">*</span></Label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
         {/* Right Eye */}
         <div>
           <Label htmlFor="visualAcuity-re" className="text-sm font-normal">Right Eye (RE)</Label>
           <Select value={re} onValueChange={handleREChange}>
-            <SelectTrigger id="visualAcuity-re" className="mt-1 bg-white">
+            <SelectTrigger id="visualAcuity-re" className="mt-1 bg-white w-full">
               <SelectValue placeholder="Select RE value" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px]">
               {SNELLEN_VALUES.map((val) => (
                 <SelectItem key={val} value={val}>
                   {val}
@@ -81,10 +81,10 @@ export function VisualAcuityField({ value, onChange, error, onValidate }: Visual
         <div>
           <Label htmlFor="visualAcuity-le" className="text-sm font-normal">Left Eye (LE)</Label>
           <Select value={le} onValueChange={handleLEChange}>
-            <SelectTrigger id="visualAcuity-le" className="mt-1 bg-white">
+            <SelectTrigger id="visualAcuity-le" className="mt-1 bg-white w-full">
               <SelectValue placeholder="Select LE value" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px]">
               {SNELLEN_VALUES.map((val) => (
                 <SelectItem key={val} value={val}>
                   {val}

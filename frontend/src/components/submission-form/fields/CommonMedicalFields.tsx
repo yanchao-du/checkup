@@ -156,7 +156,7 @@ export function CommonMedicalFields({
         )}
 
         {/* Pulse */}
-        <div>
+        <div style={{ maxWidth: 'calc(28rem / 2 - 0.5rem)' }}>
           <Label htmlFor="pulse">Pulse (bpm) <span className="text-red-500">*</span></Label>
           <Input
             id="pulse"
@@ -186,8 +186,8 @@ export function CommonMedicalFields({
 
         {/* S1_S2 Reading */}
         <div>
-          <div className="grid grid-cols-2 gap-4 items-center">
-            <Label htmlFor="s1S2Reading">S1_S2 Reading</Label>
+          <div className="flex items-center gap-4">
+            <Label htmlFor="s1S2Reading" className="min-w-[140px]">S1_S2 Reading</Label>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="s1S2Reading"
@@ -214,8 +214,8 @@ export function CommonMedicalFields({
 
         {/* Murmurs */}
         <div>
-          <div className="grid grid-cols-2 gap-4 items-center">
-            <Label htmlFor="murmurs">Murmurs</Label>
+          <div className="flex items-center gap-4">
+            <Label htmlFor="murmurs" className="min-w-[140px]">Murmurs</Label>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="murmurs"
@@ -285,7 +285,7 @@ export function CommonMedicalFields({
         {/* Near Vision */}
         <div className="space-y-2">
           <Label>Near Vision <span className="text-red-500">*</span></Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
             {/* Right Eye */}
             <div>
               <Label htmlFor="nearVision-re" className="text-sm font-normal">Right Eye (RE)</Label>
@@ -298,10 +298,10 @@ export function CommonMedicalFields({
                   }
                 }}
               >
-                <SelectTrigger id="nearVision-re" className="mt-1 bg-white">
+                <SelectTrigger id="nearVision-re" className="mt-1 bg-white w-full">
                   <SelectValue placeholder="Select RE value" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]">
                   <SelectItem value="N5">N5</SelectItem>
                   <SelectItem value="N6">N6</SelectItem>
                   <SelectItem value="N8">N8</SelectItem>
@@ -328,10 +328,10 @@ export function CommonMedicalFields({
                   }
                 }}
               >
-                <SelectTrigger id="nearVision-le" className="mt-1 bg-white">
+                <SelectTrigger id="nearVision-le" className="mt-1 bg-white w-full">
                   <SelectValue placeholder="Select LE value" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]">
                   <SelectItem value="N5">N5</SelectItem>
                   <SelectItem value="N6">N6</SelectItem>
                   <SelectItem value="N8">N8</SelectItem>
