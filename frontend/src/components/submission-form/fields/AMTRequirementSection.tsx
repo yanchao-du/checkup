@@ -120,8 +120,10 @@ export function AMTRequirementSection({
           if (formData.holdsLTAVocationalLicence === 'yes') {
             required = true;
             reasons.push(`Patient holds LTA vocational licence and is aged ${ageOnExamDate} on examination date (70+)`);
-          } else if (formData.holdsLTAVocationalLicence === undefined) {
-            // Need to know if they hold LTA vocational licence
+          } else if (formData.holdsLTAVocationalLicence === 'no') {
+            // LTA vocational licence holder status is known and is 'no', continue checking
+          } else if (formData.holdsLTAVocationalLicence === undefined && !autoSetLTAVocational) {
+            // Need to know if they hold LTA vocational licence (only if not auto-set)
             needsMoreInfo = true;
           }
         }
