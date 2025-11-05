@@ -5,8 +5,9 @@ const prisma = new PrismaClient();
 
 // NRIC/FIN generation utility (copied to avoid import issues with ts-node)
 const NRIC_WEIGHTS = [2, 7, 6, 5, 4, 3, 2];
-const ST_FG_CHECKSUM = ['J', 'Z', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
-const M_CHECKSUM = ['K', 'L', 'J', 'N', 'P', 'Q', 'R', 'T', 'U', 'W', 'X'];
+const ST_CHECKSUMS = ['J', 'Z', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
+const FG_CHECKSUMS = ['X', 'W', 'U', 'T', 'R', 'Q', 'P', 'N', 'M', 'L', 'K'];
+const M_CHECKSUMS = ['K', 'L', 'J', 'N', 'P', 'Q', 'R', 'T', 'U', 'W', 'X'];
 
 function generateValidNRIC(prefix: 'S' | 'T' | 'F' | 'G' | 'M' = 'S', digits?: string): string {
   // Generate random 7 digits if not provided
@@ -18,13 +19,28 @@ function generateValidNRIC(prefix: 'S' | 'T' | 'F' | 'G' | 'M' = 'S', digits?: s
     sum += parseInt(numDigits.charAt(i)) * NRIC_WEIGHTS[i];
   }
   
-  // Add offset for M prefix
-  if (prefix === 'M') {
+  // Add offset based on prefix
+  if (prefix === 'T' || prefix === 'G') {
     sum += 4;
+  } else if (prefix === 'M') {
+    sum += 3;
   }
+  // S and F have offset 0
   
-  const checksumArray = (prefix === 'M') ? M_CHECKSUM : ST_FG_CHECKSUM;
-  const checksum = checksumArray[sum % 11];
+  // Get remainder
+  const remainder = sum % 11;
+  
+  // Get expected checksum based on prefix
+  let checksum: string;
+  if (prefix === 'S' || prefix === 'T') {
+    checksum = ST_CHECKSUMS[remainder];
+  } else if (prefix === 'F' || prefix === 'G') {
+    checksum = FG_CHECKSUMS[remainder];
+  } else if (prefix === 'M') {
+    checksum = M_CHECKSUMS[remainder];
+  } else {
+    throw new Error(`Invalid prefix: ${prefix}`);
+  }
   
   return `${prefix}${numDigits}${checksum}`;
 }

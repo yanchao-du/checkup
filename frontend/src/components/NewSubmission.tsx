@@ -290,7 +290,25 @@ export function NewSubmission() {
           setIsLoading(true);
           const existing = await submissionsApi.getById(id);
           setExamType(existing.examType);
-          setPatientName(existing.patientName);
+          
+          // For MDW/FMW/WORK_PERMIT drafts, restore the full name from formData if available
+          // Otherwise use the patient name from the submission
+          if ((existing.examType === 'SIX_MONTHLY_MDW' || 
+               existing.examType === 'SIX_MONTHLY_FMW' || 
+               existing.examType === 'WORK_PERMIT') && 
+              existing.formData?._fullName) {
+            setPatientName(existing.formData._fullName);
+            setIsNameFromApi(true);
+          } else {
+            setPatientName(existing.patientName);
+            // For MDW/FMW/WORK_PERMIT drafts without stored full name, assume it came from API
+            if (existing.examType === 'SIX_MONTHLY_MDW' || 
+                existing.examType === 'SIX_MONTHLY_FMW' || 
+                existing.examType === 'WORK_PERMIT') {
+              setIsNameFromApi(true);
+            }
+          }
+          
           setPatientNric(existing.patientNric);
           setPatientDateOfBirth(existing.patientDateOfBirth);
           setPatientEmail(existing.patientEmail || '');
@@ -1196,6 +1214,13 @@ export function NewSubmission() {
     try {
       setIsSaving(true);
 
+      // For MDW/FMW/WORK_PERMIT, store both masked and full name in formData
+      const enhancedFormData = { ...formData };
+      if ((examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') && isNameFromApi) {
+        enhancedFormData._maskedName = maskName(patientName);
+        enhancedFormData._fullName = patientName;
+      }
+
       const submissionData = {
         examType,
         patientName,
@@ -1205,7 +1230,7 @@ export function NewSubmission() {
         ...(patientMobile && { patientMobile }), // Only include if not empty
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
-        formData,
+        formData: enhancedFormData,
         routeForApproval: false,
         assignedDoctorId: assignedDoctorId || undefined,
         ...(selectedClinicId && { clinicId: selectedClinicId }),
@@ -1232,7 +1257,7 @@ export function NewSubmission() {
         patientDateOfBirth,
         drivingLicenseClass,
         examinationDate,
-        formData: JSON.parse(JSON.stringify(formData)), // Deep copy
+        formData: JSON.parse(JSON.stringify(enhancedFormData)), // Deep copy with masked/full names
       });
       
       setHasUnsavedChanges(false); // Clear unsaved changes after saving state
@@ -1257,6 +1282,13 @@ export function NewSubmission() {
       setIsSaving(true);
       setHasUnsavedChanges(false); // Clear unsaved changes before navigation
 
+      // For MDW/FMW/WORK_PERMIT, store both masked and full name in formData
+      const enhancedFormData = { ...formData };
+      if ((examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') && isNameFromApi) {
+        enhancedFormData._maskedName = maskName(patientName);
+        enhancedFormData._fullName = patientName;
+      }
+
       const submissionData = {
         examType,
         patientName,
@@ -1266,7 +1298,7 @@ export function NewSubmission() {
         ...(patientMobile && { patientMobile }), // Only include if not empty
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
-        formData,
+        formData: enhancedFormData,
         // Don't send routeForApproval: false for doctors - backend treats that as draft
         // Only send routeForApproval: true when nurse is routing for approval
         ...(user.role === 'nurse' && isRouteForApproval && { routeForApproval: true }),
@@ -1515,50 +1547,47 @@ export function NewSubmission() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="patientNric">NRIC / FIN <span className="text-red-500">*</span></Label>
-                        {testFin && (
-                          <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-                            <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
-                            <div className="flex items-center gap-2">
-                              <code className="text-sm font-mono text-blue-900 select-all cursor-pointer px-2 py-1 bg-white rounded border border-blue-300 hover:bg-blue-100 transition-colors">
-                                {testFin}
-                              </code>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setPatientNric(testFin);
-                                  toast.success('Test FIN populated');
-                                }}
-                                className="text-xs h-7 px-2"
-                              >
-                                Use This
-                              </Button>
-                            </div>
+                    <div className="space-y-2 max-w-xs">
+                      <Label htmlFor="patientNric">NRIC / FIN <span className="text-red-500">*</span></Label>
+                      {testFin && (
+                        <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                          <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
+                          <div className="flex items-center gap-2">
+                            <code className="text-sm font-mono text-blue-900 select-all cursor-pointer px-2 py-1 bg-white rounded border border-blue-300 hover:bg-blue-100 transition-colors">
+                              {testFin}
+                            </code>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setPatientNric(testFin);
+                                toast.success('Test FIN populated');
+                              }}
+                              className="text-xs h-7 px-2"
+                            >
+                              Use This
+                            </Button>
                           </div>
-                        )}
-                        <Input
-                          id="patientNric"
-                          name="nric"
-                          value={patientNric}
-                          onChange={(e) => setPatientNric(e.target.value)}
-                          onBlur={(e) => {
-                            setNricError(validateNricOrFin(e.target.value, validateNRIC));
-                          }}
-                          placeholder="S1234567A"
-                          className={nricError ? 'border-red-500' : ''}
-                        />
-                        {nricError && (
-                          <InlineError>{nricError}</InlineError>
-                        )}
-                      </div>
+                        </div>
+                      )}
+                      <Input
+                        id="patientNric"
+                        name="nric"
+                        value={patientNric}
+                        onChange={(e) => setPatientNric(e.target.value)}
+                        onBlur={(e) => {
+                          setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                        }}
+                        placeholder="S1234567A"
+                        className={nricError ? 'border-red-500' : ''}
+                      />
+                      {nricError && (
+                        <InlineError>{nricError}</InlineError>
+                      )}
                     </div>
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-w-md">
                       <Label htmlFor="patientName">Full Name (as in NRIC / FIN) <span className="text-red-500">*</span></Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
                         patientNric.length === 9 && !nricError ? 
@@ -1567,7 +1596,7 @@ export function NewSubmission() {
                             <Input
                               id="patientName"
                               name="patientName"
-                              value={isNameFromApi && !id ? maskName(patientName) : patientName}
+                              value={isNameFromApi ? maskName(patientName) : patientName}
                               onChange={(e) => {
                                 setPatientName(e.target.value);
                                 // Clear error on change
@@ -1586,7 +1615,7 @@ export function NewSubmission() {
                               className={`${isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} ${patientNameError ? 'border-red-500' : ''}`}
                             />
                             {patientNameError && !isNameFromApi && <InlineError>{patientNameError}</InlineError>}
-                            {isNameFromApi && !id && (
+                            {isNameFromApi && (
                               <p className="text-xs text-slate-600 flex items-center gap-1">
                                 <span className="inline-block w-1 h-1 rounded-full bg-green-500"></span>
                                 Name retrieved and masked for verification. Full name will be visible after submission.
@@ -1629,7 +1658,6 @@ export function NewSubmission() {
                         </>
                       )}
                     </div>
-                    </div>
                     {(examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && (
                       <DateOfBirthField
                         value={patientDateOfBirth}
@@ -1638,7 +1666,7 @@ export function NewSubmission() {
                     )}
                     {isDriverExamType(examType) && (
                       <>
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-w-md">
                           <Label htmlFor="patientEmail">Email Address</Label>
                           <Input
                             id="patientEmail"
@@ -1659,7 +1687,7 @@ export function NewSubmission() {
                           />
                           {emailError && <InlineError>{emailError}</InlineError>}
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-w-xs">
                           <Label htmlFor="patientMobile">Mobile Number</Label>
                           <div className="flex gap-2 items-start">
                             <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-muted-foreground whitespace-nowrap">
@@ -1726,7 +1754,7 @@ export function NewSubmission() {
                         </div>
                       </div>
                     )}
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-w-xs">
                       <Label htmlFor="examinationDate">Examination Date <span className="text-red-500">*</span></Label>
                       <Input
                         id="examinationDate"

@@ -12,7 +12,7 @@ export function DateOfBirthField({ value, onChange, required = true }: DateOfBir
   const today = getTodayInSingapore();
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 max-w-xs">
       <Label htmlFor="dob">Date of Birth {required && <span className="text-red-500">*</span>}</Label>
       <Input
         id="dob"

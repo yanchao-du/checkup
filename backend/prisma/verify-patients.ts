@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { isValidNRIC } from '../src/common/utils/nric-validator';
 
 const prisma = new PrismaClient();
 
@@ -60,6 +61,7 @@ async function verify() {
     },
     select: {
       formData: true,
+      patientNric: true,
     },
   });
 
@@ -71,9 +73,23 @@ async function verify() {
   let syphilisPositive = 0;
   let hivPositive = 0;
   let tbPositive = 0;
+  let validNrics = 0;
+  let invalidNrics = 0;
+  const invalidNricExamples: string[] = [];
 
   allPatients.forEach((p: any) => {
     const data = p.formData as any;
+    
+    // Validate NRIC/FIN
+    if (isValidNRIC(p.patientNric)) {
+      validNrics++;
+    } else {
+      invalidNrics++;
+      if (invalidNricExamples.length < 5) {
+        invalidNricExamples.push(p.patientNric);
+      }
+    }
+    
     if (data.height) {
       withHeight++;
     } else {
@@ -101,6 +117,19 @@ async function verify() {
   console.log(`   Syphilis positive: ${syphilisPositive}`);
   console.log(`   HIV positive: ${hivPositive}`);
   console.log(`   TB positive: ${tbPositive}`);
+  
+  console.log('\n🔐 NRIC/FIN Validation:');
+  console.log(`   Valid NRICs/FINs: ${validNrics} ✓`);
+  console.log(`   Invalid NRICs/FINs: ${invalidNrics} ${invalidNrics > 0 ? '✗' : ''}`);
+  
+  if (invalidNrics > 0) {
+    console.log('\n⚠️  Invalid NRIC/FIN Examples:');
+    invalidNricExamples.forEach(nric => {
+      console.log(`   - ${nric}`);
+    });
+  } else {
+    console.log('   ✅ All NRICs/FINs are valid!');
+  }
 }
 
 verify()
