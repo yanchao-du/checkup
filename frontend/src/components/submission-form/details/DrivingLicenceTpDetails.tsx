@@ -296,8 +296,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
       {/* Overall Result of Medical Examination */}
       {assessment && (
-        <div className="bg-white border-2 border-green-300 rounded-lg shadow-sm">
-          <h3 className="font-semibold text-lg mb-0 text-green-900 bg-green-50 px-6 py-4 rounded-t-lg border-b-2 border-green-300">Overall Result of Medical Examination</h3>
+        <div className="bg-white border-2 border-slate-300 rounded-lg shadow-sm">
+          <h3 className="font-semibold text-lg mb-0 text-slate-900 bg-slate-100 px-6 py-4 rounded-t-lg border-b-2 border-slate-300">Overall Result of Medical Examination</h3>
           
           <div className="p-6">
           {/* Fit to Drive */}
