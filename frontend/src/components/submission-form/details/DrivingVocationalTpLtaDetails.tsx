@@ -485,10 +485,10 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
 
           {/* Medical Practitioner Declaration */}
           {assessment.declarationAgreed && (
-            <div className="pt-4 border-t border-green-200">
+            <div className="pt-4 border-t border-blue-200">
               <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
-              <div className="bg-green-50 p-3 rounded border border-green-300">
-                <p className="text-green-700 font-medium mb-2">✓ Declaration confirmed</p>
+              <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                <p className="text-blue-700 font-medium mb-2">✓ Declaration confirmed</p>
                 <p className="text-sm leading-relaxed text-gray-700">
                   I certify that I have examined and identified the patient named above:
                 </p>
