@@ -695,8 +695,8 @@ export function DrivingVocationalTpLtaSummary({
         <CardContent className="pt-6 bg-blue-50">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Overall Result of Medical Examination</h3>
         
-        {/* Fit to Drive Public Service Vehicle Question - Only show if vocational exam is shown */}
-        {patientInfo.purposeOfExam !== 'AGE_65_ABOVE_TP_ONLY' && (
+        {/* Fit to Drive Public Service Vehicle Question - Only show if vocational exam is shown and NOT BAVL only */}
+        {patientInfo.purposeOfExam !== 'AGE_65_ABOVE_TP_ONLY' && patientInfo.purposeOfExam !== 'BAVL_ANY_AGE' && (
           <>
             <div className="mb-6">
               <p className="text-sm font-medium text-gray-700 mb-3">
@@ -791,6 +791,54 @@ export function DrivingVocationalTpLtaSummary({
               </div>
             )}
           </>
+        )}
+
+        {/* Bus Attendant Only Question - for BAVL_ANY_AGE purpose */}
+        {patientInfo.purposeOfExam === 'BAVL_ANY_AGE' && (
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Is the patient fit to hold a Bus Attendant Vocational Licence? <span className="text-red-500">*</span>
+            </p>
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fitForBusAttendant"
+                  value="true"
+                  checked={assessment.fitForBusAttendant === true}
+                  onChange={() => {
+                    if (onChange) {
+                      onChange('assessment', { ...assessment, fitForBusAttendant: true });
+                    }
+                  }}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm font-medium">Yes</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fitForBusAttendant"
+                  value="false"
+                  checked={assessment.fitForBusAttendant === false}
+                  onChange={() => {
+                    if (onChange) {
+                      onChange('assessment', { ...assessment, fitForBusAttendant: false });
+                    }
+                  }}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm font-medium">No</span>
+              </label>
+            </div>
+            {assessment.fitForBusAttendant !== undefined && (
+              <div className="mt-3">
+                <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
+                  {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Medical Practitioner Declaration */}

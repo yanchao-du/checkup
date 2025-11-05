@@ -2520,7 +2520,9 @@ export function NewSubmission() {
                           disabled={
                             isSaving || 
                             !formData.assessment?.declarationAgreed || 
-                            formData.assessment?.fitToDrivePublicService === undefined ||
+                            (purposeOfExam === 'BAVL_ANY_AGE' 
+                              ? formData.assessment?.fitForBusAttendant === undefined
+                              : formData.assessment?.fitToDrivePublicService === undefined) ||
                             hasPendingMemos(examType, formData)
                           }
                         >
