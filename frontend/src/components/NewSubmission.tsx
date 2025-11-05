@@ -401,6 +401,16 @@ export function NewSubmission() {
     if ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && 
         patientDateOfBirth && examinationDate && drivingLicenseClass) {
       
+      // Skip age validation for TP_LTA when certain purposes are selected
+      const skipAgeValidation = examType === 'DRIVING_VOCATIONAL_TP_LTA' && 
+        (purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE');
+      
+      if (skipAgeValidation) {
+        setDrivingLicenceTimingError(null);
+        setDrivingLicenceTimingWarning(null);
+        return;
+      }
+      
       // Check if exam date is before DOB
       if (new Date(examinationDate) < new Date(patientDateOfBirth)) {
         setDrivingLicenceTimingError('Examination date cannot be before date of birth.');
@@ -429,7 +439,7 @@ export function NewSubmission() {
       setDrivingLicenceTimingError(null);
       setDrivingLicenceTimingWarning(null);
     }
-  }, [examType, patientDateOfBirth, examinationDate, drivingLicenseClass]);
+  }, [examType, patientDateOfBirth, examinationDate, drivingLicenseClass, purposeOfExam]);
 
   // Track form changes
   useEffect(() => {
