@@ -36,6 +36,10 @@ export class CreateSubmissionDto {
   drivingLicenseClass?: string;
   
   @IsOptional()
+  @IsString()
+  purposeOfExam?: string;
+  
+  @IsOptional()
   @IsDateString()
   examinationDate?: string;
   
@@ -91,6 +95,10 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsString()
   drivingLicenseClass?: string;
+  
+  @IsOptional()
+  @IsString()
+  purposeOfExam?: string;
   
   @IsOptional()
   @IsDateString()

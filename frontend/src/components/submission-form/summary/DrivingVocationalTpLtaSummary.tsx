@@ -251,18 +251,14 @@ export function DrivingVocationalTpLtaSummary({
                 </p>
               </div>
             )}
-            {patientInfo.email && (
-              <div>
-                <p className="text-slate-500">Email Address</p>
-                <p className="font-medium">{patientInfo.email}</p>
-              </div>
-            )}
-            {patientInfo.mobile && (
-              <div>
-                <p className="text-slate-500">Mobile Number</p>
-                <p className="font-medium">{patientInfo.mobile}</p>
-              </div>
-            )}
+            <div>
+              <p className="text-slate-500">Email Address</p>
+              <p className="font-medium">{patientInfo.email || '-'}</p>
+            </div>
+            <div>
+              <p className="text-slate-500">Mobile Number</p>
+              <p className="font-medium">{patientInfo.mobile || '-'}</p>
+            </div>
             <div>
               <p className="text-slate-500">Examination Date</p>
               <p className="font-medium">{new Date(examinationDate).toLocaleDateString()}</p>
@@ -369,7 +365,7 @@ export function DrivingVocationalTpLtaSummary({
               </ul>
             </>
           ) : (
-            <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
+            <p className="text-sm text-gray-600 italic">No declared medical conditions</p>
           )}
           
           {/* Patient Certification */}
@@ -431,11 +427,15 @@ export function DrivingVocationalTpLtaSummary({
                 </div>
                 <div>
                   <span className="text-gray-600">S1_S2 Reading:</span>
-                  <p className="font-medium">{formData.s1S2Reading || '-'}</p>
+                  <p className={`font-medium ${formData.s1S2Reading === 'Abnormal' ? 'text-red-600' : ''}`}>
+                    {formData.s1S2Reading || '-'}
+                  </p>
                 </div>
                 <div>
                   <span className="text-gray-600">Murmurs:</span>
-                  <p className="font-medium">{formData.murmurs || '-'}</p>
+                  <p className={`font-medium ${formData.murmurs === 'Yes' ? 'text-red-600' : ''}`}>
+                    {formData.murmurs || '-'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -578,7 +578,7 @@ export function DrivingVocationalTpLtaSummary({
                 <>
                   <div>
                     <span className="text-gray-600">X-ray Findings:</span>
-                    <p className="font-medium inline ml-2">
+                    <p className={`font-medium inline ml-2 ${formData.vocationalXrayFindings === 'tb' ? 'text-red-600' : ''}`}>
                       {formData.vocationalXrayFindings === 'no_lesion' 
                         ? 'No radiological evidence of chest lesion' 
                         : formData.vocationalXrayFindings === 'tb' 
@@ -625,7 +625,9 @@ export function DrivingVocationalTpLtaSummary({
               .filter(([_, value]) => value === true)
               .map(([key]) => key);
 
-            if (checkedConditions.length === 0) return null;
+            if (checkedConditions.length === 0) {
+              return <p className="text-sm text-gray-600">Nil</p>;
+            }
 
             return (
               <div>
@@ -695,8 +697,201 @@ export function DrivingVocationalTpLtaSummary({
         <CardContent className="pt-6 bg-blue-50">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Overall Result of Medical Examination</h3>
         
-        {/* Fit to Drive Public Service Vehicle Question - Only show if vocational exam is shown and NOT BAVL only */}
-        {patientInfo.purposeOfExam !== 'AGE_65_ABOVE_TP_ONLY' && patientInfo.purposeOfExam !== 'BAVL_ANY_AGE' && (
+        {/* For AGE_65_ABOVE_TP_LTA, show BOTH fit to drive motor vehicle AND fit to drive public service vehicle */}
+        {patientInfo.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' ? (
+          <>
+            {/* First: Fit to drive a motor vehicle (for TP) */}
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Is the patient physically and mentally fit to drive a motor vehicle? <span className="text-red-500">*</span>
+              </p>
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="fitToDrive"
+                    value="true"
+                    checked={assessment.fitToDrive === true}
+                    onChange={() => {
+                      if (onChange) {
+                        onChange('assessment', { ...assessment, fitToDrive: true });
+                      }
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-sm font-medium">Yes</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="fitToDrive"
+                    value="false"
+                    checked={assessment.fitToDrive === false}
+                    onChange={() => {
+                      if (onChange) {
+                        onChange('assessment', { ...assessment, fitToDrive: false });
+                      }
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-sm font-medium">No</span>
+                </label>
+              </div>
+              {assessment.fitToDrive !== undefined && (
+                <div className="mt-3">
+                  <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
+                    {assessment.fitToDrive ? '✓ YES - Patient is fit to drive' : '✗ NO - Patient is not fit to drive'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Second: Fit to drive a public service vehicle (for LTA vocational) */}
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Is the patient physically and mentally fit to drive a public service vehicle? <span className="text-red-500">*</span>
+              </p>
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="fitToDrivePublicService"
+                    value="true"
+                    checked={assessment.fitToDrivePublicService === true}
+                    onChange={() => {
+                      if (onChange) {
+                        onChange('assessment', { ...assessment, fitToDrivePublicService: true });
+                      }
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-sm font-medium">Yes</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="fitToDrivePublicService"
+                    value="false"
+                    checked={assessment.fitToDrivePublicService === false}
+                    onChange={() => {
+                      if (onChange) {
+                        onChange('assessment', { ...assessment, fitToDrivePublicService: false });
+                      }
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-sm font-medium">No</span>
+                </label>
+              </div>
+              {assessment.fitToDrivePublicService !== undefined && (
+                <div className="mt-3">
+                  <p className={`font-bold text-lg ${assessment.fitToDrivePublicService ? 'text-green-600' : 'text-red-600'}`}>
+                    {assessment.fitToDrivePublicService ? '✓ YES - Patient is fit to drive a public service vehicle' : '✗ NO - Patient is not fit to drive a public service vehicle'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Bus Attendant Question - show if not fit for public service vehicle */}
+            {assessment.fitToDrivePublicService === false && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Is the patient fit to hold a Bus Attendant Vocational Licence? <span className="text-red-500">*</span>
+                </p>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fitForBusAttendant"
+                      value="true"
+                      checked={assessment.fitForBusAttendant === true}
+                      onChange={() => {
+                        if (onChange) {
+                          onChange('assessment', { ...assessment, fitForBusAttendant: true });
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">Yes</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fitForBusAttendant"
+                      value="false"
+                      checked={assessment.fitForBusAttendant === false}
+                      onChange={() => {
+                        if (onChange) {
+                          onChange('assessment', { ...assessment, fitForBusAttendant: false });
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">No</span>
+                  </label>
+                </div>
+                {assessment.fitForBusAttendant !== undefined && (
+                  <div className="mt-3">
+                    <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
+                      {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Fit to Drive Motor Vehicle Question - For AGE_65_ABOVE_TP_ONLY */}
+            {patientInfo.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Is the patient physically and mentally fit to drive a motor vehicle? <span className="text-red-500">*</span>
+                </p>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fitToDrive"
+                      value="true"
+                      checked={assessment.fitToDrive === true}
+                      onChange={() => {
+                        if (onChange) {
+                          onChange('assessment', { ...assessment, fitToDrive: true });
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">Yes</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fitToDrive"
+                      value="false"
+                      checked={assessment.fitToDrive === false}
+                      onChange={() => {
+                        if (onChange) {
+                          onChange('assessment', { ...assessment, fitToDrive: false });
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">No</span>
+                  </label>
+                </div>
+                {assessment.fitToDrive !== undefined && (
+                  <div className="mt-3">
+                    <p className={`font-bold text-lg ${assessment.fitToDrive ? 'text-green-600' : 'text-red-600'}`}>
+                      {assessment.fitToDrive ? '✓ YES - Patient is fit to drive' : '✗ NO - Patient is not fit to drive'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Fit to Drive Public Service Vehicle Question - Only show if vocational exam is shown and NOT BAVL only */}
+            {patientInfo.purposeOfExam !== 'AGE_65_ABOVE_TP_ONLY' && patientInfo.purposeOfExam !== 'BAVL_ANY_AGE' && (
           <>
             <div className="mb-6">
               <p className="text-sm font-medium text-gray-700 mb-3">
@@ -793,52 +988,54 @@ export function DrivingVocationalTpLtaSummary({
           </>
         )}
 
-        {/* Bus Attendant Only Question - for BAVL_ANY_AGE purpose */}
-        {patientInfo.purposeOfExam === 'BAVL_ANY_AGE' && (
-          <div className="mb-6">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Is the patient fit to hold a Bus Attendant Vocational Licence? <span className="text-red-500">*</span>
-            </p>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="fitForBusAttendant"
-                  value="true"
-                  checked={assessment.fitForBusAttendant === true}
-                  onChange={() => {
-                    if (onChange) {
-                      onChange('assessment', { ...assessment, fitForBusAttendant: true });
-                    }
-                  }}
-                  className="h-4 w-4"
-                />
-                <span className="text-sm font-medium">Yes</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="fitForBusAttendant"
-                  value="false"
-                  checked={assessment.fitForBusAttendant === false}
-                  onChange={() => {
-                    if (onChange) {
-                      onChange('assessment', { ...assessment, fitForBusAttendant: false });
-                    }
-                  }}
-                  className="h-4 w-4"
-                />
-                <span className="text-sm font-medium">No</span>
-              </label>
-            </div>
-            {assessment.fitForBusAttendant !== undefined && (
-              <div className="mt-3">
-                <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
-                  {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
+            {/* Bus Attendant Only Question - for BAVL_ANY_AGE purpose */}
+            {patientInfo.purposeOfExam === 'BAVL_ANY_AGE' && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Is the patient fit to hold a Bus Attendant Vocational Licence? <span className="text-red-500">*</span>
                 </p>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fitForBusAttendant"
+                      value="true"
+                      checked={assessment.fitForBusAttendant === true}
+                      onChange={() => {
+                        if (onChange) {
+                          onChange('assessment', { ...assessment, fitForBusAttendant: true });
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">Yes</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fitForBusAttendant"
+                      value="false"
+                      checked={assessment.fitForBusAttendant === false}
+                      onChange={() => {
+                        if (onChange) {
+                          onChange('assessment', { ...assessment, fitForBusAttendant: false });
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">No</span>
+                  </label>
+                </div>
+                {assessment.fitForBusAttendant !== undefined && (
+                  <div className="mt-3">
+                    <p className={`font-bold text-lg ${assessment.fitForBusAttendant ? 'text-green-600' : 'text-red-600'}`}>
+                      {assessment.fitForBusAttendant ? '✓ YES - Patient is fit for Bus Attendant licence' : '✗ NO - Patient is not fit for Bus Attendant licence'}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Medical Practitioner Declaration */}

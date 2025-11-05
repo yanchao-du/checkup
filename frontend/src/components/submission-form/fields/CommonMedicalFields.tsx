@@ -48,6 +48,16 @@ export function CommonMedicalFields({
     }
   }, []);
 
+  // Initialize s1S2Reading and murmurs with default values if not set
+  useEffect(() => {
+    if (!formData.s1S2Reading) {
+      onChange('s1S2Reading', 'Normal');
+    }
+    if (!formData.murmurs) {
+      onChange('murmurs', 'No');
+    }
+  }, []);
+
   // Auto-calculate BMI when height or weight changes
   useEffect(() => {
     const height = parseFloat(formData.height);

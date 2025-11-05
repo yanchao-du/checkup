@@ -20,7 +20,6 @@ import { WorkPermitDetails } from './submission-view/WorkPermitDetails';
 import { AgedDriversDetails } from './submission-view/AgedDriversDetails';
 import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { DrivingLicenceTpDetails } from './submission-form/details/DrivingLicenceTpDetails';
-import { DrivingVocationalTpLtaDetails } from './submission-form/details/DrivingVocationalTpLtaDetails';
 import { VocationalLicenceLtaDetails } from './submission-form/details/VocationalLicenceLtaDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import { DeclarationView } from './submission-view/DeclarationView';
@@ -192,22 +191,34 @@ export function ViewSubmission() {
                     <p className="text-slate-900">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
                   </div>
                 )}
-                {isDriverExamType(submission.examType) && submission.patientEmail && (
+                {isDriverExamType(submission.examType) && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Email Address</p>
-                    <p className="text-slate-900">{submission.patientEmail}</p>
+                    <p className="text-slate-900">{submission.patientEmail || '-'}</p>
                   </div>
                 )}
-                {isDriverExamType(submission.examType) && submission.patientMobile && (
+                {isDriverExamType(submission.examType) && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Mobile Number</p>
-                    <p className="text-slate-900">+65 {submission.patientMobile}</p>
+                    <p className="text-slate-900">{submission.patientMobile ? `+65 ${submission.patientMobile}` : '-'}</p>
                   </div>
                 )}
                 {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (submission as any).drivingLicenseClass && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Class of Driving Licence</p>
                     <p className="text-slate-900">{(submission as any).drivingLicenseClass}</p>
+                  </div>
+                )}
+                {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && submission.purposeOfExam && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Purpose of Exam</p>
+                    <p className="text-slate-900">
+                      {submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' && 'Age 64 and below - Renew LTA Vocational Licence only'}
+                      {submission.purposeOfExam === 'BAVL_ANY_AGE' && 'Bus Attendant Vocational Licence (any age)'}
+                      {submission.purposeOfExam === 'AGE_65_ABOVE_DRIVING_ONLY' && 'Age 65 and above - Renew driving licence only'}
+                      {submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' && 'Age 65 and above - Renew Traffic Police Driving Licence only'}
+                      {submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && 'Age 65 and above - Renew both driving and vocational licence'}
+                    </p>
                   </div>
                 )}
                 <div>
@@ -315,12 +326,8 @@ export function ViewSubmission() {
                 <AgedDriversDetails submission={submission} />
               )}
 
-              {submission.examType === 'DRIVING_LICENCE_TP' && (
+              {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
                 <DrivingLicenceTpDetails submission={submission} />
-              )}
-
-              {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
-                <DrivingVocationalTpLtaDetails submission={submission} />
               )}
 
               {submission.examType === 'VOCATIONAL_LICENCE_LTA' && (
@@ -461,8 +468,14 @@ export function ViewSubmission() {
                         {(submission.examType === 'PR_MEDICAL' || 
                           submission.examType === 'STUDENT_PASS_MEDICAL' || 
                           submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
-                        {submission.examType === 'DRIVING_LICENCE_TP' && 'Traffic Police'}
-                        {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Traffic Police & Land Transport Authority'}
+                        {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
+                          <>
+                            {(submission.purposeOfExam === 'AGE_65_ABOVE_DRIVING_ONLY' || submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY') && 'Traffic Police'}
+                            {submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && 'Traffic Police & Land Transport Authority'}
+                            {(submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || submission.purposeOfExam === 'BAVL_ANY_AGE') && 'Land Transport Authority'}
+                            {!submission.purposeOfExam && 'Traffic Police / Land Transport Authority'}
+                          </>
+                        )}
                         {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Land Transport Authority'}
                       </p>
                     </div>
@@ -470,7 +483,9 @@ export function ViewSubmission() {
                   <div>
                     <p className="text-sm text-slate-500">Examination Category</p>
                     <p className="text-slate-900 text-sm">
-                      {formatExamTypeFull(submission.examType)}
+                      {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') 
+                        ? 'Medical Examination for Driving Licence / Vocational Licence'
+                        : formatExamTypeFull(submission.examType)}
                     </p>
                   </div>
                 </div>

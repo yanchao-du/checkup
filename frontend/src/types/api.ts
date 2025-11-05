@@ -95,6 +95,7 @@ export interface MedicalSubmission {
   patientEmail?: string;
   patientMobile?: string;
   drivingLicenseClass?: string;
+  purposeOfExam?: string;
   examinationDate?: string;
   status: SubmissionStatus;
   formData: Record<string, any>;

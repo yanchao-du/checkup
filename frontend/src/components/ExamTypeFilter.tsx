@@ -47,11 +47,8 @@ export function ExamTypeFilter({ value, onValueChange }: ExamTypeFilterProps) {
         
         <SelectGroup>
           <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
-          <SelectItem value="DRIVING_LICENCE_TP">
-            Driving Licence Medical Examination Report (TP)
-          </SelectItem>
           <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-            Driving Licence and Vocational Licence (TP & LTA)
+            Driving Licence / Vocational Licence
           </SelectItem>
         </SelectGroup>
       </SelectContent>

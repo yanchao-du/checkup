@@ -306,7 +306,7 @@ export function DrivingLicenceTpSummary({
               </ul>
             </>
           ) : (
-            <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
+            <p className="text-sm text-gray-600 italic">No declared medical conditions</p>
           )}
           
           {/* Patient Certification */}
@@ -368,11 +368,15 @@ export function DrivingLicenceTpSummary({
                 </div>
                 <div>
                   <span className="text-gray-600">S1_S2 Reading:</span>
-                  <p className="font-medium">{formData.s1S2Reading || '-'}</p>
+                  <p className={`font-medium ${formData.s1S2Reading === 'Abnormal' ? 'text-red-600' : ''}`}>
+                    {formData.s1S2Reading || '-'}
+                  </p>
                 </div>
                 <div>
                   <span className="text-gray-600">Murmurs:</span>
-                  <p className="font-medium">{formData.murmurs || '-'}</p>
+                  <p className={`font-medium ${formData.murmurs === 'Yes' ? 'text-red-600' : ''}`}>
+                    {formData.murmurs || '-'}
+                  </p>
                 </div>
               </div>
             </div>

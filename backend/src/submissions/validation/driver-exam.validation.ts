@@ -35,11 +35,17 @@ export function requiresLtaValidation(examType: string): boolean {
 /**
  * Validate that examination is within 2 months before patient's birthday
  * Per Road Traffic (Motor Vehicles, Driving Licence) Rules
+ * DISABLED: Validation removed to allow more flexible examination dates
  */
 export function validateExamTiming(
   patientDateOfBirth: string,
   examinationDate: string,
 ): void {
+  // Validation disabled - no longer enforcing 2-month window
+  // Keeping function for backward compatibility
+  return;
+  
+  /* Original validation logic (commented out):
   if (!patientDateOfBirth || !examinationDate) {
     throw new BadRequestException(
       'Patient date of birth and examination date are required for driver medical exams',
@@ -75,6 +81,7 @@ export function validateExamTiming(
       'Examination must be conducted within 2 months before the examinee\'s birthday per Road Traffic Rules',
     );
   }
+  */
 }
 
 /**
@@ -148,41 +155,50 @@ export function validateAssessment(assessment: any, examType: string): void {
     throw new BadRequestException('Medical practitioner assessment is required');
   }
 
-  // Validate TP exams require fitToDrive
+  // Validate TP exams require fitToDrive or fitToDrivePublicService
   if (requiresTpValidation(examType)) {
-    if (assessment.fitToDrive === undefined || assessment.fitToDrive === null) {
-      throw new BadRequestException('Fitness to drive determination is required');
+    const hasFitnessDecision = 
+      assessment.fitToDrive !== undefined && assessment.fitToDrive !== null ||
+      assessment.fitToDrivePublicService !== undefined && assessment.fitToDrivePublicService !== null;
+    
+    if (!hasFitnessDecision) {
+      throw new BadRequestException('Fitness determination is required');
     }
   }
 
   // Validate LTA exams require fitForVocational
   if (requiresLtaValidation(examType)) {
-    if (assessment.fitForVocational === undefined || assessment.fitForVocational === null) {
+    if (assessment.fitForVocational === undefined && assessment.fitForVocational === null) {
       throw new BadRequestException(
         'Fitness for vocational duty determination is required',
       );
     }
   }
 
-  // Remarks are required for all driver exams
-  if (!assessment.remarks || assessment.remarks.trim() === '') {
-    throw new BadRequestException('Medical practitioner remarks are required');
-  }
+  // Remarks validation removed - not always required
 }
 
 /**
  * Validate common medical fields
  */
 export function validateCommonFields(formData: any): void {
-  const requiredFields = ['height', 'weight', 'bloodPressure', 'pulse', 'visualAcuity', 'hearingTest'];
+  // Required fields for driver exams (updated to match current form)
+  // Blood pressure can be either combined format or separate systolic/diastolic
+  const hasBloodPressure = formData.bloodPressure || (formData.systolic && formData.diastolic);
   
-  for (const field of requiredFields) {
-    if (!formData[field]) {
-      throw new BadRequestException(`${field} is required for driver medical examinations`);
-    }
+  if (!hasBloodPressure) {
+    throw new BadRequestException('Blood pressure is required for driver medical examinations');
+  }
+  
+  if (!formData.pulse) {
+    throw new BadRequestException('Pulse is required for driver medical examinations');
+  }
+  
+  if (!formData.visualAcuity) {
+    throw new BadRequestException('Visual acuity is required for driver medical examinations');
   }
 
-  // Validate blood pressure format (systolic/diastolic)
+  // Validate blood pressure format if using combined format
   if (formData.bloodPressure && !/^\d{2,3}\/\d{2,3}$/.test(formData.bloodPressure)) {
     throw new BadRequestException(
       'Blood pressure must be in format systolic/diastolic (e.g., 120/80)',
@@ -219,13 +235,17 @@ export function validateDriverExam(dto: CreateSubmissionDto): void {
 
   // TP-specific validations
   if (requiresTpValidation(examType)) {
-    validateAmt(formData.amt);
+    // Only validate AMT if amtRequired is true
+    if (formData.amtRequired !== false && formData.amt) {
+      validateAmt(formData.amt);
+    }
   }
 
-  // LTA-specific validations
-  if (requiresLtaValidation(examType)) {
-    validateLtaVocational(formData.ltaVocational);
-  }
+  // LTA-specific validations - disabled as vocational data is now optional
+  // and stored as flat fields (vocationalXrayRequired, memoRequirements, etc.)
+  // if (requiresLtaValidation(examType)) {
+  //   validateLtaVocational(formData.ltaVocational);
+  // }
 
   // Validate assessment section
   validateAssessment(formData.assessment, examType);

@@ -252,11 +252,15 @@ export function DrivingVocationalTpLtaDetails({ submission }: DrivingVocationalT
             </div>
             <div>
               <span className="text-gray-600">S1_S2 Reading:</span>
-              <p className="font-medium">{data.s1S2Reading || '-'}</p>
+              <p className={`font-medium ${data.s1S2Reading === 'Abnormal' ? 'text-red-600' : ''}`}>
+                {data.s1S2Reading || '-'}
+              </p>
             </div>
             <div>
               <span className="text-gray-600">Murmurs:</span>
-              <p className="font-medium">{data.murmurs || '-'}</p>
+              <p className={`font-medium ${data.murmurs === 'Yes' ? 'text-red-600' : ''}`}>
+                {data.murmurs || '-'}
+              </p>
             </div>
           </div>
         </div>

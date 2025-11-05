@@ -141,7 +141,7 @@ export function VocationalLicenceLtaDetails({ submission }: VocationalLicenceLta
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-gray-600 italic">No pre-existing conditions</p>
+          <p className="text-sm text-gray-600 italic">No declared medical conditions</p>
         )}
       </div>
 

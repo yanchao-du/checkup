@@ -209,8 +209,9 @@ export function validateGeneralMedical(
   let isValid = true;
   let firstErrorField: string | null = null;
 
-  // Validate Blood Pressure
-  if (!formData.bloodPressure?.trim()) {
+  // Validate Blood Pressure (can be either combined or separate systolic/diastolic)
+  const hasBloodPressure = formData.bloodPressure?.trim() || (formData.systolic?.trim() && formData.diastolic?.trim());
+  if (!hasBloodPressure) {
     if (onValidate) {
       onValidate('bloodPressure', ERROR_MESSAGES.FIELD_REQUIRED);
     }

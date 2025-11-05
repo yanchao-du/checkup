@@ -145,6 +145,7 @@ export function NewSubmission() {
   const [examinationDateBlurred, setExaminationDateBlurred] = useState(false);
   const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
   const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
+  const [purposeOfExamWarning, setPurposeOfExamWarning] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
@@ -316,7 +317,7 @@ export function NewSubmission() {
           setPatientEmail(existing.patientEmail || '');
           setPatientMobile(existing.patientMobile || '');
           setDrivingLicenseClass(existing.drivingLicenseClass || '');
-          setPurposeOfExam((existing as any).purposeOfExam || '');
+          setPurposeOfExam(existing.purposeOfExam || '');
           setExaminationDate(existing.examinationDate || '');
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setSelectedClinicId(existing.clinicId || '');
@@ -357,7 +358,7 @@ export function NewSubmission() {
             patientNric: existing.patientNric,
             patientDateOfBirth: existing.patientDateOfBirth,
             drivingLicenseClass: existing.drivingLicenseClass || '',
-            purposeOfExam: (existing as any).purposeOfExam || '',
+            purposeOfExam: existing.purposeOfExam || '',
             examinationDate: existing.examinationDate || '',
             formData: JSON.parse(JSON.stringify(existing.formData)), // Deep copy
           });
@@ -411,7 +412,7 @@ export function NewSubmission() {
         return;
       }
       
-      // Check if exam date is before DOB
+      // Check if exam date is before DOB - this is a critical error
       if (new Date(examinationDate) < new Date(patientDateOfBirth)) {
         setDrivingLicenceTimingError('Examination date cannot be before date of birth.');
         setDrivingLicenceTimingWarning(null);
@@ -424,22 +425,74 @@ export function NewSubmission() {
         drivingLicenseClass
       );
       
+      // Convert age validation errors to warnings instead of blocking errors
       if (!validation.isValid && validation.error) {
-        setDrivingLicenceTimingError(validation.error);
+        setDrivingLicenceTimingError(null); // Don't block the form
+        setDrivingLicenceTimingWarning(validation.error); // Show as warning instead
       } else {
         setDrivingLicenceTimingError(null);
-      }
-      
-      if (validation.warningMessage) {
-        setDrivingLicenceTimingWarning(validation.warningMessage);
-      } else {
-        setDrivingLicenceTimingWarning(null);
+        
+        if (validation.warningMessage) {
+          setDrivingLicenceTimingWarning(validation.warningMessage);
+        } else {
+          setDrivingLicenceTimingWarning(null);
+        }
       }
     } else {
       setDrivingLicenceTimingError(null);
       setDrivingLicenceTimingWarning(null);
     }
   }, [examType, patientDateOfBirth, examinationDate, drivingLicenseClass, purposeOfExam]);
+
+  // Check if patient is within 2 months before 65 with AGE_64_BELOW_LTA_ONLY
+  useEffect(() => {
+    if (examType === 'DRIVING_VOCATIONAL_TP_LTA' && 
+        purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' &&
+        patientDateOfBirth && 
+        examinationDate) {
+      
+      const age = calculateAge(patientDateOfBirth, examinationDate);
+      if (!age) {
+        setPurposeOfExamWarning(null);
+        return;
+      }
+
+      // If patient is already 65 or older, definitely warn
+      if (age.years >= 65) {
+        setPurposeOfExamWarning(
+          'Patient is 65 or older. Please verify the exam is only for LTA Vocational Licence renewal. ' +
+          'If Traffic Police Driving Licence renewal is also needed, select "Age 65 and above - Renew both Traffic Police & LTA Vocational Licence".'
+        );
+        return;
+      }
+
+      // If patient is 64, check if within 2 months before turning 65
+      if (age.years === 64) {
+        const examDate = new Date(examinationDate);
+        const dob = new Date(patientDateOfBirth);
+        const birthday65 = new Date(dob);
+        birthday65.setFullYear(dob.getFullYear() + 65);
+        
+        // Calculate months difference
+        const monthsDiff = (birthday65.getFullYear() - examDate.getFullYear()) * 12 + 
+                           (birthday65.getMonth() - examDate.getMonth());
+        
+        // Warn if within 2 months before turning 65
+        if (monthsDiff <= 2 && monthsDiff >= 0) {
+          setPurposeOfExamWarning(
+            'Patient is within 2 months of turning 65. Please verify the exam is only for LTA Vocational Licence renewal. ' +
+            'If Traffic Police Driving Licence renewal is also needed, select "Age 65 and above - Renew both Traffic Police & LTA Vocational Licence".'
+          );
+        } else {
+          setPurposeOfExamWarning(null);
+        }
+      } else {
+        setPurposeOfExamWarning(null);
+      }
+    } else {
+      setPurposeOfExamWarning(null);
+    }
+  }, [examType, purposeOfExam, patientDateOfBirth, examinationDate]);
 
   // Auto-set LTA vocational licence holder based on purpose of exam
   useEffect(() => {
@@ -837,11 +890,7 @@ export function NewSubmission() {
       }
     }
 
-    // Validate driving licence exam timing
-    if (drivingLicenceTimingError) {
-      toast.error(drivingLicenceTimingError);
-      return false;
-    }
+    // Validate driving licence exam timing - show as warning only, do not block
     
     // clear inline exam date error if present
     if (examinationDateError) setExaminationDateError(null);
@@ -1147,7 +1196,6 @@ export function NewSubmission() {
     (examType === 'DRIVING_VOCATIONAL_TP_LTA' ? purposeOfExam : true) &&
     examinationDate &&
     !examinationDateError &&
-    !drivingLicenceTimingError &&
     !emailError &&
     !mobileError
   );
@@ -1203,8 +1251,15 @@ export function NewSubmission() {
         // If AMT is required OR we can't determine (null), check if AMT section was completed
         if (newAmtRequired === true || newAmtRequired === null) {
           // Check if AMT section was completed (user visited and clicked continue)
-          const amtSectionCompleted = completedSections.has('amt');
+          // When editing from summary, also check if AMT data exists in formData
+          const hasAmtData = formData.amt && (
+            formData.amt.score !== undefined || 
+            Object.keys(formData.amt).some(key => key !== 'score' && formData.amt[key] === true)
+          );
+          const amtSectionCompleted = completedSections.has('amt') || hasAmtData;
           console.log('amtSectionCompleted:', amtSectionCompleted);
+          console.log('completedSections.has(amt):', completedSections.has('amt'));
+          console.log('hasAmtData:', hasAmtData);
           console.log('formData.amt:', formData.amt);
           
           if (!amtSectionCompleted) {
@@ -1268,7 +1323,7 @@ export function NewSubmission() {
         patientNric,
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
-        ...(patientMobile && { patientMobile }), // Only include if not empty
+        ...(patientMobile && { patientMobile: patientMobile.replace(/\s/g, '') }), // Remove spaces before saving
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
@@ -1290,6 +1345,9 @@ export function NewSubmission() {
         // Navigate to /draft/:id which will load the draft into the form
         navigate(`/draft/${created.id}`, { replace: true });
       }
+      
+      // Update formData to match what was saved
+      setFormData(enhancedFormData);
       
       // Save current state as the last saved state
       setLastSavedState({
@@ -1338,7 +1396,7 @@ export function NewSubmission() {
         patientNric,
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
-        ...(patientMobile && { patientMobile }), // Only include if not empty
+        ...(patientMobile && { patientMobile: patientMobile.replace(/\s/g, '') }), // Remove spaces before saving
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
@@ -1540,11 +1598,8 @@ export function NewSubmission() {
                 
                 <SelectGroup>
                   <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
-                  <SelectItem value="DRIVING_LICENCE_TP">
-                    Driving Licence Medical Examination Report (TP)
-                  </SelectItem>
                   <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-                    Driving Licence and Vocational Licence (TP & LTA)
+                    Driving Licence / Vocational Licence
                   </SelectItem>
                 </SelectGroup>
               </SelectContent>
@@ -1553,7 +1608,7 @@ export function NewSubmission() {
 
           {/* Clinic Selection - Only show for doctors and nurses */}
           {examType && (user?.role === 'doctor' || user?.role === 'nurse') && clinics.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-2 max-w-lg">
               <Label htmlFor="clinic">Clinic <span className="text-red-500">*</span></Label>
               <Select value={selectedClinicId} onValueChange={setSelectedClinicId} name="clinic">
                 <SelectTrigger id="clinic">
@@ -1771,7 +1826,7 @@ export function NewSubmission() {
                       />
                     )}
                     {examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
-                      <div className="space-y-2">
+                      <div className="space-y-2 max-w-2xl">
                         <Label htmlFor="purposeOfExam">Purpose of Exam <span className="text-red-500">*</span></Label>
                         <Select value={purposeOfExam} onValueChange={setPurposeOfExam}>
                           <SelectTrigger id="purposeOfExam" className={!purposeOfExam ? 'text-muted-foreground' : ''}>
@@ -1784,10 +1839,21 @@ export function NewSubmission() {
                             <SelectItem value="BAVL_ANY_AGE">Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age</SelectItem>
                           </SelectContent>
                         </Select>
+                        {purposeOfExamWarning && (
+                          <div className="flex items-start gap-3 p-4 mt-2 bg-amber-50 border-2 border-amber-400 rounded-lg shadow-sm max-w-none">
+                            <svg className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-base font-bold text-amber-900 mb-1">Please Verify Purpose of Exam</p>
+                              <p className="text-sm text-amber-800 leading-relaxed">{purposeOfExamWarning}</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     {isDriverExamType(examType) && patientDateOfBirth && examinationDate && (
-                      <div className="space-y-2 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                      <div className="space-y-2 bg-slate-50 p-4 rounded-lg border border-slate-200 max-w-xs">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-medium text-slate-700">Age at Examination</p>
@@ -1839,19 +1905,24 @@ export function NewSubmission() {
                           }
                         }}
                         onBlur={() => setExaminationDateBlurred(true)}
-                        aria-invalid={!!examinationDateError || (examinationDateBlurred && !!drivingLicenceTimingError)}
-                        className={`${examinationDateError || (examinationDateBlurred && drivingLicenceTimingError) ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+                        aria-invalid={!!examinationDateError}
+                        className={`${examinationDateError ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
                       />
                       {examinationDateError && (
                         <InlineError>{examinationDateError}</InlineError>
                       )}
-                      {examinationDateBlurred && drivingLicenceTimingError && (
-                        <InlineError>{drivingLicenceTimingError}</InlineError>
-                      )}
-                      {examinationDateBlurred && !drivingLicenceTimingError && drivingLicenceTimingWarning && (
-                        <p className="text-sm text-amber-600">{drivingLicenceTimingWarning}</p>
-                      )}
                     </div>
+                    {drivingLicenceTimingWarning && (
+                      <div className="flex items-start gap-3 p-4 mt-2 bg-amber-50 border-2 border-amber-400 rounded-lg shadow-sm max-w-none">
+                        <svg className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-base font-bold text-amber-900 mb-1">Age Validation Warning</p>
+                          <p className="text-sm text-amber-800 leading-relaxed">{drivingLicenceTimingWarning}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex justify-start mt-4">
                     <Button 
@@ -2522,6 +2593,8 @@ export function NewSubmission() {
                             !formData.assessment?.declarationAgreed || 
                             (purposeOfExam === 'BAVL_ANY_AGE' 
                               ? formData.assessment?.fitForBusAttendant === undefined
+                              : purposeOfExam === 'AGE_65_ABOVE_TP_ONLY'
+                              ? formData.assessment?.fitToDrive === undefined
                               : formData.assessment?.fitToDrivePublicService === undefined) ||
                             hasPendingMemos(examType, formData)
                           }

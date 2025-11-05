@@ -136,11 +136,30 @@ export function DrivingVocationalTpLtaAccordions({
               <Button 
                 type="button"
                 onClick={() => {
+                  console.log('🔍 General Medical Continue clicked');
+                  console.log('FormData:', formData);
+                  
                   const isGeneralMedicalValid = validateGeneralMedical(formData, onValidate);
                   const isAbnormalityValid = validateAbnormalityChecklist(formData, onValidate);
                   
+                  console.log('Validation results:', {
+                    isGeneralMedicalValid,
+                    isAbnormalityValid,
+                    bloodPressure: formData.bloodPressure,
+                    pulse: formData.pulse,
+                    opticalAids: formData.opticalAids,
+                    visualAcuity: formData.visualAcuity,
+                    nearVisionRE: formData.nearVisionRE,
+                    nearVisionLE: formData.nearVisionLE,
+                    passGeneralCondition: formData.passGeneralCondition,
+                    abnormalityChecklist: formData.abnormalityChecklist
+                  });
+                  
                   if (isGeneralMedicalValid && isAbnormalityValid) {
+                    console.log('✅ Validation passed, calling onContinue');
                     onContinue('general-medical', 'amt');
+                  } else {
+                    console.log('❌ Validation failed');
                   }
                 }}
               >
