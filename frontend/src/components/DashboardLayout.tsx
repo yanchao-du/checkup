@@ -90,7 +90,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 {/* <div className="text-xs text-slate-600">{user?.clinicName}</div> */}
               </div>
             </div>
-            <Button 
+            {/* <Button 
               variant="outline" 
               size="sm" 
               className="text-slate-600 hover:text-blue-600 focus:outline-none w-full sm:w-auto" 
@@ -99,7 +99,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             >
               <HelpCircle className="w-4 h-4 mr-2" />
               Help
-            </Button>
+            </Button> */}
             <Button variant="outline" size="sm" className="text-blue-600 focus:outline-none w-full sm:w-auto" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Log out
