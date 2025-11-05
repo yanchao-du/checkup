@@ -182,8 +182,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
       )}
 
       {/* General Medical Examination */}
-      <div className="bg-white border-2 border-blue-200 rounded-lg p-6 shadow-sm">
-        <h3 className="font-semibold text-lg mb-4 text-blue-900 bg-blue-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-blue-200">General Medical Examination</h3>
+      <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-4 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">General Medical Examination</h3>
         
         {/* Cardiovascular Assessment */}
         <div className="mb-4">
@@ -268,8 +268,8 @@ export function DrivingLicenceTpDetails({ submission }: DrivingLicenceTpDetailsP
 
       {/* Abbreviated Mental Test (AMT) */}
       {amt.score !== undefined && (
-        <div className="bg-white border-2 border-purple-200 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-4 text-purple-900 bg-purple-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-purple-200">Abbreviated Mental Test (AMT)</h3>
+        <div className="bg-white border-2 border-amber-200 rounded-lg p-6 shadow-sm">
+          <h3 className="font-semibold text-lg mb-4 text-amber-900 bg-amber-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-amber-200">Abbreviated Mental Test (AMT)</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-8">
               <div>
