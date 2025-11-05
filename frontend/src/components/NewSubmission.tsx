@@ -2526,7 +2526,13 @@ export function NewSubmission() {
                             hasPendingMemos(examType, formData)
                           }
                         >
-                          {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to TP & LTA' : 'Route for Approval'}
+                          {isSaving ? 'Submitting...' : role === 'doctor' ? (
+                            purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE' 
+                              ? 'Submit to LTA'
+                              : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
+                              ? 'Submit to TP & LTA'
+                              : 'Submit to TP'
+                          ) : 'Route for Approval'}
                         </Button>
                       </div>
                     </div>
