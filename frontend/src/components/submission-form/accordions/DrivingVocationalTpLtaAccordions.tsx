@@ -27,6 +27,7 @@ interface DrivingVocationalTpLtaAccordionsProps {
   drivingLicenseClass?: string;
   dateOfBirth?: string;
   examinationDate?: string;
+  purposeOfExam?: string;
 }
 
 export function DrivingVocationalTpLtaAccordions({
@@ -41,7 +42,12 @@ export function DrivingVocationalTpLtaAccordions({
   drivingLicenseClass,
   dateOfBirth,
   examinationDate,
+  purposeOfExam,
 }: DrivingVocationalTpLtaAccordionsProps) {
+  // Determine if vocational exam section should be shown
+  // Hide if "Age 65 and above - Renew Traffic Police Driving Licence only" is selected
+  const showVocationalExam = purposeOfExam !== 'AGE_65_ABOVE_TP_ONLY';
+
   return (
     <>
       {/* Medical Declaration by Examinee */}
@@ -164,7 +170,7 @@ export function DrivingVocationalTpLtaAccordions({
             <div className="flex justify-start mt-4">
               <Button 
                 type="button"
-                onClick={() => onContinue('amt', 'vocational-xray')}
+                onClick={() => onContinue('amt', showVocationalExam ? 'vocational-xray' : 'summary')}
               >
                 {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
               </Button>
@@ -173,36 +179,38 @@ export function DrivingVocationalTpLtaAccordions({
         </AccordionContent>
       </AccordionItem>
 
-      {/* Vocational License Medical Examination */}
-      <AccordionItem value="vocational-xray">
-        <AccordionTrigger isCompleted={completedSections.has('vocational-xray')} isDisabled={!isPatientInfoValid}>
-          <div className="flex items-center gap-2">
-            <span>Vocational Licence Medical Examination</span>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-4">
-            <VocationalXraySection 
-              formData={formData} 
-              onChange={onChange}
-              errors={errors}
-              onValidate={onValidate}
-            />
-            <div className="flex justify-start mt-4">
-              <Button 
-                type="button"
-                onClick={() => {
-                  if (validateVocationalXray(formData, onValidate)) {
-                    onContinue('vocational-xray', 'summary');
-                  }
-                }}
-              >
-                Continue to Summary
-              </Button>
+      {/* Vocational License Medical Examination - Only show if not TP only */}
+      {showVocationalExam && (
+        <AccordionItem value="vocational-xray">
+          <AccordionTrigger isCompleted={completedSections.has('vocational-xray')} isDisabled={!isPatientInfoValid}>
+            <div className="flex items-center gap-2">
+              <span>Vocational Licence Medical Examination</span>
             </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <VocationalXraySection 
+                formData={formData} 
+                onChange={onChange}
+                errors={errors}
+                onValidate={onValidate}
+              />
+              <div className="flex justify-start mt-4">
+                <Button 
+                  type="button"
+                  onClick={() => {
+                    if (validateVocationalXray(formData, onValidate)) {
+                      onContinue('vocational-xray', 'summary');
+                    }
+                  }}
+                >
+                  Continue to Summary
+                </Button>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
     </>
   );
 }

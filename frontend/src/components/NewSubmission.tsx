@@ -2013,6 +2013,7 @@ export function NewSubmission() {
                   drivingLicenseClass={drivingLicenseClass}
                   dateOfBirth={patientDateOfBirth}
                   examinationDate={examinationDate}
+                  purposeOfExam={purposeOfExam}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
                     
