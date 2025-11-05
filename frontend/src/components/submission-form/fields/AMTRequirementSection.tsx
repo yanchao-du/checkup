@@ -164,7 +164,8 @@ export function AMTRequirementSection({
         </Tooltip>
       </div>
       
-      {(needsAdditionalInfo || hasShownPrivateDrivingInstructor || hasShownLTAVocational) && (
+      {/* Only show the card if there are actual questions to display */}
+      {(hasShownPrivateDrivingInstructor || (hasShownLTAVocational && !autoSetLTAVocational)) && (
         <div className="space-y-4 bg-white p-4 rounded border border-gray-200">
           <p className="text-sm text-gray-600 font-medium">Additional information required to determine AMT requirement:</p>
           
