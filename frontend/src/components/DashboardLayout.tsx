@@ -16,7 +16,8 @@ import {
   CheckCircle,
   XCircle,
   Settings,
-  LogOut
+  LogOut,
+  HelpCircle
 } from 'lucide-react';
 import "@govtechsg/sgds-web-component/themes/day.css";
 import "@govtechsg/sgds-web-component/css/sgds.css";
@@ -31,6 +32,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleHelp = () => {
+    // Determine which guide to show based on user role
+    const guideUrl = user?.role === 'doctor' 
+      ? 'https://github.com/yanchao-du/checkup/blob/main/docs/guides/DOCTOR_USER_GUIDE.md'
+      : 'https://github.com/yanchao-du/checkup/blob/main/docs/guides/NURSE_USER_GUIDE.md';
+    window.open(guideUrl, '_blank');
   };
 
   const navItems = [
@@ -85,6 +94,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 {/* <div className="text-xs text-slate-600">{user?.clinicName}</div> */}
               </div>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-slate-600 hover:text-blue-600 focus:outline-none w-full sm:w-auto" 
+              onClick={handleHelp}
+              title="View User Guide"
+            >
+              <HelpCircle className="w-4 h-4 mr-2" />
+              Help
+            </Button>
             <Button variant="outline" size="sm" className="text-blue-600 focus:outline-none w-full sm:w-auto" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Log out
