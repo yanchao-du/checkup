@@ -1720,11 +1720,18 @@ export function NewSubmission() {
                   <SelectItem value="SIX_MONTHLY_MDW">
                     Six-monthly Medical Exam (6ME) for Migrant Domestic Worker
                   </SelectItem>
+                  <SelectItem value="FULL_MEDICAL_EXAM">
+                    Full Medical Examination for Foreign Worker
+                  </SelectItem>
                   <SelectItem value="SIX_MONTHLY_FMW">
                     Six-monthly Medical Exam (6ME) for Female Migrant Worker
                   </SelectItem>
-                  <SelectItem value="FULL_MEDICAL_EXAM">
-                    Full Medical Examination for Foreign Worker
+                </SelectGroup>
+                
+                <SelectGroup>
+                  <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
+                    Driving Licence / Vocational Licence
                   </SelectItem>
                 </SelectGroup>
                 
@@ -1733,18 +1740,11 @@ export function NewSubmission() {
                   <SelectItem value="PR_MEDICAL">
                     Medical Examination for Permanent Residency
                   </SelectItem>
-                  <SelectItem value="STUDENT_PASS_MEDICAL">
-                    Medical Examination for Student Pass
-                  </SelectItem>
                   <SelectItem value="LTVP_MEDICAL">
                     Medical Examination for Long Term Visit Pass
                   </SelectItem>
-                </SelectGroup>
-                
-                <SelectGroup>
-                  <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
-                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-                    Driving Licence / Vocational Licence
+                  <SelectItem value="STUDENT_PASS_MEDICAL">
+                    Medical Examination for Student Pass
                   </SelectItem>
                 </SelectGroup>
               </SelectContent>
