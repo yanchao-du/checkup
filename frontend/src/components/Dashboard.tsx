@@ -537,7 +537,7 @@ export function Dashboard() {
                   <>
                     <div className="border-b border-slate-200 pb-1.5 pt-1.5">
                       <div className="flex items-center gap-2">
-                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                        <Star className="w-3.5 h-3.5 text-green-500 fill-green-500" />
                         <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Favorite Exam Types</p>
                       </div>
                     </div>
@@ -545,10 +545,10 @@ export function Dashboard() {
                       <div
                         key={examType}
                         onClick={() => navigate(`/new-submission?examType=${examType}`)}
-                        className="flex items-center gap-2.5 p-2.5 rounded-lg border border-yellow-200 bg-yellow-50 hover:border-yellow-300 hover:bg-yellow-100 transition-all cursor-pointer group"
+                        className="flex items-center gap-2.5 p-2.5 rounded-lg border border-green-200 bg-green-50 hover:border-green-300 hover:bg-green-100 transition-all cursor-pointer group"
                       >
-                        <div className="bg-yellow-100 group-hover:bg-yellow-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
-                          <Plus className="w-4 h-4 text-yellow-700" />
+                        <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                          <Plus className="w-4 h-4 text-green-700" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
