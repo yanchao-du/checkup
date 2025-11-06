@@ -1,5 +1,5 @@
 import { useAuth } from './AuthContext';
-import { formatExamType } from '../lib/formatters';
+import { formatExamType, formatExamTypeFull } from '../lib/formatters';
 import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -10,12 +10,14 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Send
+  Send,
+  Star
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { toast } from 'sonner';
+import { FavoritesManager } from './FavoritesManager';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -366,7 +368,7 @@ export function Dashboard() {
         </Card>
       </div>
 
-      {/* Two Column Layout: Recent Activity (Left) and Quick Actions (Right) */}
+      {/* Two Column Layout: Recent Activity (Left) and Quick Actions + Favorites (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity - Takes 2 columns */}
         <Card className="lg:col-span-2">
@@ -430,19 +432,21 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions - Takes 1 column */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+        {/* Quick Actions + Favorites Manager - Takes 1 column */}
+        <div className="flex flex-col gap-6">
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Common tasks and favorites</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
             {user?.role === 'admin' ? (
               <>
                 <Link to="/settings?tab=users" className="block">
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
-                    <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                      <FileText className="w-5 h-5 text-blue-600" />
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                    <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                      <FileText className="w-4 h-4 text-blue-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-900">User Management</p>
@@ -451,9 +455,9 @@ export function Dashboard() {
                   </div>
                 </Link>
                 <Link to="/settings?tab=clinics" className="block">
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 hover:border-green-300 hover:bg-green-50 transition-all cursor-pointer group">
-                    <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-green-200 hover:border-green-300 hover:bg-green-50 transition-all cursor-pointer group">
+                    <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-900">Clinic Management</p>
@@ -462,9 +466,9 @@ export function Dashboard() {
                   </div>
                 </Link>
                 <Link to="/settings?tab=doctor-assignments" className="block">
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
-                    <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                      <FileEdit className="w-5 h-5 text-amber-600" />
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-amber-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
+                    <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                      <FileEdit className="w-4 h-4 text-amber-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-900">Doctor Assignment</p>
@@ -473,9 +477,9 @@ export function Dashboard() {
                   </div>
                 </Link>
                 <Link to="/settings?tab=nurse-assignments" className="block">
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer group">
-                    <div className="bg-purple-100 group-hover:bg-purple-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                      <FileEdit className="w-5 h-5 text-purple-600" />
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-purple-200 hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer group">
+                    <div className="bg-purple-100 group-hover:bg-purple-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                      <FileEdit className="w-4 h-4 text-purple-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-900">Nurse/Assistant Assignment</p>
@@ -486,24 +490,12 @@ export function Dashboard() {
               </>
             ) : (
               <>
-                {(user?.role === 'doctor' || user?.role === 'nurse') && (
-                  <Link to="/new-submission" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
-                      <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <FileText className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">New Report</p>
-                        <p className="text-xs text-slate-500">Create a new medical examination</p>
-                      </div>
-                    </div>
-                  </Link>
-                )}
+                {/* Regular Quick Actions - Reordered priority */}
                 {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
                   <Link to="/rejected-submissions" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
-                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <XCircle className="w-5 h-5 text-red-600" />
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
+                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                        <XCircle className="w-4 h-4 text-red-600" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-slate-900">Review Rejected</p>
@@ -514,12 +506,12 @@ export function Dashboard() {
                 )}
                 {user?.role === 'doctor' && pendingApprovals.length > 0 && (
                   <Link to="/pending-approvals" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
-                      <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <CheckCircle className="w-5 h-5 text-orange-600" />
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
+                      <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                        <CheckCircle className="w-4 h-4 text-orange-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Review Approvals</p>
+                        <p className="text-sm font-medium text-slate-900">Review & Approve</p>
                         <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
                       </div>
                     </div>
@@ -527,9 +519,9 @@ export function Dashboard() {
                 )}
                 {drafts.length > 0 && (
                   <Link to="/drafts" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
-                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <FileEdit className="w-5 h-5 text-amber-600" />
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
+                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                        <FileEdit className="w-4 h-4 text-amber-600" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-slate-900">Continue Draft</p>
@@ -538,10 +530,55 @@ export function Dashboard() {
                     </div>
                   </Link>
                 )}
+                {(user?.role === 'doctor' || user?.role === 'nurse') && (
+                  <>
+                    <Link to="/new-submission" className="block">
+                      <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                        <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-900">New Report</p>
+                          <p className="text-xs text-slate-500">Select exam type and create</p>
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* Favorite Exam Types Section - Quick links to favorites */}
+                    {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
+                      <>
+                        <div className="px-2 py-1">
+                          <p className="text-xs text-slate-500 italic">Or go directly to your favorites:</p>
+                        </div>
+                        {user.favoriteExamTypes.map((examType) => (
+                          <div
+                            key={examType}
+                            onClick={() => navigate(`/new-submission?examType=${examType}`)}
+                            className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-green-300 hover:bg-green-50 transition-all cursor-pointer group"
+                          >
+                            <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                              <Star className="w-4 h-4 text-green-600 fill-green-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-slate-900">{formatExamTypeFull(examType as any)}</p>
+                              <p className="text-xs text-slate-500">Start immediately</p>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </>
+                )}
               </>
             )}
           </CardContent>
         </Card>
+
+          {/* Favorites Manager */}
+          {(user?.role === 'doctor' || user?.role === 'nurse') && (
+            <FavoritesManager />
+          )}
+        </div>
       </div>
 
 

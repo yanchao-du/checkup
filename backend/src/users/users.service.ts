@@ -355,6 +355,7 @@ export class UsersService {
       role: updateUserDto.role,
       status: updateUserDto.status,
       mcrNumber: updateUserDto.mcrNumber,
+      favoriteExamTypes: updateUserDto.favoriteExamTypes,
     };
 
     // Hash password if provided
@@ -374,6 +375,7 @@ export class UsersService {
         status: true,
         lastLoginAt: true,
         createdAt: true,
+        favoriteExamTypes: true,
       },
     });
 
@@ -463,6 +465,32 @@ export class UsersService {
       message: 'Default doctor updated successfully',
       defaultDoctorId: updatedUser.defaultDoctorId,
       defaultDoctor: updatedUser.defaultDoctor,
+    };
+  }
+
+  async updateFavoriteExamTypes(userId: string, favoriteExamTypes: string[]) {
+    // Verify the user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Update the user's favorite exam types
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { favoriteExamTypes },
+      select: {
+        id: true,
+        favoriteExamTypes: true,
+      },
+    });
+
+    return {
+      id: updatedUser.id,
+      favoriteExamTypes: updatedUser.favoriteExamTypes,
     };
   }
 

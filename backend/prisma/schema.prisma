@@ -39,6 +39,7 @@ model User {
   defaultDoctorId                                               String?             @map("default_doctor_id")
   mcrNumber                                                     String?             @unique @map("mcr_number")
   nric                                                          String?             @unique
+  favoriteExamTypes                                             Json?               @map("favorite_exam_types")
   auditLogs                                                     AuditLog[]
   corpPassUsers                                                 CorpPassUser[]
   doctorClinics                                                 DoctorClinic[]

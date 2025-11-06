@@ -12,6 +12,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateFavoritesDto } from './dto/update-favorites.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -64,6 +65,14 @@ export class UsersController {
     @Body() body: { defaultDoctorId: string },
   ) {
     return this.usersService.setDefaultDoctor(user.id, body.defaultDoctorId);
+  }
+
+  @Put('me/favorites')
+  async updateMyFavorites(
+    @CurrentUser() user: any,
+    @Body() updateFavoritesDto: UpdateFavoritesDto,
+  ) {
+    return this.usersService.updateFavoriteExamTypes(user.id, updateFavoritesDto.favoriteExamTypes);
   }
 
   @Get(':id')

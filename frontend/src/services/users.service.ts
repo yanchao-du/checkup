@@ -83,6 +83,25 @@ export const usersApi = {
     return apiClient.put('/users/me/default-doctor', { defaultDoctorId });
   },
 
+  // Update favorite exam types
+  updateFavoriteExamTypes: async (favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
+    const response = await apiClient.put<{ id: string; favoriteExamTypes: string[] }>(`/users/me/favorites`, { favoriteExamTypes });
+    
+    // Update user in localStorage with the new favorites
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const updatedUser = { ...user, favoriteExamTypes };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (error) {
+        console.error('Failed to update localStorage:', error);
+      }
+    }
+    
+    return response;
+  },
+
   // Doctor-Clinic Relationship Management (Admin only)
   
   /**

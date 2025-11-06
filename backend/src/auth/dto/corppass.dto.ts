@@ -53,6 +53,7 @@ export class CorpPassLoginResponseDto {
     role: string;
     clinicId: string;
     clinicName: string;
+    favoriteExamTypes?: any; // Array of favorite exam types (JSON)
     authMethod: 'email' | 'corppass'; // Authentication method used
   };
 }
