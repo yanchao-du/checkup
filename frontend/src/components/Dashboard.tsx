@@ -11,8 +11,7 @@ import {
   XCircle,
   AlertCircle,
   Send,
-  Star,
-  Plus
+  Star
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
@@ -519,43 +518,42 @@ export function Dashboard() {
                   </Link>
                 )}
                 {(user?.role === 'doctor' || user?.role === 'nurse') && (
-                  <Link to="/new-submission" className="block">
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
-                      <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
-                        <FileText className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">New Report</p>
-                        <p className="text-xs text-slate-500">Create a new medical examination</p>
-                      </div>
-                    </div>
-                  </Link>
-                )}
-
-                {/* Favorite Exam Types Section - Under New Report */}
-                {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
                   <>
-                    <div className="border-b border-slate-200 pb-1.5 pt-1.5">
-                      <div className="flex items-center gap-2">
-                        <Star className="w-3.5 h-3.5 text-green-500 fill-green-500" />
-                        <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Favorite Exam Types</p>
-                      </div>
-                    </div>
-                    {user.favoriteExamTypes.map((examType) => (
-                      <div
-                        key={examType}
-                        onClick={() => navigate(`/new-submission?examType=${examType}`)}
-                        className="flex items-center gap-2.5 p-2.5 rounded-lg border border-green-200 bg-green-50 hover:border-green-300 hover:bg-green-100 transition-all cursor-pointer group"
-                      >
-                        <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
-                          <Plus className="w-4 h-4 text-green-700" />
+                    <Link to="/new-submission" className="block">
+                      <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                        <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                          <FileText className="w-4 h-4 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
-                          <p className="text-xs text-slate-500">Create new submission</p>
+                          <p className="text-sm font-medium text-slate-900">New Report</p>
+                          <p className="text-xs text-slate-500">Select exam type and create</p>
                         </div>
                       </div>
-                    ))}
+                    </Link>
+
+                    {/* Favorite Exam Types Section - Quick links to favorites */}
+                    {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
+                      <>
+                        <div className="px-2 py-1">
+                          <p className="text-xs text-slate-500 italic">Or go directly to your favorites:</p>
+                        </div>
+                        {user.favoriteExamTypes.map((examType) => (
+                          <div
+                            key={examType}
+                            onClick={() => navigate(`/new-submission?examType=${examType}`)}
+                            className="flex items-center gap-2.5 p-2.5 rounded-lg border border-green-200 bg-green-50 hover:border-green-300 hover:bg-green-100 transition-all cursor-pointer group"
+                          >
+                            <div className="bg-green-100 group-hover:bg-green-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                              <Star className="w-4 h-4 text-green-700 fill-green-700" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
+                              <p className="text-xs text-slate-500">Start immediately</p>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </>
                 )}
                 
