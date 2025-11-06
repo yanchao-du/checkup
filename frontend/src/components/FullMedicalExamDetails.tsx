@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-
 interface FullMedicalExamDetailsProps {
   submission: any;
 }
@@ -171,34 +169,25 @@ export function FullMedicalExamDetails({
       </div>
 
       {/* Overall Result */}
-      <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 shadow-sm">
-        <h3 className="font-semibold text-lg mb-4 text-gray-900">Overall Result of Medical Examination</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <p className="text-sm font-medium text-gray-900">Is this patient fit for work?</p>
-            {formData.fitForWork === 'yes' ? (
-              <Badge className="bg-green-600 text-white hover:bg-green-700">Yes</Badge>
-            ) : formData.fitForWork === 'no' ? (
-              <Badge variant="destructive">No</Badge>
-            ) : (
-              <p className="text-sm text-gray-500">Not specified</p>
+      <div className="bg-white border-2 border-slate-300 rounded-lg shadow-sm">
+        <h3 className="font-semibold text-lg mb-0 text-slate-900 bg-slate-100 px-6 py-4 rounded-t-lg border-b-2 border-slate-300">Overall Result of Medical Examination</h3>
+        
+        <div className="p-6">
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Is the patient fit for work?
+            </p>
+            {formData.fitForWork && (
+              <div className="mt-3">
+                <p className={`font-bold text-lg ${formData.fitForWork === 'yes' ? 'text-green-600' : 'text-red-600'}`}>
+                  {formData.fitForWork === 'yes' ? '✓ YES - Patient is fit for work' : '✗ NO - Patient is not fit for work'}
+                </p>
+              </div>
+            )}
+            {!formData.fitForWork && (
+              <p className="text-sm text-gray-500 italic">Not specified</p>
             )}
           </div>
-          
-          {formData.fitForWork && (
-            <div className={`p-4 rounded-lg border ${
-              formData.fitForWork === 'yes' 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-red-50 border-red-200'
-            }`}>
-              <p className={`font-semibold ${
-                formData.fitForWork === 'yes' ? 'text-green-700' : 'text-red-700'
-              }`}>
-                {formData.fitForWork === 'yes' ? '✓' : '✗'} The patient is{' '}
-                {formData.fitForWork === 'yes' ? 'fit for work' : 'NOT fit for work'}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
