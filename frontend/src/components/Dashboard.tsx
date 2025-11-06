@@ -503,6 +503,32 @@ export function Dashboard() {
                     </div>
                   </Link>
                 )}
+                {user?.role === 'doctor' && pendingApprovals.length > 0 && (
+                  <Link to="/pending-approvals" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
+                      <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <CheckCircle className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Review Approvals</p>
+                        <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {drafts.length > 0 && (
+                  <Link to="/drafts" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
+                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <FileEdit className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Continue Draft</p>
+                        <p className="text-xs text-slate-500">{drafts.length} incomplete {drafts.length === 1 ? 'draft' : 'drafts'}</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
                 {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
                   <Link to="/rejected-submissions" className="block">
                     <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
@@ -541,42 +567,17 @@ export function Dashboard() {
                         </div>
                       </div>
                     ))}
-                    <div className="border-b border-slate-200 pt-2"></div>
                   </>
-                )}
-
-                {/* Favorites Manager Component */}
-                <FavoritesManager />
-                {user?.role === 'doctor' && pendingApprovals.length > 0 && (
-                  <Link to="/pending-approvals" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
-                      <div className="bg-orange-100 group-hover:bg-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <CheckCircle className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Review Approvals</p>
-                        <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
-                      </div>
-                    </div>
-                  </Link>
-                )}
-                {drafts.length > 0 && (
-                  <Link to="/drafts" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer group">
-                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <FileEdit className="w-5 h-5 text-amber-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Continue Draft</p>
-                        <p className="text-xs text-slate-500">{drafts.length} incomplete {drafts.length === 1 ? 'draft' : 'drafts'}</p>
-                      </div>
-                    </div>
-                  </Link>
                 )}
               </>
             )}
           </CardContent>
         </Card>
+
+        {/* Favorites Manager - Separate Section */}
+        {(user?.role === 'doctor' || user?.role === 'nurse') && (
+          <FavoritesManager />
+        )}
       </div>
 
 
