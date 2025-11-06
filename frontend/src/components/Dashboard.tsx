@@ -489,37 +489,6 @@ export function Dashboard() {
               </>
             ) : (
               <>
-                {/* Favorite Exam Types Section */}
-                {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
-                  <>
-                    <div className="border-b border-slate-200 pb-2">
-                      <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Favorite Exam Types</p>
-                      </div>
-                    </div>
-                    {user.favoriteExamTypes.map((examType) => (
-                      <div
-                        key={examType}
-                        onClick={() => navigate(`/new-submission?examType=${examType}`)}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-yellow-200 bg-yellow-50 hover:border-yellow-300 hover:bg-yellow-100 transition-all cursor-pointer group"
-                      >
-                        <div className="bg-yellow-100 group-hover:bg-yellow-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                          <Plus className="w-5 h-5 text-yellow-700" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
-                          <p className="text-xs text-slate-500">Create new submission</p>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="border-b border-slate-200 pt-2"></div>
-                  </>
-                )}
-
-                {/* Favorites Manager Component */}
-                <FavoritesManager />
-
                 {/* Regular Quick Actions */}
                 {(user?.role === 'doctor' || user?.role === 'nurse') && (
                   <Link to="/new-submission" className="block">
@@ -547,6 +516,37 @@ export function Dashboard() {
                     </div>
                   </Link>
                 )}
+
+                {/* Favorite Exam Types Section */}
+                {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
+                  <>
+                    <div className="border-b border-slate-200 pb-2 pt-2">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Favorite Exam Types</p>
+                      </div>
+                    </div>
+                    {user.favoriteExamTypes.map((examType) => (
+                      <div
+                        key={examType}
+                        onClick={() => navigate(`/new-submission?examType=${examType}`)}
+                        className="flex items-center gap-3 p-3 rounded-lg border border-yellow-200 bg-yellow-50 hover:border-yellow-300 hover:bg-yellow-100 transition-all cursor-pointer group"
+                      >
+                        <div className="bg-yellow-100 group-hover:bg-yellow-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                          <Plus className="w-5 h-5 text-yellow-700" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
+                          <p className="text-xs text-slate-500">Create new submission</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="border-b border-slate-200 pt-2"></div>
+                  </>
+                )}
+
+                {/* Favorites Manager Component */}
+                <FavoritesManager />
                 {user?.role === 'doctor' && pendingApprovals.length > 0 && (
                   <Link to="/pending-approvals" className="block">
                     <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
