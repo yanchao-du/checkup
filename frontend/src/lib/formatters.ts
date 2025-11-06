@@ -11,6 +11,8 @@ export function formatExamType(examType: ExamType): string {
       return 'FMW Six-monthly (MOM)';
     case 'WORK_PERMIT':
       return 'Work Permit (MOM)';
+    case 'FULL_MEDICAL_EXAM':
+      return 'Full Medical Exam (MOM)';
     case 'AGED_DRIVERS':
       return 'Aged Drivers (SPF)';
     case 'DRIVING_LICENCE_TP':
@@ -41,6 +43,8 @@ export function formatExamTypeFull(examType: ExamType): string {
       return 'Six-monthly Medical Examination (6ME) for Female Migrant Worker';
     case 'WORK_PERMIT':
       return 'Full Medical Examination for Work Permit';
+    case 'FULL_MEDICAL_EXAM':
+      return 'Full Medical Examination for Foreign Worker';
     case 'AGED_DRIVERS':
       return 'Medical Examination for Aged Drivers';
     case 'DRIVING_LICENCE_TP':
@@ -68,6 +72,7 @@ export function formatAgency(examType: ExamType): string {
     case 'SIX_MONTHLY_MDW':
     case 'SIX_MONTHLY_FMW':
     case 'WORK_PERMIT':
+    case 'FULL_MEDICAL_EXAM':
       return 'MOM';
     case 'AGED_DRIVERS':
       return 'SPF';

@@ -483,7 +483,8 @@ export function ViewSubmission() {
                         {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
                         {(submission.examType === 'SIX_MONTHLY_MDW' || 
                           submission.examType === 'SIX_MONTHLY_FMW' || 
-                          submission.examType === 'WORK_PERMIT') && 'Ministry of Manpower'}
+                          submission.examType === 'WORK_PERMIT' ||
+                          submission.examType === 'FULL_MEDICAL_EXAM') && 'Ministry of Manpower'}
                         {(submission.examType === 'PR_MEDICAL' || 
                           submission.examType === 'STUDENT_PASS_MEDICAL' || 
                           submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
