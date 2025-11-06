@@ -491,6 +491,19 @@ export function Dashboard() {
             ) : (
               <>
                 {/* Regular Quick Actions - Reordered priority */}
+                {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+                  <Link to="/rejected-submissions" className="block">
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
+                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                        <XCircle className="w-4 h-4 text-red-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Review Rejected</p>
+                        <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
                 {user?.role === 'doctor' && pendingApprovals.length > 0 && (
                   <Link to="/pending-approvals" className="block">
                     <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
@@ -555,20 +568,6 @@ export function Dashboard() {
                       </>
                     )}
                   </>
-                )}
-                
-                {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
-                  <Link to="/rejected-submissions" className="block">
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
-                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
-                        <XCircle className="w-4 h-4 text-red-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Review Rejected</p>
-                        <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
-                      </div>
-                    </div>
-                  </Link>
                 )}
               </>
             )}
