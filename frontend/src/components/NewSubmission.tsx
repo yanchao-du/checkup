@@ -188,7 +188,7 @@ export function NewSubmission() {
     // Pre-select exam type from query parameter (for quick actions/favorites)
     if (searchParams.has('examType') && !id) {
       const typeParam = searchParams.get('examType');
-      if (typeParam && typeParam !== examType) {
+      if (typeParam) {
         setExamType(typeParam as ExamType);
       }
     }
