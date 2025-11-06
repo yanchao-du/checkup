@@ -47,6 +47,7 @@ export interface ClinicUser {
   role: UserRole;
   status: 'active' | 'inactive';
   mcrNumber?: string; // Medical Council Registration number (for doctors)
+  favoriteExamTypes?: string[]; // Array of favorite exam types
   clinicId?: string; // Primary clinic ID (legacy field)
   lastLoginAt?: string;
   createdAt: string;
@@ -56,6 +57,18 @@ export interface ClinicUser {
 }
 
 // Auth Types
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  clinicId: string;
+  clinicName: string;
+  mcrNumber?: string;
+  favoriteExamTypes?: string[];
+  authMethod?: 'email' | 'corppass';
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -63,7 +76,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user: ClinicUser;
+  user: User;
 }
 
 // Exam Types

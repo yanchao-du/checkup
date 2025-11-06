@@ -13,6 +13,7 @@ export interface User {
   clinicId: string;
   clinicName: string;
   mcrNumber?: string; // Medical Council Registration number (for doctors)
+  favoriteExamTypes?: string[]; // Array of favorite exam types
 }
 
 interface AuthContextType {

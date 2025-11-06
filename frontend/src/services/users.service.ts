@@ -83,6 +83,24 @@ export const usersApi = {
     return apiClient.put('/users/me/default-doctor', { defaultDoctorId });
   },
 
+  // Update favorite exam types
+  updateFavoriteExamTypes: async (favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
+    // Get current user ID from localStorage
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user?.id) {
+      throw new Error('User not authenticated');
+    }
+    
+    const response = await apiClient.put<ClinicUser>(`/users/${user.id}`, { favoriteExamTypes });
+    
+    // Update user in localStorage
+    const updatedUser = { ...user, favoriteExamTypes: response.favoriteExamTypes };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    return { id: response.id, favoriteExamTypes: response.favoriteExamTypes || [] };
+  },
+
   // Doctor-Clinic Relationship Management (Admin only)
   
   /**
