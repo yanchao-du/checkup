@@ -22,6 +22,7 @@ import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { DrivingLicenceTpDetails } from './submission-form/details/DrivingLicenceTpDetails';
 import { DrivingVocationalTpLtaDetails } from './submission-form/details/DrivingVocationalTpLtaDetails';
 import { VocationalLicenceLtaDetails } from './submission-form/details/VocationalLicenceLtaDetails';
+import { FullMedicalExamDetails } from './FullMedicalExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import { DeclarationView } from './submission-view/DeclarationView';
 import { MomDeclarationContent, IcaDeclarationContent } from './submission-form/summary/DeclarationContent';
@@ -186,6 +187,12 @@ export function ViewSubmission() {
                   <p className="text-sm text-slate-500 mb-1">NRIC/FIN</p>
                   <p className="text-slate-900">{submission.patientNric}</p>
                 </div>
+                {submission.formData?.gender && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Gender</p>
+                    <p className="text-slate-900">{submission.formData.gender === 'M' ? 'Male' : submission.formData.gender === 'F' ? 'Female' : submission.formData.gender}</p>
+                  </div>
+                )}
                 {submission.patientDateOfBirth && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Date of Birth</p>
@@ -323,6 +330,10 @@ export function ViewSubmission() {
                 <WorkPermitDetails submission={submission} />
               )}
 
+              {submission.examType === 'FULL_MEDICAL_EXAM' && (
+                <FullMedicalExamDetails submission={submission} />
+              )}
+
               {submission.examType === 'AGED_DRIVERS' && (
                 <AgedDriversDetails submission={submission} />
               )}
@@ -360,7 +371,8 @@ export function ViewSubmission() {
                submission.examType !== 'LTVP_MEDICAL' &&
                submission.examType !== 'DRIVING_LICENCE_TP' &&
                submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
-               submission.examType !== 'VOCATIONAL_LICENCE_LTA' && (
+               submission.examType !== 'VOCATIONAL_LICENCE_LTA' &&
+               submission.examType !== 'FULL_MEDICAL_EXAM' && (
                 <>
                   <Separator />
                   <div>
@@ -478,7 +490,8 @@ export function ViewSubmission() {
                         {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
                         {(submission.examType === 'SIX_MONTHLY_MDW' || 
                           submission.examType === 'SIX_MONTHLY_FMW' || 
-                          submission.examType === 'WORK_PERMIT') && 'Ministry of Manpower'}
+                          submission.examType === 'WORK_PERMIT' ||
+                          submission.examType === 'FULL_MEDICAL_EXAM') && 'Ministry of Manpower'}
                         {(submission.examType === 'PR_MEDICAL' || 
                           submission.examType === 'STUDENT_PASS_MEDICAL' || 
                           submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
@@ -507,12 +520,13 @@ export function ViewSubmission() {
             </Card>
           )}
 
-          {/* Clinic Information - hide for TP, TP_LTA, MDW, FMW, and ICA exams as they show it in declaration section */}
+          {/* Clinic Information - hide for TP, TP_LTA, MDW, FMW, FME, and ICA exams as they show it in declaration section */}
           {submission.clinicName && 
            submission.examType !== 'DRIVING_LICENCE_TP' && 
            submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
            submission.examType !== 'SIX_MONTHLY_MDW' &&
            submission.examType !== 'SIX_MONTHLY_FMW' &&
+           submission.examType !== 'FULL_MEDICAL_EXAM' &&
            submission.examType !== 'PR_MEDICAL' &&
            submission.examType !== 'STUDENT_PASS_MEDICAL' &&
            submission.examType !== 'LTVP_MEDICAL' && (

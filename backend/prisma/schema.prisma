@@ -171,9 +171,10 @@ enum UserStatus {
 
 enum ExamType {
   SIX_MONTHLY_MDW           @map("Six-monthly Medical Exam for Migrant Domestic Workers (MOM)")
-  WORK_PERMIT               @map("Full Medical Exam for Work Permit (MOM)")
-  AGED_DRIVERS              @map("Medical Exam for Aged Drivers (SPF)")
   SIX_MONTHLY_FMW           @map("Six-monthly Medical Exam for Female Migrant Workers (MOM)")
+  WORK_PERMIT               @map("Full Medical Exam for Work Permit (MOM)")
+  FULL_MEDICAL_EXAM         @map("Full Medical Examination for Foreign Worker (MOM)")
+  AGED_DRIVERS              @map("Medical Exam for Aged Drivers (SPF)")
   PR_MEDICAL                @map("Medical Examination for Permanent Residency (ICA)")
   STUDENT_PASS_MEDICAL      @map("Medical Examination for Student Pass (ICA)")
   LTVP_MEDICAL              @map("Medical Examination for Long Term Visit Pass (ICA)")
