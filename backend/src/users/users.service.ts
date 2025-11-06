@@ -355,6 +355,7 @@ export class UsersService {
       role: updateUserDto.role,
       status: updateUserDto.status,
       mcrNumber: updateUserDto.mcrNumber,
+      favoriteExamTypes: updateUserDto.favoriteExamTypes,
     };
 
     // Hash password if provided
@@ -374,6 +375,7 @@ export class UsersService {
         status: true,
         lastLoginAt: true,
         createdAt: true,
+        favoriteExamTypes: true,
       },
     });
 

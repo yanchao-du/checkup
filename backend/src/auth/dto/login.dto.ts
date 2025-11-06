@@ -20,6 +20,7 @@ export class LoginResponseDto {
     clinicId: string;
     clinicName: string;
     mcrNumber?: string; // Medical Council Registration number (for doctors)
+    favoriteExamTypes?: any; // Array of favorite exam types (JSON)
     authMethod?: 'email' | 'corppass'; // Optional: authentication method used
   };
 }
