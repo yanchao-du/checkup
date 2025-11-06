@@ -5,8 +5,8 @@ interface FullMedicalExamDetailsProps {
 export function FullMedicalExamDetails({
   submission,
 }: FullMedicalExamDetailsProps) {
-  const isFemale = submission.patient?.gender === 'F';
   const formData = submission.formData || {};
+  const isFemale = formData.gender === 'F';
 
   const medicalHistoryConditions = [
     { key: 'cardiovascular', label: 'Cardiovascular disease (e.g. ischemic heart disease)' },

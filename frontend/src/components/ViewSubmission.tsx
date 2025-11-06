@@ -187,10 +187,10 @@ export function ViewSubmission() {
                   <p className="text-sm text-slate-500 mb-1">NRIC/FIN</p>
                   <p className="text-slate-900">{submission.patientNric}</p>
                 </div>
-                {submission.patient?.gender && (
+                {submission.formData?.gender && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Gender</p>
-                    <p className="text-slate-900">{submission.patient.gender === 'M' ? 'Male' : submission.patient.gender === 'F' ? 'Female' : submission.patient.gender}</p>
+                    <p className="text-slate-900">{submission.formData.gender === 'M' ? 'Male' : submission.formData.gender === 'F' ? 'Female' : submission.formData.gender}</p>
                   </div>
                 )}
                 {submission.patientDateOfBirth && (
