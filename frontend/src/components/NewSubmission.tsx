@@ -52,6 +52,8 @@ import { IcaExamSummary } from './submission-form/summary/IcaExamSummary';
 import { DrivingLicenceTpAccordions } from './submission-form/accordions/DrivingLicenceTpAccordions';
 import { DrivingVocationalTpLtaAccordions } from './submission-form/accordions/DrivingVocationalTpLtaAccordions';
 import { VocationalLicenceLtaAccordions } from './submission-form/accordions/VocationalLicenceLtaAccordions';
+import { FullMedicalExamFields } from './FullMedicalExamFields';
+import { FullMedicalExamSummary } from './FullMedicalExamSummary';
 
 // Helper to check if exam type is ICA
 const isIcaExamType = (examType: ExamType | ''): boolean => {
@@ -624,10 +626,10 @@ export function NewSubmission() {
 
   // Fetch a random test FIN when exam type supports patient lookup
   useEffect(() => {
-    const shouldShowTestFin = !id && (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT');
+    const shouldShowTestFin = !id && (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM');
     
     if (shouldShowTestFin) {
-      patientsApi.getRandomTestFin().then((result) => {
+      patientsApi.getRandomTestFin(examType).then((result) => {
         if (result) {
           setTestFin(result.fin);
         }
@@ -639,11 +641,11 @@ export function NewSubmission() {
     }
   }, [examType, id]);
 
-  // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW and WORK_PERMIT (but not ICA)
+  // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW, WORK_PERMIT and FULL_MEDICAL_EXAM (but not ICA)
   useEffect(() => {
     const shouldFetchPatientName = 
       !isIcaExamType(examType) &&
-      (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') &&
+      (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') &&
       patientNric.length >= 9 && 
       !nricError &&
       !id; // Only auto-fetch for new submissions, not when editing
@@ -666,6 +668,14 @@ export function NewSubmission() {
           lastLookedUpNricRef.current = patientNric;
           setPatientName(patient.name);
           setIsNameFromApi(true);
+          
+          // Set gender from API for FME
+          if (examType === 'FULL_MEDICAL_EXAM' && patient.gender) {
+            setFormData(prev => ({
+              ...prev,
+              gender: patient.gender,
+            }));
+          }
           
           // Set required tests from patient data
           if (patient.requiredTests) {
@@ -1310,9 +1320,9 @@ export function NewSubmission() {
     try {
       setIsSaving(true);
 
-      // For MDW/FMW/WORK_PERMIT, store both masked and full name in formData
+      // For MDW/FMW/WORK_PERMIT/FME, store both masked and full name in formData
       const enhancedFormData = { ...formData };
-      if ((examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') && isNameFromApi) {
+      if ((examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') && isNameFromApi) {
         enhancedFormData._maskedName = maskName(patientName);
         enhancedFormData._fullName = patientName;
       }
@@ -1383,9 +1393,9 @@ export function NewSubmission() {
       setIsSaving(true);
       setHasUnsavedChanges(false); // Clear unsaved changes before navigation
 
-      // For MDW/FMW/WORK_PERMIT, store both masked and full name in formData
+      // For MDW/FMW/WORK_PERMIT/FME, store both masked and full name in formData
       const enhancedFormData = { ...formData };
-      if ((examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') && isNameFromApi) {
+      if ((examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') && isNameFromApi) {
         enhancedFormData._maskedName = maskName(patientName);
         enhancedFormData._fullName = patientName;
       }
@@ -1581,6 +1591,9 @@ export function NewSubmission() {
                   <SelectItem value="SIX_MONTHLY_FMW">
                     Six-monthly Medical Exam (6ME) for Female Migrant Worker
                   </SelectItem>
+                  <SelectItem value="FULL_MEDICAL_EXAM">
+                    Full Medical Examination for Foreign Worker
+                  </SelectItem>
                 </SelectGroup>
                 
                 <SelectGroup>
@@ -1688,7 +1701,7 @@ export function NewSubmission() {
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
                     <div className="space-y-2 max-w-md">
                       <Label htmlFor="patientName">Full Name (as in NRIC / FIN) <span className="text-red-500">*</span></Label>
-                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT') ? (
+                      {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
                           <div className="space-y-2">
@@ -1719,6 +1732,16 @@ export function NewSubmission() {
                                 <span className="inline-block w-1 h-1 rounded-full bg-green-500"></span>
                                 Name retrieved and masked for verification. Full name will be visible after submission.
                               </p>
+                            )}
+                            {examType === 'FULL_MEDICAL_EXAM' && formData.gender && (
+                              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                <p className="text-sm font-semibold text-blue-900 flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                  Gender: {formData.gender === 'M' ? 'Male' : formData.gender === 'F' ? 'Female' : formData.gender}
+                                </p>
+                              </div>
                             )}
                           </div>
                         ) : (
@@ -1978,6 +2001,16 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                     />
                   )}
+                  {examType === 'FULL_MEDICAL_EXAM' && (
+                    <FullMedicalExamFields
+                      formData={formData}
+                      handleInputChange={(e) => {
+                        const { name, value } = e.target;
+                        handleFormDataChange(name, value);
+                      }}
+                      gender={formData.gender}
+                    />
+                  )}
                   {examType === 'AGED_DRIVERS' && (
                     <AgedDriversFields
                       formData={formData}
@@ -1995,8 +2028,8 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
-                          // For MDW, FMW, and ICA exams, show summary page
+                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'FULL_MEDICAL_EXAM' || isIcaExamType(examType)) {
+                          // For MDW, FMW, FME, and ICA exams, show summary page
                           if (validateExamSpecific()) {
                             setCompletedSections(prev => new Set(prev).add('exam-specific'));
                             setShowSummary(true);
@@ -2389,6 +2422,91 @@ export function NewSubmission() {
                           </Button>
                         ) : (
                           // Other roles (non-doctor, non-nurse) can continue
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              toast.success('All sections completed! You can now save or submit.');
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {examType === 'FULL_MEDICAL_EXAM' && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!isPatientInfoValid || !completedSections.has('exam-specific')}>
+                    <div className="flex items-center gap-2">
+                      <span>Summary & Declaration</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <FullMedicalExamSummary
+                        formData={formData}
+                        gender={formData.gender}
+                      />
+                      
+                      <DeclarationSection
+                        checked={declarationChecked}
+                        onChange={setDeclarationChecked}
+                        userRole={role}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
+                      />
+                      
+                      <div className="flex justify-start mt-4">
+                        {role === 'doctor' ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (!declarationChecked) {
+                                toast.error('Please check the declaration before submitting');
+                                return;
+                              }
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
+                            }}
+                            disabled={!declarationChecked}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit to MOM
+                          </Button>
+                        ) : role === 'nurse' ? (
+                          <Button
+                            type="button"
+                            onClick={async () => {
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+
+                              if (!hasDefaultDoctor) {
+                                setShowSetDefaultDoctorDialog(true);
+                              } else {
+                                try {
+                                  if (!assignedDoctorId) {
+                                    const { defaultDoctorId } = await usersApi.getDefaultDoctor();
+                                    if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
+                                  }
+                                } catch (e) {
+                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                }
+
+                                setIsRouteForApproval(true);
+                                setShowSubmitDialog(true);
+                              }
+                            }}
+                            disabled={!isPatientInfoValid || isSaving}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit for Approval
+                          </Button>
+                        ) : (
                           <Button
                             type="button"
                             onClick={() => {

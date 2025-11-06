@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export interface PatientInfo {
   nric: string;
   name: string;
+  gender?: string;
   lastHeight?: string;
   lastWeight?: string;
   lastExamDate?: string;
@@ -57,6 +58,7 @@ export class PatientsService {
     const lastHeight = formData?.height?.toString() || undefined;
     const lastWeight = formData?.weight?.toString() || undefined;
     const lastExamDate = submission.examinationDate?.toISOString().split('T')[0] || undefined;
+    const gender = formData?.gender || undefined;
 
     // Extract test requirements from formData
     // Pregnancy and Syphilis are always required for MDW/FMW exams
@@ -71,6 +73,7 @@ export class PatientsService {
     return {
       nric: submission.patientNric,
       name: submission.patientName,
+      gender,
       lastHeight,
       lastWeight,
       lastExamDate,
@@ -82,12 +85,23 @@ export class PatientsService {
    * Get a random test FIN from the seeded patient data
    * This is used for displaying test FINs to users for exam types that support lookup
    */
-  async getRandomTestFin(): Promise<{ fin: string; name: string } | null> {
-    // Get a random patient from the seeded data (those with IDs starting with 'patient-')
+  async getRandomTestFin(examType?: string): Promise<{ fin: string; name: string } | null> {
+    // Determine which patient pool to use based on exam type
+    let idPrefix: string;
+    if (examType === 'FULL_MEDICAL_EXAM') {
+      // For FME, use both male and female patients
+      const useMale = Math.random() < 0.5;
+      idPrefix = useMale ? 'fme-male-' : 'fme-female-';
+    } else {
+      // For MDW/FMW/WORK_PERMIT, use the original patient pool
+      idPrefix = 'patient-';
+    }
+
+    // Get a random patient from the seeded data
     const count = await this.prisma.medicalSubmission.count({
       where: {
         id: {
-          startsWith: 'patient-',
+          startsWith: idPrefix,
         },
         deletedAt: null,
       },
@@ -104,7 +118,7 @@ export class PatientsService {
     const patient = await this.prisma.medicalSubmission.findMany({
       where: {
         id: {
-          startsWith: 'patient-',
+          startsWith: idPrefix,
         },
         deletedAt: null,
       },

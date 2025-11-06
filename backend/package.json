@@ -22,6 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "studio": "prisma studio",
     "seed:patients": "ts-node prisma/seed-patients.ts",
+    "seed:patients:fme": "ts-node prisma/seed-fme-patients.ts",
     "seed:patients:cleanup": "ts-node prisma/cleanup-patients.ts",
     "seed:patients:verify": "ts-node prisma/verify-patients.ts",
     "seed:patients:check-dates": "ts-node prisma/check-dates.ts",

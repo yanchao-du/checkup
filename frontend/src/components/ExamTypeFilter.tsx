@@ -30,6 +30,9 @@ export function ExamTypeFilter({ value, onValueChange }: ExamTypeFilterProps) {
           <SelectItem value="SIX_MONTHLY_FMW">
             Six-monthly Medical Exam (6ME) for Female Migrant Worker
           </SelectItem>
+          <SelectItem value="FULL_MEDICAL_EXAM">
+            Full Medical Examination for Foreign Worker
+          </SelectItem>
         </SelectGroup>
         
         <SelectGroup>

@@ -70,7 +70,8 @@ export interface LoginResponse {
 export type ExamType = 
   | 'SIX_MONTHLY_MDW' 
   | 'SIX_MONTHLY_FMW' 
-  | 'WORK_PERMIT' 
+  | 'WORK_PERMIT'
+  | 'FULL_MEDICAL_EXAM'
   | 'AGED_DRIVERS'
   | 'PR_MEDICAL'
   | 'STUDENT_PASS_MEDICAL'

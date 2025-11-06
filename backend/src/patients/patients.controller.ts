@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Logger, Query } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LookupPatientDto } from './dto/lookup-patient.dto';
@@ -17,8 +17,8 @@ export class PatientsController {
   }
 
   @Get('random-test-fin')
-  async getRandomTestFin() {
-    this.logger.log('Getting random test FIN');
-    return this.patientsService.getRandomTestFin();
+  async getRandomTestFin(@Query('examType') examType?: string) {
+    this.logger.log(`Getting random test FIN for exam type: ${examType || 'any'}`);
+    return this.patientsService.getRandomTestFin(examType);
   }
 }

@@ -14,6 +14,7 @@ const getAxiosInstance = () => {
 export interface PatientInfo {
   nric: string;
   name: string;
+  gender?: string;
   lastHeight?: string;
   lastWeight?: string;
   lastExamDate?: string;
@@ -57,10 +58,11 @@ export const patientsApi = {
    * Get a random test FIN from the seeded patient data
    * Used for displaying test FINs to users
    */
-  async getRandomTestFin(): Promise<RandomTestFin | null> {
+  async getRandomTestFin(examType?: string): Promise<RandomTestFin | null> {
     try {
       const api = getAxiosInstance();
-      const response = await api.get<RandomTestFin>('/patients/random-test-fin');
+      const params = examType ? { examType } : {};
+      const response = await api.get<RandomTestFin>('/patients/random-test-fin', { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching random test FIN:', error);

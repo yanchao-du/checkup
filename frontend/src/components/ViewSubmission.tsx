@@ -22,6 +22,7 @@ import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { DrivingLicenceTpDetails } from './submission-form/details/DrivingLicenceTpDetails';
 import { DrivingVocationalTpLtaDetails } from './submission-form/details/DrivingVocationalTpLtaDetails';
 import { VocationalLicenceLtaDetails } from './submission-form/details/VocationalLicenceLtaDetails';
+import { FullMedicalExamDetails } from './FullMedicalExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import { DeclarationView } from './submission-view/DeclarationView';
 import { MomDeclarationContent, IcaDeclarationContent } from './submission-form/summary/DeclarationContent';
@@ -321,6 +322,10 @@ export function ViewSubmission() {
 
               {submission.examType === 'WORK_PERMIT' && (
                 <WorkPermitDetails submission={submission} />
+              )}
+
+              {submission.examType === 'FULL_MEDICAL_EXAM' && (
+                <FullMedicalExamDetails submission={submission} />
               )}
 
               {submission.examType === 'AGED_DRIVERS' && (
