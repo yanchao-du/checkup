@@ -1,16 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 
 interface FullMedicalExamDetailsProps {
   submission: any;
@@ -20,39 +8,53 @@ export function FullMedicalExamDetails({
   submission,
 }: FullMedicalExamDetailsProps) {
   const isFemale = submission.patient?.gender === 'F';
+  const formData = submission.formData || {};
 
   const medicalHistoryConditions = [
     { key: 'cardiovascular', label: 'Cardiovascular disease (e.g. ischemic heart disease)' },
-    { key: 'metabolic', label: 'Metabolic disease (diabetes, hypertension)' },
-    { key: 'respiratory', label: 'Respiratory disease (e.g. tuberculosis, asthma)' },
     { key: 'gastrointestinal', label: 'Gastrointestinal disease (e.g. peptic ulcer disease)' },
-    { key: 'neurological', label: 'Neurological disease (e.g. epilepsy, stroke)' },
-    { key: 'mentalHealth', label: 'Mental health condition (e.g. depression)' },
-    { key: 'otherMedical', label: 'Other medical condition' },
-    { key: 'previousSurgeries', label: 'Previous surgeries' },
-    { key: 'longTermMedications', label: 'Long-term medications' },
-    { key: 'smokingHistory', label: 'Smoking History (tobacco)' },
     { key: 'lifestyleRiskFactors', label: 'Other lifestyle risk factors or significant family history' },
+    { key: 'longTermMedications', label: 'Long-term medications' },
+    { key: 'mentalHealth', label: 'Mental health condition (e.g. depression)' },
+    { key: 'metabolic', label: 'Metabolic disease (diabetes, hypertension)' },
+    { key: 'neurological', label: 'Neurological disease (e.g. epilepsy, stroke)' },
     { key: 'previousInfections', label: 'Previous infections of concern (e.g. COVID-19)' },
+    { key: 'previousSurgeries', label: 'Previous surgeries' },
+    { key: 'respiratory', label: 'Respiratory disease (e.g. tuberculosis, asthma)' },
+    { key: 'smokingHistory', label: 'Smoking History (tobacco)' },
+    { key: 'otherMedical', label: 'Other medical condition' },
   ];
 
   const medicalTests = [
-    { key: 'hiv', label: 'HIV' },
-    { key: 'pregnancy', label: 'Pregnancy', femaleOnly: true },
-    { key: 'urineAlbumin', label: 'Urine Albumin' },
-    { key: 'urineSugar', label: 'Urine Sugar' },
-    { key: 'bloodPressure', label: 'Blood Pressure' },
-    { key: 'malaria', label: 'Malaria' },
-    { key: 'colourVision', label: 'Colour Vision' },
+    { key: 'hiv', label: 'HIV', checkboxLabel: 'Positive', normalLabel: 'Negative' },
+    { key: 'pregnancy', label: 'Pregnancy', femaleOnly: true, checkboxLabel: 'Positive', normalLabel: 'Negative' },
+    { key: 'urineAlbumin', label: 'Urine Albumin', checkboxLabel: 'Abnormal', normalLabel: 'Normal' },
+    { key: 'urineSugar', label: 'Urine Sugar', checkboxLabel: 'Abnormal', normalLabel: 'Normal' },
+    { key: 'bloodPressure', label: 'Blood Pressure', checkboxLabel: 'Abnormal', normalLabel: 'Normal' },
+    { key: 'malaria', label: 'Malaria', checkboxLabel: 'Positive', normalLabel: 'Negative' },
+    { key: 'colourVision', label: 'Colour Vision', checkboxLabel: 'Abnormal', normalLabel: 'Normal' },
   ];
 
-  const checkedHistoryConditions = medicalHistoryConditions.filter(
-    (condition) => submission.formData?.[`medicalHistory_${condition.key}`] === 'yes'
-  );
+  // Get checked history items with remarks
+  const getCheckedHistory = () => {
+    const items: Array<{ label: string; remarks?: string }> = [];
+    
+    medicalHistoryConditions.forEach((condition) => {
+      if (formData[`medicalHistory_${condition.key}`] === 'yes') {
+        const remarks = formData[`medicalHistory_${condition.key}Remarks`];
+        items.push({ label: condition.label, remarks });
+      }
+    });
 
-  const abnormalTests = medicalTests.filter((test) => {
+    return items;
+  };
+
+  const checkedHistoryItems = getCheckedHistory();
+
+  // Get all relevant tests (including female-specific)
+  const relevantTests = medicalTests.filter((test) => {
     if (test.femaleOnly && !isFemale) return false;
-    return submission.formData?.[`test_${test.key}`] === 'yes';
+    return true;
   });
 
   const getChestXrayLabel = (value: string) => {
@@ -76,139 +78,137 @@ export function FullMedicalExamDetails({
 
   return (
     <div className="space-y-6">
-      {/* Medical History Accordion */}
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="medical-history">
-          <AccordionTrigger className="text-lg font-semibold">
-            Medical History of Patient
-          </AccordionTrigger>
-          <AccordionContent className="pt-4">
-            {checkedHistoryConditions.length > 0 ? (
-              <div className="space-y-2">
-                {checkedHistoryConditions.map((condition) => (
-                  <div key={condition.key} className="flex items-start gap-2">
-                    <div className="min-w-[20px] mt-1">
-                      <svg
-                        className="w-4 h-4 text-green-600"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path d="M5 13l4 4L19 7"></path>
-                      </svg>
+      {/* Medical History of Patient */}
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-3 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical History of Patient</h3>
+        {checkedHistoryItems.length > 0 ? (
+          <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
+            {checkedHistoryItems.map((item, index) => (
+              <li key={index} className="text-amber-700">
+                <div>
+                  <div className="font-medium">{item.label}</div>
+                  {item.remarks && (
+                    <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+                      <span className="font-semibold">Remarks: </span>{item.remarks}
                     </div>
-                    <p className="text-sm">{condition.label}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No medical history conditions reported</p>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-600 italic">No medical history conditions reported</p>
+        )}
 
-      {/* Medical Examination Accordion */}
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="medical-examination">
-          <AccordionTrigger className="text-lg font-semibold">
-            Medical Examination
-          </AccordionTrigger>
-          <AccordionContent className="space-y-6 pt-4">
+        {/* Patient Certification */}
+        {formData.medicalHistory_patientCertification && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Declaration by Patient to Medical Practitioner</h4>
+            <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
+              <p className="text-blue-700 font-medium mb-2">✓ Patient certification confirmed</p>
+              <p className="text-sm leading-relaxed mb-2">I hereby certify that:</p>
+              <ul className="space-y-1.5 ml-4 list-disc list-outside text-sm">
+                <li>I have explained this declaration to the patient</li>
+                <li>The patient has confirmed that he/she has carefully considered his/her responses and believe them to be complete and correct</li>
+                <li>The patient has declared to me that he/she has not withheld any relevant information or made any misleading statement</li>
+                <li>He/she has provided his/her consent for me, as the examining medical practitioner, to communicate with any physician who has previously attended to him/her</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Medical Examination */}
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-4 text-gray-900 bg-gray-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg border-b-2 border-gray-200">Medical Examination</h3>
+        
+        {/* Test Results */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">Test Results</h4>
+          <div className="space-y-2 text-sm">
             {/* Chest X-ray */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Chest X-ray</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Badge variant={submission.formData?.chestXray === 'normal' ? 'outline' : 'secondary'}>
-                  {submission.formData?.chestXray
-                    ? getChestXrayLabel(submission.formData.chestXray)
-                    : 'Not specified'}
-                </Badge>
-              </CardContent>
-            </Card>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-700 font-medium">Chest X-ray</span>
+              <span className={
+                formData.chestXray && formData.chestXray !== 'normal' 
+                  ? 'font-semibold text-red-600' 
+                  : 'text-gray-600'
+              }>
+                {formData.chestXray ? getChestXrayLabel(formData.chestXray) : 'Not specified'}
+              </span>
+            </div>
 
             {/* Syphilis */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Syphilis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Badge
-                  variant={
-                    submission.formData?.syphilis === 'normal'
-                      ? 'outline'
-                      : submission.formData?.syphilis?.startsWith('positive')
-                        ? 'destructive'
-                        : 'secondary'
-                  }
-                >
-                  {submission.formData?.syphilis
-                    ? getSyphilisLabel(submission.formData.syphilis)
-                    : 'Not specified'}
-                </Badge>
-              </CardContent>
-            </Card>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <span className="text-gray-700 font-medium">Syphilis</span>
+              <span className={
+                formData.syphilis === 'positive-infectious' 
+                  ? 'font-semibold text-red-600' 
+                  : formData.syphilis === 'positive-treated'
+                  ? 'font-semibold text-amber-600'
+                  : 'text-gray-600'
+              }>
+                {formData.syphilis ? getSyphilisLabel(formData.syphilis) : 'Not specified'}
+              </span>
+            </div>
 
-            {/* Abnormal Tests */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Abnormal Tests</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {abnormalTests.length > 0 ? (
-                  <div className="space-y-2">
-                    {abnormalTests.map((test) => (
-                      <div key={test.key} className="flex items-center gap-2">
-                        <Badge variant="destructive">{test.label}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No abnormal tests</p>
-                )}
-              </CardContent>
-            </Card>
+            {/* All Other Tests */}
+            {relevantTests.map((test) => {
+              const isAbnormal = formData[`test_${test.key}`] === 'yes';
+              return (
+                <div key={test.key} className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-700 font-medium">{test.label}</span>
+                  <span className={isAbnormal ? 'font-semibold text-red-600' : 'text-gray-600'}>
+                    {isAbnormal ? test.checkboxLabel : test.normalLabel}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-            {/* Other Abnormalities */}
-            {submission.formData?.otherAbnormalities && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Other Abnormalities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap">
-                    {submission.formData.otherAbnormalities}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+        {/* Other Abnormalities */}
+        {formData.otherAbnormalities && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Other Abnormalities</h4>
+            <div className="text-sm bg-gray-50 p-3 rounded-md">
+              <p className="text-gray-700 whitespace-pre-wrap">{formData.otherAbnormalities}</p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Overall Result */}
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle>Overall Result</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 shadow-sm">
+        <h3 className="font-semibold text-lg mb-4 text-gray-900">Overall Result of Medical Examination</h3>
+        <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <p className="text-sm font-medium">Fit for work:</p>
-            {submission.formData?.fitForWork === 'yes' ? (
-              <Badge className="bg-green-500 text-white">Yes</Badge>
-            ) : submission.formData?.fitForWork === 'no' ? (
+            <p className="text-sm font-medium text-gray-900">Is this patient fit for work?</p>
+            {formData.fitForWork === 'yes' ? (
+              <Badge className="bg-green-600 text-white hover:bg-green-700">Yes</Badge>
+            ) : formData.fitForWork === 'no' ? (
               <Badge variant="destructive">No</Badge>
             ) : (
               <p className="text-sm text-gray-500">Not specified</p>
             )}
           </div>
-        </CardContent>
-      </Card>
+          
+          {formData.fitForWork && (
+            <div className={`p-4 rounded-lg border ${
+              formData.fitForWork === 'yes' 
+                ? 'bg-green-50 border-green-200' 
+                : 'bg-red-50 border-red-200'
+            }`}>
+              <p className={`font-semibold ${
+                formData.fitForWork === 'yes' ? 'text-green-700' : 'text-red-700'
+              }`}>
+                {formData.fitForWork === 'yes' ? '✓' : '✗'} The patient is{' '}
+                {formData.fitForWork === 'yes' ? 'fit for work' : 'NOT fit for work'}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
