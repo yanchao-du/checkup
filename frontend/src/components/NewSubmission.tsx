@@ -2739,6 +2739,10 @@ export function NewSubmission() {
                           <Button
                             type="button"
                             onClick={() => {
+                              if (!formData.fitForWork) {
+                                toast.error('Please select whether the patient is fit for work');
+                                return;
+                              }
                               if (!declarationChecked) {
                                 toast.error('Please check the declaration before submitting');
                                 return;
@@ -2747,7 +2751,7 @@ export function NewSubmission() {
                               setIsRouteForApproval(false);
                               setShowSubmitDialog(true);
                             }}
-                            disabled={!declarationChecked}
+                            disabled={!declarationChecked || !formData.fitForWork}
                           >
                             <Send className="w-4 h-4 mr-2" />
                             Submit to MOM
@@ -2756,6 +2760,10 @@ export function NewSubmission() {
                           <Button
                             type="button"
                             onClick={async () => {
+                              if (!formData.fitForWork) {
+                                toast.error('Please select whether the patient is fit for work');
+                                return;
+                              }
                               setCompletedSections(prev => new Set(prev).add('summary'));
 
                               if (!hasDefaultDoctor) {
@@ -2774,7 +2782,7 @@ export function NewSubmission() {
                                 setShowSubmitDialog(true);
                               }
                             }}
-                            disabled={!isPatientInfoValid || isSaving}
+                            disabled={!isPatientInfoValid || isSaving || !formData.fitForWork}
                           >
                             <Send className="w-4 h-4 mr-2" />
                             Submit for Approval
