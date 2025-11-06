@@ -291,6 +291,7 @@ export function SubmissionsList() {
                           {submission.examType === 'SIX_MONTHLY_MDW' && 'MDW Six-monthly (MOM)'}
                           {submission.examType === 'SIX_MONTHLY_FMW' && 'FMW Six-monthly (MOM)'}
                           {submission.examType === 'WORK_PERMIT' && 'Work Permit (MOM)'}
+                          {submission.examType === 'FULL_MEDICAL_EXAM' && 'Full Medical Exam (MOM)'}
                           {submission.examType === 'AGED_DRIVERS' && 'Aged Drivers (SPF)'}
                           {submission.examType === 'DRIVING_LICENCE_TP' && 'Driving Licence (TP)'}
                           {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Driving Vocational (TP/LTA)'}
