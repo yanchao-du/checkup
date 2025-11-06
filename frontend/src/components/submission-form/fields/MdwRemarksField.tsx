@@ -37,7 +37,7 @@ export function MdwRemarksField({
               htmlFor="hasAdditionalRemarks"
               className="text-sm font-normal cursor-pointer"
             >
-              I have something else to report to MOM about the helper
+              I have something else to report to MOM about the patient
             </Label>
           </div>
         </div>
