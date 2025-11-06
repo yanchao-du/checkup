@@ -87,18 +87,34 @@ export const usersApi = {
   updateFavoriteExamTypes: async (favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
     // Get current user ID from localStorage
     const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    if (!user?.id) {
+    if (!userStr) {
+      console.error('No user found in localStorage');
       throw new Error('User not authenticated');
+    }
+    
+    let user;
+    try {
+      user = JSON.parse(userStr);
+    } catch (error) {
+      console.error('Failed to parse user from localStorage:', error);
+      throw new Error('Invalid user data');
+    }
+    
+    if (!user?.id) {
+      console.error('User object:', user);
+      throw new Error('User ID not found');
     }
     
     const response = await apiClient.put<ClinicUser>(`/users/${user.id}`, { favoriteExamTypes });
     
-    // Update user in localStorage
-    const updatedUser = { ...user, favoriteExamTypes: response.favoriteExamTypes };
+    // Update user in localStorage with the new favorites
+    const updatedUser = { ...user, favoriteExamTypes };
     localStorage.setItem('user', JSON.stringify(updatedUser));
     
-    return { id: response.id, favoriteExamTypes: response.favoriteExamTypes || [] };
+    return {
+      id: response.id,
+      favoriteExamTypes: response.favoriteExamTypes || favoriteExamTypes
+    };
   },
 
   // Doctor-Clinic Relationship Management (Admin only)
