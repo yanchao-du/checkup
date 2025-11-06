@@ -185,10 +185,10 @@ export function NewSubmission() {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     
-    // Pre-select exam type from query parameter (for quick actions)
-    if (searchParams.has('examType') && !id && !examType) {
+    // Pre-select exam type from query parameter (for quick actions/favorites)
+    if (searchParams.has('examType') && !id) {
       const typeParam = searchParams.get('examType');
-      if (typeParam) {
+      if (typeParam && typeParam !== examType) {
         setExamType(typeParam as ExamType);
       }
     }
