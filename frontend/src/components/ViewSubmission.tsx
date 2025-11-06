@@ -371,7 +371,8 @@ export function ViewSubmission() {
                submission.examType !== 'LTVP_MEDICAL' &&
                submission.examType !== 'DRIVING_LICENCE_TP' &&
                submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
-               submission.examType !== 'VOCATIONAL_LICENCE_LTA' && (
+               submission.examType !== 'VOCATIONAL_LICENCE_LTA' &&
+               submission.examType !== 'FULL_MEDICAL_EXAM' && (
                 <>
                   <Separator />
                   <div>
