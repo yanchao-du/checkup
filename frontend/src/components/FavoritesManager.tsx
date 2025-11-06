@@ -63,7 +63,7 @@ export function FavoritesManager() {
     setIsUpdating(true);
 
     try {
-      await usersApi.updateFavoriteExamTypes(user.id, newFavorites);
+      await usersApi.updateFavoriteExamTypes(newFavorites);
       setFavoriteExamTypes(newFavorites);
       
       // Update user context
@@ -93,7 +93,7 @@ export function FavoritesManager() {
     setIsUpdating(true);
 
     try {
-      await usersApi.updateFavoriteExamTypes(user.id, newFavorites);
+      await usersApi.updateFavoriteExamTypes(newFavorites);
       setFavoriteExamTypes(newFavorites);
       
       // Update user context

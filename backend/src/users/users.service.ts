@@ -468,6 +468,32 @@ export class UsersService {
     };
   }
 
+  async updateFavoriteExamTypes(userId: string, favoriteExamTypes: string[]) {
+    // Verify the user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Update the user's favorite exam types
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { favoriteExamTypes },
+      select: {
+        id: true,
+        favoriteExamTypes: true,
+      },
+    });
+
+    return {
+      id: updatedUser.id,
+      favoriteExamTypes: updatedUser.favoriteExamTypes,
+    };
+  }
+
   // Doctor-Clinic relationship management
   async assignDoctorToClinic(
     doctorId: string,

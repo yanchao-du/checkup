@@ -84,8 +84,8 @@ export const usersApi = {
   },
 
   // Update favorite exam types
-  updateFavoriteExamTypes: async (userId: string, favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
-    const response = await apiClient.put<ClinicUser>(`/users/${userId}`, { favoriteExamTypes });
+  updateFavoriteExamTypes: async (favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
+    const response = await apiClient.put<{ id: string; favoriteExamTypes: string[] }>(`/users/me/favorites`, { favoriteExamTypes });
     
     // Update user in localStorage with the new favorites
     const userStr = localStorage.getItem('user');
@@ -99,10 +99,7 @@ export const usersApi = {
       }
     }
     
-    return {
-      id: response.id,
-      favoriteExamTypes: response.favoriteExamTypes || favoriteExamTypes
-    };
+    return response;
   },
 
   // Doctor-Clinic Relationship Management (Admin only)
