@@ -189,12 +189,9 @@ export function FavoritesManager() {
                   key={examType}
                   className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
                 >
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
-                    <span className="text-sm text-slate-900">
-                      {examTypeInfo?.label || examType}
-                    </span>
-                  </div>
+                  <span className="text-sm text-slate-900">
+                    {examTypeInfo?.label || examType}
+                  </span>
                   <Button
                     variant="ghost"
                     size="sm"
