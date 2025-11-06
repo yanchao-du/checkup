@@ -209,39 +209,6 @@ export function Dashboard() {
         </p>
       </div>
 
-      {/* Quick Actions for Favorite Exam Types */}
-      {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-              <CardTitle className="text-blue-900">Quick Actions</CardTitle>
-            </div>
-            <CardDescription className="text-blue-700">
-              Create new submission for your favorite exam types
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {user.favoriteExamTypes.map((examType) => (
-                <Button
-                  key={examType}
-                  onClick={() => navigate(`/new-submission?examType=${examType}`)}
-                  className="bg-white hover:bg-blue-100 text-blue-900 border border-blue-300 shadow-sm h-auto py-4 px-4 justify-start items-center gap-2"
-                  variant="outline"
-                >
-                  <Plus className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-left text-sm">{formatExamType(examType as any)}</span>
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Favorites Manager */}
-      <FavoritesManager />
-
       {/* Rejected Submissions Alert - For Nurses */}
       {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
         <Card className="border-red-200 bg-red-50">
@@ -470,7 +437,7 @@ export function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks</CardDescription>
+            <CardDescription>Common tasks and favorites</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {user?.role === 'admin' ? (
@@ -522,6 +489,38 @@ export function Dashboard() {
               </>
             ) : (
               <>
+                {/* Favorite Exam Types Section */}
+                {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
+                  <>
+                    <div className="border-b border-slate-200 pb-2">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Favorite Exam Types</p>
+                      </div>
+                    </div>
+                    {user.favoriteExamTypes.map((examType) => (
+                      <div
+                        key={examType}
+                        onClick={() => navigate(`/new-submission?examType=${examType}`)}
+                        className="flex items-center gap-3 p-3 rounded-lg border border-yellow-200 bg-yellow-50 hover:border-yellow-300 hover:bg-yellow-100 transition-all cursor-pointer group"
+                      >
+                        <div className="bg-yellow-100 group-hover:bg-yellow-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                          <Plus className="w-5 h-5 text-yellow-700" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
+                          <p className="text-xs text-slate-500">Create new submission</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="border-b border-slate-200 pt-2"></div>
+                  </>
+                )}
+
+                {/* Favorites Manager Component */}
+                <FavoritesManager />
+
+                {/* Regular Quick Actions */}
                 {(user?.role === 'doctor' || user?.role === 'nurse') && (
                   <Link to="/new-submission" className="block">
                     <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
