@@ -1,53 +1,56 @@
 import React from 'react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { PatientCertificationCheckbox } from './submission-form/fields/PatientCertificationCheckbox';
+import { CheckboxField } from './submission-form/fields/CheckboxField';
 
 interface FullMedicalExamFieldsProps {
   formData: any;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   gender?: string;
+  section?: 'medical-history' | 'medical-examination' | 'all';
+  errors?: Record<string, string>;
+  onValidate?: (field: string, error: string) => void;
 }
 
 export function FullMedicalExamFields({
   formData,
   handleInputChange,
   gender,
+  section = 'all',
+  errors,
+  onValidate,
 }: FullMedicalExamFieldsProps) {
   const isFemale = gender === 'F';
 
   // Medical History conditions
   const medicalHistoryConditions = [
     { key: 'cardiovascular', label: 'Cardiovascular disease (e.g. ischemic heart disease)' },
-    { key: 'metabolic', label: 'Metabolic disease (diabetes, hypertension)' },
-    { key: 'respiratory', label: 'Respiratory disease (e.g. tuberculosis, asthma)' },
     { key: 'gastrointestinal', label: 'Gastrointestinal disease (e.g. peptic ulcer disease)' },
-    { key: 'neurological', label: 'Neurological disease (e.g. epilepsy, stroke)' },
-    { key: 'mentalHealth', label: 'Mental health condition (e.g. depression)' },
-    { key: 'otherMedical', label: 'Other medical condition' },
-    { key: 'previousSurgeries', label: 'Previous surgeries' },
-    { key: 'longTermMedications', label: 'Long-term medications' },
-    { key: 'smokingHistory', label: 'Smoking History (tobacco)' },
     { key: 'lifestyleRiskFactors', label: 'Other lifestyle risk factors or significant family history' },
+    { key: 'longTermMedications', label: 'Long-term medications' },
+    { key: 'mentalHealth', label: 'Mental health condition (e.g. depression)' },
+    { key: 'metabolic', label: 'Metabolic disease (diabetes, hypertension)' },
+    { key: 'neurological', label: 'Neurological disease (e.g. epilepsy, stroke)' },
     { key: 'previousInfections', label: 'Previous infections of concern (e.g. COVID-19)' },
+    { key: 'previousSurgeries', label: 'Previous surgeries' },
+    { key: 'respiratory', label: 'Respiratory disease (e.g. tuberculosis, asthma)' },
+    { key: 'smokingHistory', label: 'Smoking History (tobacco)' },
+    { key: 'otherMedical', label: 'Other medical condition' },
   ];
 
   // Medical Examination tests
   const medicalTests = [
-    { key: 'hiv', label: 'HIV' },
-    { key: 'pregnancy', label: 'Pregnancy', femaleOnly: true },
-    { key: 'urineAlbumin', label: 'Urine Albumin' },
-    { key: 'urineSugar', label: 'Urine Sugar' },
-    { key: 'bloodPressure', label: 'Blood Pressure' },
-    { key: 'malaria', label: 'Malaria' },
-    { key: 'colourVision', label: 'Colour Vision' },
+    { key: 'hiv', label: 'HIV', checkboxLabel: 'Positive' },
+    { key: 'pregnancy', label: 'Pregnancy', femaleOnly: true, checkboxLabel: 'Positive' },
+    { key: 'urineAlbumin', label: 'Urine Albumin', checkboxLabel: 'Abnormal' },
+    { key: 'urineSugar', label: 'Urine Sugar', checkboxLabel: 'Abnormal' },
+    { key: 'bloodPressure', label: 'Blood Pressure', checkboxLabel: 'Abnormal' },
+    { key: 'malaria', label: 'Malaria', checkboxLabel: 'Positive' },
+    { key: 'colourVision', label: 'Colour Vision', checkboxLabel: 'Abnormal' },
   ];
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
@@ -57,6 +60,54 @@ export function FullMedicalExamFields({
         value: checked ? 'yes' : '',
       },
     } as any);
+    
+    // Clear remarks when unchecking
+    if (!checked) {
+      handleInputChange({
+        target: {
+          name: `${field}Remarks`,
+          value: '',
+        },
+      } as any);
+    }
+  };
+
+  const handleRemarksChange = (field: string, value: string) => {
+    handleInputChange({
+      target: {
+        name: `${field}Remarks`,
+        value: value,
+      },
+    } as any);
+    
+    // Clear error when user starts typing
+    if (onValidate && value.trim()) {
+      onValidate(`${field}Remarks`, '');
+    }
+  };
+
+  const handleRemarksBlur = (field: string) => {
+    if (onValidate && formData[field] === 'yes' && !formData[`${field}Remarks`]?.trim()) {
+      onValidate(`${field}Remarks`, 'Remarks are required when this condition is selected');
+    }
+  };
+
+  const handleClearAll = () => {
+    // Clear all medical history checkboxes and their remarks
+    medicalHistoryConditions.forEach((condition) => {
+      handleInputChange({
+        target: {
+          name: `medicalHistory_${condition.key}`,
+          value: '',
+        },
+      } as any);
+      handleInputChange({
+        target: {
+          name: `medicalHistory_${condition.key}Remarks`,
+          value: '',
+        },
+      } as any);
+    });
   };
 
   const handleRadioChange = (field: string, value: string) => {
@@ -70,16 +121,21 @@ export function FullMedicalExamFields({
 
   return (
     <>
-      {/* Medical History Accordion */}
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="medical-history">
-          <AccordionTrigger className="text-lg font-semibold">
-            Medical History of Patient
-          </AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-4">
-            <div className="space-y-3">
-              {medicalHistoryConditions.map((condition) => (
-                <div key={condition.key} className="flex items-start space-x-3">
+      {/* Medical History - Direct display without accordion */}
+      {(section === 'all' || section === 'medical-history') && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-600">
+              Does the patient have a history of, or is currently suffering from, any of the following?
+            </p>
+            <Button type="button" variant="outline" size="sm" onClick={handleClearAll} className="border-blue-500 text-blue-500 hover:bg-blue-50">
+              Clear All
+            </Button>
+          </div>
+          <ul className="space-y-3">
+            {medicalHistoryConditions.map((condition) => (
+              <li key={condition.key}>
+                <div className="flex items-start space-x-3">
                   <Checkbox
                     id={`medicalHistory_${condition.key}`}
                     name={`medicalHistory_${condition.key}`}
@@ -91,159 +147,190 @@ export function FullMedicalExamFields({
                   />
                   <Label
                     htmlFor={`medicalHistory_${condition.key}`}
-                    className="font-normal cursor-pointer"
+                    className={`font-normal cursor-pointer ${formData[`medicalHistory_${condition.key}`] === 'yes' ? 'font-semibold' : ''}`}
                   >
                     {condition.label}
                   </Label>
                 </div>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {/* Medical Examination Accordion */}
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="medical-examination">
-          <AccordionTrigger className="text-lg font-semibold">
-            Medical Examination
-          </AccordionTrigger>
-          <AccordionContent className="space-y-6 pt-4">
-            {/* Chest X-ray */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium">Chest X-ray</Label>
-              <RadioGroup
-                value={formData.chestXray || ''}
-                onValueChange={(value: string) => handleRadioChange('chestXray', value)}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="normal" id="xray-normal" />
-                  <Label htmlFor="xray-normal" className="font-normal cursor-pointer">
-                    Normal
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no-referral" id="xray-no-referral" />
-                  <Label htmlFor="xray-no-referral" className="font-normal cursor-pointer">
-                    No referral needed
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="cleared-ntbcc" id="xray-cleared" />
-                  <Label htmlFor="xray-cleared" className="font-normal cursor-pointer">
-                    Cleared by NTBCC
-                  </Label>
-                </div>
-                {isFemale && (
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="pregnancy-exempted" id="xray-pregnancy" />
-                    <Label htmlFor="xray-pregnancy" className="font-normal cursor-pointer">
-                      Pregnancy Exempted
+                {formData[`medicalHistory_${condition.key}`] === 'yes' && (
+                  <div className="mt-2 ml-8 p-4 border-l-2 border-blue-200 bg-blue-50/30 space-y-2">
+                    <Label htmlFor={`medicalHistory_${condition.key}_remarks`} className="text-sm font-semibold">
+                      Remarks <span className="text-red-500">*</span>
                     </Label>
+                    <Textarea
+                      id={`medicalHistory_${condition.key}_remarks`}
+                      name={`medicalHistory_${condition.key}Remarks`}
+                      placeholder="Please provide details..."
+                      value={formData[`medicalHistory_${condition.key}Remarks`] || ''}
+                      onChange={(e) => handleRemarksChange(`medicalHistory_${condition.key}`, e.target.value)}
+                      onBlur={() => handleRemarksBlur(`medicalHistory_${condition.key}`)}
+                      className="mt-1"
+                      rows={3}
+                    />
+                    {errors?.[`medicalHistory_${condition.key}Remarks`] && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors[`medicalHistory_${condition.key}Remarks`]}
+                      </p>
+                    )}
                   </div>
                 )}
-              </RadioGroup>
-            </div>
+              </li>
+            ))}
+          </ul>
+          
+          {/* Patient Certification */}
+          <PatientCertificationCheckbox
+            id="medicalHistoryPatientCertification"
+            checked={formData.medicalHistory_patientCertification || false}
+            onChange={(checked) => handleInputChange({
+              target: {
+                name: 'medicalHistory_patientCertification',
+                value: checked,
+              },
+            } as any)}
+          />
+        </div>
+      )}
 
-            {/* Syphilis */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium">Syphilis</Label>
-              <RadioGroup
-                value={formData.syphilis || ''}
-                onValueChange={(value: string) => handleRadioChange('syphilis', value)}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="normal" id="syphilis-normal" />
-                  <Label htmlFor="syphilis-normal" className="font-normal cursor-pointer">
-                    Normal
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="positive-infectious" id="syphilis-infectious" />
-                  <Label htmlFor="syphilis-infectious" className="font-normal cursor-pointer">
-                    Positive - Currently Infectious
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="positive-treated" id="syphilis-treated" />
-                  <Label htmlFor="syphilis-treated" className="font-normal cursor-pointer">
-                    Positive - Treated Inactive
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Medical Tests */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium">
-                Tests (check if positive/reactive/abnormal)
-              </Label>
-              <div className="space-y-3">
-                {medicalTests.map((test) => {
-                  if (test.femaleOnly && !isFemale) return null;
-                  
-                  return (
-                    <div key={test.key} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={`test_${test.key}`}
-                        name={`test_${test.key}`}
-                        checked={formData[`test_${test.key}`] === 'yes'}
-                        onCheckedChange={(checked) =>
-                          handleCheckboxChange(`test_${test.key}`, checked as boolean)
-                        }
-                      />
-                      <Label
-                        htmlFor={`test_${test.key}`}
-                        className="font-normal cursor-pointer"
-                      >
-                        {test.label}
-                      </Label>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Other Abnormalities */}
-            <div className="space-y-2">
-              <Label htmlFor="otherAbnormalities">Any other abnormalities</Label>
-              <Textarea
-                id="otherAbnormalities"
-                name="otherAbnormalities"
-                value={formData.otherAbnormalities || ''}
-                onChange={handleInputChange}
-                placeholder="Describe any other abnormalities..."
-                rows={4}
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {/* Overall Assessment */}
-      <div className="space-y-4 p-6 border rounded-lg bg-slate-50">
-        <Label className="text-base font-medium">Overall Result</Label>
+      {/* Medical Examination - Direct display without accordion */}
+      {(section === 'all' || section === 'medical-examination') && (
+        <div className="space-y-6">
+        
+        {/* Chest X-ray */}
         <div className="space-y-3">
-          <Label className="text-sm font-normal">Is this patient fit for work?</Label>
+          <Label className="text-base font-medium">Chest X-ray</Label>
           <RadioGroup
-            value={formData.fitForWork || ''}
-            onValueChange={(value: string) => handleRadioChange('fitForWork', value)}
+            value={formData.chestXray || ''}
+            onValueChange={(value: string) => handleRadioChange('chestXray', value)}
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="yes" id="fit-yes" />
-              <Label htmlFor="fit-yes" className="font-normal cursor-pointer">
-                Yes
+              <RadioGroupItem value="normal" id="xray-normal" />
+              <Label htmlFor="xray-normal" className="font-normal cursor-pointer">
+                Normal
               </Label>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="no" id="fit-no" />
-              <Label htmlFor="fit-no" className="font-normal cursor-pointer">
-                No
+              <RadioGroupItem value="no-referral" id="xray-no-referral" />
+              <Label htmlFor="xray-no-referral" className="font-normal cursor-pointer">
+                No referral needed
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="cleared-ntbcc" id="xray-cleared" />
+              <Label htmlFor="xray-cleared" className="font-normal cursor-pointer">
+                Cleared by NTBCC
+              </Label>
+            </div>
+            {isFemale && (
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pregnancy-exempted" id="xray-pregnancy" />
+                <Label htmlFor="xray-pregnancy" className="font-normal cursor-pointer">
+                  Pregnancy Exempted
+                </Label>
+              </div>
+            )}
+          </RadioGroup>
+        </div>
+
+        {/* Syphilis */}
+        <div className="space-y-3">
+          <Label className="text-base font-medium">Syphilis</Label>
+          <RadioGroup
+            value={formData.syphilis || ''}
+            onValueChange={(value: string) => handleRadioChange('syphilis', value)}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="normal" id="syphilis-normal" />
+              <Label htmlFor="syphilis-normal" className="font-normal cursor-pointer">
+                Normal
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem 
+                value="positive-infectious" 
+                id="syphilis-infectious"
+                className={formData.syphilis === 'positive-infectious' ? 'border-red-600 [&_svg]:fill-red-600 [&_svg]:stroke-red-600' : ''}
+              />
+              <Label 
+                htmlFor="syphilis-infectious" 
+                className={`cursor-pointer ${formData.syphilis === 'positive-infectious' ? 'text-red-600 font-semibold' : 'font-normal'}`}
+              >
+                Positive - Currently Infectious
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="positive-treated" id="syphilis-treated" />
+              <Label htmlFor="syphilis-treated" className="font-normal cursor-pointer">
+                Positive - Treated Inactive
               </Label>
             </div>
           </RadioGroup>
         </div>
+
+        {/* Other Medical Tests */}
+        <div className="space-y-3">
+          <p className="text-sm text-slate-600">
+            Check only if test result is <b>positive</b> or <b>abnormal</b>:
+          </p>
+          <div className="space-y-0 border border-slate-200 rounded-md p-4">
+            {medicalTests.map((test) => {
+              if (test.femaleOnly && !isFemale) return null;
+              
+              return (
+                <CheckboxField
+                  key={test.key}
+                  id={`test_${test.key}`}
+                  label={test.label}
+                  checkboxLabel={test.checkboxLabel}
+                  checked={formData[`test_${test.key}`] === 'yes'}
+                  onChange={(checked) =>
+                    handleCheckboxChange(`test_${test.key}`, checked as boolean)
+                  }
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Other Abnormalities */}
+        <div className="space-y-2">
+          <Label htmlFor="otherAbnormalities">Any other abnormalities</Label>
+          <Textarea
+            id="otherAbnormalities"
+            name="otherAbnormalities"
+            value={formData.otherAbnormalities || ''}
+            onChange={handleInputChange}
+            placeholder="Describe any other abnormalities..."
+            rows={4}
+          />
+        </div>
+
+        {/* Overall Assessment */}
+        <div className="space-y-4 p-6 border rounded-lg bg-slate-50">
+          <Label className="text-base font-medium">Overall Result</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-normal">Is this patient fit for work?</Label>
+            <RadioGroup
+              value={formData.fitForWork || ''}
+              onValueChange={(value: string) => handleRadioChange('fitForWork', value)}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="fit-yes" />
+                <Label htmlFor="fit-yes" className="font-normal cursor-pointer">
+                  Yes
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="fit-no" />
+                <Label htmlFor="fit-no" className="font-normal cursor-pointer">
+                  No
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
       </div>
+      )}
     </>
   );
 }

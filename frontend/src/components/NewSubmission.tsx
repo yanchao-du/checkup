@@ -117,6 +117,7 @@ export function NewSubmission() {
   const [medicalDeclarationRemarksError, setMedicalDeclarationRemarksError] = useState<string | null>(null);
   const [medicalDeclarationPatientCertificationError, setMedicalDeclarationPatientCertificationError] = useState<string | null>(null);
   const [medicalHistoryErrors, setMedicalHistoryErrors] = useState<Record<string, string>>({});
+  const [fmeMedicalHistoryErrors, setFmeMedicalHistoryErrors] = useState<Record<string, string>>({});
   const [abnormalityChecklistErrors, setAbnormalityChecklistErrors] = useState<Record<string, string>>({});
   const [drivingLicenseClass, setDrivingLicenseClass] = useState('');
   const [purposeOfExam, setPurposeOfExam] = useState('');
@@ -218,6 +219,7 @@ export function NewSubmission() {
       setMedicalDeclarationRemarksError(null);
       setMedicalDeclarationPatientCertificationError(null);
       setMedicalHistoryErrors({});
+      setFmeMedicalHistoryErrors({});
       setAbnormalityChecklistErrors({});
       
       // Remove the refresh parameter from URL
@@ -764,8 +766,14 @@ export function NewSubmission() {
       setMedicalDeclarationRemarksError(error);
     } else if (field === 'medicalDeclarationPatientCertification') {
       setMedicalDeclarationPatientCertificationError(error);
+    } else if (field.startsWith('medicalHistory_')) {
+      // Handle FME medical history errors (with underscore)
+      setFmeMedicalHistoryErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
     } else if (field.startsWith('medicalHistory')) {
-      // Handle medical history remarks errors
+      // Handle TP/LTA medical history remarks errors (without underscore)
       setMedicalHistoryErrors(prev => ({
         ...prev,
         [field]: error
@@ -817,6 +825,7 @@ export function NewSubmission() {
     setMedicalDeclarationRemarksError(null);
     setMedicalDeclarationPatientCertificationError(null);
     setMedicalHistoryErrors({});
+    setFmeMedicalHistoryErrors({});
     setAbnormalityChecklistErrors({});
   };
 
@@ -908,6 +917,60 @@ export function NewSubmission() {
     if (mobileError) setMobileError(null);
     if (nricError) setNricError(null);
     return true;
+  };
+
+  const validateFmeMedicalHistory = (): boolean => {
+    const medicalHistoryConditions = [
+      'cardiovascular',
+      'metabolic',
+      'respiratory',
+      'gastrointestinal',
+      'neurological',
+      'mentalHealth',
+      'otherMedical',
+      'previousSurgeries',
+      'longTermMedications',
+      'smokingHistory',
+      'lifestyleRiskFactors',
+      'previousInfections',
+    ];
+
+    let isValid = true;
+    let firstErrorField: string | null = null;
+
+    for (const condition of medicalHistoryConditions) {
+      const fieldName = `medicalHistory_${condition}`;
+      const remarksFieldName = `${fieldName}Remarks`;
+      
+      if (formData[fieldName] === 'yes' && !formData[remarksFieldName]?.trim()) {
+        handleValidationError(remarksFieldName, 'Remarks are required when this condition is selected');
+        if (!firstErrorField) {
+          firstErrorField = `medicalHistory_${condition}_remarks`;
+        }
+        isValid = false;
+      }
+    }
+
+    // Check patient certification
+    if (!formData.medicalHistory_patientCertification) {
+      if (!firstErrorField) {
+        firstErrorField = 'medicalHistoryPatientCertification';
+      }
+      isValid = false;
+    }
+
+    // Scroll to first error if validation failed
+    if (!isValid && firstErrorField) {
+      setTimeout(() => {
+        const element = document.getElementById(firstErrorField!);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+      }, 100);
+    }
+
+    return isValid;
   };
 
   const validateExamSpecific = (): boolean => {
@@ -1950,7 +2013,15 @@ export function NewSubmission() {
                   <div className="flex justify-start mt-4">
                     <Button 
                       type="button"
-                      onClick={() => handleContinue('patient-info', 'exam-specific')}
+                      onClick={() => {
+                        if (examType === 'FULL_MEDICAL_EXAM') {
+                          // For FME, navigate to medical-history accordion
+                          setCompletedSections(prev => new Set(prev).add('patient-info'));
+                          setActiveAccordion('medical-history');
+                        } else {
+                          handleContinue('patient-info', 'exam-specific');
+                        }
+                      }}
                       disabled={!isPatientInfoValid}
                     >
                       {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
@@ -1959,8 +2030,82 @@ export function NewSubmission() {
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Examination Details - hidden for driver exams as they have their own internal structure */}
-              {!isDriverExamType(examType) && (
+              {/* For FME, show Medical History and Medical Examination as separate accordions */}
+              {examType === 'FULL_MEDICAL_EXAM' && (
+                <>
+                  <AccordionItem value="medical-history">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-history')} isDisabled={!isPatientInfoValid}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical History of Patient</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <FullMedicalExamFields
+                        formData={formData}
+                        handleInputChange={(e) => {
+                          const { name, value } = e.target;
+                          handleFormDataChange(name, value);
+                        }}
+                        gender={formData.gender}
+                        section="medical-history"
+                        errors={fmeMedicalHistoryErrors}
+                        onValidate={handleValidationError}
+                      />
+                      <div className="flex justify-start mt-4">
+                        <Button 
+                          type="button"
+                          disabled={!formData.medicalHistory_patientCertification}
+                          onClick={() => {
+                            if (validateFmeMedicalHistory()) {
+                              setCompletedSections(prev => new Set(prev).add('medical-history'));
+                              setActiveAccordion('medical-examination');
+                            }
+                          }}
+                        >
+                          Continue
+                        </Button>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="medical-examination">
+                    <AccordionTrigger isCompleted={completedSections.has('medical-examination')} isDisabled={!completedSections.has('medical-history')}>
+                      <div className="flex items-center gap-2">
+                        <span>Medical Examination</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <FullMedicalExamFields
+                        formData={formData}
+                        handleInputChange={(e) => {
+                          const { name, value } = e.target;
+                          handleFormDataChange(name, value);
+                        }}
+                        gender={formData.gender}
+                        section="medical-examination"
+                      />
+                      <div className="flex justify-start mt-4">
+                        <Button 
+                          type="button"
+                          onClick={() => {
+                            if (validateExamSpecific()) {
+                              setCompletedSections(prev => new Set(prev).add('medical-examination'));
+                              setCompletedSections(prev => new Set(prev).add('exam-specific'));
+                              setShowSummary(true);
+                              setActiveAccordion('summary');
+                            }
+                          }}
+                        >
+                          Continue to Summary
+                        </Button>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </>
+              )}
+
+              {/* Examination Details - hidden for driver exams and FME as they have their own structure */}
+              {!isDriverExamType(examType) && examType !== 'FULL_MEDICAL_EXAM' && (
               <AccordionItem value="exam-specific">
                 <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
                   <div className="flex items-center gap-2">
@@ -2001,16 +2146,6 @@ export function NewSubmission() {
                       onChange={handleFormDataChange}
                     />
                   )}
-                  {examType === 'FULL_MEDICAL_EXAM' && (
-                    <FullMedicalExamFields
-                      formData={formData}
-                      handleInputChange={(e) => {
-                        const { name, value } = e.target;
-                        handleFormDataChange(name, value);
-                      }}
-                      gender={formData.gender}
-                    />
-                  )}
                   {examType === 'AGED_DRIVERS' && (
                     <AgedDriversFields
                       formData={formData}
@@ -2028,8 +2163,8 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'FULL_MEDICAL_EXAM' || isIcaExamType(examType)) {
-                          // For MDW, FMW, FME, and ICA exams, show summary page
+                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
+                          // For MDW, FMW, and ICA exams, show summary page
                           if (validateExamSpecific()) {
                             setCompletedSections(prev => new Set(prev).add('exam-specific'));
                             setShowSummary(true);
@@ -2781,7 +2916,7 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && !isIcaExamType(examType) && examType !== 'DRIVING_LICENCE_TP' && examType !== 'DRIVING_VOCATIONAL_TP_LTA' && examType !== 'VOCATIONAL_LICENCE_LTA' && (
+              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && examType !== 'FULL_MEDICAL_EXAM' && !isIcaExamType(examType) && examType !== 'DRIVING_LICENCE_TP' && examType !== 'DRIVING_VOCATIONAL_TP_LTA' && examType !== 'VOCATIONAL_LICENCE_LTA' && (
                 <AccordionItem value="remarks">
                   <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">
