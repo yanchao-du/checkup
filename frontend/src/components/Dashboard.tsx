@@ -489,20 +489,7 @@ export function Dashboard() {
               </>
             ) : (
               <>
-                {/* Regular Quick Actions */}
-                {(user?.role === 'doctor' || user?.role === 'nurse') && (
-                  <Link to="/new-submission" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
-                      <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <FileText className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">New Report</p>
-                        <p className="text-xs text-slate-500">Create a new medical examination</p>
-                      </div>
-                    </div>
-                  </Link>
-                )}
+                {/* Regular Quick Actions - Reordered priority */}
                 {user?.role === 'doctor' && pendingApprovals.length > 0 && (
                   <Link to="/pending-approvals" className="block">
                     <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer group">
@@ -510,7 +497,7 @@ export function Dashboard() {
                         <CheckCircle className="w-5 h-5 text-orange-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Review Approvals</p>
+                        <p className="text-sm font-medium text-slate-900">Review & Approve</p>
                         <p className="text-xs text-slate-500">{pendingApprovals.length} pending {pendingApprovals.length === 1 ? 'approval' : 'approvals'}</p>
                       </div>
                     </div>
@@ -529,21 +516,21 @@ export function Dashboard() {
                     </div>
                   </Link>
                 )}
-                {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
-                  <Link to="/rejected-submissions" className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
-                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        <XCircle className="w-5 h-5 text-red-600" />
+                {(user?.role === 'doctor' || user?.role === 'nurse') && (
+                  <Link to="/new-submission" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                      <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <FileText className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Review Rejected</p>
-                        <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
+                        <p className="text-sm font-medium text-slate-900">New Report</p>
+                        <p className="text-xs text-slate-500">Create a new medical examination</p>
                       </div>
                     </div>
                   </Link>
                 )}
 
-                {/* Favorite Exam Types Section */}
+                {/* Favorite Exam Types Section - Under New Report */}
                 {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
                   <>
                     <div className="border-b border-slate-200 pb-2 pt-2">
@@ -568,6 +555,20 @@ export function Dashboard() {
                       </div>
                     ))}
                   </>
+                )}
+                
+                {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (
+                  <Link to="/rejected-submissions" className="block">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all cursor-pointer group">
+                      <div className="bg-red-100 group-hover:bg-red-200 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">Review Rejected</p>
+                        <p className="text-xs text-slate-500">{rejectedSubmissions.length} {rejectedSubmissions.length === 1 ? 'item' : 'items'} need attention</p>
+                      </div>
+                    </div>
+                  </Link>
                 )}
               </>
             )}
