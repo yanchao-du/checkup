@@ -84,32 +84,20 @@ export const usersApi = {
   },
 
   // Update favorite exam types
-  updateFavoriteExamTypes: async (favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
-    // Get current user ID from localStorage
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
-      console.error('No user found in localStorage');
-      throw new Error('User not authenticated');
-    }
-    
-    let user;
-    try {
-      user = JSON.parse(userStr);
-    } catch (error) {
-      console.error('Failed to parse user from localStorage:', error);
-      throw new Error('Invalid user data');
-    }
-    
-    if (!user?.id) {
-      console.error('User object:', user);
-      throw new Error('User ID not found');
-    }
-    
-    const response = await apiClient.put<ClinicUser>(`/users/${user.id}`, { favoriteExamTypes });
+  updateFavoriteExamTypes: async (userId: string, favoriteExamTypes: string[]): Promise<{ id: string; favoriteExamTypes: string[] }> => {
+    const response = await apiClient.put<ClinicUser>(`/users/${userId}`, { favoriteExamTypes });
     
     // Update user in localStorage with the new favorites
-    const updatedUser = { ...user, favoriteExamTypes };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const updatedUser = { ...user, favoriteExamTypes };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (error) {
+        console.error('Failed to update localStorage:', error);
+      }
+    }
     
     return {
       id: response.id,

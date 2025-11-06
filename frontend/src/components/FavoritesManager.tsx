@@ -40,6 +40,13 @@ export function FavoritesManager() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleAddFavorite = async (examType: ExamType) => {
+    if (!user?.id) {
+      toast.error('Not authenticated', {
+        description: 'Please log in to manage favorites',
+      });
+      return;
+    }
+
     if (favoriteExamTypes.length >= 3) {
       toast.error('Maximum 3 favorites allowed', {
         description: 'Remove a favorite before adding a new one',
@@ -56,13 +63,11 @@ export function FavoritesManager() {
     setIsUpdating(true);
 
     try {
-      await usersApi.updateFavoriteExamTypes(newFavorites);
+      await usersApi.updateFavoriteExamTypes(user.id, newFavorites);
       setFavoriteExamTypes(newFavorites);
       
       // Update user context
-      if (user) {
-        setUser({ ...user, favoriteExamTypes: newFavorites });
-      }
+      setUser({ ...user, favoriteExamTypes: newFavorites });
       
       toast.success('Added to favorites');
       setIsDialogOpen(false);
@@ -77,17 +82,22 @@ export function FavoritesManager() {
   };
 
   const handleRemoveFavorite = async (examType: string) => {
+    if (!user?.id) {
+      toast.error('Not authenticated', {
+        description: 'Please log in to manage favorites',
+      });
+      return;
+    }
+
     const newFavorites = favoriteExamTypes.filter(t => t !== examType);
     setIsUpdating(true);
 
     try {
-      await usersApi.updateFavoriteExamTypes(newFavorites);
+      await usersApi.updateFavoriteExamTypes(user.id, newFavorites);
       setFavoriteExamTypes(newFavorites);
       
       // Update user context
-      if (user) {
-        setUser({ ...user, favoriteExamTypes: newFavorites });
-      }
+      setUser({ ...user, favoriteExamTypes: newFavorites });
       
       toast.success('Removed from favorites');
     } catch (error) {
