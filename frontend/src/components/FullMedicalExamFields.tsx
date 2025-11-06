@@ -198,10 +198,15 @@ export function FullMedicalExamFields({
         
         {/* Chest X-ray */}
         <div className="space-y-3">
-          <Label className="text-base font-medium">Chest X-ray</Label>
+          <Label className="text-base font-medium">Chest X-ray <span className="text-red-500">*</span></Label>
           <RadioGroup
             value={formData.chestXray || ''}
-            onValueChange={(value: string) => handleRadioChange('chestXray', value)}
+            onValueChange={(value: string) => {
+              handleRadioChange('chestXray', value);
+              if (onValidate) {
+                onValidate('chestXray', '');
+              }
+            }}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="normal" id="xray-normal" />
@@ -230,14 +235,22 @@ export function FullMedicalExamFields({
               </div>
             )}
           </RadioGroup>
+          {errors?.chestXray && (
+            <p className="text-sm text-red-600">{errors.chestXray}</p>
+          )}
         </div>
 
         {/* Syphilis */}
         <div className="space-y-3">
-          <Label className="text-base font-medium">Syphilis</Label>
+          <Label className="text-base font-medium">Syphilis <span className="text-red-500">*</span></Label>
           <RadioGroup
             value={formData.syphilis || ''}
-            onValueChange={(value: string) => handleRadioChange('syphilis', value)}
+            onValueChange={(value: string) => {
+              handleRadioChange('syphilis', value);
+              if (onValidate) {
+                onValidate('syphilis', '');
+              }
+            }}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="normal" id="syphilis-normal" />
@@ -265,6 +278,9 @@ export function FullMedicalExamFields({
               </Label>
             </div>
           </RadioGroup>
+          {errors?.syphilis && (
+            <p className="text-sm text-red-600">{errors.syphilis}</p>
+          )}
         </div>
 
         {/* Other Medical Tests */}
@@ -303,31 +319,6 @@ export function FullMedicalExamFields({
             placeholder="Describe any other abnormalities..."
             rows={4}
           />
-        </div>
-
-        {/* Overall Assessment */}
-        <div className="space-y-4 p-6 border rounded-lg bg-slate-50">
-          <Label className="text-base font-medium">Overall Result</Label>
-          <div className="space-y-3">
-            <Label className="text-sm font-normal">Is this patient fit for work?</Label>
-            <RadioGroup
-              value={formData.fitForWork || ''}
-              onValueChange={(value: string) => handleRadioChange('fitForWork', value)}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="fit-yes" />
-                <Label htmlFor="fit-yes" className="font-normal cursor-pointer">
-                  Yes
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="fit-no" />
-                <Label htmlFor="fit-no" className="font-normal cursor-pointer">
-                  No
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
         </div>
       </div>
       )}

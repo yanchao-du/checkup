@@ -757,6 +757,24 @@ export function NewSubmission() {
   // caused every height edit to re-trigger the patient lookup API.
   }, [patientNric, examType, nricError, id]);
 
+  // Track FME medical examination completion
+  useEffect(() => {
+    if (examType === 'FULL_MEDICAL_EXAM') {
+      const isMedicalExaminationComplete = formData.chestXray && formData.syphilis;
+      
+      if (isMedicalExaminationComplete && !completedSections.has('medical-examination')) {
+        setCompletedSections(prev => new Set(prev).add('medical-examination'));
+      } else if (!isMedicalExaminationComplete && completedSections.has('medical-examination')) {
+        // Remove completion if fields are cleared
+        setCompletedSections(prev => {
+          const newSet = new Set(prev);
+          newSet.delete('medical-examination');
+          return newSet;
+        });
+      }
+    }
+  }, [examType, formData.chestXray, formData.syphilis, completedSections]);
+
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
@@ -768,6 +786,12 @@ export function NewSubmission() {
       setMedicalDeclarationPatientCertificationError(error);
     } else if (field.startsWith('medicalHistory_')) {
       // Handle FME medical history errors (with underscore)
+      setFmeMedicalHistoryErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
+    } else if (field === 'chestXray' || field === 'syphilis') {
+      // Handle FME medical examination errors
       setFmeMedicalHistoryErrors(prev => ({
         ...prev,
         [field]: error
@@ -966,6 +990,39 @@ export function NewSubmission() {
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           element.focus();
+        }
+      }, 100);
+    }
+
+    return isValid;
+  };
+
+  const validateFmeMedicalExamination = (): boolean => {
+    let isValid = true;
+    const newErrors: Record<string, string> = {};
+
+    // Validate Chest X-ray (mandatory)
+    if (!formData.chestXray) {
+      newErrors.chestXray = 'Chest X-ray result is required';
+      isValid = false;
+    }
+
+    // Validate Syphilis (mandatory)
+    if (!formData.syphilis) {
+      newErrors.syphilis = 'Syphilis test result is required';
+      isValid = false;
+    }
+
+    // Update errors state
+    if (!isValid) {
+      setFmeMedicalHistoryErrors(prev => ({ ...prev, ...newErrors }));
+      
+      // Scroll to first error
+      setTimeout(() => {
+        const firstErrorField = !formData.chestXray ? 'chestXray' : 'syphilis';
+        const element = document.getElementById(firstErrorField === 'chestXray' ? 'xray-normal' : 'syphilis-normal');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 100);
     }
@@ -2017,7 +2074,12 @@ export function NewSubmission() {
                         if (examType === 'FULL_MEDICAL_EXAM') {
                           // For FME, navigate to medical-history accordion
                           setCompletedSections(prev => new Set(prev).add('patient-info'));
-                          setActiveAccordion('medical-history');
+                          if (isEditingFromSummary) {
+                            setActiveAccordion('summary');
+                            setIsEditingFromSummary(false);
+                          } else {
+                            setActiveAccordion('medical-history');
+                          }
                         } else {
                           handleContinue('patient-info', 'exam-specific');
                         }
@@ -2058,11 +2120,16 @@ export function NewSubmission() {
                           onClick={() => {
                             if (validateFmeMedicalHistory()) {
                               setCompletedSections(prev => new Set(prev).add('medical-history'));
-                              setActiveAccordion('medical-examination');
+                              if (isEditingFromSummary) {
+                                setActiveAccordion('summary');
+                                setIsEditingFromSummary(false);
+                              } else {
+                                setActiveAccordion('medical-examination');
+                              }
                             }
                           }}
                         >
-                          Continue
+                          {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
                         </Button>
                       </div>
                     </AccordionContent>
@@ -2083,16 +2150,21 @@ export function NewSubmission() {
                         }}
                         gender={formData.gender}
                         section="medical-examination"
+                        errors={fmeMedicalHistoryErrors}
+                        onValidate={handleValidationError}
                       />
                       <div className="flex justify-start mt-4">
                         <Button 
                           type="button"
                           onClick={() => {
-                            if (validateExamSpecific()) {
+                            if (validateFmeMedicalExamination()) {
                               setCompletedSections(prev => new Set(prev).add('medical-examination'));
                               setCompletedSections(prev => new Set(prev).add('exam-specific'));
                               setShowSummary(true);
                               setActiveAccordion('summary');
+                              if (isEditingFromSummary) {
+                                setIsEditingFromSummary(false);
+                              }
                             }
                           }}
                         >
@@ -2585,7 +2657,73 @@ export function NewSubmission() {
                       <FullMedicalExamSummary
                         formData={formData}
                         gender={formData.gender}
+                        patientName={patientName}
+                        patientNric={patientNric}
+                        examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          setIsEditingFromSummary(true);
+                          setActiveAccordion(section);
+                        }}
                       />
+
+                      {/* Overall Result */}
+                      <Card className="mt-6 bg-blue-50 border-blue-100">
+                        <CardContent className="pt-6">
+                          <h4 className="text-lg font-semibold mb-4">Overall Result of Medical Examination</h4>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium mb-3 block">
+                                Is this patient fit for work? <span className="text-red-500">*</span>
+                              </Label>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="radio"
+                                    id="fit-yes-summary"
+                                    name="fitForWork-summary"
+                                    value="yes"
+                                    checked={formData.fitForWork === 'yes'}
+                                    onChange={(e) => handleFormDataChange('fitForWork', e.target.value)}
+                                    className="w-4 h-4 text-blue-600 cursor-pointer"
+                                  />
+                                  <Label htmlFor="fit-yes-summary" className="font-normal cursor-pointer">
+                                    Yes
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="radio"
+                                    id="fit-no-summary"
+                                    name="fitForWork-summary"
+                                    value="no"
+                                    checked={formData.fitForWork === 'no'}
+                                    onChange={(e) => handleFormDataChange('fitForWork', e.target.value)}
+                                    className="w-4 h-4 text-blue-600 cursor-pointer"
+                                  />
+                                  <Label htmlFor="fit-no-summary" className="font-normal cursor-pointer">
+                                    No
+                                  </Label>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {formData.fitForWork && (
+                              <div className={`p-4 rounded-lg border ${
+                                formData.fitForWork === 'yes' 
+                                  ? 'bg-green-50 border-green-200' 
+                                  : 'bg-red-50 border-red-200'
+                              }`}>
+                                <p className={`font-semibold ${
+                                  formData.fitForWork === 'yes' ? 'text-green-700' : 'text-red-700'
+                                }`}>
+                                  {formData.fitForWork === 'yes' ? '✓' : '✗'} The patient is{' '}
+                                  {formData.fitForWork === 'yes' ? 'fit for work' : 'NOT fit for work'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
                       
                       <DeclarationSection
                         checked={declarationChecked}
