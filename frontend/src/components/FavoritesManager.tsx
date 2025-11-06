@@ -129,7 +129,7 @@ export function FavoritesManager() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-            <CardTitle>Favorite Exam Types</CardTitle>
+            <CardTitle>My Favorite Exam Types</CardTitle>
           </div>
           {favoriteExamTypes.length < 3 && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
