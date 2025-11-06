@@ -792,7 +792,7 @@ export function NewSubmission() {
         ...prev,
         [field]: error
       }));
-    } else if (field === 'chestXray' || field === 'syphilis') {
+    } else if (field === 'chestXray' || field === 'syphilis' || field === 'pregnancyTest') {
       // Handle FME medical examination errors
       setFmeMedicalHistoryErrors(prev => ({
         ...prev,
@@ -1015,14 +1015,24 @@ export function NewSubmission() {
       isValid = false;
     }
 
+    // Validate pregnancy test if pregnancy exempted is selected for X-ray
+    if (formData.chestXray === 'pregnancy-exempted' && formData.test_pregnancy !== 'yes') {
+      newErrors.pregnancyTest = 'Pregnancy test must be positive when Pregnancy Exempted is selected';
+      isValid = false;
+    }
+
     // Update errors state
     if (!isValid) {
       setFmeMedicalHistoryErrors(prev => ({ ...prev, ...newErrors }));
       
       // Scroll to first error
       setTimeout(() => {
-        const firstErrorField = !formData.chestXray ? 'chestXray' : 'syphilis';
-        const element = document.getElementById(firstErrorField === 'chestXray' ? 'xray-normal' : 'syphilis-normal');
+        const firstErrorField = !formData.chestXray ? 'chestXray' : 
+                               !formData.syphilis ? 'syphilis' :
+                               'test_pregnancy';
+        const element = document.getElementById(firstErrorField === 'chestXray' ? 'xray-normal' : 
+                                               firstErrorField === 'syphilis' ? 'syphilis-normal' :
+                                               'test_pregnancy');
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }

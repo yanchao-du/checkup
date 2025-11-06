@@ -70,6 +70,11 @@ export function FullMedicalExamFields({
         },
       } as any);
     }
+    
+    // Clear pregnancy test error when checking the box
+    if (field === 'test_pregnancy' && checked && onValidate) {
+      onValidate('pregnancyTest', '');
+    }
   };
 
   const handleRemarksChange = (field: string, value: string) => {
@@ -205,6 +210,10 @@ export function FullMedicalExamFields({
               handleRadioChange('chestXray', value);
               if (onValidate) {
                 onValidate('chestXray', '');
+                // Clear pregnancy test error if changing away from pregnancy-exempted
+                if (value !== 'pregnancy-exempted') {
+                  onValidate('pregnancyTest', '');
+                }
               }
             }}
           >
@@ -293,16 +302,20 @@ export function FullMedicalExamFields({
               if (test.femaleOnly && !isFemale) return null;
               
               return (
-                <CheckboxField
-                  key={test.key}
-                  id={`test_${test.key}`}
-                  label={test.label}
-                  checkboxLabel={test.checkboxLabel}
-                  checked={formData[`test_${test.key}`] === 'yes'}
-                  onChange={(checked) =>
-                    handleCheckboxChange(`test_${test.key}`, checked as boolean)
-                  }
-                />
+                <div key={test.key}>
+                  <CheckboxField
+                    id={`test_${test.key}`}
+                    label={test.label}
+                    checkboxLabel={test.checkboxLabel}
+                    checked={formData[`test_${test.key}`] === 'yes'}
+                    onChange={(checked) =>
+                      handleCheckboxChange(`test_${test.key}`, checked as boolean)
+                    }
+                  />
+                  {test.key === 'pregnancy' && errors?.pregnancyTest && (
+                    <p className="text-sm text-red-600 ml-6 mt-1">{errors.pregnancyTest}</p>
+                  )}
+                </div>
               );
             })}
           </div>
