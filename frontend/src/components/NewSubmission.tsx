@@ -298,20 +298,22 @@ export function NewSubmission() {
           const existing = await submissionsApi.getById(id);
           setExamType(existing.examType);
           
-          // For MDW/FMW/WORK_PERMIT drafts, restore the full name from formData if available
+          // For MDW/FMW/WORK_PERMIT/FME drafts, restore the full name from formData if available
           // Otherwise use the patient name from the submission
           if ((existing.examType === 'SIX_MONTHLY_MDW' || 
                existing.examType === 'SIX_MONTHLY_FMW' || 
-               existing.examType === 'WORK_PERMIT') && 
+               existing.examType === 'WORK_PERMIT' ||
+               existing.examType === 'FULL_MEDICAL_EXAM') && 
               existing.formData?._fullName) {
             setPatientName(existing.formData._fullName);
             setIsNameFromApi(true);
           } else {
             setPatientName(existing.patientName);
-            // For MDW/FMW/WORK_PERMIT drafts without stored full name, assume it came from API
+            // For MDW/FMW/WORK_PERMIT/FME drafts without stored full name, assume it came from API
             if (existing.examType === 'SIX_MONTHLY_MDW' || 
                 existing.examType === 'SIX_MONTHLY_FMW' || 
-                existing.examType === 'WORK_PERMIT') {
+                existing.examType === 'WORK_PERMIT' ||
+                existing.examType === 'FULL_MEDICAL_EXAM') {
               setIsNameFromApi(true);
             }
           }
