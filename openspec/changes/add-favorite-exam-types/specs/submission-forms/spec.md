@@ -113,3 +113,40 @@ The system SHALL provide API endpoints to persist and retrieve user favorite exa
 **When** the request contains an invalid exam type value  
 **Then** the backend shall return 400 Bad Request  
 **And** the error message shall indicate "Invalid exam type"
+
+---
+
+### Requirement: Dashboard quick action buttons for favorites
+The dashboard SHALL display quick action buttons for favorite exam types, enabling direct navigation to the submission form.
+
+#### Scenario: Dashboard shows quick action buttons for favorites
+**Given** a user has marked "SIX_MONTHLY_MDW" and "FULL_MEDICAL_EXAM" as favorites  
+**When** the user views the dashboard/home page  
+**Then** a "Quick Actions" or "Favorites" section shall be displayed  
+**And** a button labeled "Six-monthly Medical Exam (6ME) for Migrant Domestic Worker" shall be shown  
+**And** a button labeled "Full Medical Examination for Foreign Worker" shall be shown  
+**And** each button shall have appropriate styling (e.g., card or button with icon)
+
+#### Scenario: Dashboard quick action button navigates to submission form
+**Given** a user has "SIX_MONTHLY_MDW" marked as favorite  
+**When** the user clicks the quick action button for "Six-monthly Medical Exam (6ME) for Migrant Domestic Worker"  
+**Then** the user shall be navigated to the new submission page  
+**And** the exam type shall be pre-selected to "SIX_MONTHLY_MDW"  
+**And** the MDW exam form shall be displayed immediately  
+**And** the user can begin filling out the form without additional selections
+
+#### Scenario: Dashboard shows empty state when no favorites
+**Given** a user has not marked any exam types as favorites  
+**When** the user views the dashboard  
+**Then** the quick actions section shall NOT be displayed  
+**Or** an empty state message shall be shown (e.g., "Mark exam types as favorites for quick access")
+
+#### Scenario: Dashboard updates when favorites change
+**Given** a user is viewing the dashboard  
+**And** the user has 2 favorites displayed  
+**When** the user navigates to new submission and adds a 3rd favorite  
+**And** returns to the dashboard  
+**Then** all 3 favorite quick action buttons shall be displayed  
+**When** the user removes a favorite  
+**And** returns to the dashboard  
+**Then** only the remaining favorites shall be displayed

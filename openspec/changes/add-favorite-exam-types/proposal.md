@@ -39,7 +39,7 @@ Implement a user preference system where users can:
 1. Add star icon to exam type dropdown items
 2. Store user's favorite exam types in user profile state
 3. Reorder dropdown to show favorites first (with visual separator)
-4. Add quick action cards/buttons on dashboard (optional enhancement)
+4. Add quick action cards/buttons on dashboard for favorite exam types
 
 ### Backend Changes
 1. Add `favoriteExamTypes` field to User model (JSON array)
@@ -61,11 +61,13 @@ Implement a user preference system where users can:
 - Favorite marking/unmarking in exam type dropdown (frontend)
 - Reordering dropdown to show favorites first
 - Persist favorites across sessions
+- Dashboard quick action buttons for favorite exam types
+- Maximum 3 favorites per user
 
 **Out of Scope (Future Enhancement):**
-- Dashboard quick action buttons (can be added later)
 - Sharing favorites across clinic (admin feature)
 - Analytics on most-used exam types
+- Customizable favorite order/sorting
 
 ## Risks & Mitigation
 
@@ -73,7 +75,10 @@ Implement a user preference system where users can:
   - **Mitigation**: Add undo toast notification after unfavoriting
   
 - **Risk**: Dropdown becomes cluttered if user favorites many exam types
-  - **Mitigation**: Limit to maximum 3 favorites
+  - **Mitigation**: Hard limit to maximum 3 favorites with clear UI feedback
+
+- **Risk**: Dashboard becomes cluttered with many quick action buttons
+  - **Mitigation**: Maximum 3 favorites ensures at most 3 dashboard buttons
 
 ## Success Criteria
 
@@ -90,9 +95,10 @@ Implement a user preference system where users can:
 ## Timeline Estimate
 
 - Backend API: 1-2 hours
-- Frontend UI: 2-3 hours
+- Frontend dropdown UI: 2-3 hours
+- Frontend dashboard quick actions: 1-2 hours
 - Testing: 1-2 hours
-- **Total**: ~6 hours
+- **Total**: ~8 hours
 
 ## Alternatives Considered
 
@@ -107,6 +113,6 @@ Implement a user preference system where users can:
 
 ## Open Questions
 
-1. Should we limit the number of favorites? (Suggested: 3 max)
-2. Should favorites be visible on dashboard as quick action buttons?
-3. Should we show a tutorial/tooltip on first visit to help users discover this feature?
+1. Should we show a tutorial/tooltip on first visit to help users discover this feature?
+2. Should dashboard quick action buttons show exam type icons/colors for visual distinction?
+3. Where on the dashboard should the quick action buttons appear? (Top banner, sidebar, or dedicated section?)

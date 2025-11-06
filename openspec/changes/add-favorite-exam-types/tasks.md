@@ -22,6 +22,11 @@
 - [ ] Add toast notification for successful favorite add/remove
 - [ ] Limit favorites to maximum of 3 (show tooltip if limit reached)
 - [ ] Add hover tooltips for star icons ("Add to favorites" / "Remove from favorites")
+- [ ] Add dashboard quick action buttons section
+- [ ] Create quick action button component for favorite exam types
+- [ ] Dashboard buttons should navigate directly to new submission with exam type pre-selected
+- [ ] Add proper spacing and styling for dashboard quick actions
+- [ ] Show empty state on dashboard when user has no favorites
 
 ## Testing Tasks
 
@@ -33,6 +38,10 @@
 - [ ] Test favorite limit enforcement (max 3)
 - [ ] Test with no favorites (empty state)
 - [ ] Test error handling if API call fails
+- [ ] Test dashboard quick action buttons appear for favorites
+- [ ] Test dashboard button clicks navigate to new submission with correct exam type
+- [ ] Test dashboard updates when favorites are added/removed
+- [ ] Test dashboard empty state when no favorites
 
 ## Documentation Tasks
 
@@ -42,6 +51,7 @@
 
 ## Optional Enhancement Tasks (Future)
 
-- [ ] Add quick action cards on dashboard for favorite exam types
 - [ ] Add onboarding tooltip to introduce favorites feature
 - [ ] Add analytics tracking for favorite usage
+- [ ] Add drag-and-drop to reorder favorites
+- [ ] Add exam type icons/colors for visual distinction on dashboard
