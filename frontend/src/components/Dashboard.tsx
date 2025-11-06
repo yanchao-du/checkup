@@ -10,12 +10,15 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Send
+  Send,
+  Star,
+  Plus
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { toast } from 'sonner';
+import { FavoritesManager } from './FavoritesManager';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -205,6 +208,39 @@ export function Dashboard() {
           {user?.role === 'admin' ? "Here's an overview of all medical examination reports" : "Here's an overview of medical examination reports"}
         </p>
       </div>
+
+      {/* Quick Actions for Favorite Exam Types */}
+      {user?.favoriteExamTypes && user.favoriteExamTypes.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+              <CardTitle className="text-blue-900">Quick Actions</CardTitle>
+            </div>
+            <CardDescription className="text-blue-700">
+              Create new submission for your favorite exam types
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {user.favoriteExamTypes.map((examType) => (
+                <Button
+                  key={examType}
+                  onClick={() => navigate(`/new-submission?examType=${examType}`)}
+                  className="bg-white hover:bg-blue-100 text-blue-900 border border-blue-300 shadow-sm h-auto py-4 px-4 justify-start items-center gap-2"
+                  variant="outline"
+                >
+                  <Plus className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-left text-sm">{formatExamType(examType as any)}</span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Favorites Manager */}
+      <FavoritesManager />
 
       {/* Rejected Submissions Alert - For Nurses */}
       {user?.role === 'nurse' && rejectedSubmissions.length > 0 && (

@@ -148,6 +148,7 @@ export function NewSubmission() {
   const [examinationDateBlurred, setExaminationDateBlurred] = useState(false);
   const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
   const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
+  
   const [purposeOfExamWarning, setPurposeOfExamWarning] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
@@ -183,6 +184,15 @@ export function NewSubmission() {
   // Reset form when refresh parameter is present (navigating to /new-submission from /new-submission)
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
+    
+    // Pre-select exam type from query parameter (for quick actions)
+    if (searchParams.has('examType') && !id && !examType) {
+      const typeParam = searchParams.get('examType');
+      if (typeParam) {
+        setExamType(typeParam as ExamType);
+      }
+    }
+    
     if (searchParams.has('refresh') && !id) {
       // Reset all form state
       setExamType('');
