@@ -35,14 +35,13 @@ export function FullMedicalExamDetails({
     { key: 'colourVision', label: 'Colour Vision', checkboxLabel: 'Abnormal', normalLabel: 'Normal' },
   ];
 
-  // Get checked history items with remarks
+  // Get checked history items
   const getCheckedHistory = () => {
-    const items: Array<{ label: string; remarks?: string }> = [];
+    const items: Array<{ label: string }> = [];
     
     medicalHistoryConditions.forEach((condition) => {
       if (formData[`medicalHistory_${condition.key}`] === 'yes') {
-        const remarks = formData[`medicalHistory_${condition.key}Remarks`];
-        items.push({ label: condition.label, remarks });
+        items.push({ label: condition.label });
       }
     });
 
@@ -85,14 +84,7 @@ export function FullMedicalExamDetails({
           <ul className="list-disc ml-6 space-y-3 text-sm mb-4">
             {checkedHistoryItems.map((item, index) => (
               <li key={index} className="text-amber-700">
-                <div>
-                  <div className="font-medium">{item.label}</div>
-                  {item.remarks && (
-                    <div className="mt-1 ml-0 text-gray-700 bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
-                      <span className="font-semibold">Remarks: </span>{item.remarks}
-                    </div>
-                  )}
-                </div>
+                <div className="font-medium">{item.label}</div>
               </li>
             ))}
           </ul>
