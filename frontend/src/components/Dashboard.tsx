@@ -1,5 +1,5 @@
 import { useAuth } from './AuthContext';
-import { formatExamType } from '../lib/formatters';
+import { formatExamType, formatExamTypeFull } from '../lib/formatters';
 import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -547,7 +547,7 @@ export function Dashboard() {
                               <Star className="w-4 h-4 text-green-700 fill-green-700" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm font-medium text-slate-900">{formatExamType(examType as any)}</p>
+                              <p className="text-sm font-medium text-slate-900">{formatExamTypeFull(examType as any)}</p>
                               <p className="text-xs text-slate-500">Start immediately</p>
                             </div>
                           </div>
