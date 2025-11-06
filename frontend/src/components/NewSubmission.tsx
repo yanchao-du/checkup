@@ -387,7 +387,11 @@ export function NewSubmission() {
         }
       } else {
         // Reset form when creating new submission (no id)
-        setExamType('');
+        // Don't reset exam type if it's coming from URL parameter
+        const searchParams = new URLSearchParams(location.search);
+        if (!searchParams.has('examType')) {
+          setExamType('');
+        }
         setPatientName('');
         setPatientNric('');
         setPatientDateOfBirth('');
@@ -411,7 +415,7 @@ export function NewSubmission() {
     };
 
     loadSubmission();
-  }, [id, navigate]);
+  }, [id, navigate, location.search]);
 
   // Validate driving licence exam timing
   useEffect(() => {
