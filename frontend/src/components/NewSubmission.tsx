@@ -1932,6 +1932,30 @@ export function NewSubmission() {
                         onChange={setPatientDateOfBirth}
                       />
                     )}
+                    {isIcaExamType(examType) && (
+                      <div className="space-y-2 max-w-md">
+                        <Label htmlFor="patientEmail">Email Address</Label>
+                        <Input
+                          id="patientEmail"
+                          name="patientEmail"
+                          type="email"
+                          value={patientEmail}
+                          onChange={(e) => {
+                            setPatientEmail(e.target.value);
+                            // Clear error on change
+                            if (emailError) setEmailError(null);
+                          }}
+                          onBlur={(e) => {
+                            const error = validateEmail(e.target.value);
+                            setEmailError(error);
+                          }}
+                          placeholder="example@email.com"
+                          className={emailError ? 'border-red-500' : ''}
+                        />
+                        {emailError && <InlineError>{emailError}</InlineError>}
+                        {!emailError && <p className="text-xs text-slate-500">The medical report will be sent to this email address, if provided.</p>}
+                      </div>
+                    )}
                     {isDriverExamType(examType) && (
                       <>
                         <div className="space-y-2 max-w-md">
@@ -1954,6 +1978,7 @@ export function NewSubmission() {
                             className={emailError ? 'border-red-500' : ''}
                           />
                           {emailError && <InlineError>{emailError}</InlineError>}
+                          {!emailError && <p className="text-xs text-slate-500">The medical report will be sent to this email address, if provided.</p>}
                         </div>
                         <div className="space-y-2 max-w-xs">
                           <Label htmlFor="patientMobile">Mobile Number</Label>
@@ -2843,6 +2868,7 @@ export function NewSubmission() {
                         formData={formData}
                         patientName={patientName}
                         patientNric={patientNric}
+                        patientEmail={patientEmail}
                         examinationDate={examinationDate}
                         onEdit={(section) => {
                           setActiveAccordion(section);

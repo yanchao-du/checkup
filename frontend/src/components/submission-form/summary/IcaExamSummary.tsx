@@ -6,6 +6,7 @@ interface IcaExamSummaryProps {
   formData: Record<string, any>;
   patientName: string;
   patientNric: string;
+  patientEmail?: string;
   examinationDate: string;
   onEdit: (section: string) => void;
 }
@@ -14,6 +15,7 @@ export function IcaExamSummary({
   formData,
   patientName,
   patientNric,
+  patientEmail,
   examinationDate,
   onEdit,
 }: IcaExamSummaryProps) {
@@ -48,6 +50,12 @@ export function IcaExamSummary({
               <p className="text-slate-500">NRIC/FIN</p>
               <p className="font-medium">{patientNric}</p>
             </div>
+            {patientEmail && (
+              <div>
+                <p className="text-slate-500">Email Address</p>
+                <p className="font-medium">{patientEmail}</p>
+              </div>
+            )}
             <div>
               <p className="text-slate-500">Examination Date</p>
               <p className="font-medium">{formatDate(examinationDate)}</p>
