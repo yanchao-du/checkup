@@ -887,20 +887,44 @@ export function NewSubmission() {
   };
 
   const validatePatientInfo = (): boolean => {
-    // Validate NRIC/FIN
-    if (!patientNric.trim()) {
-      setNricError('NRIC/FIN is required');
-      // scroll/focus the NRIC field
-      // attempt to focus and scroll to patientNric
-      try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
-      return false;
-    }
+    // For ICA exams, validate passport number instead of NRIC
+    if (isIcaExamType(examType)) {
+      // Validate Passport Number for ICA exams
+      if (!patientPassportNo.trim()) {
+        setPassportNoError('Passport number is required');
+        return false;
+      }
 
-    const nricValidationError = validateNricOrFin(patientNric, validateNRIC);
-    if (nricValidationError) {
-      setNricError(nricValidationError);
-      try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
-      return false;
+      const passportValidationError = validatePassportNo(patientPassportNo);
+      if (passportValidationError) {
+        setPassportNoError(passportValidationError);
+        return false;
+      }
+
+      // For ICA exams, NRIC is optional - only validate if provided
+      if (patientNric.trim()) {
+        const nricValidationError = validateNricOrFin(patientNric, validateNRIC);
+        if (nricValidationError) {
+          setNricError(nricValidationError);
+          return false;
+        }
+      }
+    } else {
+      // For non-ICA exams, validate NRIC/FIN as required
+      if (!patientNric.trim()) {
+        setNricError('NRIC/FIN is required');
+        // scroll/focus the NRIC field
+        // attempt to focus and scroll to patientNric
+        try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
+        return false;
+      }
+
+      const nricValidationError = validateNricOrFin(patientNric, validateNRIC);
+      if (nricValidationError) {
+        setNricError(nricValidationError);
+        try { focusFirstInvalidField && (focusFirstInvalidField as any)({ height: true, weight: true, policeReport: true, remarks: true }); } catch (e) { /* ignore */ }
+        return false;
+      }
     }
     
     // Validate Patient Name
