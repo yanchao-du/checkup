@@ -5,7 +5,8 @@ import { Edit } from 'lucide-react';
 interface IcaExamSummaryProps {
   formData: Record<string, any>;
   patientName: string;
-  patientNric: string;
+  patientNric?: string;
+  patientPassportNo?: string;
   patientEmail?: string;
   examinationDate: string;
   onEdit: (section: string) => void;
@@ -15,6 +16,7 @@ export function IcaExamSummary({
   formData,
   patientName,
   patientNric,
+  patientPassportNo,
   patientEmail,
   examinationDate,
   onEdit,
@@ -47,8 +49,12 @@ export function IcaExamSummary({
               <p className="font-medium">{patientName}</p>
             </div>
             <div>
-              <p className="text-slate-500">NRIC/FIN</p>
-              <p className="font-medium">{patientNric}</p>
+              <p className="text-slate-500">Passport Number</p>
+              <p className="font-medium">{patientPassportNo || '-'}</p>
+            </div>
+            <div>
+              <p className="text-slate-500">FIN</p>
+              <p className="font-medium">{patientNric || '-'}</p>
             </div>
             <div>
               <p className="text-slate-500">Email Address</p>

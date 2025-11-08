@@ -2965,6 +2965,7 @@ export function NewSubmission() {
                         formData={formData}
                         patientName={patientName}
                         patientNric={patientNric}
+                        patientPassportNo={patientPassportNo}
                         patientEmail={patientEmail}
                         examinationDate={examinationDate}
                         onEdit={(section) => {

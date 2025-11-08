@@ -187,19 +187,18 @@ export function ViewSubmission() {
                   <p className="text-sm text-slate-500 mb-1">Name</p>
                   <p className="text-slate-900">{getDisplayName(submission.patientName, submission.examType, submission.status)}</p>
                 </div>
-                {isIcaExamType(submission.examType) && submission.patientPassportNo && (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Passport Number</p>
-                    <p className="text-slate-900">{submission.patientPassportNo}</p>
-                  </div>
-                )}
-                {isIcaExamType(submission.examType) && submission.patientNric && (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">FIN</p>
-                    <p className="text-slate-900">{submission.patientNric}</p>
-                  </div>
-                )}
-                {!isIcaExamType(submission.examType) && (
+                {isIcaExamType(submission.examType) ? (
+                  <>
+                    <div>
+                      <p className="text-sm text-slate-500 mb-1">Passport Number</p>
+                      <p className="text-slate-900">{submission.patientPassportNo || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500 mb-1">FIN</p>
+                      <p className="text-slate-900">{submission.patientNric || '-'}</p>
+                    </div>
+                  </>
+                ) : (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">NRIC/FIN</p>
                     <p className="text-slate-900">{submission.patientNric}</p>
