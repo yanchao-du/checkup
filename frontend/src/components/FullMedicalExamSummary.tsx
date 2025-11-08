@@ -232,8 +232,16 @@ export function FullMedicalExamSummary({
               <div className="flex justify-between items-center">
                 <span className="text-slate-700">Chest X-ray</span>
                 <span className={
-                  formData.chestXray && formData.chestXray !== 'normal' 
-                    ? 'font-semibold text-red-600' 
+                  formData.chestXray === 'pending-clearance-ntbcc'
+                    ? 'font-semibold text-amber-600' 
+                    : formData.chestXray === 'cleared-ntbcc'
+                    ? 'font-semibold text-green-600'
+                    : formData.chestXray === 'pregnancy-exempted'
+                    ? 'font-semibold text-purple-600'
+                    : formData.chestXray === 'no-referral'
+                    ? 'font-semibold text-blue-600'
+                    : formData.chestXray === 'normal'
+                    ? 'text-slate-500'
                     : 'text-slate-500'
                 }>
                   {formData.chestXray ? getChestXrayLabel(formData.chestXray) : 'Not specified'}
