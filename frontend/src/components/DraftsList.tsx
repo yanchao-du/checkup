@@ -72,7 +72,7 @@ export function DraftsList() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterExamType, setFilterExamType] = useState<string>('all');
-  const [filterMemoStatus, setFilterMemoStatus] = useState<'all' | 'pending' | 'complete'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending-memo' | 'pending-ntbcc' | 'complete'>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [includeDeleted] = useState(false);
   const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
@@ -120,12 +120,14 @@ export function DraftsList() {
     const matchesExamType = filterExamType === 'all' || draft.examType === filterExamType;
     
     const pendingMemo = hasPendingMemos(draft);
-    const matchesMemoStatus = 
-      filterMemoStatus === 'all' ||
-      (filterMemoStatus === 'pending' && pendingMemo) ||
-      (filterMemoStatus === 'complete' && !pendingMemo);
+    const pendingNTBCC = hasPendingNTBCCClearance(draft);
+    const matchesStatus = 
+      filterStatus === 'all' ||
+      (filterStatus === 'pending-memo' && pendingMemo) ||
+      (filterStatus === 'pending-ntbcc' && pendingNTBCC) ||
+      (filterStatus === 'complete' && !pendingMemo && !pendingNTBCC);
     
-    return matchesSearch && matchesExamType && matchesMemoStatus;
+    return matchesSearch && matchesExamType && matchesStatus;
   });
 
   const handleSort = (field: keyof MedicalSubmission) => {
@@ -168,7 +170,7 @@ export function DraftsList() {
   useEffect(() => {
     setCurrentPage(1);
     setPageInput('1');
-  }, [searchQuery, filterExamType, filterMemoStatus]);
+  }, [searchQuery, filterExamType, filterStatus]);
 
   // Sync pageInput with currentPage when currentPage changes externally
   useEffect(() => {
@@ -209,12 +211,12 @@ export function DraftsList() {
 
       <Card>
         <CardContent className="space-y-4">
-          {/* Memo Status Filter Tabs */}
+          {/* Status Filter Tabs */}
           <div className="mt-6 flex gap-2 border-b border-slate-200">
             <button
-              onClick={() => setFilterMemoStatus('all')}
+              onClick={() => setFilterStatus('all')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
-                filterMemoStatus === 'all'
+                filterStatus === 'all'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -222,9 +224,9 @@ export function DraftsList() {
               All Drafts ({drafts.length})
             </button>
             <button
-              onClick={() => setFilterMemoStatus('pending')}
+              onClick={() => setFilterStatus('pending-memo')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
-                filterMemoStatus === 'pending'
+                filterStatus === 'pending-memo'
                   ? 'text-yellow-600 border-b-2 border-yellow-600'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -232,14 +234,24 @@ export function DraftsList() {
               Pending Memo/Report ({drafts.filter(hasPendingMemos).length})
             </button>
             <button
-              onClick={() => setFilterMemoStatus('complete')}
+              onClick={() => setFilterStatus('pending-ntbcc')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
-                filterMemoStatus === 'complete'
+                filterStatus === 'pending-ntbcc'
+                  ? 'text-amber-600 border-b-2 border-amber-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Pending NTBCC Clearance ({drafts.filter(hasPendingNTBCCClearance).length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('complete')}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                filterStatus === 'complete'
                   ? 'text-green-600 border-b-2 border-green-600'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              No Pending Memo ({drafts.filter(d => !hasPendingMemos(d)).length})
+              Complete ({drafts.filter(d => !hasPendingMemos(d) && !hasPendingNTBCCClearance(d)).length})
             </button>
           </div>
 
