@@ -65,7 +65,7 @@ export function SubmissionsList() {
     const fetchSubmissions = async () => {
       try {
         setIsLoading(true);
-        const response = await submissionsApi.getAll();
+        const response = await submissionsApi.getAll({ limit: 100 });
         setSubmissions(response.data);
       } catch (error) {
         console.error('Failed to fetch submissions:', error);
