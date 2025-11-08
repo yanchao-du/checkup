@@ -49,7 +49,7 @@ export class PatientsService {
       },
     });
 
-    if (!submission) {
+    if (!submission || !submission.patientNric) {
       return null;
     }
 
@@ -121,6 +121,9 @@ export class PatientsService {
           startsWith: idPrefix,
         },
         deletedAt: null,
+        patientNric: {
+          not: null,
+        },
       },
       select: {
         patientNric: true,
@@ -130,7 +133,7 @@ export class PatientsService {
       take: 1,
     });
 
-    if (patient.length === 0) {
+    if (patient.length === 0 || !patient[0].patientNric) {
       return null;
     }
 
