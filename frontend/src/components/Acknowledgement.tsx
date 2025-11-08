@@ -84,7 +84,11 @@ export function Acknowledgement() {
                      submission.examType === 'LTVP_MEDICAL' || 
                      submission.examType === 'STUDENT_PASS_MEDICAL' 
                       ? 'Passport Number' 
-                      : 'NRIC / FIN'}
+                      : submission.examType === 'SIX_MONTHLY_MDW' ||
+                        submission.examType === 'SIX_MONTHLY_FMW' ||
+                        submission.examType === 'FULL_MEDICAL_EXAM'
+                        ? 'FIN'
+                        : 'NRIC / FIN'}
                   </p>
                   <p className="text-slate-900 font-medium">
                     {submission.examType === 'PR_MEDICAL' || 

@@ -46,6 +46,10 @@ const isIcaExamType = (examType: string) => {
   return examType === 'PR_MEDICAL' || examType === 'STUDENT_PASS_MEDICAL' || examType === 'LTVP_MEDICAL';
 };
 
+const isMomExamType = (examType: string) => {
+  return examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'FULL_MEDICAL_EXAM';
+};
+
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -200,7 +204,7 @@ export function ViewSubmission() {
                   </>
                 ) : (
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">NRIC/FIN</p>
+                    <p className="text-sm text-slate-500 mb-1">{isMomExamType(submission.examType) ? 'FIN' : 'NRIC/FIN'}</p>
                     <p className="text-slate-900">{submission.patientNric}</p>
                   </div>
                 )}

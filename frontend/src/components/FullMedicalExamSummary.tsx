@@ -109,7 +109,7 @@ export function FullMedicalExamSummary({
               <p className="font-medium">{maskName(patientName)}</p>
             </div>
             <div>
-              <p className="text-slate-500">NRIC/FIN</p>
+              <p className="text-slate-500">FIN</p>
               <p className="font-medium">{patientNric}</p>
             </div>
             <div>

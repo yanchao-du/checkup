@@ -1929,7 +1929,11 @@ export function NewSubmission() {
                     )}
                     <div className="space-y-2 max-w-xs">
                       <Label htmlFor="patientNric">
-                        {isIcaExamType(examType) ? 'FIN (if applicable)' : 'NRIC / FIN'} 
+                        {isIcaExamType(examType) 
+                          ? 'FIN (if applicable)' 
+                          : isMomExamType(examType) 
+                            ? 'FIN' 
+                            : 'NRIC / FIN'} 
                         {!isIcaExamType(examType) && <span className="text-red-500">*</span>}
                       </Label>
                       {testFin && (
@@ -1984,7 +1988,11 @@ export function NewSubmission() {
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
                     <div className="space-y-2 max-w-md">
                       <Label htmlFor="patientName">
-                        {isIcaExamType(examType) ? 'Full Name (as in Passport)' : 'Full Name (as in NRIC / FIN)'} <span className="text-red-500">*</span>
+                        {isIcaExamType(examType) 
+                          ? 'Full Name (as in Passport)' 
+                          : isMomExamType(examType) 
+                            ? 'Full Name (as in FIN)' 
+                            : 'Full Name (as in NRIC / FIN)'} <span className="text-red-500">*</span>
                       </Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') ? (
                         patientNric.length === 9 && !nricError ? 
