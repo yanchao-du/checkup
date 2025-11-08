@@ -1067,11 +1067,8 @@ export function NewSubmission() {
       isValid = false;
     }
 
-    // Block submission if pending NTBCC clearance is selected
-    if (formData.chestXray === 'pending-clearance-ntbcc') {
-      newErrors.chestXray = 'Cannot submit while pending NTBCC clearance. Please save as draft and submit after obtaining clearance.';
-      isValid = false;
-    }
+    // Note: Don't block continuing to summary if pending NTBCC clearance is selected
+    // The warning will be shown on the summary page and Submit button will be disabled
 
     // Validate Syphilis (mandatory)
     if (!formData.syphilis) {
@@ -2929,11 +2926,15 @@ export function NewSubmission() {
                                 toast.error('Please check the declaration before submitting');
                                 return;
                               }
+                              if (formData.chestXray === 'pending-clearance-ntbcc') {
+                                toast.error('Cannot submit while pending NTBCC clearance. Please save as draft and submit after obtaining clearance.');
+                                return;
+                              }
                               setCompletedSections(prev => new Set(prev).add('summary'));
                               setIsRouteForApproval(false);
                               setShowSubmitDialog(true);
                             }}
-                            disabled={!declarationChecked || !formData.fitForWork}
+                            disabled={!declarationChecked || !formData.fitForWork || formData.chestXray === 'pending-clearance-ntbcc'}
                           >
                             <Send className="w-4 h-4 mr-2" />
                             Submit to MOM
@@ -2944,6 +2945,10 @@ export function NewSubmission() {
                             onClick={async () => {
                               if (!formData.fitForWork) {
                                 toast.error('Please select whether the patient is fit for work');
+                                return;
+                              }
+                              if (formData.chestXray === 'pending-clearance-ntbcc') {
+                                toast.error('Cannot submit while pending NTBCC clearance. Please save as draft and submit after obtaining clearance.');
                                 return;
                               }
                               setCompletedSections(prev => new Set(prev).add('summary'));
@@ -2964,7 +2969,7 @@ export function NewSubmission() {
                                 setShowSubmitDialog(true);
                               }
                             }}
-                            disabled={!isPatientInfoValid || isSaving || !formData.fitForWork}
+                            disabled={!isPatientInfoValid || isSaving || !formData.fitForWork || formData.chestXray === 'pending-clearance-ntbcc'}
                           >
                             <Send className="w-4 h-4 mr-2" />
                             Submit for Approval
