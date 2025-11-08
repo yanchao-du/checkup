@@ -189,7 +189,7 @@ export function ViewSubmission() {
                 </div>
                 {isIcaExamType(submission.examType) && submission.patientPassportNo && (
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">Passport No</p>
+                    <p className="text-sm text-slate-500 mb-1">Passport Number</p>
                     <p className="text-slate-900">{submission.patientPassportNo}</p>
                   </div>
                 )}

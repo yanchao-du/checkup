@@ -1396,8 +1396,8 @@ export function NewSubmission() {
   // Compute whether the Patient Information section is complete and valid.
   // This is used to enable/disable other accordions when patient-info is incomplete or has inline errors.
   const isPatientInfoValid = Boolean(
-    patientNric.trim() &&
-    !nricError &&
+    // For ICA exams, require passport number; for others, require NRIC
+    (isIcaExamType(examType) ? (patientPassportNo.trim() && !passportNoError) : (patientNric.trim() && !nricError)) &&
     patientName.trim() &&
     ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
     ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
@@ -1858,10 +1858,10 @@ export function NewSubmission() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
-                    {/* Passport No field - only for ICA exams */}
+                    {/* Passport Number field - only for ICA exams */}
                     {isIcaExamType(examType) && (
                       <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="patientPassportNo">Passport No <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="patientPassportNo">Passport Number <span className="text-red-500">*</span></Label>
                         <Input
                           id="patientPassportNo"
                           name="passportNo"
@@ -1941,7 +1941,9 @@ export function NewSubmission() {
                     </div>
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
                     <div className="space-y-2 max-w-md">
-                      <Label htmlFor="patientName">Full Name (as in NRIC / FIN) <span className="text-red-500">*</span></Label>
+                      <Label htmlFor="patientName">
+                        {isIcaExamType(examType) ? 'Full Name (as in Passport)' : 'Full Name (as in NRIC / FIN)'} <span className="text-red-500">*</span>
+                      </Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') ? (
                         patientNric.length === 9 && !nricError ? 
                         (
