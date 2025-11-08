@@ -1875,7 +1875,6 @@ export function NewSubmission() {
                             const error = validatePassportNo(e.target.value);
                             setPassportNoError(error);
                           }}
-                          placeholder="ABC123456"
                           maxLength={15}
                           className={passportNoError ? 'border-red-500' : ''}
                         />
@@ -1932,7 +1931,6 @@ export function NewSubmission() {
                             setNricError(validateNricOrFin(e.target.value, validateNRIC));
                           }
                         }}
-                        placeholder="S1234567A"
                         className={nricError ? 'border-red-500' : ''}
                       />
                       {nricError && (
