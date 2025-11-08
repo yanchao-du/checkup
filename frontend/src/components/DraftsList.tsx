@@ -247,11 +247,11 @@ export function DraftsList() {
               onClick={() => setFilterStatus('complete')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 filterStatus === 'complete'
-                  ? 'text-green-600 border-b-2 border-green-600'
+                  ? 'text-slate-600 border-b-2 border-slate-600'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Complete ({drafts.filter(d => !hasPendingMemos(d) && !hasPendingNTBCCClearance(d)).length})
+              No Pending Items ({drafts.filter(d => !hasPendingMemos(d) && !hasPendingNTBCCClearance(d)).length})
             </button>
           </div>
 
