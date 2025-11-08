@@ -27,10 +27,10 @@ export function IcaDeclarationContent() {
           I am authorised by the clinic to submit the results and make the declarations in this form on its behalf.
         </li>
         <li className="text-sm text-slate-700 leading-relaxed">
-          By submitting this form, I understand that the information given will be submitted to the Controller or an authorised officer who may act on the information given by me. I further declare that the information provided by me is true to the best of my knowledge and belief.
+          By submitting this form, I understand that the information given will be submitted to the Commissioner of Immigration or an authorised officer who may act on the information given by me. I further declare that the information provided by me is true to the best of my knowledge and belief.
         </li>
         <li className="text-sm text-slate-700 leading-relaxed">
-          I have obtained the consent from the patient to submit the medical exam report to the Controller.
+          I have obtained the consent from the patient to submit the medical exam report to the Commissioner of Immigration.
         </li>
       </ul>
     </>

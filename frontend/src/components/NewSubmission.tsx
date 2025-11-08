@@ -65,6 +65,11 @@ const isDriverExamType = (examType: ExamType | ''): boolean => {
   return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
 };
 
+// Helper to check if exam type is a MOM exam
+const isMomExamType = (examType: ExamType | ''): boolean => {
+  return examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'FULL_MEDICAL_EXAM';
+};
+
 // Helper to check if there are pending memos for TP_LTA exam
 const hasPendingMemos = (examType: ExamType | '', formData: Record<string, any>): boolean => {
   if (examType !== 'DRIVING_VOCATIONAL_TP_LTA') return false;
@@ -148,6 +153,7 @@ export function NewSubmission() {
   const [examinationDateBlurred, setExaminationDateBlurred] = useState(false);
   const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
   const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
+  const [chestXrayTbError, setChestXrayTbError] = useState<string | null>(null);
   
   const [purposeOfExamWarning, setPurposeOfExamWarning] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
@@ -793,6 +799,10 @@ export function NewSubmission() {
 
   const handleFormDataChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
+    // Clear chest X-ray TB error when user selects an option
+    if (key === 'chestXrayTb' && value) {
+      setChestXrayTbError(null);
+    }
   };
 
   const handleValidationError = (field: string, error: string) => {
@@ -1057,6 +1067,16 @@ export function NewSubmission() {
   };
 
   const validateExamSpecific = (): boolean => {
+    
+    // For ICA exams, require chest X-ray TB question to be answered
+    if (isIcaExamType(examType)) {
+      if (!formData.chestXrayTb) {
+        setChestXrayTbError('Please answer the TB (Chest X-ray) question');
+        return false;
+      }
+      // Clear error if validation passes
+      setChestXrayTbError(null);
+    }
     
     // For Six-Monthly MDW, require height and weight and validate police report if physical exam concerns are present
     if (examType === 'SIX_MONTHLY_MDW') {
@@ -1833,7 +1853,7 @@ export function NewSubmission() {
                         id="patientNric"
                         name="nric"
                         value={patientNric}
-                        onChange={(e) => setPatientNric(e.target.value)}
+                        onChange={(e) => setPatientNric(e.target.value.toUpperCase())}
                         onBlur={(e) => {
                           setNricError(validateNricOrFin(e.target.value, validateNRIC));
                         }}
@@ -1932,7 +1952,8 @@ export function NewSubmission() {
                         onChange={setPatientDateOfBirth}
                       />
                     )}
-                    {isIcaExamType(examType) && (
+                    {/* Email Address - Available for ICA and Driver exams only (not MOM exams) */}
+                    {!isMomExamType(examType) && examType && (
                       <div className="space-y-2 max-w-md">
                         <Label htmlFor="patientEmail">Email Address</Label>
                         <Input
@@ -1953,65 +1974,41 @@ export function NewSubmission() {
                           className={emailError ? 'border-red-500' : ''}
                         />
                         {emailError && <InlineError>{emailError}</InlineError>}
-                        {!emailError && <p className="text-xs text-slate-500">The medical report will be sent to this email address, if provided.</p>}
+                        {!emailError && (isIcaExamType(examType) || isDriverExamType(examType)) && <p className="text-xs text-slate-500">The medical report will be sent to this email address, if provided.</p>}
                       </div>
                     )}
                     {isDriverExamType(examType) && (
-                      <>
-                        <div className="space-y-2 max-w-md">
-                          <Label htmlFor="patientEmail">Email Address</Label>
-                          <Input
-                            id="patientEmail"
-                            name="patientEmail"
-                            type="email"
-                            value={patientEmail}
-                            onChange={(e) => {
-                              setPatientEmail(e.target.value);
-                              // Clear error on change
-                              if (emailError) setEmailError(null);
-                            }}
-                            onBlur={(e) => {
-                              const error = validateEmail(e.target.value);
-                              setEmailError(error);
-                            }}
-                            placeholder="example@email.com"
-                            className={emailError ? 'border-red-500' : ''}
-                          />
-                          {emailError && <InlineError>{emailError}</InlineError>}
-                          {!emailError && <p className="text-xs text-slate-500">The medical report will be sent to this email address, if provided.</p>}
-                        </div>
-                        <div className="space-y-2 max-w-xs">
-                          <Label htmlFor="patientMobile">Mobile Number</Label>
-                          <div className="flex gap-2 items-start">
-                            <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-muted-foreground whitespace-nowrap">
-                              +65
-                            </div>
-                            <div className="flex-1 space-y-2">
-                              <Input
-                                id="patientMobile"
-                                name="patientMobile"
-                                type="tel"
-                                value={patientMobile}
-                                onChange={(e) => {
-                                  // Only allow digits and spaces
-                                  const cleaned = e.target.value.replace(/[^\d\s]/g, '');
-                                  setPatientMobile(cleaned);
-                                  // Clear error on change
-                                  if (mobileError) setMobileError(null);
-                                }}
-                                onBlur={(e) => {
-                                  const error = validateSingaporeMobile(e.target.value);
-                                  setMobileError(error);
-                                }}
-                                placeholder="9123 4567"
-                                maxLength={9}
-                                className={mobileError ? 'border-red-500' : ''}
-                              />
-                              {mobileError && <InlineError>{mobileError}</InlineError>}
-                            </div>
+                      <div className="space-y-2 max-w-xs">
+                        <Label htmlFor="patientMobile">Mobile Number</Label>
+                        <div className="flex gap-2 items-start">
+                          <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-muted-foreground whitespace-nowrap">
+                            +65
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <Input
+                              id="patientMobile"
+                              name="patientMobile"
+                              type="tel"
+                              value={patientMobile}
+                              onChange={(e) => {
+                                // Only allow digits and spaces
+                                const cleaned = e.target.value.replace(/[^\d\s]/g, '');
+                                setPatientMobile(cleaned);
+                                // Clear error on change
+                                if (mobileError) setMobileError(null);
+                              }}
+                              onBlur={(e) => {
+                                const error = validateSingaporeMobile(e.target.value);
+                                setMobileError(error);
+                              }}
+                              placeholder="9123 4567"
+                              maxLength={9}
+                              className={mobileError ? 'border-red-500' : ''}
+                            />
+                            {mobileError && <InlineError>{mobileError}</InlineError>}
                           </div>
                         </div>
-                      </>
+                      </div>
                     )}
                     {(examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
                       <DrivingLicenceClassField
@@ -2280,6 +2277,7 @@ export function NewSubmission() {
                       formData={formData}
                       onChange={handleFormDataChange}
                       remarksError={remarksError}
+                      chestXrayTbError={chestXrayTbError}
                     />
                   )}
                   <div className="flex justify-start mt-4">

@@ -42,6 +42,10 @@ const isDriverExamType = (examType: string) => {
   return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
 };
 
+const isIcaExamType = (examType: string) => {
+  return examType === 'PR_MEDICAL' || examType === 'STUDENT_PASS_MEDICAL' || examType === 'LTVP_MEDICAL';
+};
+
 export function ViewSubmission() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -199,7 +203,7 @@ export function ViewSubmission() {
                     <p className="text-slate-900">{new Date(submission.patientDateOfBirth).toLocaleDateString()}</p>
                   </div>
                 )}
-                {isDriverExamType(submission.examType) && (
+                {(isDriverExamType(submission.examType) || isIcaExamType(submission.examType)) && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Email Address</p>
                     <p className="text-slate-900">{submission.patientEmail || '-'}</p>

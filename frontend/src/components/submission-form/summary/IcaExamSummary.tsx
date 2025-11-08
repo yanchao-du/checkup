@@ -50,12 +50,10 @@ export function IcaExamSummary({
               <p className="text-slate-500">NRIC/FIN</p>
               <p className="font-medium">{patientNric}</p>
             </div>
-            {patientEmail && (
-              <div>
-                <p className="text-slate-500">Email Address</p>
-                <p className="font-medium">{patientEmail}</p>
-              </div>
-            )}
+            <div>
+              <p className="text-slate-500">Email Address</p>
+              <p className="font-medium">{patientEmail || '-'}</p>
+            </div>
             <div>
               <p className="text-slate-500">Examination Date</p>
               <p className="font-medium">{formatDate(examinationDate)}</p>
@@ -81,7 +79,7 @@ export function IcaExamSummary({
           </div>
 
           {/* Test Results */}
-          <div className="mb-6">
+          <div>
             <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Test Results</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
@@ -91,19 +89,11 @@ export function IcaExamSummary({
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-700">Chest X-ray to screen for TB</span>
-                <span className={formData.chestXrayPositive === 'true' ? 'font-semibold text-red-600' : 'text-slate-500'}>
-                  {formData.chestXrayPositive === 'true' ? 'Positive/Reactive' : 'Negative/Non-reactive'}
+                <span className="text-slate-700">TB (Chest X-ray)</span>
+                <span className={formData.chestXrayTb === 'yes' ? 'font-semibold text-red-600' : 'text-slate-500'}>
+                  {formData.chestXrayTb === 'yes' ? 'Active TB detected' : formData.chestXrayTb === 'no' ? 'No active TB detected' : formData.chestXrayTb === 'pregnancy-exempted' ? 'Exempted due to pregnancy' : '-'}
                 </span>
               </div>
-            </div>
-          </div>
-
-          {/* Remarks - always show, display '-' when empty */}
-          <div>
-            <h4 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Remarks</h4>
-            <div className="text-sm bg-slate-50 p-3 rounded border border-slate-200">
-              <p className="whitespace-pre-wrap text-slate-700">{formData.remarks || '-'}</p>
             </div>
           </div>
         </CardContent>

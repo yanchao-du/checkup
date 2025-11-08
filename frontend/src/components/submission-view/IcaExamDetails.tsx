@@ -24,21 +24,11 @@ export function IcaExamDetails({ submission }: IcaExamDetailsProps) {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500 mb-1">Chest X-Ray to screen for TB</p>
-            <p className={cn('text-slate-900', String(formData.chestXrayPositive) === 'true' && 'font-semibold text-red-600')}>
-              {String(formData.chestXrayPositive) === 'true'
-                ? 'Positive/Reactive'
-                : (formData.chestXray ?? 'Negative/Non-reactive')}
+            <p className="text-sm text-slate-500 mb-1">TB (Chest X-ray)</p>
+            <p className={cn('text-slate-900', formData.chestXrayTb === 'yes' && 'font-semibold text-red-600')}>
+              {formData.chestXrayTb === 'yes' ? 'Active TB detected' : formData.chestXrayTb === 'no' ? 'No active TB detected' : formData.chestXrayTb === 'pregnancy-exempted' ? 'Exempted due to pregnancy' : '-'}
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Remarks - always show, display '-' when empty */}
-      <div>
-        <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
-        <div className="bg-slate-50 p-3 rounded border border-slate-200">
-          <p className="text-sm text-slate-700 whitespace-pre-wrap">{formData.remarks || '-'}</p>
         </div>
       </div>
     </div>

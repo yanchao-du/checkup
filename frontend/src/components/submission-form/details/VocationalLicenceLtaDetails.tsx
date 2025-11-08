@@ -315,9 +315,9 @@ export function VocationalLicenceLtaDetails({ submission }: VocationalLicenceLta
         </div>
 
         {/* Physical & Mental Health Assessment */}
-        {abnormalityItems.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">Physical & Mental Health Assessment</h4>
+          {abnormalityItems.length > 0 ? (
             <ul className="list-disc ml-6 space-y-3 text-sm">
               {abnormalityItems.map((item, index) => (
                 <li key={index} className="text-red-700">
@@ -332,8 +332,10 @@ export function VocationalLicenceLtaDetails({ submission }: VocationalLicenceLta
                 </li>
               ))}
             </ul>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-gray-600 italic">No abnormalities observed</p>
+          )}
+        </div>
       </div>
 
       {/* Abbreviated Mental Test (AMT) */}
