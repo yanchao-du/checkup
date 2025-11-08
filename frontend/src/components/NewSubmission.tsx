@@ -168,6 +168,7 @@ export function NewSubmission() {
     examType: ExamType | '';
     patientName: string;
     patientNric: string;
+    patientPassportNo?: string;
     patientDateOfBirth: string;
     drivingLicenseClass: string;
     purposeOfExam: string;
@@ -385,6 +386,7 @@ export function NewSubmission() {
             examType: existing.examType,
             patientName: existing.patientName,
             patientNric: existing.patientNric || '',
+            patientPassportNo: existing.patientPassportNo || '',
             patientDateOfBirth: existing.patientDateOfBirth,
             drivingLicenseClass: existing.drivingLicenseClass || '',
             purposeOfExam: existing.purposeOfExam || '',
@@ -554,6 +556,7 @@ export function NewSubmission() {
         examType !== lastSavedState.examType ||
         patientName !== lastSavedState.patientName ||
         patientNric !== lastSavedState.patientNric ||
+        patientPassportNo !== (lastSavedState.patientPassportNo || '') ||
         patientDateOfBirth !== lastSavedState.patientDateOfBirth ||
         drivingLicenseClass !== lastSavedState.drivingLicenseClass ||
         purposeOfExam !== lastSavedState.purposeOfExam ||
@@ -563,11 +566,11 @@ export function NewSubmission() {
       setHasUnsavedChanges(hasChanges);
     } else {
       // No saved state - mark as changed if any field has data (for new submissions)
-      const hasData = !!(examType || patientName || patientNric || patientDateOfBirth || drivingLicenseClass ||
+      const hasData = !!(examType || patientName || patientNric || patientPassportNo || patientDateOfBirth || drivingLicenseClass ||
                       purposeOfExam || examinationDate || Object.keys(formData).length > 0);
       setHasUnsavedChanges(hasData);
     }
-  }, [examType, patientName, patientNric, patientDateOfBirth, drivingLicenseClass, purposeOfExam, examinationDate, formData, setHasUnsavedChanges, lastSavedState]);
+  }, [examType, patientName, patientNric, patientPassportNo, patientDateOfBirth, drivingLicenseClass, purposeOfExam, examinationDate, formData, setHasUnsavedChanges, lastSavedState]);
 
   // Reset unsaved changes when component unmounts
   useEffect(() => {
@@ -1553,6 +1556,7 @@ export function NewSubmission() {
         examType,
         patientName,
         patientNric,
+        ...(patientPassportNo && { patientPassportNo }), // Only include if not empty
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
         ...(patientMobile && { patientMobile: patientMobile.replace(/\s/g, '') }), // Remove spaces before saving
@@ -1586,6 +1590,7 @@ export function NewSubmission() {
         examType,
         patientName,
         patientNric,
+        patientPassportNo,
         patientDateOfBirth,
         drivingLicenseClass,
         purposeOfExam,
