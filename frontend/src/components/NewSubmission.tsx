@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateNRIC } from '../lib/nric_validator';
-import { validateNricOrFin, validateEmail, validateSingaporeMobile, validatePatientName } from '../lib/validationRules';
+import { validateNricOrFin, validateEmail, validateSingaporeMobile, validatePatientName, validatePassportNo } from '../lib/validationRules';
 import { validateDrivingLicenceExamTiming } from '../lib/drivingLicenceValidation';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
 import { getTodayInSingapore } from './submission-form/utils/date';
@@ -112,7 +112,9 @@ export function NewSubmission() {
   const [examType, setExamType] = useState<ExamType | ''>('');
   const [patientName, setPatientName] = useState('');
   const [patientNric, setPatientNric] = useState('');
+  const [patientPassportNo, setPatientPassportNo] = useState('');
   const [nricError, setNricError] = useState<string | null>(null);
+  const [passportNoError, setPassportNoError] = useState<string | null>(null);
   const [patientNameError, setPatientNameError] = useState<string | null>(null);
   const [patientDateOfBirth, setPatientDateOfBirth] = useState('');
   const [patientEmail, setPatientEmail] = useState('');
@@ -334,7 +336,8 @@ export function NewSubmission() {
             }
           }
           
-          setPatientNric(existing.patientNric);
+          setPatientNric(existing.patientNric || '');
+          setPatientPassportNo(existing.patientPassportNo || '');
           setPatientDateOfBirth(existing.patientDateOfBirth);
           setPatientEmail(existing.patientEmail || '');
           setPatientMobile(existing.patientMobile || '');
@@ -359,7 +362,11 @@ export function NewSubmission() {
           const completed = new Set<string>();
           
           // Check patient info
-          if (existing.patientName && existing.patientNric && existing.examinationDate) {
+          const hasRequiredPatientId = isIcaExamType(existing.examType) 
+            ? existing.patientPassportNo // ICA requires passport
+            : existing.patientNric; // Others require NRIC
+            
+          if (existing.patientName && hasRequiredPatientId && existing.examinationDate) {
             if (existing.examType !== 'AGED_DRIVERS' || existing.patientDateOfBirth) {
               completed.add('patient-info');
             }
@@ -377,7 +384,7 @@ export function NewSubmission() {
           setLastSavedState({
             examType: existing.examType,
             patientName: existing.patientName,
-            patientNric: existing.patientNric,
+            patientNric: existing.patientNric || '',
             patientDateOfBirth: existing.patientDateOfBirth,
             drivingLicenseClass: existing.drivingLicenseClass || '',
             purposeOfExam: existing.purposeOfExam || '',
@@ -1068,14 +1075,39 @@ export function NewSubmission() {
 
   const validateExamSpecific = (): boolean => {
     
-    // For ICA exams, require chest X-ray TB question to be answered
+    // For ICA exams, require chest X-ray TB question to be answered and passport number
     if (isIcaExamType(examType)) {
+      let hasError = false;
+      
+      // Validate passport number
+      if (!patientPassportNo || !patientPassportNo.trim()) {
+        setPassportNoError('Passport number is required for ICA medical examinations');
+        hasError = true;
+      } else {
+        const passportError = validatePassportNo(patientPassportNo);
+        if (passportError) {
+          setPassportNoError(passportError);
+          hasError = true;
+        } else {
+          setPassportNoError(null);
+        }
+      }
+      
+      // Validate chest X-ray TB
       if (!formData.chestXrayTb) {
         setChestXrayTbError('Please answer the TB (Chest X-ray) question');
+        hasError = true;
+      } else {
+        setChestXrayTbError(null);
+      }
+      
+      if (hasError) {
+        // Scroll to patient info accordion if passport error
+        if (passportNoError) {
+          setActiveAccordion('patient-info');
+        }
         return false;
       }
-      // Clear error if validation passes
-      setChestXrayTbError(null);
     }
     
     // For Six-Monthly MDW, require height and weight and validate police report if physical exam concerns are present
@@ -1569,7 +1601,8 @@ export function NewSubmission() {
       const submissionData = {
         examType,
         patientName,
-        patientNric,
+        ...(patientNric && { patientNric }), // Optional for ICA exams
+        ...(patientPassportNo && { patientPassportNo }), // Include passport number if provided
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
         ...(patientMobile && { patientMobile: patientMobile.replace(/\s/g, '') }), // Remove spaces before saving
@@ -1825,8 +1858,37 @@ export function NewSubmission() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
+                    {/* Passport No field - only for ICA exams */}
+                    {isIcaExamType(examType) && (
+                      <div className="space-y-2 max-w-xs">
+                        <Label htmlFor="patientPassportNo">Passport No <span className="text-red-500">*</span></Label>
+                        <Input
+                          id="patientPassportNo"
+                          name="passportNo"
+                          value={patientPassportNo}
+                          onChange={(e) => {
+                            setPatientPassportNo(e.target.value.toUpperCase());
+                            // Clear error on change
+                            if (passportNoError) setPassportNoError(null);
+                          }}
+                          onBlur={(e) => {
+                            const error = validatePassportNo(e.target.value);
+                            setPassportNoError(error);
+                          }}
+                          placeholder="ABC123456"
+                          maxLength={15}
+                          className={passportNoError ? 'border-red-500' : ''}
+                        />
+                        {passportNoError && (
+                          <InlineError>{passportNoError}</InlineError>
+                        )}
+                      </div>
+                    )}
                     <div className="space-y-2 max-w-xs">
-                      <Label htmlFor="patientNric">NRIC / FIN <span className="text-red-500">*</span></Label>
+                      <Label htmlFor="patientNric">
+                        {isIcaExamType(examType) ? 'FIN (if applicable)' : 'NRIC / FIN'} 
+                        {!isIcaExamType(examType) && <span className="text-red-500">*</span>}
+                      </Label>
                       {testFin && (
                         <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
                           <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
@@ -1853,9 +1915,22 @@ export function NewSubmission() {
                         id="patientNric"
                         name="nric"
                         value={patientNric}
-                        onChange={(e) => setPatientNric(e.target.value.toUpperCase())}
+                        onChange={(e) => {
+                          setPatientNric(e.target.value.toUpperCase());
+                          // Clear error on change
+                          if (nricError) setNricError(null);
+                        }}
                         onBlur={(e) => {
-                          setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                          // For ICA exams, NRIC is optional - only validate if provided
+                          if (isIcaExamType(examType)) {
+                            if (e.target.value) {
+                              setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                            } else {
+                              setNricError(null);
+                            }
+                          } else {
+                            setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                          }
                         }}
                         placeholder="S1234567A"
                         className={nricError ? 'border-red-500' : ''}

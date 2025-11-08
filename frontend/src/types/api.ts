@@ -104,7 +104,8 @@ export interface MedicalSubmission {
   id: string;
   examType: ExamType;
   patientName: string;
-  patientNric: string;
+  patientNric?: string; // Optional for ICA exams
+  patientPassportNo?: string; // For ICA exams
   patientDateOfBirth: string;
   patientEmail?: string;
   patientMobile?: string;
@@ -138,8 +139,13 @@ export interface MedicalSubmission {
 export interface CreateSubmissionRequest {
   examType: ExamType;
   patientName: string;
-  patientNric: string;
+  patientNric?: string; // Optional for ICA exams
+  patientPassportNo?: string; // For ICA exams
   patientDateOfBirth?: string;
+  patientEmail?: string;
+  patientMobile?: string;
+  drivingLicenseClass?: string;
+  purposeOfExam?: string;
   examinationDate?: string;
   formData: Record<string, any>;
   routeForApproval?: boolean;
@@ -150,7 +156,12 @@ export interface CreateSubmissionRequest {
 export interface UpdateSubmissionRequest {
   patientName?: string;
   patientNric?: string;
+  patientPassportNo?: string;
   patientDateOfBirth?: string;
+  patientEmail?: string;
+  patientMobile?: string;
+  drivingLicenseClass?: string;
+  purposeOfExam?: string;
   examinationDate?: string;
   formData?: Record<string, any>;
   assignedDoctorId?: string;

@@ -110,7 +110,8 @@ model MedicalSubmission {
   approvedById                                    String?          @map("approved_by")
   examType                                        ExamType         @map("exam_type")
   patientName                                     String           @map("patient_name")
-  patientNric                                     String           @map("patient_nric")
+  patientNric                                     String?          @map("patient_nric")
+  patientPassportNo                               String?          @map("patient_passport_no")
   patientDob                                      DateTime?        @map("patient_dob") @db.Date
   status                                          SubmissionStatus @default(draft)
   formData                                        Json             @map("form_data")

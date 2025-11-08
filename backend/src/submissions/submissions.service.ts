@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nest
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
 import { validateDriverExam } from './validation/driver-exam.validation';
+import { validateIcaExam } from './validation/ica-exam.validation';
 
 @Injectable()
 export class SubmissionsService {
@@ -13,9 +14,10 @@ export class SubmissionsService {
     // When routeForApproval is explicitly false, it's a draft
     const isDraft = dto.routeForApproval === false;
     
-    // Only validate driver exam submissions if not a draft
+    // Only validate driver exam and ICA exam submissions if not a draft
     if (!isDraft) {
       validateDriverExam(dto);
+      validateIcaExam(dto);
     }
     
     let status: string;
@@ -33,7 +35,8 @@ export class SubmissionsService {
       data: {
         examType: dto.examType as any,
         patientName: dto.patientName,
-        patientNric: dto.patientNric,
+        ...(dto.patientNric && { patientNric: dto.patientNric }),
+        ...(dto.patientPassportNo && { patientPassportNo: dto.patientPassportNo }),
         ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
         ...(dto.patientEmail && { patientEmail: dto.patientEmail }),
         ...(dto.patientMobile && { patientMobile: dto.patientMobile }),
@@ -305,7 +308,8 @@ export class SubmissionsService {
         data: {
           ...(dto.examType && { examType: dto.examType as any }),
           ...(dto.patientName && { patientName: dto.patientName }),
-          ...(dto.patientNric && { patientNric: dto.patientNric }),
+          ...(dto.patientNric !== undefined && { patientNric: dto.patientNric }),
+          ...(dto.patientPassportNo !== undefined && { patientPassportNo: dto.patientPassportNo }),
           ...(dto.patientDateOfBirth && { patientDob: new Date(dto.patientDateOfBirth) }),
           ...(dto.patientEmail !== undefined && { patientEmail: dto.patientEmail }),
           ...(dto.patientMobile !== undefined && { patientMobile: dto.patientMobile }),

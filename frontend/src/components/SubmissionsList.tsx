@@ -84,7 +84,8 @@ export function SubmissionsList() {
   const filteredSubmissions = mySubmissions.filter((submission: any) => {
     const matchesSearch = 
       submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
+      (submission.patientNric && submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (submission.patientPassportNo && submission.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
     const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
@@ -106,8 +107,8 @@ export function SubmissionsList() {
         bValue = b.patientName.toLowerCase();
         break;
       case 'nric':
-        aValue = a.patientNric.toLowerCase();
-        bValue = b.patientNric.toLowerCase();
+        aValue = (a.patientNric || a.patientPassportNo || '').toLowerCase();
+        bValue = (b.patientNric || b.patientPassportNo || '').toLowerCase();
         break;
       case 'examType':
         aValue = a.examType;
@@ -285,7 +286,7 @@ export function SubmissionsList() {
                       onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/submissions' } })}
                     >
                       <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
+                      <TableCell className="text-slate-600">{submission.patientPassportNo || submission.patientNric || '-'}</TableCell>
                       <TableCell>
                         <div className="text-sm">
                           {submission.examType === 'SIX_MONTHLY_MDW' && 'MDW Six-monthly (MOM)'}

@@ -8,8 +8,14 @@ export class CreateSubmissionDto {
   @IsString()
   patientName: string;
   
+  @IsOptional()
   @IsString()
-  patientNric: string;
+  patientNric?: string;
+  
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z0-9]{1,15}$/, { message: 'Passport number must be alphanumeric and max 15 characters' })
+  patientPassportNo?: string;
   
   @IsOptional()
   @IsDateString()
@@ -71,6 +77,11 @@ export class UpdateSubmissionDto {
   @IsOptional()
   @IsString()
   patientNric?: string;
+  
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z0-9]{1,15}$/, { message: 'Passport number must be alphanumeric and max 15 characters' })
+  patientPassportNo?: string;
   
   @IsOptional()
   @IsDateString()

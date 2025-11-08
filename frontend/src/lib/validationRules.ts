@@ -193,3 +193,18 @@ export function validateSingaporeMobile(value: string): string | null {
   }
   return null;
 }
+
+export function validatePassportNo(value: string): string | null {
+  if (!value) return null; // Optional field in general, but required for ICA exams
+  // Regex: ^[A-Za-z0-9]{1,15}$
+  // Breakdown:
+  //   ^           - Start of string
+  //   [A-Za-z0-9] - Only alphanumeric characters (letters and numbers)
+  //   {1,15}      - Must be between 1 and 15 characters
+  //   $           - End of string
+  // Examples: ABC123456, P1234567, 123456789
+  if (!/^[A-Za-z0-9]{1,15}$/.test(value)) {
+    return 'Passport number must be alphanumeric and max 15 characters';
+  }
+  return null;
+}

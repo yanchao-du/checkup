@@ -106,7 +106,8 @@ export function DraftsList() {
   const filteredDrafts = drafts.filter(draft => {
     const matchesSearch = 
       draft.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      draft.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
+      (draft.patientNric && draft.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (draft.patientPassportNo && draft.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesExamType = filterExamType === 'all' || draft.examType === filterExamType;
     
@@ -321,7 +322,7 @@ export function DraftsList() {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-slate-600">{draft.patientNric}</TableCell>
+                        <TableCell className="text-slate-600">{draft.patientPassportNo || draft.patientNric || '-'}</TableCell>
                         <TableCell>
                           <div className="text-sm">
                             {formatExamType(draft.examType)}
