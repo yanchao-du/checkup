@@ -1552,22 +1552,37 @@ export function NewSubmission() {
         enhancedFormData._fullName = patientName;
       }
 
-      const submissionData = {
+      const submissionData: any = {
         examType,
         patientName,
-        ...(patientNric && { patientNric }), // Only include if not empty
-        ...(patientPassportNo && { patientPassportNo }), // Only include if not empty
-        ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
-        ...(patientEmail && { patientEmail }), // Only include if not empty
-        ...(patientMobile && { patientMobile: patientMobile.replace(/\s/g, '') }), // Remove spaces before saving
-        ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
-        ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
-        ...(examinationDate && { examinationDate }), // Only include if not empty
         formData: enhancedFormData,
         routeForApproval: false,
         assignedDoctorId: assignedDoctorId || undefined,
-        ...(selectedClinicId && { clinicId: selectedClinicId }),
       };
+
+      // For updates, always include these fields (even if empty string) to allow clearing
+      // For new drafts, only include if not empty
+      if (id) {
+        submissionData.patientNric = patientNric || null;
+        submissionData.patientPassportNo = patientPassportNo || null;
+        submissionData.patientDateOfBirth = patientDateOfBirth || null;
+        submissionData.patientEmail = patientEmail || null;
+        submissionData.patientMobile = patientMobile ? patientMobile.replace(/\s/g, '') : null;
+        submissionData.drivingLicenseClass = drivingLicenseClass || null;
+        submissionData.purposeOfExam = purposeOfExam || null;
+        submissionData.examinationDate = examinationDate || null;
+        if (selectedClinicId) submissionData.clinicId = selectedClinicId;
+      } else {
+        if (patientNric) submissionData.patientNric = patientNric;
+        if (patientPassportNo) submissionData.patientPassportNo = patientPassportNo;
+        if (patientDateOfBirth) submissionData.patientDateOfBirth = patientDateOfBirth;
+        if (patientEmail) submissionData.patientEmail = patientEmail;
+        if (patientMobile) submissionData.patientMobile = patientMobile.replace(/\s/g, '');
+        if (drivingLicenseClass) submissionData.drivingLicenseClass = drivingLicenseClass;
+        if (purposeOfExam) submissionData.purposeOfExam = purposeOfExam;
+        if (examinationDate) submissionData.examinationDate = examinationDate;
+        if (selectedClinicId) submissionData.clinicId = selectedClinicId;
+      }
 
       if (id) {
         // Update existing draft - stay on the same page
