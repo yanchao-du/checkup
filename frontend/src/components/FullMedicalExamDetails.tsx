@@ -35,11 +35,14 @@ export function FullMedicalExamDetails({
 
   // Get checked history items
   const getCheckedHistory = () => {
-    const items: Array<{ label: string }> = [];
+    const items: Array<{ label: string; remarks?: string }> = [];
     
     medicalHistoryConditions.forEach((condition) => {
       if (formData[`medicalHistory_${condition.key}`] === 'yes') {
-        items.push({ label: condition.label });
+        items.push({ 
+          label: condition.label,
+          remarks: formData[`medicalHistory_${condition.key}Remarks`] || ''
+        });
       }
     });
 
@@ -84,6 +87,11 @@ export function FullMedicalExamDetails({
             {checkedHistoryItems.map((item, index) => (
               <li key={index} className="text-amber-700">
                 <div className="font-medium">{item.label}</div>
+                {item.remarks && (
+                  <div className="mt-1 text-gray-700 italic">
+                    Remarks: {item.remarks}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
