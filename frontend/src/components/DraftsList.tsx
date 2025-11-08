@@ -58,6 +58,14 @@ const hasPendingMemos = (draft: MedicalSubmission): boolean => {
   return false;
 };
 
+// Helper to check if a draft has pending NTBCC clearance
+const hasPendingNTBCCClearance = (draft: MedicalSubmission): boolean => {
+  if (draft.examType !== 'FULL_MEDICAL_EXAM') return false;
+  
+  const formData = draft.formData as Record<string, any>;
+  return formData.chestXray === 'pending-clearance-ntbcc';
+};
+
 export function DraftsList() {
   const { user } = useAuth();
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
@@ -312,10 +320,12 @@ export function DraftsList() {
                   {paginatedDrafts.map((draft) => {
                     const isDeleted = !!draft.deletedAt;
                     const pendingMemo = hasPendingMemos(draft);
+                    const pendingNTBCC = hasPendingNTBCCClearance(draft);
+                    const hasAnyPending = pendingMemo || pendingNTBCC;
                     return (
                       <TableRow 
                         key={draft.id} 
-                        className={isDeleted ? 'bg-red-50 opacity-60' : pendingMemo ? 'bg-yellow-50' : ''}
+                        className={isDeleted ? 'bg-red-50 opacity-60' : hasAnyPending ? 'bg-amber-50' : ''}
                       >
                         <TableCell>
                           {getDisplayName(draft.patientName, draft.examType, draft.status)}
@@ -325,6 +335,11 @@ export function DraftsList() {
                           {!isDeleted && pendingMemo && (
                             <span className="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded font-medium">
                               Pending Memo
+                            </span>
+                          )}
+                          {!isDeleted && pendingNTBCC && (
+                            <span className="ml-2 text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded font-medium">
+                              Pending NTBCC Clearance
                             </span>
                           )}
                         </TableCell>

@@ -238,6 +238,12 @@ export function FullMedicalExamFields({
                     Cleared by NTBCC
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="pending-clearance-ntbcc" id="xray-pending" />
+                  <Label htmlFor="xray-pending" className="font-normal cursor-pointer">
+                    Pending clearance by NTBCC
+                  </Label>
+                </div>
                 {isFemale && (
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="pregnancy-exempted" id="xray-pregnancy" />
@@ -248,6 +254,13 @@ export function FullMedicalExamFields({
                 )}
               </RadioGroup>
             </div>
+            {formData.chestXray === 'pending-clearance-ntbcc' && (
+              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <p className="text-sm text-amber-800">
+                  <span className="font-semibold">Submission blocked:</span> This form cannot be submitted until NTBCC clearance is obtained. You may save this as a draft and submit it after receiving clearance.
+                </p>
+              </div>
+            )}
           </div>
           {errors?.chestXray && (
             <p className="text-sm text-red-600 ml-4 md:ml-[244px]">{errors.chestXray}</p>

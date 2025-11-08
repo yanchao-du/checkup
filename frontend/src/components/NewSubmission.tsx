@@ -1067,6 +1067,12 @@ export function NewSubmission() {
       isValid = false;
     }
 
+    // Block submission if pending NTBCC clearance is selected
+    if (formData.chestXray === 'pending-clearance-ntbcc') {
+      newErrors.chestXray = 'Cannot submit while pending NTBCC clearance. Please save as draft and submit after obtaining clearance.';
+      isValid = false;
+    }
+
     // Validate Syphilis (mandatory)
     if (!formData.syphilis) {
       newErrors.syphilis = 'Syphilis test result is required';
