@@ -79,8 +79,20 @@ export function Acknowledgement() {
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="grid grid-cols-2 gap-4">
                 <div className="pl-3 md:pl-4">
-                  <p className="text-xs text-slate-500">NRIC / FIN</p>
-                  <p className="text-slate-900 font-medium">{submission.patientNric || '-'}</p>
+                  <p className="text-xs text-slate-500">
+                    {submission.examType === 'PR_MEDICAL' || 
+                     submission.examType === 'LTVP_MEDICAL' || 
+                     submission.examType === 'STUDENT_PASS_MEDICAL' 
+                      ? 'Passport Number' 
+                      : 'NRIC / FIN'}
+                  </p>
+                  <p className="text-slate-900 font-medium">
+                    {submission.examType === 'PR_MEDICAL' || 
+                     submission.examType === 'LTVP_MEDICAL' || 
+                     submission.examType === 'STUDENT_PASS_MEDICAL'
+                      ? (submission.patientPassportNo || '-')
+                      : (submission.patientNric || '-')}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Patient Name</p>
