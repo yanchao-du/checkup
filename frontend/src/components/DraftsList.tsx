@@ -283,6 +283,12 @@ export function DraftsList() {
                     </TableHead>
                     <TableHead 
                       className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('patientPassportNo')}
+                    >
+                      Passport No{getSortIcon('patientPassportNo')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
                       onClick={() => handleSort('examType')}
                     >
                       Examination Type{getSortIcon('examType')}
@@ -322,7 +328,8 @@ export function DraftsList() {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-slate-600">{draft.patientPassportNo || draft.patientNric || '-'}</TableCell>
+                        <TableCell className="text-slate-600">{draft.patientNric || '-'}</TableCell>
+                        <TableCell className="text-slate-600">{draft.patientPassportNo || '-'}</TableCell>
                         <TableCell>
                           <div className="text-sm">
                             {formatExamType(draft.examType)}
