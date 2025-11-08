@@ -59,6 +59,7 @@ export function FullMedicalExamDetails({
       'normal': 'Normal',
       'no-referral': 'No referral needed',
       'cleared-ntbcc': 'Cleared by NTBCC',
+      'pending-clearance-ntbcc': 'Pending clearance by NTBCC',
       'pregnancy-exempted': 'Pregnancy Exempted',
     };
     return labels[value] || value;
@@ -120,8 +121,16 @@ export function FullMedicalExamDetails({
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
               <span className="text-gray-700 font-medium">Chest X-ray</span>
               <span className={
-                formData.chestXray && formData.chestXray !== 'normal' 
-                  ? 'font-semibold text-red-600' 
+                formData.chestXray === 'pending-clearance-ntbcc'
+                  ? 'font-semibold text-amber-600' 
+                  : formData.chestXray === 'cleared-ntbcc'
+                  ? 'font-semibold text-green-600'
+                  : formData.chestXray === 'pregnancy-exempted'
+                  ? 'font-semibold text-purple-600'
+                  : formData.chestXray === 'no-referral'
+                  ? 'font-semibold text-blue-600'
+                  : formData.chestXray === 'normal'
+                  ? 'text-gray-600'
                   : 'text-gray-600'
               }>
                 {formData.chestXray ? getChestXrayLabel(formData.chestXray) : 'Not specified'}
