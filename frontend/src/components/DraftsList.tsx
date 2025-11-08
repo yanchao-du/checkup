@@ -240,7 +240,7 @@ export function DraftsList() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
-                placeholder="Search by patient name or NRIC/FIN..."
+                placeholder="Search by patient name or NRIC/FIN or passport number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -285,7 +285,7 @@ export function DraftsList() {
                       className="cursor-pointer hover:bg-slate-50 select-none"
                       onClick={() => handleSort('patientPassportNo')}
                     >
-                      Passport No{getSortIcon('patientPassportNo')}
+                      Passport{getSortIcon('patientPassportNo')}
                     </TableHead>
                     <TableHead 
                       className="cursor-pointer hover:bg-slate-50 select-none"

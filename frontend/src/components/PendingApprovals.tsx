@@ -75,7 +75,8 @@ export function PendingApprovals() {
   const filteredApprovals = pendingApprovals.filter(approval => {
     const matchesSearch = 
       approval.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      approval.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
+      (approval.patientNric && approval.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (approval.patientPassportNo && approval.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesExamType = filterExamType === 'all' || approval.examType === filterExamType;
     
@@ -196,7 +197,7 @@ export function PendingApprovals() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
-                placeholder="Search by patient name or NRIC/FIN..."
+                placeholder="Search by patient name or NRIC/FIN or passport number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -240,6 +241,12 @@ export function PendingApprovals() {
                     </TableHead>
                     <TableHead 
                       className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('patientPassportNo')}
+                    >
+                      Passport{getSortIcon('patientPassportNo')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
                       onClick={() => handleSort('examType')}
                     >
                       Examination Type{getSortIcon('examType')}
@@ -267,7 +274,8 @@ export function PendingApprovals() {
                       onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/pending-approvals' } })}
                     >
                       <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientNric}</TableCell>
+                      <TableCell className="text-slate-600">{submission.patientNric || '-'}</TableCell>
+                      <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
                       <TableCell>
                         <div className="text-sm">
                           {formatExamType(submission.examType)}

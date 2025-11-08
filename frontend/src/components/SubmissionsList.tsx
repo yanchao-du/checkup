@@ -168,7 +168,7 @@ export function SubmissionsList() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
-                  placeholder="Search by patient name or NRIC/FIN..."
+                  placeholder="Search by patient name or NRIC/FIN or passport number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -184,7 +184,7 @@ export function SubmissionsList() {
               <div className="relative mt-6">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Search by patient name or NRIC/FIN..."
+                  placeholder="Search by patient name or NRIC/FIN or passport number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -251,6 +251,12 @@ export function SubmissionsList() {
                     </TableHead>
                     <TableHead 
                       className="cursor-pointer hover:bg-slate-50 select-none"
+                      onClick={() => handleSort('patientPassportNo')}
+                    >
+                      Passport{getSortIcon('patientPassportNo')}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-50 select-none"
                       onClick={() => handleSort('examType')}
                     >
                       Examination Type{getSortIcon('examType')}
@@ -286,7 +292,8 @@ export function SubmissionsList() {
                       onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/submissions' } })}
                     >
                       <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientPassportNo || submission.patientNric || '-'}</TableCell>
+                      <TableCell className="text-slate-600">{submission.patientNric || '-'}</TableCell>
+                      <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
                       <TableCell>
                         <div className="text-sm">
                           {submission.examType === 'SIX_MONTHLY_MDW' && 'MDW Six-monthly (MOM)'}

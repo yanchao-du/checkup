@@ -68,7 +68,8 @@ export function RejectedSubmissions() {
   const filteredRejections = rejectedSubmissions.filter(submission => {
     const matchesSearch = 
       submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase());
+      (submission.patientNric && submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (submission.patientPassportNo && submission.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
     
@@ -173,7 +174,7 @@ export function RejectedSubmissions() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
-                placeholder="Search by patient name or NRIC/FIN..."
+                placeholder="Search by patient name or NRIC/FIN or passport number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -219,6 +220,12 @@ export function RejectedSubmissions() {
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-slate-50 select-none"
+                    onClick={() => handleSort('patientPassportNo')}
+                  >
+                    Passport{getSortIcon('patientPassportNo')}
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-slate-50 select-none"
                     onClick={() => handleSort('examType')}
                   >
                     Examination Type{getSortIcon('examType')}
@@ -260,7 +267,8 @@ export function RejectedSubmissions() {
                 {paginatedRejections.map((submission) => (
                   <TableRow key={submission.id}>
                     <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                    <TableCell>{submission.patientNric}</TableCell>
+                    <TableCell>{submission.patientNric || '-'}</TableCell>
+                    <TableCell>{submission.patientPassportNo || '-'}</TableCell>
                     <TableCell className="text-sm">{formatExamType(submission.examType)}</TableCell>
                     <TableCell className="max-w-[200px]">
                       <p className="text-sm text-slate-600 truncate" title={submission.rejectedReason || 'No reason provided'}>
