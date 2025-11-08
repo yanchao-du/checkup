@@ -549,6 +549,7 @@ export class SubmissionsService {
       examType: submission.examType,
       patientName: submission.patientName,
       patientNric: submission.patientNric,
+      patientPassportNo: submission.patientPassportNo,
       patientDateOfBirth: submission.patientDob ? submission.patientDob.toISOString().split('T')[0] : null,
       patientEmail: submission.patientEmail,
       patientMobile: submission.patientMobile,

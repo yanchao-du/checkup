@@ -1555,7 +1555,7 @@ export function NewSubmission() {
       const submissionData = {
         examType,
         patientName,
-        patientNric,
+        ...(patientNric && { patientNric }), // Only include if not empty
         ...(patientPassportNo && { patientPassportNo }), // Only include if not empty
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
