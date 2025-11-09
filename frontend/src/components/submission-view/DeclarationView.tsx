@@ -9,9 +9,10 @@ interface DeclarationViewProps {
   clinicName?: string;
   clinicHciCode?: string;
   clinicPhone?: string;
+  status?: string;
 }
 
-export function DeclarationView({ children, doctorName, doctorMcrNumber, clinicName, clinicHciCode, clinicPhone }: DeclarationViewProps) {
+export function DeclarationView({ children, doctorName, doctorMcrNumber, clinicName, clinicHciCode, clinicPhone, status }: DeclarationViewProps) {
   return (
     <Card className="border-2 border-blue-60 bg-blue-50">
       <CardContent className="pt-6">
@@ -21,7 +22,7 @@ export function DeclarationView({ children, doctorName, doctorMcrNumber, clinicN
           {/* Doctor Information Display */}
           {doctorName && (
             <div className="bg-white border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-sm text-blue-900 mb-2">Examining Doctor</h4>
+              <h4 className="font-semibold text-sm text-blue-900 mb-2">{status === 'pending_approval' ? 'Prepared by' : 'Examining Doctor'}</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex items-start">
                   <span className="font-medium text-gray-700 w-24">Name:</span>

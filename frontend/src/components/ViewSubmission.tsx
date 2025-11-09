@@ -415,6 +415,7 @@ export function ViewSubmission() {
                       clinicName={submission.clinicName}
                       clinicHciCode={submission.clinicHciCode}
                       clinicPhone={submission.clinicPhone}
+                      status={submission.status}
                     >
                       <IcaDeclarationContent />
                     </DeclarationView>
@@ -429,6 +430,7 @@ export function ViewSubmission() {
                       clinicName={submission.clinicName}
                       clinicHciCode={submission.clinicHciCode}
                       clinicPhone={submission.clinicPhone}
+                      status={submission.status}
                     >
                       <MomDeclarationContent />
                     </DeclarationView>
