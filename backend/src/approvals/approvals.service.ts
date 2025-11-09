@@ -223,6 +223,7 @@ export class ApprovalsService {
       examType: submission.examType,
       patientName: submission.patientName,
       patientNric: submission.patientNric,
+      patientPassportNo: submission.patientPassportNo,
       // patientDob may occasionally be null; guard against calling toISOString on null
       patientDateOfBirth: submission.patientDob ? submission.patientDob.toISOString().split('T')[0] : null,
       status: submission.status,
