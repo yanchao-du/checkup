@@ -48,7 +48,7 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
   };
 
   return (
-  <div className="space-y-2">
+  <div className="space-y-2 max-w-xs">
       <Label htmlFor="weight">Weight (kg)</Label>
       <Input
         id="weight"

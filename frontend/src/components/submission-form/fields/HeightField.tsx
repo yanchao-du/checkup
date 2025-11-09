@@ -36,7 +36,7 @@ export function HeightField({ value, onChange, lastRecordedHeight, lastRecordedD
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 max-w-xs">
       <Label htmlFor="height">Height (cm)</Label>
       <Input
         id="height"
