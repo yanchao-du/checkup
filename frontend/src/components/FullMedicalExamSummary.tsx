@@ -99,9 +99,12 @@ export function FullMedicalExamSummary({
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-semibold text-amber-800">Submission Blocked - Pending NTBCC Clearance</h3>
+              <h3 className="text-sm font-semibold text-amber-800">⚠️ Warning: Pending NTBCC Clearance</h3>
               <p className="mt-1 text-sm text-amber-700">
-                This form cannot be submitted until NTBCC clearance is obtained. You may save this as a draft and submit it after receiving clearance from NTBCC.
+                This form cannot be submitted until NTBCC clearance is obtained.
+              </p>
+              <p className="mt-2 text-sm text-blue-700">
+                <span className="font-semibold">💡 Tip:</span> You may save this as a draft and submit it after receiving clearance from NTBCC.
               </p>
             </div>
           </div>

@@ -769,7 +769,7 @@ export function NewSubmission() {
               hivTestRequired: 'true',
               chestXrayRequired: 'true',
             }));
-            toast.info('Patient not found in system. Please enter name manually.');
+            toast.info('Patient not found.');
           }
         }
       } catch (error) {

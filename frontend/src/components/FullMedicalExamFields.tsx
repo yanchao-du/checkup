@@ -255,9 +255,12 @@ export function FullMedicalExamFields({
               </RadioGroup>
             </div>
             {formData.chestXray === 'pending-clearance-ntbcc' && (
-              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md space-y-2">
                 <p className="text-sm text-amber-800">
-                  <span className="font-semibold">Submission blocked:</span> This form cannot be submitted until NTBCC clearance is obtained. You may save this as a draft and submit it after receiving clearance.
+                  <span className="font-semibold">⚠️ Warning:</span> This form cannot be submitted until NTBCC clearance is obtained.
+                </p>
+                <p className="text-sm text-blue-700">
+                  <span className="font-semibold">💡 Tip:</span> You may save this as a draft and submit it after receiving clearance.
                 </p>
               </div>
             )}
