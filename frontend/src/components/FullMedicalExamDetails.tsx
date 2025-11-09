@@ -63,7 +63,7 @@ export function FullMedicalExamDetails({
       'no-referral': 'No referral needed',
       'cleared-ntbcc': 'Cleared by NTBCC',
       'pending-clearance-ntbcc': 'Pending clearance by NTBCC',
-      'pregnancy-exempted': 'Pregnancy Exempted',
+      'pregnancy-exempted': 'Exempted due to pregnancy',
     };
     return labels[value] || value;
   };

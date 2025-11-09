@@ -1078,7 +1078,7 @@ export function NewSubmission() {
 
     // Validate pregnancy test if pregnancy exempted is selected for X-ray
     if (formData.chestXray === 'pregnancy-exempted' && formData.test_pregnancy !== 'yes') {
-      newErrors.pregnancyTest = 'Pregnancy test must be positive when Pregnancy Exempted is selected';
+      newErrors.pregnancyTest = 'Pregnancy test must be positive when "Exempted due to pregnancy" is selected';
       isValid = false;
     }
 
