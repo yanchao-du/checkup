@@ -372,19 +372,21 @@ export class SubmissionsService {
     }
 
     // Access control:
-    // - Admin can submit any draft
+    // - Admin can submit any draft or pending_approval
     // - Creator can submit their own drafts
     // - Doctors can submit drafts that were converted from pending_approval (originally created by nurse)
+    // - Doctors can also submit pending_approval submissions directly (without editing)
     const isCreator = existing.createdById === userId;
-    const isDoctorSubmittingConvertedDraft = userRole === 'doctor' && existing.status === 'draft';
+    const isDoctorSubmittingDraft = userRole === 'doctor' && existing.status === 'draft';
+    const isDoctorSubmittingPendingApproval = userRole === 'doctor' && existing.status === 'pending_approval';
     
-    if (!isCreator && userRole !== 'admin' && !isDoctorSubmittingConvertedDraft) {
+    if (!isCreator && userRole !== 'admin' && !isDoctorSubmittingDraft && !isDoctorSubmittingPendingApproval) {
       this.logger.warn(`Access denied for user ${userId} to submit submission ${id} (creator: ${existing.createdById})`);
       throw new ForbiddenException('Access denied');
     }
 
-    if (existing.status !== 'draft') {
-      throw new ForbiddenException('Only drafts can be submitted for approval');
+    if (existing.status !== 'draft' && existing.status !== 'pending_approval') {
+      throw new ForbiddenException('Only drafts and pending approvals can be submitted');
     }
 
     // Doctors submit directly to 'submitted' status
