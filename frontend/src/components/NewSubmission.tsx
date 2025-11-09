@@ -3084,6 +3084,7 @@ export function NewSubmission() {
                         }}
                         doctorName={user?.name}
                         doctorMcrNumber={user?.mcrNumber}
+                        userRole={role}
                       />
 
                       <div className="flex justify-start mt-4">
@@ -3137,6 +3138,7 @@ export function NewSubmission() {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
                         }}
+                        userRole={role}
                       />
 
                       {/* Warning for pending memos */}
@@ -3227,6 +3229,7 @@ export function NewSubmission() {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
                         }}
+                        userRole={role}
                       />
 
                       <div className="flex justify-start mt-4">

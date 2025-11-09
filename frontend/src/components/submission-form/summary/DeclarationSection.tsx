@@ -24,7 +24,7 @@ export function DeclarationSection({
       {/* Doctor Information Display */}
       {doctorName && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-sm text-blue-900 mb-2">Examining Doctor</h3>
+          <h3 className="font-semibold text-sm text-blue-900 mb-2">{userRole === 'nurse' ? 'Prepared by' : 'Examining Doctor'}</h3>
           <div className="space-y-1 text-sm">
             <div className="flex items-start">
               <span className="font-medium text-gray-700 w-24">Name:</span>
