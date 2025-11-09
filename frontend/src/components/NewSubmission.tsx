@@ -3031,7 +3031,9 @@ export function NewSubmission() {
                                 toast.error('Please check the declaration before submitting');
                                 return;
                               }
-                              handleSubmit();
+                              setCompletedSections(prev => new Set(prev).add('summary'));
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
                             }}
                             disabled={!declarationChecked || isSaving}
                           >
@@ -3093,7 +3095,8 @@ export function NewSubmission() {
                           onClick={() => {
                             setCompletedSections(prev => new Set(prev).add('summary'));
                             if (role === 'doctor') {
-                              handleSubmit();
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
                             } else {
                               setIsRouteForApproval(true);
                               setShowSubmitDialog(true);
@@ -3172,7 +3175,8 @@ export function NewSubmission() {
                           onClick={() => {
                             setCompletedSections(prev => new Set(prev).add('summary'));
                             if (role === 'doctor') {
-                              handleSubmit();
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
                             } else {
                               setIsRouteForApproval(true);
                               setShowSubmitDialog(true);
@@ -3238,7 +3242,8 @@ export function NewSubmission() {
                           onClick={() => {
                             setCompletedSections(prev => new Set(prev).add('summary'));
                             if (role === 'doctor') {
-                              handleSubmit();
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
                             } else {
                               setIsRouteForApproval(true);
                               setShowSubmitDialog(true);
