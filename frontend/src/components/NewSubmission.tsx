@@ -2314,7 +2314,7 @@ export function NewSubmission() {
                   </AccordionItem>
 
                   <AccordionItem value="medical-examination">
-                    <AccordionTrigger isCompleted={completedSections.has('medical-examination')} isDisabled={!completedSections.has('medical-history')}>
+                    <AccordionTrigger isCompleted={completedSections.has('medical-examination')} isDisabled={!completedSections.has('medical-history') && !completedSections.has('medical-examination')}>
                       <div className="flex items-center gap-2">
                         <span>Medical Examination</span>
                       </div>
