@@ -412,6 +412,8 @@ export function ViewSubmission() {
                     <DeclarationView
                       doctorName={submission.approvedByName || submission.createdByName}
                       doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                      createdByName={submission.approvedByName ? submission.createdByName : undefined}
+                      createdByMcrNumber={submission.approvedByName ? submission.createdByMcrNumber : undefined}
                       clinicName={submission.clinicName}
                       clinicHciCode={submission.clinicHciCode}
                       clinicPhone={submission.clinicPhone}
@@ -427,6 +429,8 @@ export function ViewSubmission() {
                     <DeclarationView
                       doctorName={submission.approvedByName || submission.createdByName}
                       doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                      createdByName={submission.approvedByName ? submission.createdByName : undefined}
+                      createdByMcrNumber={submission.approvedByName ? submission.createdByMcrNumber : undefined}
                       clinicName={submission.clinicName}
                       clinicHciCode={submission.clinicHciCode}
                       clinicPhone={submission.clinicPhone}

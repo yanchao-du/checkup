@@ -509,18 +509,40 @@ export function VocationalLicenceLtaDetails({ submission }: VocationalLicenceLta
 
             {/* Doctor Information */}
             {submission.createdByName && (
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-gray-200 space-y-3">
+                {/* Show "Prepared by" if nurse created and doctor approved */}
+                {submission.approvedByName && submission.createdByName && (
+                  <div className="bg-white border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm text-blue-900 mb-2">Prepared by</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-start">
+                        <span className="font-medium text-gray-700 w-24">Name:</span>
+                        <span className="text-gray-900">{submission.createdByName}</span>
+                      </div>
+                      {submission.createdByMcrNumber && (
+                        <div className="flex items-start">
+                          <span className="font-medium text-gray-700 w-24">MCR Number:</span>
+                          <span className="text-gray-900">{submission.createdByMcrNumber}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show "Examining Doctor" with approver if exists, otherwise with creator */}
                 <div className="bg-white border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-sm text-blue-900 mb-2">{submission.status === 'pending_approval' ? 'Prepared by' : 'Examining Doctor'}</h4>
+                  <h4 className="font-semibold text-sm text-blue-900 mb-2">
+                    {submission.status === 'pending_approval' && !submission.approvedByName ? 'Prepared by' : 'Examining Doctor'}
+                  </h4>
                   <div className="space-y-1 text-sm">
                     <div className="flex items-start">
                       <span className="font-medium text-gray-700 w-24">Name:</span>
-                      <span className="text-gray-900">{submission.createdByName}</span>
+                      <span className="text-gray-900">{submission.approvedByName || submission.createdByName}</span>
                     </div>
-                    {submission.createdByMcrNumber && (
+                    {(submission.approvedByMcrNumber || submission.createdByMcrNumber) && (
                       <div className="flex items-start">
                         <span className="font-medium text-gray-700 w-24">MCR Number:</span>
-                        <span className="text-gray-900">{submission.createdByMcrNumber}</span>
+                        <span className="text-gray-900">{submission.approvedByMcrNumber || submission.createdByMcrNumber}</span>
                       </div>
                     )}
                   </div>

@@ -6,23 +6,46 @@ interface DeclarationViewProps {
   children: ReactNode;
   doctorName?: string;
   doctorMcrNumber?: string;
+  createdByName?: string;
+  createdByMcrNumber?: string;
   clinicName?: string;
   clinicHciCode?: string;
   clinicPhone?: string;
   status?: string;
 }
 
-export function DeclarationView({ children, doctorName, doctorMcrNumber, clinicName, clinicHciCode, clinicPhone, status }: DeclarationViewProps) {
+export function DeclarationView({ children, doctorName, doctorMcrNumber, createdByName, createdByMcrNumber, clinicName, clinicHciCode, clinicPhone, status }: DeclarationViewProps) {
   return (
     <Card className="border-2 border-blue-60 bg-blue-50">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900">Declaration</h3>
           
-          {/* Doctor Information Display */}
+          {/* Show "Prepared by" if we have both creator and approver (nurse prepared, doctor approved) */}
+          {doctorName && createdByName && (
+            <div className="bg-white border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-sm text-blue-900 mb-2">Prepared by</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-start">
+                  <span className="font-medium text-gray-700 w-24">Name:</span>
+                  <span className="text-gray-900">{createdByName}</span>
+                </div>
+                {createdByMcrNumber && (
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-700 w-24">MCR Number:</span>
+                    <span className="text-gray-900">{createdByMcrNumber}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Doctor Information Display - show as "Examining Doctor" or "Prepared by" based on context */}
           {doctorName && (
             <div className="bg-white border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-sm text-blue-900 mb-2">{status === 'pending_approval' ? 'Prepared by' : 'Examining Doctor'}</h4>
+              <h4 className="font-semibold text-sm text-blue-900 mb-2">
+                {status === 'pending_approval' && !createdByName ? 'Prepared by' : 'Examining Doctor'}
+              </h4>
               <div className="space-y-1 text-sm">
                 <div className="flex items-start">
                   <span className="font-medium text-gray-700 w-24">Name:</span>
