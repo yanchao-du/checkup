@@ -95,11 +95,8 @@ export function ViewSubmission() {
       await approvalsApi.approve(id, { notes: approvalNotes || undefined });
       toast.success('Submission approved successfully');
       setShowApproveDialog(false);
-      // Refresh submission data
-      const submissionData = await submissionsApi.getById(id);
-      setSubmission(submissionData);
-      // Optionally navigate back to pending approvals
-      setTimeout(() => navigate('/pending-approvals'), 1000);
+      // Navigate to acknowledgement page
+      navigate(`/acknowledgement/${id}`);
     } catch (error) {
       console.error('Failed to approve submission:', error);
       toast.error('Failed to approve submission');
@@ -579,7 +576,7 @@ export function ViewSubmission() {
           <CardHeader>
             <CardTitle>Doctor Actions</CardTitle>
             <CardDescription>
-              Review the submission and approve or reject with remarks
+              Review the submission and edit, approve or reject with remarks
             </CardDescription>
           </CardHeader>
           <CardContent>
