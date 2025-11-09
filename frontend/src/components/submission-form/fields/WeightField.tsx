@@ -48,24 +48,31 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
   };
 
   return (
-  <div className="space-y-2 max-w-xs">
-      <Label htmlFor="weight">Weight (kg)</Label>
-      <Input
-        id="weight"
-        name="weight"
-        type="text"
-        inputMode="numeric"
-        maxLength={3}
-        value={value}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        // placeholder="70"
-        aria-invalid={!!(externalError || error)}
-        className={`${externalError || error ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
-      />
-      {(externalError || error) && (
-        <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>
-      )}
+  <div className="space-y-2">
+      <div className="max-w-xs space-y-2">
+        <Label htmlFor="weight">Weight (kg)</Label>
+        <Input
+          id="weight"
+          name="weight"
+          type="text"
+          inputMode="numeric"
+          maxLength={3}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          // placeholder="70"
+          aria-invalid={!!(externalError || error)}
+          className={`${externalError || error ? 'border-red-500 focus:border-red-500 focus-visible:border-red-500 focus:ring-destructive' : ''}`}
+        />
+        {(externalError || error) && (
+          <p className="text-xs text-red-600 mt-1">{externalError ?? error}</p>
+        )}
+        {lastRecordedWeight && lastRecordedDate && (
+          <p className="text-xs text-slate-500">
+            Last recorded weight: {lastRecordedWeight} kg (Date: {new Date(lastRecordedDate).toLocaleDateString()})
+          </p>
+        )}
+      </div>
       {showWarning && (
         <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
           <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -73,11 +80,6 @@ export function WeightField({ value, onChange, lastRecordedWeight, lastRecordedD
             This helper has lost ≥10% weight since the last examination. If her weight loss was unintentional or if its reason cannot be determined, please select Yes for weight loss under the Physical examination details.
           </p>
         </div>
-      )}
-      {lastRecordedWeight && lastRecordedDate && (
-        <p className="text-xs text-slate-500">
-          Last recorded weight: {lastRecordedWeight} kg (Date: {new Date(lastRecordedDate).toLocaleDateString()})
-        </p>
       )}
     </div>
   );
