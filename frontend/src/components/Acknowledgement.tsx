@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, UserCheck } from 'lucide-react';
 
 export function Acknowledgement() {
   const { id } = useParams();
@@ -59,6 +59,7 @@ export function Acknowledgement() {
   }
 
   const submittedAt = submission.submittedDate ? new Date(submission.submittedDate) : new Date(submission.createdDate);
+  const isPendingApproval = submission.status === 'pending_approval';
 
   return (
     <div className="max-w-3xl mx-auto py-12">
@@ -66,10 +67,21 @@ export function Acknowledgement() {
         <CardHeader className="pt-6">
           {/* Inline small icon and prominent message */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-            <p className="text-lg md:text-xl font-semibold text-slate-900">Medical examination results have been successfully submitted.</p>
+            {isPendingApproval ? (
+              <>
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <UserCheck className="w-5 h-5 text-blue-600" />
+                </div>
+                <p className="text-lg md:text-xl font-semibold text-slate-900">Medical examination results have been routed to doctor for review.</p>
+              </>
+            ) : (
+              <>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                </div>
+                <p className="text-lg md:text-xl font-semibold text-slate-900">Medical examination results have been successfully submitted.</p>
+              </>
+            )}
           </div>
         </CardHeader>
         <CardContent>
