@@ -43,7 +43,7 @@ export function BmiField({ height, weight }: BmiFieldProps) {
   const { value: bmiValue, category, color } = calculateBMI();
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 max-w-xs">
       <Label htmlFor="bmi">BMI</Label>
       <Input
         id="bmi"
