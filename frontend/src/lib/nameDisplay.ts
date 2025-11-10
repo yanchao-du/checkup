@@ -4,8 +4,8 @@ import type { ExamType, SubmissionStatus } from '../types/api';
 /**
  * Determines whether to display a masked name based on exam type and submission status
  * For MDW, FMW, WORK_PERMIT, and FULL_MEDICAL_EXAM exams:
- * - Mask names in draft and pending_approval states
- * - Show full names only when submitted, rejected, or revision_requested
+ * - Mask names in draft, pending_approval, rejected, and revision_requested states
+ * - Show full names only when submitted to the government agency
  */
 export function getDisplayName(
   fullName: string,

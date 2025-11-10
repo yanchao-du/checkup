@@ -4,6 +4,7 @@ import { submissionsApi } from '../services/submissions.service';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
 import { Loader2, CheckCircle, UserCheck } from 'lucide-react';
+import { getDisplayName } from '../lib/nameDisplay';
 
 export function Acknowledgement() {
   const { id } = useParams();
@@ -112,7 +113,7 @@ export function Acknowledgement() {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Patient Name</p>
-                  <p className="text-slate-900 font-medium">{submission.patientName || '-'}</p>
+                  <p className="text-slate-900 font-medium">{getDisplayName(submission.patientName || '-', submission.examType, submission.status)}</p>
                 </div>
                 <div className="pl-3 md:pl-4">
                   <p className="text-xs text-slate-500">Reference Number</p>
