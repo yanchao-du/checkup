@@ -61,8 +61,8 @@ export function FullMedicalExamDetails({
     const labels: Record<string, string> = {
       'normal': 'Normal',
       'no-referral': 'No referral needed',
-      'cleared-ntbcc': 'Cleared by NTBCC',
-      'pending-clearance-ntbcc': 'Pending clearance by NTBCC',
+      'cleared-ntbcc': 'Cleared by National Tuberculosis Care Centre (NTBCC)',
+      'pending-clearance-ntbcc': 'Pending clearance by National Tuberculosis Care Centre (NTBCC)',
       'pregnancy-exempted': 'Exempted due to pregnancy',
     };
     return labels[value] || value;

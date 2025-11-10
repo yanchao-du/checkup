@@ -240,13 +240,13 @@ export function FullMedicalExamFields({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="cleared-ntbcc" id="xray-cleared" />
                   <Label htmlFor="xray-cleared" className="font-normal cursor-pointer">
-                    Cleared by NTBCC
+                    Cleared by National Tuberculosis Care Centre (NTBCC)
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="pending-clearance-ntbcc" id="xray-pending" />
                   <Label htmlFor="xray-pending" className="font-normal cursor-pointer">
-                    Pending clearance by NTBCC
+                    Pending clearance by National Tuberculosis Care Centre (NTBCC)
                   </Label>
                 </div>
                 {isFemale && (
