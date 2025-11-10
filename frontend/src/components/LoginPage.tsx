@@ -61,7 +61,7 @@ export function LoginPage() {
                   Medical Examination Portal
                 </h2>
                 <p className="text-lg text-slate-700">
-                  A one-stop portal for healthcare institutions to manage, submit, and track statutory medical examinations efficiently and securely.
+                  A one-stop portal for healthcare institutions to <span className="font-semibold">manage, submit, and track statutory medical examinations</span> efficiently and securely.
                 </p>
               </div>
 
