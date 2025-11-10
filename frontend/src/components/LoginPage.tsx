@@ -7,7 +7,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
-import { Shield, Loader2, FileCheck, Users, Clock, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, Loader2, FileCheck, Users, Clock, CheckCircle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import "@govtechsg/sgds-web-component/themes/day.css";
 import "@govtechsg/sgds-web-component/css/sgds.css";
 import "@govtechsg/sgds-web-component";
@@ -103,6 +103,16 @@ export function LoginPage() {
                     <div>
                       <h4 className="font-semibold text-slate-900">Real-Time Tracking</h4>
                       {/* <p className="text-sm text-slate-600">Monitor submission status from draft to approval</p> */}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0">
+                      <FileText className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900">Hassle-Free Report Management</h4>
+                      {/* <p className="text-sm text-slate-600">Save drafts, review details, submit, and view past submissions</p> */}
                     </div>
                   </div>
                   
@@ -211,7 +221,7 @@ export function LoginPage() {
                     
                     {/* Nurses Column */}
                     <div>
-                      <p className="text-sm font-semibold text-blue-900 mb-2">Nurses</p>
+                      <p className="text-sm font-semibold text-blue-900 mb-2">Nurses / Clinic Assistants</p>
                       <div className="space-y-1">
                         <p className="text-xs text-slate-700">Nurse Mary Lim</p>
                         <p className="text-xs text-blue-700">S2345678H</p>
