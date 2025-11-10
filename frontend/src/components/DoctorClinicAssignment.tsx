@@ -248,7 +248,7 @@ export function DoctorClinicAssignment() {
                     key={doctor.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                       selectedDoctor?.id === doctor.id
-                        ? 'bg-blue-50 border-blue-300'
+                        ? 'bg-blue-50 border-teal-300'
                         : 'hover:bg-slate-50'
                     }`}
                     onClick={() => handleSelectDoctor(doctor)}

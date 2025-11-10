@@ -1943,7 +1943,7 @@ export function NewSubmission() {
                         <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
                           <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
                           <div className="flex items-center gap-2">
-                            <code className="text-sm font-mono text-blue-900 select-all cursor-pointer px-2 py-1 bg-white rounded border border-blue-300 hover:bg-blue-100 transition-colors">
+                            <code className="text-sm font-mono text-blue-900 select-all cursor-pointer px-2 py-1 bg-white rounded border border-teal-300 hover:bg-blue-100 transition-colors">
                               {testFin}
                             </code>
                             <Button

@@ -42,7 +42,7 @@ export function LoginPage() {
   return (
     <>
       <SgdsMasthead />
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
         {/* Hero Section with Login */}
         <div className="container mx-auto px-4 py-8 lg:py-12">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
@@ -52,7 +52,7 @@ export function LoginPage() {
               <div className="flex items-center gap-3 mb-6">
                 <img src="/logo.svg" alt="goCheckUp logo" className="w-16 h-16" />
                 <h1 className="text-3xl lg:text-4xl font-bold text-slate-900">
-                  <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
+                  <span style={{ color: '#2563eb' }}>go</span>CheckUp
                 </h1>
               </div>
               
@@ -78,7 +78,7 @@ export function LoginPage() {
                 <div className="grid gap-6">
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <FileCheck className="w-6 h-6 text-teal-600" />
+                      <FileCheck className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Multiple Exam Types, One Single Portal</h4>
@@ -88,7 +88,7 @@ export function LoginPage() {
                   
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <Users className="w-6 h-6 text-teal-600" />
+                      <Users className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Role-Based Workflow</h4>
@@ -98,7 +98,7 @@ export function LoginPage() {
                   
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <Clock className="w-6 h-6 text-teal-600" />
+                      <Clock className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Real-Time Tracking</h4>
@@ -108,7 +108,7 @@ export function LoginPage() {
                   
                   {/* <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <CheckCircle className="w-6 h-6 text-teal-600" />
+                      <CheckCircle className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Secure & Compliant</h4>
@@ -179,13 +179,13 @@ export function LoginPage() {
             <div className="mt-6">
               <button
                 onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-                className="w-full flex items-center justify-between p-4 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors border border-teal-200"
+                className="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
               >
-                <span className="text-sm font-semibold text-teal-900">Demo Accounts</span>
+                <span className="text-sm font-semibold text-blue-900">Demo Accounts</span>
                 {showDemoAccounts ? (
-                  <ChevronUp className="w-4 h-4 text-teal-700" />
+                  <ChevronUp className="w-4 h-4 text-blue-700" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-teal-700" />
+                  <ChevronDown className="w-4 h-4 text-blue-700" />
                 )}
               </button>
               
@@ -194,37 +194,37 @@ export function LoginPage() {
                   showDemoAccounts ? 'h-auto opacity-100 mt-2' : 'h-0 opacity-0'
                 }`}
               >
-                <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     {/* Doctors Column */}
                     <div>
-                      <p className="text-sm font-semibold text-teal-900 mb-2">Doctors</p>
+                      <p className="text-sm font-semibold text-blue-900 mb-2">Doctors</p>
                       <div className="space-y-1">
                         <p className="text-xs text-slate-700">Dr. Sarah Tan</p>
-                        <p className="text-xs text-teal-700">S1234567D</p>
+                        <p className="text-xs text-blue-700">S1234567D</p>
                       </div>
                       <div className="space-y-1 mt-2">
                         <p className="text-xs text-slate-700">Dr. James Lee</p>
-                        <p className="text-xs text-teal-700">S4567890C</p>
+                        <p className="text-xs text-blue-700">S4567890C</p>
                       </div>
                     </div>
                     
                     {/* Nurses Column */}
                     <div>
-                      <p className="text-sm font-semibold text-teal-900 mb-2">Nurses</p>
+                      <p className="text-sm font-semibold text-blue-900 mb-2">Nurses</p>
                       <div className="space-y-1">
                         <p className="text-xs text-slate-700">Nurse Mary Lim</p>
-                        <p className="text-xs text-teal-700">S2345678H</p>
+                        <p className="text-xs text-blue-700">S2345678H</p>
                       </div>
                       <div className="space-y-1 mt-2">
                         <p className="text-xs text-slate-700">Nurse Linda Koh</p>
-                        <p className="text-xs text-teal-700">S7890123C</p>
+                        <p className="text-xs text-blue-700">S7890123C</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="pt-3 border-t border-teal-200">
-                    <p className="text-xs font-semibold text-teal-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
+                  <div className="pt-3 border-t border-blue-200">
+                    <p className="text-xs font-semibold text-blue-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
                   </div>
                 </div>
               </div>
@@ -244,18 +244,18 @@ export function LoginPage() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* MOM */}
                 <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <h4 className="text-lg font-semibold text-teal-700 mb-4">Ministry of Manpower (MOM)</h4>
+                  <h4 className="text-lg font-semibold text-blue-700 mb-4">Ministry of Manpower (MOM)</h4>
                   <ul className="space-y-2">
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>Full Medical Examination for Foreign Worker</span>
                     </li>
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>6-Monthly Medical Examination for Migrant Domestic Worker</span>
                     </li>
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>6-Monthly Medical Examination for Female Migrant Worker</span>
                     </li>
                   </ul>
@@ -263,18 +263,18 @@ export function LoginPage() {
 
                 {/* ICA */}
                 <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <h4 className="text-lg font-semibold text-teal-700 mb-4">Immigration & Checkpoints Authority (ICA)</h4>
+                  <h4 className="text-lg font-semibold text-blue-700 mb-4">Immigration & Checkpoints Authority (ICA)</h4>
                   <ul className="space-y-2">
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>Medical Examination for Permanent Residency</span>
                     </li>
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>Medical Examination for Long Term Visit Pass</span>
                     </li>
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>Medical Examination for Student Pass</span>
                     </li>
                   </ul>
@@ -282,14 +282,14 @@ export function LoginPage() {
 
                 {/* Traffic Police */}
                 <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <h4 className="text-lg font-semibold text-teal-700 mb-4">Singapore Police Force (SPF) and Land Transport Authority (LTA)</h4>
+                  <h4 className="text-lg font-semibold text-blue-700 mb-4">Singapore Police Force (SPF) and Land Transport Authority (LTA)</h4>
                   <ul className="space-y-2">
                     <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>Medical Examination for Driving Licence / Vocational Licence</span>
                     </li>
                     {/* <li className="text-sm text-slate-700 flex items-start">
-                      <span className="text-teal-600 mr-2">•</span>
+                      <span className="text-blue-600 mr-2">•</span>
                       <span>Medical Examination for Vocational Licence</span>
                     </li> */}
                   </ul>
