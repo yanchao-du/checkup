@@ -7,7 +7,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
-import { Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2, FileCheck, Users, Clock, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import "@govtechsg/sgds-web-component/themes/day.css";
 import "@govtechsg/sgds-web-component/css/sgds.css";
 import "@govtechsg/sgds-web-component";
@@ -16,6 +16,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
   const { login } = useAuth();
   // Feature toggle for email/password login
   const enableEmailLogin = import.meta.env.VITE_ENABLE_EMAIL_LOGIN === 'true';
@@ -41,25 +42,89 @@ export function LoginPage() {
   return (
     <>
       <SgdsMasthead />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
-              <img src="/logo.svg" alt="goCheckUp logo" className="w-16 h-16" />
-            </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">
-            <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
-          </h1>
-          <p className="text-slate-600">Your one-stop portal to manage, submit, and track statutory medical examinations</p>
-          <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-sm font-semibold">
-            This website is for demo and testing purposes only. Do not submit real patient data.
-          </div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+        {/* Hero Section with Login */}
+        <div className="container mx-auto px-4 py-8 lg:py-12">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
+            
+            {/* Left Column - Overview */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <img src="/logo.svg" alt="goCheckUp logo" className="w-16 h-16" />
+                <h1 className="text-3xl lg:text-4xl font-bold text-slate-900">
+                  <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
+                </h1>
+              </div>
+              
+              <div className="space-y-4">
+                <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900">
+                  Medical Examination Portal
+                </h2>
+                <p className="text-lg text-slate-700">
+                  A one-stop portal for healthcare institutions to <span className="font-semibold">manage, submit, and track statutory medical examinations</span> efficiently and securely.
+                </p>
+              </div>
 
-        <Card>
-          <CardHeader>
-            {/* <CardTitle>Sign In</CardTitle> */}
-            {/* <CardDescription>Enter your credentials to access the portal</CardDescription> */}
+              {/* Warning Banner */}
+              {/* <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded">
+                <p className="text-yellow-900 font-semibold text-sm">
+                  ⚠️ Demo Environment: Do not submit real patient data
+                </p>
+              </div> */}
+
+              {/* Key Features */}
+              <div className="space-y-6 pt-6">
+                <h3 className="text-lg font-semibold text-slate-900">Key Features</h3>
+                <div className="grid gap-6">
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0">
+                      <FileCheck className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900">Multiple Exam Types, One Single Portal</h4>
+                      {/* <p className="text-sm text-slate-600">Submit results for Work Permit, Driver Licence, and other statutory exams across agencies such as MOM, SPF, LTA, ICA, and more — all in one place.</p> */}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0">
+                      <Users className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900">Role-Based Workflow</h4>
+                      {/* <p className="text-sm text-slate-600">Separate access for nurses, doctors, and administrators</p> */}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0">
+                      <Clock className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900">Real-Time Tracking</h4>
+                      {/* <p className="text-sm text-slate-600">Monitor submission status from draft to approval</p> */}
+                    </div>
+                  </div>
+                  
+                  {/* <div className="flex gap-3">
+                    <div className="flex-shrink-0">
+                      <CheckCircle className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900">Secure & Compliant</h4>
+                      <p className="text-sm text-slate-600">CorpPass authentication and audit trails</p>
+                    </div>
+                  </div> */}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Login Card */}
+            <div className="lg:sticky lg:top-16">
+              <Card className="shadow-xl">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">Sign In</CardTitle>
+            <CardDescription>Access the portal with your CorpPass credentials</CardDescription>
           </CardHeader>
           <CardContent>
             {enableEmailLogin && (
@@ -110,38 +175,131 @@ export function LoginPage() {
               Login with CorpPass
             </Button>
 
-            {/* <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-              <p className="text-sm font-semibold text-slate-600 mb-2">Demo Accounts:</p>
-              <div className="space-y-1 text-xs text-slate-500">
-                <p className="text-sm">Doctor: doctor@clinic.sg / S1234567D</p>
-                <p className="text-sm">Nurse: nurse@clinic.sg / S2345678H</p>
-                <p className="text-sm">Admin: admin@clinic.sg / S3456789A</p>
-                <p className="text-sm">Nurse 2: nurse2@clinic.sg / S7890123C</p>
-                <p className="text-sm">UEN: 123456789D</p>
-                <p className="text-sm mb-2">Password: password</p>
-              </div>
-            </div> */}
-            <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-              <p className="text-sm font-semibold text-slate-600 mb-2">Demo Accounts:</p>
-              <div className="space-y-1 text-xs text-slate-500">
-                <p className="text-sm">Doctor1: S1234567D</p>
-                <p className="text-sm">Doctor2: S4567890C</p>
-                <p className="text-sm">Nurse/Assistant1: S2345678H</p>
-                <p className="text-sm">Nurse/Assistant2: S7890123C</p>
-                {/* <p className="text-sm">Admin1: S3456789A</p> */}
-                <p className="text-sm">UEN: 123456789D</p>
+            {/* Collapsible Demo Accounts */}
+            <div className="mt-6">
+              <button
+                onClick={() => setShowDemoAccounts(!showDemoAccounts)}
+                className="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
+              >
+                <span className="text-sm font-semibold text-blue-900">Demo Accounts</span>
+                {showDemoAccounts ? (
+                  <ChevronUp className="w-4 h-4 text-blue-700" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-blue-700" />
+                )}
+              </button>
+              
+              <div 
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  showDemoAccounts ? 'h-auto opacity-100 mt-2' : 'h-0 opacity-0'
+                }`}
+              >
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    {/* Doctors Column */}
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900 mb-2">Doctors</p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-slate-700">Dr. Sarah Tan</p>
+                        <p className="text-xs text-blue-700">S1234567D</p>
+                      </div>
+                      <div className="space-y-1 mt-2">
+                        <p className="text-xs text-slate-700">Dr. James Lee</p>
+                        <p className="text-xs text-blue-700">S4567890C</p>
+                      </div>
+                    </div>
+                    
+                    {/* Nurses Column */}
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900 mb-2">Nurses</p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-slate-700">Nurse Mary Lim</p>
+                        <p className="text-xs text-blue-700">S2345678H</p>
+                      </div>
+                      <div className="space-y-1 mt-2">
+                        <p className="text-xs text-slate-700">Nurse Linda Koh</p>
+                        <p className="text-xs text-blue-700">S7890123C</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-3 border-t border-blue-200">
+                    <p className="text-xs font-semibold text-blue-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
+            </div>
+          </div>
+        </div>
 
-        {/* <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-sm">
-          <Shield className="w-4 h-4" />
-          <span>Secure government portal</span>
-        </div> */}
+        {/* Additional Info Section */}
+        <div className="bg-white border-t border-slate-200 py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <h3 className="text-2xl font-semibold text-slate-900 mb-8 text-center">Supported Examination Types</h3>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* MOM */}
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-4">Ministry of Manpower (MOM)</h4>
+                  <ul className="space-y-2">
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>Full Medical Examination for Foreign Worker</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>6-Monthly Medical Examination for Migrant Domestic Worker</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>6-Monthly Medical Examination for Female Migrant Worker</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* ICA */}
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-4">Immigration & Checkpoints Authority (ICA)</h4>
+                  <ul className="space-y-2">
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>Medical Examination for Permanent Residency</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>Medical Examination for Long Term Visit Pass</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>Medical Examination for Student Pass</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Traffic Police */}
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-4">Singapore Police Force (SPF) and Land Transport Authority (LTA)</h4>
+                  <ul className="space-y-2">
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>Medical Examination for Driving Licence / Vocational Licence</span>
+                    </li>
+                    {/* <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>Medical Examination for Vocational Licence</span>
+                    </li> */}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-  </div>
-  <SgdsFooter />
-  </>
+      <SgdsFooter />
+    </>
   );
 }

@@ -25,7 +25,7 @@ const badgeVariants = cva(
         error:
           "bg-red-50 text-red-700 border-red-300 [a&]:hover:bg-red-100",
         info:
-          "bg-blue-50 text-blue-700 border-blue-300 [a&]:hover:bg-blue-100",
+          "bg-blue-50 text-blue-700 border-teal-300 [a&]:hover:bg-blue-100",
         inactive:
           "bg-slate-100 text-slate-700 border-slate-300 [a&]:hover:bg-slate-200",
       },

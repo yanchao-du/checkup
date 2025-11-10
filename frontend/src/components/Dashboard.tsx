@@ -444,7 +444,7 @@ export function Dashboard() {
             {user?.role === 'admin' ? (
               <>
                 <Link to="/settings?tab=users" className="block">
-                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-blue-200 hover:border-teal-300 hover:bg-blue-50 transition-all cursor-pointer group">
                     <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
                       <FileText className="w-4 h-4 text-blue-600" />
                     </div>
@@ -533,7 +533,7 @@ export function Dashboard() {
                 {(user?.role === 'doctor' || user?.role === 'nurse') && (
                   <>
                     <Link to="/new-submission" className="block">
-                      <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer group">
+                      <div className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-teal-300 hover:bg-blue-50 transition-all cursor-pointer group">
                         <div className="bg-blue-100 group-hover:bg-blue-200 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
                           <FileText className="w-4 h-4 text-blue-600" />
                         </div>

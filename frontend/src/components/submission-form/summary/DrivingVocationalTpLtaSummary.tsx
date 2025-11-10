@@ -1087,7 +1087,7 @@ export function DrivingVocationalTpLtaSummary({
           )}
 
           <h4 className="text-sm font-semibold text-gray-900 mb-3">Medical Practitioner Declaration</h4>
-          <label className="flex items-start space-x-3 cursor-pointer bg-white p-3 rounded border border-blue-300">
+          <label className="flex items-start space-x-3 cursor-pointer bg-white p-3 rounded border border-teal-300">
             <input
               type="checkbox"
               checked={assessment.declarationAgreed === true}
