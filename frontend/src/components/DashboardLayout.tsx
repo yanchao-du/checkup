@@ -79,7 +79,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <img src="/logo.svg" alt="goCheckUp logo" className="w-10 h-10 rounded-lg" />
             <div>
               <h1 className="text-slate-900 text-lg md:text-xl">
-                <span style={{ color: '#2563eb' }}>go</span>CheckUp
+                <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
               </h1>
             </div>
           </div>

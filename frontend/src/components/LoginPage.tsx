@@ -52,7 +52,7 @@ export function LoginPage() {
               <div className="flex items-center gap-3 mb-6">
                 <img src="/logo.svg" alt="goCheckUp logo" className="w-16 h-16" />
                 <h1 className="text-3xl lg:text-4xl font-bold text-slate-900">
-                  <span style={{ color: '#2563eb' }}>go</span>CheckUp
+                  <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
                 </h1>
               </div>
               
