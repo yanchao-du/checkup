@@ -296,15 +296,15 @@ export function SubmissionsList() {
                       <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {submission.examType === 'SIX_MONTHLY_MDW' && 'MDW Six-monthly (MOM)'}
-                          {submission.examType === 'SIX_MONTHLY_FMW' && 'FMW Six-monthly (MOM)'}
+                          {submission.examType === 'SIX_MONTHLY_MDW' && '6ME for MDW (MOM)'}
+                          {submission.examType === 'SIX_MONTHLY_FMW' && '6ME for FMW (MOM)'}
                           {submission.examType === 'WORK_PERMIT' && 'Work Permit (MOM)'}
                           {submission.examType === 'FULL_MEDICAL_EXAM' && 'Full Medical Exam (MOM)'}
                           {submission.examType === 'AGED_DRIVERS' && 'Aged Drivers (SPF)'}
                           {submission.examType === 'DRIVING_LICENCE_TP' && 'Driving Licence (TP)'}
-                          {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Driving Vocational (TP/LTA)'}
+                          {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Driving (TP) / Vocational (LTA)'}
                           {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Vocational Licence (LTA)'}
-                          {submission.examType === 'PR_MEDICAL' && 'PR Medical (ICA)'}
+                          {submission.examType === 'PR_MEDICAL' && 'PR (ICA)'}
                           {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Student Pass (ICA)'}
                           {submission.examType === 'LTVP_MEDICAL' && 'LTVP (ICA)'}
                         </div>

@@ -6,9 +6,9 @@ import type { ExamType } from '../types/api';
 export function formatExamType(examType: ExamType): string {
   switch (examType) {
     case 'SIX_MONTHLY_MDW':
-      return 'MDW Six-monthly (MOM)';
+      return '6ME for MDW (MOM)';
     case 'SIX_MONTHLY_FMW':
-      return 'FMW Six-monthly (MOM)';
+      return '6ME for FMW (MOM)';
     case 'WORK_PERMIT':
       return 'Work Permit (MOM)';
     case 'FULL_MEDICAL_EXAM':
@@ -18,11 +18,11 @@ export function formatExamType(examType: ExamType): string {
     case 'DRIVING_LICENCE_TP':
       return 'Driving Licence (TP)';
     case 'DRIVING_VOCATIONAL_TP_LTA':
-      return 'Driving Vocational (TP/LTA)';
+      return 'Driving (TP) / Vocational (LTA)';
     case 'VOCATIONAL_LICENCE_LTA':
       return 'Vocational Licence (LTA)';
     case 'PR_MEDICAL':
-      return 'PR Medical (ICA)';
+      return 'PR (ICA)';
     case 'STUDENT_PASS_MEDICAL':
       return 'Student Pass (ICA)';
     case 'LTVP_MEDICAL':
