@@ -78,7 +78,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             </button>
             <img src="/logo.svg" alt="goCheckUp logo" className="w-10 h-10 rounded-lg" />
             <div>
-              <h1 className="text-slate-900 text-lg md:text-xl">goCheckUp</h1>
+              <h1 className="text-slate-900 text-lg md:text-xl">
+                <span className="text-blue-600">go</span>CheckUp
+              </h1>
             </div>
           </div>
 
