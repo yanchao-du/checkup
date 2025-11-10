@@ -78,7 +78,7 @@ export function LoginPage() {
                 <div className="grid gap-6">
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <FileCheck className="w-6 h-6 text-blue-600" />
+                      <FileCheck className="w-6 h-6 text-teal-700" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Multiple Exam Types, One Single Portal</h4>
@@ -88,7 +88,7 @@ export function LoginPage() {
                   
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <Users className="w-6 h-6 text-blue-600" />
+                      <Users className="w-6 h-6 text-teal-700" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Role-Based Workflow</h4>
@@ -98,7 +98,7 @@ export function LoginPage() {
                   
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <Clock className="w-6 h-6 text-blue-600" />
+                      <Clock className="w-6 h-6 text-teal-700" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Real-Time Tracking</h4>
@@ -108,7 +108,7 @@ export function LoginPage() {
                   
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                      <FileText className="w-6 h-6 text-blue-600" />
+                      <FileText className="w-6 h-6 text-teal-700" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Hassle-Free Report Management</h4>
