@@ -82,19 +82,19 @@ export function LoginPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Multiple Exam Types, One Single Portal</h4>
-                      <p className="text-sm text-slate-600">Submit results for Work Permit, Driver Licence, and other statutory exams across agencies such as MOM, SPF, LTA, ICA, and more — all in one place.</p>
+                      {/* <p className="text-sm text-slate-600">Submit results for Work Permit, Driver Licence, and other statutory exams across agencies such as MOM, SPF, LTA, ICA, and more — all in one place.</p> */}
                     </div>
                   </div>
                   
-                  {/* <div className="flex gap-3">
+                  <div className="flex gap-3">
                     <div className="flex-shrink-0">
                       <Users className="w-6 h-6 text-teal-600" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Role-Based Workflow</h4>
-                      <p className="text-sm text-slate-600">Separate access for nurses, doctors, and administrators</p>
+                      {/* <p className="text-sm text-slate-600">Separate access for nurses, doctors, and administrators</p> */}
                     </div>
-                  </div> */}
+                  </div>
                   
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
@@ -102,7 +102,7 @@ export function LoginPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-900">Real-Time Tracking</h4>
-                      <p className="text-sm text-slate-600">Monitor submission status from draft to approval</p>
+                      {/* <p className="text-sm text-slate-600">Monitor submission status from draft to approval</p> */}
                     </div>
                   </div>
                   
@@ -218,31 +218,63 @@ export function LoginPage() {
         </div>
 
         {/* Additional Info Section */}
-        <div className="bg-white border-t border-slate-200 py-8">
+        <div className="bg-white border-t border-slate-200 py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4 text-center">Supported Examination Types</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-center">
-                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">Full Medical Examination for Foreign Worker</p>
+              <h3 className="text-2xl font-semibold text-slate-900 mb-8 text-center">Supported Examination Types</h3>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* MOM */}
+                <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                  <h4 className="text-lg font-semibold text-teal-700 mb-4">Ministry of Manpower (MOM)</h4>
+                  <ul className="space-y-2">
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>Full Medical Examination for Foreign Worker</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>6-Monthly Medical Examination for Migrant Domestic Worker</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>6-Monthly Medical Examination for Female Migrant Worker</span>
+                    </li>
+                  </ul>
                 </div>
-                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">6ME for Migrant Domestic Worker</p>
+
+                {/* ICA */}
+                <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                  <h4 className="text-lg font-semibold text-teal-700 mb-4">Immigration & Checkpoints Authority (ICA)</h4>
+                  <ul className="space-y-2">
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>Medical Examination for Permanent Residency</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>Medical Examination for Long Term Visit Pass</span>
+                    </li>
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>Medical Examination for Student Pass</span>
+                    </li>
+                  </ul>
                 </div>
-                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">6ME for Female Migrant Worker</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">Medical Examination for Permanant Residency</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">Medical Examination for Long Term Visit Pass</p>
-                </div>
-                                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">Medical Examination for Student Pass</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded">
-                  <p className="text-sm font-medium text-slate-700">Medical Examination for Driving Licence / Vocational Licence</p>
+
+                {/* Traffic Police */}
+                <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                  <h4 className="text-lg font-semibold text-teal-700 mb-4">Singapore Police Force (SPF) and Land Transport Authority (LTA)</h4>
+                  <ul className="space-y-2">
+                    <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>Medical Examination for Driving Licence / Vocational Licence</span>
+                    </li>
+                    {/* <li className="text-sm text-slate-700 flex items-start">
+                      <span className="text-teal-600 mr-2">•</span>
+                      <span>Medical Examination for Vocational Licence</span>
+                    </li> */}
+                  </ul>
                 </div>
               </div>
             </div>
