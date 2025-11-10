@@ -226,11 +226,16 @@ export function FullMedicalExamFields({
                     Normal
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no-referral" id="xray-no-referral" />
-                  <Label htmlFor="xray-no-referral" className="font-normal cursor-pointer">
-                    No referral needed
-                  </Label>
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="no-referral" id="xray-no-referral" />
+                    <Label htmlFor="xray-no-referral" className="font-normal cursor-pointer">
+                      No referral needed
+                    </Label>
+                  </div>
+                  <p className="text-xs text-slate-500 ml-6 pl-0.5">
+                    e.g. X-ray shows minor or non-TB-related abnormalities, or old, healed TB scars, but is assessed to require no further follow-up
+                  </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="cleared-ntbcc" id="xray-cleared" />
