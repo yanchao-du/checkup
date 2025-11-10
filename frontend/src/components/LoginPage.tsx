@@ -120,8 +120,8 @@ export function LoginPage() {
             </div>
 
             {/* Right Column - Login Card */}
-            <div className="lg:sticky lg:top-8">
-              <Card className="shadow-xl min-h-[500px]">
+            <div className="lg:sticky lg:top-16">
+              <Card className="shadow-xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl">Sign In</CardTitle>
             <CardDescription>Access the portal with your CorpPass credentials</CardDescription>
@@ -191,22 +191,40 @@ export function LoginPage() {
               
               <div 
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  showDemoAccounts ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0'
+                  showDemoAccounts ? 'h-auto opacity-100 mt-2' : 'h-0 opacity-0'
                 }`}
               >
-                <div className="p-4 bg-teal-50 rounded-lg border border-teal-200 space-y-2">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-teal-900">Doctor Accounts:</p>
-                    <p className="text-sm text-slate-700 ml-2">• Doctor1: S1234567D</p>
-                    <p className="text-sm text-slate-700 ml-2">• Doctor2: S4567890C</p>
+                <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    {/* Doctors Column */}
+                    <div>
+                      <p className="text-sm font-semibold text-teal-900 mb-2">Doctors</p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-slate-700">Dr. Sarah Tan</p>
+                        <p className="text-xs text-teal-700">S1234567D</p>
+                      </div>
+                      <div className="space-y-1 mt-2">
+                        <p className="text-xs text-slate-700">Dr. James Lee</p>
+                        <p className="text-xs text-teal-700">S4567890C</p>
+                      </div>
+                    </div>
+                    
+                    {/* Nurses Column */}
+                    <div>
+                      <p className="text-sm font-semibold text-teal-900 mb-2">Nurses</p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-slate-700">Nurse Mary Lim</p>
+                        <p className="text-xs text-teal-700">S2345678H</p>
+                      </div>
+                      <div className="space-y-1 mt-2">
+                        <p className="text-xs text-slate-700">Nurse Linda Koh</p>
+                        <p className="text-xs text-teal-700">S7890123C</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-teal-900">Nurse/Assistant Accounts:</p>
-                    <p className="text-sm text-slate-700 ml-2">• Nurse/Assistant1: S2345678H</p>
-                    <p className="text-sm text-slate-700 ml-2">• Nurse/Assistant2: S7890123C</p>
-                  </div>
-                  <div className="space-y-1 pt-2 border-t border-teal-200">
-                    <p className="text-sm font-medium text-teal-900">UEN: 123456789D</p>
+                  
+                  <div className="pt-3 border-t border-teal-200">
+                    <p className="text-xs font-semibold text-teal-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
                   </div>
                 </div>
               </div>
