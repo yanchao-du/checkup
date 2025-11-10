@@ -48,7 +48,7 @@ export function LoginPage() {
               <img src="/logo.svg" alt="goCheckUp logo" className="w-16 h-16" />
             </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">
-            <span className="text-blue-600">go</span>CheckUp
+            <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
           </h1>
           <p className="text-slate-600">Your one-stop portal to manage, submit, and track statutory medical examinations</p>
           <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-sm font-semibold">
