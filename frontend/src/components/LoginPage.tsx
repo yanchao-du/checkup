@@ -243,7 +243,7 @@ export function LoginPage() {
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* MOM */}
-                <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
                   <h4 className="text-lg font-semibold text-teal-700 mb-4">Ministry of Manpower (MOM)</h4>
                   <ul className="space-y-2">
                     <li className="text-sm text-slate-700 flex items-start">
@@ -262,7 +262,7 @@ export function LoginPage() {
                 </div>
 
                 {/* ICA */}
-                <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
                   <h4 className="text-lg font-semibold text-teal-700 mb-4">Immigration & Checkpoints Authority (ICA)</h4>
                   <ul className="space-y-2">
                     <li className="text-sm text-slate-700 flex items-start">
@@ -281,7 +281,7 @@ export function LoginPage() {
                 </div>
 
                 {/* Traffic Police */}
-                <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
                   <h4 className="text-lg font-semibold text-teal-700 mb-4">Singapore Police Force (SPF) and Land Transport Authority (LTA)</h4>
                   <ul className="space-y-2">
                     <li className="text-sm text-slate-700 flex items-start">
