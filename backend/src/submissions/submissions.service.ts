@@ -253,10 +253,11 @@ export class SubmissionsService {
       throw new NotFoundException('Submission not found');
     }
 
-    // Check access - user must be admin, creator, approver, or from same clinic
+    // Check access - user must be admin, creator, approver, assigned doctor, or from same clinic
     if (userRole !== 'admin' && 
         submission.createdById !== userId && 
         submission.approvedById !== userId &&
+        submission.assignedDoctorId !== userId &&
         submission.clinicId !== clinicId) {
       throw new ForbiddenException('Access denied');
     }
@@ -280,11 +281,13 @@ export class SubmissionsService {
     // - Admin can edit any submission
     // - Creator can edit their own submissions
     // - Doctors can edit submissions in pending_approval status (routed to them by nurses)
+    // - Doctors can edit drafts that are assigned to them (converted from pending_approval)
     const isCreator = existing.createdById === userId;
     const isDoctorEditingPendingApproval = userRole === 'doctor' && existing.status === 'pending_approval';
+    const isDoctorEditingAssignedDraft = userRole === 'doctor' && existing.status === 'draft' && existing.assignedDoctorId === userId;
     
-    if (!isCreator && userRole !== 'admin' && !isDoctorEditingPendingApproval) {
-      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById}, status: ${existing.status})`);
+    if (!isCreator && userRole !== 'admin' && !isDoctorEditingPendingApproval && !isDoctorEditingAssignedDraft) {
+      this.logger.warn(`Access denied for user ${userId} to update submission ${id} (creator: ${existing.createdById}, status: ${existing.status}, assignedDoctorId: ${existing.assignedDoctorId || 'null'})`);
       throw new ForbiddenException('Access denied');
     }
 
