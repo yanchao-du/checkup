@@ -68,11 +68,18 @@ const hasPendingNTBCCClearance = (draft: MedicalSubmission): boolean => {
 
 export function DraftsList() {
   const { user } = useAuth();
+  
+  // Helper to check if a draft was routed to the current doctor
+  const isRoutedToDr = (draft: MedicalSubmission): boolean => {
+    return user?.role === 'doctor' && 
+           draft.assignedDoctorId === user?.id && 
+           draft.createdById !== user?.id;
+  };
   const [drafts, setDrafts] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterExamType, setFilterExamType] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending-memo' | 'pending-ntbcc' | 'complete'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'routed' | 'pending-memo' | 'pending-ntbcc' | 'complete'>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [includeDeleted] = useState(false);
   const [sortField, setSortField] = useState<keyof MedicalSubmission | null>(null);
@@ -121,8 +128,10 @@ export function DraftsList() {
     
     const pendingMemo = hasPendingMemos(draft);
     const pendingNTBCC = hasPendingNTBCCClearance(draft);
+    const routed = isRoutedToDr(draft);
     const matchesStatus = 
       filterStatus === 'all' ||
+      (filterStatus === 'routed' && routed) ||
       (filterStatus === 'pending-memo' && pendingMemo) ||
       (filterStatus === 'pending-ntbcc' && pendingNTBCC) ||
       (filterStatus === 'complete' && !pendingMemo && !pendingNTBCC);
@@ -223,6 +232,18 @@ export function DraftsList() {
             >
               All Drafts ({drafts.length})
             </button>
+            {user?.role === 'doctor' && (
+              <button
+                onClick={() => setFilterStatus('routed')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  filterStatus === 'routed'
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Routed for Review ({drafts.filter(isRoutedToDr).length})
+              </button>
+            )}
             <button
               onClick={() => setFilterStatus('pending-memo')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
@@ -334,21 +355,18 @@ export function DraftsList() {
                     const pendingMemo = hasPendingMemos(draft);
                     const pendingNTBCC = hasPendingNTBCCClearance(draft);
                     const hasAnyPending = pendingMemo || pendingNTBCC;
-                    // Check if this draft was routed to the current doctor (not created by them)
-                    const isRoutedToDr = user?.role === 'doctor' && 
-                                        draft.assignedDoctorId === user?.id && 
-                                        draft.createdById !== user?.id;
+                    const routed = isRoutedToDr(draft);
                     return (
                       <TableRow 
                         key={draft.id} 
-                        className={isDeleted ? 'bg-red-50 opacity-60' : isRoutedToDr ? 'bg-purple-50' : hasAnyPending ? 'bg-amber-50' : ''}
+                        className={isDeleted ? 'bg-red-50 opacity-60' : routed ? 'bg-purple-50' : hasAnyPending ? 'bg-amber-50' : ''}
                       >
                         <TableCell>
                           {getDisplayName(draft.patientName, draft.examType, draft.status)}
                           {isDeleted && (
                             <span className="ml-2 text-xs text-red-600 font-medium">(Deleted)</span>
                           )}
-                          {!isDeleted && isRoutedToDr && (
+                          {!isDeleted && routed && (
                             <span className="ml-2 text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded font-medium">
                               Routed for Review
                             </span>
