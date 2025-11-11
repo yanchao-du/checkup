@@ -50,7 +50,7 @@ export function formatExamTypeFull(examType: ExamType): string {
     case 'DRIVING_LICENCE_TP':
       return 'Medical Examination for Driving Licence for Aged Drivers (65 and above)';
     case 'DRIVING_VOCATIONAL_TP_LTA':
-      return 'Medical Examination for Vocational Licence for Aged Drivers (65 and above)';
+      return 'Medical Examination for Driving Licence / Vocational Licence';
     case 'VOCATIONAL_LICENCE_LTA':
       return 'Medical Examination for Vocational Licence';
     case 'PR_MEDICAL':
