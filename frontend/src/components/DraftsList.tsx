@@ -334,15 +334,24 @@ export function DraftsList() {
                     const pendingMemo = hasPendingMemos(draft);
                     const pendingNTBCC = hasPendingNTBCCClearance(draft);
                     const hasAnyPending = pendingMemo || pendingNTBCC;
+                    // Check if this draft was routed to the current doctor (not created by them)
+                    const isRoutedToDr = user?.role === 'doctor' && 
+                                        draft.assignedDoctorId === user?.id && 
+                                        draft.createdById !== user?.id;
                     return (
                       <TableRow 
                         key={draft.id} 
-                        className={isDeleted ? 'bg-red-50 opacity-60' : hasAnyPending ? 'bg-amber-50' : ''}
+                        className={isDeleted ? 'bg-red-50 opacity-60' : isRoutedToDr ? 'bg-purple-50' : hasAnyPending ? 'bg-amber-50' : ''}
                       >
                         <TableCell>
                           {getDisplayName(draft.patientName, draft.examType, draft.status)}
                           {isDeleted && (
                             <span className="ml-2 text-xs text-red-600 font-medium">(Deleted)</span>
+                          )}
+                          {!isDeleted && isRoutedToDr && (
+                            <span className="ml-2 text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded font-medium">
+                              Routed for Review
+                            </span>
                           )}
                           {!isDeleted && pendingMemo && (
                             <span className="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded font-medium">

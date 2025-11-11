@@ -139,6 +139,8 @@ export class SubmissionsService {
       where.OR = [
         { createdById: userId },
         { approvedById: userId },
+        // Doctors can see drafts that were assigned to them (converted from pending_approval)
+        ...(userRole === 'doctor' ? [{ assignedDoctorId: userId }] : []),
       ];
     }
 
