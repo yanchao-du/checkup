@@ -28,7 +28,8 @@
     "seed:patients:check-dates": "ts-node prisma/check-dates.ts",
     "seed:patients:analyze-names": "ts-node prisma/analyze-names.ts",
     "test:patient-api": "node scripts/test-patient-api.js",
-    "fix:nurse-clinics": "ts-node prisma/add-nurse-clinic-relationships.ts"
+    "fix:nurse-clinics": "ts-node prisma/add-nurse-clinic-relationships.ts",
+    "cleanup:submissions": "ts-node prisma/cleanup-submissions.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

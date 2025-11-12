@@ -325,8 +325,16 @@ async function main() {
   console.log('   - Nurse Mary Lim: HealthFirst (primary)');
   console.log('   - Nurse Linda Koh: HealthFirst (primary)');
 
-  // Create sample submissions
-  const submission1 = await prisma.medicalSubmission.create({
+  // Check if sample submissions already exist
+  const existingSubmissionsCount = await prisma.medicalSubmission.count();
+  
+  if (existingSubmissionsCount > 0) {
+    console.log(`ℹ️  Found ${existingSubmissionsCount} existing submissions - skipping sample submission creation`);
+  } else {
+    console.log('📝 Creating sample submissions...');
+    
+    // Create sample submissions
+    const submission1 = await prisma.medicalSubmission.create({
     data: {
       examType: 'SIX_MONTHLY_MDW',
       patientName: 'Maria Santos',
@@ -423,11 +431,35 @@ async function main() {
     },
   });
 
-  console.log('✅ Created sample submissions and drafts');
-  console.log('   - Maria Santos (SIX_MONTHLY_MDW): submitted');
-  console.log('   - Chen Li Hua (SIX_MONTHLY_MDW): pending_approval');
-  console.log('   - Nguyen Thi Mai (SIX_MONTHLY_FMW): submitted');
-  console.log('   - Lim Siew Hong (SIX_MONTHLY_FMW): pending_approval');
+    console.log('✅ Created sample submissions and drafts');
+    console.log('   - Maria Santos (SIX_MONTHLY_MDW): submitted');
+    console.log('   - Chen Li Hua (SIX_MONTHLY_MDW): pending_approval');
+    console.log('   - Nguyen Thi Mai (SIX_MONTHLY_FMW): submitted');
+    console.log('   - Lim Siew Hong (SIX_MONTHLY_FMW): pending_approval');
+
+    // Create audit logs
+    await prisma.auditLog.create({
+      data: {
+        submissionId: submission1.id,
+        userId: nurse.id,
+        eventType: 'created',
+        changes: { status: 'draft' },
+        timestamp: new Date('2025-10-15T10:30:00'),
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        submissionId: submission1.id,
+        userId: doctor.id,
+        eventType: 'approved',
+        changes: { status: 'submitted' },
+        timestamp: new Date('2025-10-15T14:00:00'),
+      },
+    });
+
+    console.log('✅ Created audit logs');
+  }
 
   // Create CorpPass user associations
   // Link doctor@clinic.sg to CorpPass account
@@ -456,28 +488,6 @@ async function main() {
 
   console.log('✅ Created CorpPass user associations (doctor and nurse linked)');
 
-  // Create audit logs
-  await prisma.auditLog.create({
-    data: {
-      submissionId: submission1.id,
-      userId: nurse.id,
-      eventType: 'created',
-      changes: { status: 'draft' },
-      timestamp: new Date('2025-10-15T10:30:00'),
-    },
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      submissionId: submission1.id,
-      userId: doctor.id,
-      eventType: 'approved',
-      changes: { status: 'submitted' },
-      timestamp: new Date('2025-10-15T14:00:00'),
-    },
-  });
-
-  console.log('✅ Created audit logs');
   console.log('\n🎉 Seeding completed successfully!\n');
   console.log('📧 Demo accounts:');
   console.log('   Doctor: doctor@clinic.sg / password');
