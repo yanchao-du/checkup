@@ -2038,8 +2038,11 @@ export function NewSubmission() {
                                 });
                                 
                                 // If this is a FIN change with accordion data for MOM exams
-                                if (isMomExamType(examType) && !id && previousFinValue && previousFinValue !== testFin && hasAccordionDataFilled()) {
+                                if (isMomExamType(examType) && previousFinValue && previousFinValue !== testFin && hasAccordionDataFilled()) {
                                   console.log('[Use This] FIN change detected with data - showing dialog');
+                                  // Set the new FIN in the input field (like manual typing)
+                                  setPatientNric(testFin);
+                                  // Store as pending and show dialog
                                   setPendingFinValue(testFin);
                                   setShowFinChangeDialog(true);
                                 } else {
@@ -2067,6 +2070,12 @@ export function NewSubmission() {
                         value={patientNric}
                         onChange={(e) => {
                           const newValue = e.target.value.toUpperCase();
+                          console.log('[FIN onChange]', {
+                            oldValue: patientNric,
+                            newValue,
+                            currentPatientName: patientName,
+                            isNameFromApi
+                          });
                           setPatientNric(newValue);
                           
                           // Clear error on change
@@ -2092,7 +2101,13 @@ export function NewSubmission() {
                               setNricError(null);
                             }
                           } else {
-                            // Validate FIN
+                            // For non-ICA exams, FIN is mandatory
+                            if (!value) {
+                              setNricError('FIN is required');
+                              return;
+                            }
+                            
+                            // Validate FIN format
                             const error = validateNricOrFin(value, validateNRIC);
                             setNricError(error);
                             
@@ -2152,57 +2167,47 @@ export function NewSubmission() {
                             : 'Full Name (as in NRIC / FIN)'} <span className="text-red-500">*</span>
                       </Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') ? (
-                        patientNric.length === 9 && !nricError ? 
-                        (
-                          <div className="space-y-2">
-                            <Input
-                              id="patientName"
-                              name="patientName"
-                              value={isNameFromApi ? maskName(patientName) : patientName}
-                              onChange={(e) => {
-                                setPatientName(e.target.value);
-                                // Clear error on change
-                                if (patientNameError) setPatientNameError(null);
-                              }}
-                              onBlur={(e) => {
-                                // Trim whitespace
-                                const trimmed = e.target.value.trim();
-                                setPatientName(trimmed);
-                                // Validate
-                                const error = validatePatientName(trimmed);
-                                setPatientNameError(error);
-                              }}
-                              placeholder={isLoadingPatient ? "Loading..." : "Enter patient name"}
-                              readOnly={isNameFromApi}
-                              className={`${isNameFromApi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} ${patientNameError ? 'border-red-500' : ''}`}
-                            />
-                            {patientNameError && !isNameFromApi && <InlineError>{patientNameError}</InlineError>}
-                            {isNameFromApi && (
-                              <p className="text-xs text-slate-600 flex items-center gap-1">
-                                <span className="inline-block w-1 h-1 rounded-full bg-green-500"></span>
-                                Name retrieved and masked for verification. Full name will be visible after submission.
-                              </p>
-                            )}
-                            {examType === 'FULL_MEDICAL_EXAM' && formData.gender && (
-                              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-                                <p className="text-sm font-semibold text-blue-900 flex items-center gap-2">
-                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                  </svg>
-                                  Gender: {formData.gender === 'M' ? 'Male' : formData.gender === 'F' ? 'Female' : formData.gender}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
+                        <div className="space-y-2">
                           <Input
                             id="patientName"
                             name="patientName"
-                            value=""
-                            disabled
-                            placeholder="Fill NRIC/FIN first"
+                            value={isNameFromApi ? maskName(patientName) : patientName}
+                            onChange={(e) => {
+                              setPatientName(e.target.value);
+                              // Clear error on change
+                              if (patientNameError) setPatientNameError(null);
+                            }}
+                            onBlur={(e) => {
+                              // Trim whitespace
+                              const trimmed = e.target.value.trim();
+                              setPatientName(trimmed);
+                              // Validate
+                              const error = validatePatientName(trimmed);
+                              setPatientNameError(error);
+                            }}
+                            placeholder={isLoadingPatient ? "Loading..." : patientNric.length !== 9 || nricError ? "Fill NRIC/FIN first" : "Enter patient name"}
+                            readOnly={isNameFromApi || patientNric.length !== 9 || !!nricError}
+                            disabled={patientNric.length !== 9 || !!nricError}
+                            className={`${(isNameFromApi || patientNric.length !== 9 || nricError) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} ${patientNameError ? 'border-red-500' : ''}`}
                           />
-                        )
+                          {patientNameError && !isNameFromApi && <InlineError>{patientNameError}</InlineError>}
+                          {isNameFromApi && patientNric.length === 9 && !nricError && (
+                            <p className="text-xs text-slate-600 flex items-center gap-1">
+                              <span className="inline-block w-1 h-1 rounded-full bg-green-500"></span>
+                              Name retrieved and masked for verification. Full name will be visible after submission.
+                            </p>
+                          )}
+                          {examType === 'FULL_MEDICAL_EXAM' && formData.gender && (
+                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                              <p className="text-sm font-semibold text-blue-900 flex items-center gap-2">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                Gender: {formData.gender === 'M' ? 'Male' : formData.gender === 'F' ? 'Female' : formData.gender}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <>
                           <Input
