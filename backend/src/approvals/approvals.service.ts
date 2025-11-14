@@ -15,10 +15,7 @@ export class ApprovalsService {
     const where: any = {
       clinicId,
       status: 'pending_approval',
-      OR: [
-        { assignedDoctorId: doctorId },
-        { assignedDoctorId: null }, // backwards compatibility
-      ],
+      assignedDoctorId: doctorId, // Only show submissions assigned to this doctor
     };
 
     if (examType) {
