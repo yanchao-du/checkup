@@ -394,8 +394,13 @@ export function Dashboard() {
               <div className="space-y-3">
                 {recentActivities.map((activity) => {
                   const { Icon, bgColor, iconColor } = getActivityIcon(activity.activityType);
-                  const linkPath = (activity.activityType === 'draft' || activity.activityType === 'reopened')
+                  // Doctors should see reopened submissions in read-only mode (only nurses can edit reopened)
+                  const linkPath = activity.activityType === 'draft'
                     ? `/draft/${activity.id}` 
+                    : activity.activityType === 'reopened' && user?.role === 'doctor'
+                    ? `/view-submission/${activity.id}`
+                    : activity.activityType === 'reopened'
+                    ? `/draft/${activity.id}`
                     : `/view-submission/${activity.id}`;
                   
                   return (
