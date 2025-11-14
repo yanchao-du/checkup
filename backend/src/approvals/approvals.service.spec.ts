@@ -71,10 +71,7 @@ describe('ApprovalsService', () => {
           where: {
             clinicId: 'clinic-1',
             status: 'pending_approval',
-            OR: [
-              { assignedDoctorId: 'doctor-1' },
-              { assignedDoctorId: null },
-            ],
+            assignedDoctorId: 'doctor-1',
           },
           include: expect.any(Object),
           orderBy: { createdDate: 'desc' },
@@ -95,10 +92,7 @@ describe('ApprovalsService', () => {
           where: {
             clinicId: 'clinic-1',
             status: 'pending_approval',
-            OR: [
-              { assignedDoctorId: 'doctor-1' },
-              { assignedDoctorId: null },
-            ],
+            assignedDoctorId: 'doctor-1',
             examType: 'MDW_SIX_MONTHLY',
           },
         }),

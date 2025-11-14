@@ -1,11 +1,16 @@
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3344/v1';
 
-// Custom event for session expiry
+// Custom events for session management
 export const SESSION_EXPIRED_EVENT = 'session-expired';
+export const SESSION_REVOKED_EVENT = 'session-revoked';
 
 export const dispatchSessionExpired = (message: string) => {
   window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT, { detail: { message } }));
+};
+
+export const dispatchSessionRevoked = (message: string) => {
+  window.dispatchEvent(new CustomEvent(SESSION_REVOKED_EVENT, { detail: { message } }));
 };
 
 // API Client with authentication
@@ -50,23 +55,37 @@ class ApiClient {
 
     if (!response.ok) {
       if (response.status === 401) {
-        // Get the error message from backend
+        // Get the error message and code from backend
         const errorData = await response.json().catch(() => ({ message: 'Your session has expired' }));
         const message = errorData.message || 'Your session has expired';
+        const code = errorData.code;
         
         // Clear token and user data
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
-        // Dispatch session expired event with the message
-        dispatchSessionExpired(message);
-        
-        // Delay redirect slightly to allow toast to show
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 500);
-        
-        throw new Error(message);
+        // Check if this is a session revoked error (logged in elsewhere)
+        if (code === 'SESSION_REVOKED') {
+          // Dispatch session revoked event for special handling
+          dispatchSessionRevoked(message);
+          
+          // Redirect to session revoked page
+          window.location.href = '/session-revoked';
+          
+          // Return a rejected promise with a specific error to prevent further execution
+          // The redirect will happen before this promise resolves
+          return Promise.reject(new Error('SESSION_REVOKED'));
+        } else {
+          // Regular session expiry - redirect to dedicated session expired page
+          dispatchSessionExpired(message);
+          
+          // Redirect to session expired page
+          window.location.href = '/session-expired';
+          
+          // Return a rejected promise with a specific error to prevent further execution
+          // The redirect will happen before this promise resolves
+          return Promise.reject(new Error('SESSION_EXPIRED'));
+        }
       }
 
       const error = await response.json().catch(() => ({ message: response.statusText }));

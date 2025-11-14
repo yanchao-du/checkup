@@ -16,7 +16,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true);
   const { login } = useAuth();
   // Feature toggle for email/password login
   const enableEmailLogin = import.meta.env.VITE_ENABLE_EMAIL_LOGIN === 'true';
@@ -147,6 +147,7 @@ export function LoginPage() {
                     placeholder="your.email@clinic.sg"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                 </div>
@@ -201,7 +202,7 @@ export function LoginPage() {
               
               <div 
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  showDemoAccounts ? 'h-auto opacity-100 mt-2' : 'h-0 opacity-0'
+                  showDemoAccounts ? 'max-h-[800px] opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'
                 }`}
               >
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -233,8 +234,23 @@ export function LoginPage() {
                     </div>
                   </div>
                   
-                  <div className="pt-3 border-t border-blue-200">
+                  <div className="pt-3 border-t border-blue-200 space-y-2">
                     <p className="text-xs font-semibold text-blue-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
+                    <div className="pt-2 border-t border-blue-200 space-y-2">
+                      <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                        <strong>Note:</strong> Concurrent logins are not allowed. You may be logged out automatically if another user signs in using the same shared demo account.
+                      </p>
+                      <p className="text-xs text-slate-700">
+                        To request a dedicated demo account, please contact Yanchao (
+                        <a 
+                          href="mailto:du.yanchao@gt.tech.gov.sg" 
+                          className="text-xs text-slate-700 hover:text-blue-800 underline"
+                        >
+                          du.yanchao@gt.tech.gov.sg
+                        </a>
+                        )
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

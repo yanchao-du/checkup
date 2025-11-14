@@ -43,7 +43,13 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    // Create user session
+    // Enforce single session: Delete all existing sessions for this user
+    const deletedCount = this.userSessionService.deleteAllUserSessions(user.id);
+    if (deletedCount > 0) {
+      console.log(`🔐 Single session enforcement: Deleted ${deletedCount} existing session(s) for ${user.email}`);
+    }
+
+    // Create new user session
     const sessionId = this.userSessionService.createSession(
       user.id,
       user.email,
