@@ -45,11 +45,11 @@ export const useSubmissionWorkflow = (
 
     /**
      * Rule: Can user edit FIN/NRIC?
-     * Doctors cannot edit FIN for MOM exams that are pending approval
+     * Doctors cannot edit FIN/NRIC for MOM or driver exams that are pending approval
      */
     const canEditFIN = !(
       role === 'doctor' && 
-      isMomExam && 
+      (isMomExam || isDriverExam) && 
       status === 'pending_approval'
     );
 
