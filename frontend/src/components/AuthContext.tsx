@@ -46,8 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const handleSessionRevoked = () => {
-      // Clear user state - don't show toast since we redirect to dedicated error page
-      setUser(null);
+      // Don't clear user state here - the redirect to /session-revoked will happen
+      // via window.location.href in api-client.ts, which will cause a full page reload
+      // Clearing user state here causes ProtectedRoute to redirect to login first
     };
 
     window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired as EventListener);
