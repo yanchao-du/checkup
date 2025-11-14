@@ -45,16 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     };
 
-    const handleSessionRevoked = (event: CustomEvent) => {
-      const message = event.detail?.message || 'Your session has been revoked';
-      
-      // Show error notification with more prominent styling
-      toast.error(message, {
-        duration: 8000,
-        description: 'You have logged in from another location',
-      });
-      
-      // Clear user state
+    const handleSessionRevoked = () => {
+      // Clear user state - don't show toast since we redirect to dedicated error page
       setUser(null);
     };
 

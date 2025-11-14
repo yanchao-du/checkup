@@ -68,15 +68,20 @@ class ApiClient {
         if (code === 'SESSION_REVOKED') {
           // Dispatch session revoked event for special handling
           dispatchSessionRevoked(message);
+          
+          // Redirect to dedicated session revoked page
+          setTimeout(() => {
+            window.location.href = '/session-revoked';
+          }, 100);
         } else {
           // Regular session expiry
           dispatchSessionExpired(message);
+          
+          // Delay redirect slightly to allow toast to show
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 500);
         }
-        
-        // Delay redirect slightly to allow error page to show
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 500);
         
         throw new Error(message);
       }
