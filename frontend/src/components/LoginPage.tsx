@@ -16,7 +16,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true);
   const { login } = useAuth();
   // Feature toggle for email/password login
   const enableEmailLogin = import.meta.env.VITE_ENABLE_EMAIL_LOGIN === 'true';
