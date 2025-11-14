@@ -75,15 +75,14 @@ class ApiClient {
           // Return a promise that never resolves to prevent further execution
           return new Promise(() => {});
         } else {
-          // Regular session expiry
+          // Regular session expiry - redirect to dedicated session expired page
           dispatchSessionExpired(message);
           
-          // Delay redirect slightly to allow toast to show
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 500);
+          // Redirect to session expired page
+          window.location.href = '/session-expired';
           
-          throw new Error(message);
+          // Return a promise that never resolves to prevent further execution
+          return new Promise(() => {});
         }
       }
 

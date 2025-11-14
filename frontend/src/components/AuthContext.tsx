@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi } from '../services';
 import { SESSION_EXPIRED_EVENT, SESSION_REVOKED_EVENT } from '../lib/api-client';
-import { toast } from 'sonner';
 
 export type UserRole = 'doctor' | 'nurse' | 'admin';
 
@@ -32,17 +31,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Listen for session expiry and revoked events from API client
   useEffect(() => {
-    const handleSessionExpired = (event: CustomEvent) => {
-      const message = event.detail?.message || 'Your session has expired';
-      
-      // Show toast notification
-      toast.warning(message, {
-        duration: 5000,
-        description: 'Please sign in again to continue',
-      });
-      
-      // Clear user state
-      setUser(null);
+    const handleSessionExpired = () => {
+      // Don't show toast or clear user state here - the redirect to /session-expired
+      // will happen via window.location.href in api-client.ts, which causes a full page reload
+      // Clearing user state here would cause ProtectedRoute to redirect to login first
     };
 
     const handleSessionRevoked = () => {

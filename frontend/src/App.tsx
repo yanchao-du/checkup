@@ -4,6 +4,7 @@ import { LoginPage } from './components/LoginPage';
 import { CorpPassCallback } from './components/CorpPassCallback';
 import { AuthError } from './components/AuthError';
 import { SessionRevoked } from './pages/SessionRevoked';
+import { SessionExpired } from './pages/SessionExpired';
 import { DashboardLayout } from './components/DashboardLayout';
 import { Dashboard } from './components/Dashboard';
 import { NewSubmission } from './components/NewSubmission';
@@ -71,6 +72,7 @@ function AppRoutes() {
           <Route path="/auth/corppass/callback" element={<CorpPassCallback />} />
           <Route path="/auth/error" element={<AuthError />} />
           <Route path="/session-revoked" element={<SessionRevoked />} />
+          <Route path="/session-expired" element={<SessionExpired />} />
           <Route
             path="/*"
             element={
