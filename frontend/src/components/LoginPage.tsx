@@ -238,10 +238,10 @@ export function LoginPage() {
                     <p className="text-xs font-semibold text-blue-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
                     <div className="pt-2 border-t border-blue-200">
                       <p className="text-xs text-slate-700">
-                        For a dedicated demo account, please contact{' '}
+                        To get a dedicated demo account, please contact{' '}
                         <a 
                           href="mailto:du.yanchao@gt.tech.gov.sg" 
-                          className="text-blue-700 hover:text-blue-800 underline font-medium"
+                          className="text-slate-700 hover:text-blue-800 underline"
                         >
                           du.yanchao@gt.tech.gov.sg
                         </a>
