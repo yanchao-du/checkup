@@ -325,11 +325,18 @@ async function main() {
   console.log('   - Nurse Mary Lim: HealthFirst (primary)');
   console.log('   - Nurse Linda Koh: HealthFirst (primary)');
 
-  // Check if sample submissions already exist
-  const existingSubmissionsCount = await prisma.medicalSubmission.count();
+  // Check if sample submissions already exist (by checking for specific sample patient NRICs)
+  const sampleNrics = ['S1234567A', 'S2345678B', 'S3456789C', 'S9988776D'];
+  const existingSampleSubmissions = await prisma.medicalSubmission.findMany({
+    where: {
+      patientNric: {
+        in: sampleNrics,
+      },
+    },
+  });
   
-  if (existingSubmissionsCount > 0) {
-    console.log(`ℹ️  Found ${existingSubmissionsCount} existing submissions - skipping sample submission creation`);
+  if (existingSampleSubmissions.length > 0) {
+    console.log(`ℹ️  Found ${existingSampleSubmissions.length} existing sample submissions - skipping sample submission creation`);
   } else {
     console.log('📝 Creating sample submissions...');
     

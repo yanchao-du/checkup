@@ -147,6 +147,7 @@ export function LoginPage() {
                     placeholder="your.email@clinic.sg"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                 </div>

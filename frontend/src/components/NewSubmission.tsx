@@ -162,6 +162,10 @@ export function NewSubmission() {
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [testFin, setTestFin] = useState<string>('');
+  const [showFinChangeDialog, setShowFinChangeDialog] = useState(false);
+  const [pendingFinValue, setPendingFinValue] = useState<string>('');
+  const [previousFinValue, setPreviousFinValue] = useState<string>('');
+  const [confirmedFinValue, setConfirmedFinValue] = useState<string>(''); // FIN value after blur validation
   
   // Track last saved state to detect actual changes
   const [lastSavedState, setLastSavedState] = useState<{
@@ -189,6 +193,65 @@ export function NewSubmission() {
   });
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
   const lastLookedUpNricRef = useRef<string | null>(null);
+
+  // Helper function to check if accordion data (beyond patient info) has been filled
+  const hasAccordionDataFilled = (): boolean => {
+    // Check examination date
+    if (examinationDate) return true;
+    
+    // Check if any formData exists (excluding auto-populated fields from API)
+    // These fields are set automatically by patient lookup and shouldn't trigger the warning
+    const autoPopulatedFields = ['hivTestRequired', 'chestXrayRequired', 'gender', 'height'];
+    
+    if (Object.keys(formData).length > 0) {
+      // Check if there's any non-empty value that's NOT auto-populated
+      for (const [key, value] of Object.entries(formData)) {
+        // Skip auto-populated fields
+        if (autoPopulatedFields.includes(key)) {
+          continue;
+        }
+        // If we find any user-entered data, return true
+        if (value !== '' && value !== null && value !== undefined) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  };
+
+  // Helper function to clear all accordion data (keeping only patient info)
+  const clearAccordionData = () => {
+    setExaminationDate('');
+    setFormData({});
+    setCompletedSections(new Set());
+    setActiveAccordion('patient-info');
+    setLastRecordedHeight('');
+    setLastRecordedWeight('');
+    setLastRecordedDate('');
+    setRequiredTests({
+      pregnancy: true,
+      syphilis: true,
+      hiv: true,
+      chestXray: true,
+    });
+    
+    // Clear all accordion-related errors
+    setExaminationDateError(null);
+    setExaminationDateBlurred(false);
+    setDrivingLicenceTimingError(null);
+    setDrivingLicenceTimingWarning(null);
+    setHeightError(null);
+    setWeightError(null);
+    setPoliceReportError(null);
+    setRemarksError(null);
+    setChestXrayTbError(null);
+    setMedicalDeclarationRemarksError(null);
+    setMedicalDeclarationPatientCertificationError(null);
+    setMedicalHistoryErrors({});
+    setFmeMedicalHistoryErrors({});
+    setAbnormalityChecklistErrors({});
+  };
 
   // Reset form when refresh parameter is present (navigating to /new-submission from /new-submission)
   useEffect(() => {
@@ -338,6 +401,10 @@ export function NewSubmission() {
           }
           
           setPatientNric(existing.patientNric || '');
+          // Set previousFinValue when loading existing submission to enable FIN change detection
+          if (existing.patientNric && isMomExamType(existing.examType)) {
+            setPreviousFinValue(existing.patientNric);
+          }
           setPatientPassportNo(existing.patientPassportNo || '');
           setPatientDateOfBirth(existing.patientDateOfBirth);
           setPatientEmail(existing.patientEmail || '');
@@ -426,6 +493,13 @@ export function NewSubmission() {
           hiv: true,
           chestXray: true,
         });
+        // Reset FIN tracking states
+        setPreviousFinValue('');
+        setConfirmedFinValue('');
+        setPendingFinValue('');
+        setShowFinChangeDialog(false);
+        // Reset the lookup ref so patient lookup can happen for new FINs
+        lastLookedUpNricRef.current = null;
       }
     };
 
@@ -676,30 +750,39 @@ export function NewSubmission() {
   }, [examType, id]);
 
   // Fetch patient name from API for SIX_MONTHLY_MDW, SIX_MONTHLY_FMW, WORK_PERMIT and FULL_MEDICAL_EXAM (but not ICA)
+  // This runs only when confirmedFinValue changes (set on blur after validation)
   useEffect(() => {
+    // Don't fetch if there's a pending FIN change awaiting user confirmation
+    if (showFinChangeDialog || pendingFinValue) {
+      return;
+    }
+    
+    // Skip if no confirmed FIN value
+    if (!confirmedFinValue) {
+      return;
+    }
+    
+    // Only fetch for specific exam types
     const shouldFetchPatientName = 
       !isIcaExamType(examType) &&
-      (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') &&
-      patientNric.length >= 9 && 
-      !nricError &&
-      !id; // Only auto-fetch for new submissions, not when editing
+      (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM');
 
     if (!shouldFetchPatientName) {
       return;
     }
 
     const fetchPatientName = async () => {
-    
       // Guard: if we've already looked up this NRIC, skip
-      if (lastLookedUpNricRef.current === patientNric) {
-        console.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { patientNric });
+      if (lastLookedUpNricRef.current === confirmedFinValue) {
+        console.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { nric: confirmedFinValue });
         return;
       }
+      
       setIsLoadingPatient(true);
       try {
-        const patient = await patientsApi.getByNric(patientNric);
+        const patient = await patientsApi.getByNric(confirmedFinValue);
         if (patient) {
-          lastLookedUpNricRef.current = patientNric;
+          lastLookedUpNricRef.current = confirmedFinValue;
           setPatientName(patient.name);
           setIsNameFromApi(true);
           
@@ -780,14 +863,9 @@ export function NewSubmission() {
       }
     };
 
-    // Debounce the API call
-    const timeoutId = setTimeout(fetchPatientName, 500);
-    return () => clearTimeout(timeoutId);
-  // Note: we intentionally do NOT include formData.height in the deps here.
-  // The effect should run when the patient NRIC changes (or examType/id flags),
-  // but not when the local height field is edited. Including formData.height
-  // caused every height edit to re-trigger the patient lookup API.
-  }, [patientNric, examType, nricError, id]);
+    // No debounce needed - this only runs on blur
+    fetchPatientName();
+  }, [confirmedFinValue, examType, id, showFinChangeDialog, pendingFinValue]);
 
   // Track FME medical examination completion
   useEffect(() => {
@@ -1951,8 +2029,30 @@ export function NewSubmission() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                setPatientNric(testFin);
-                                toast.success('Test FIN populated');
+                                console.log('[Use This Debug]', {
+                                  testFin,
+                                  currentPatientNric: patientNric,
+                                  previousFinValue,
+                                  hasPrevious: !!previousFinValue,
+                                  hasAccordionData: hasAccordionDataFilled()
+                                });
+                                
+                                // If this is a FIN change with accordion data for MOM exams
+                                if (isMomExamType(examType) && !id && previousFinValue && previousFinValue !== testFin && hasAccordionDataFilled()) {
+                                  console.log('[Use This] FIN change detected with data - showing dialog');
+                                  setPendingFinValue(testFin);
+                                  setShowFinChangeDialog(true);
+                                } else {
+                                  console.log('[Use This] Setting FIN directly');
+                                  setPatientNric(testFin);
+                                  // Update previousFinValue if no accordion data yet
+                                  if (!hasAccordionDataFilled()) {
+                                    setPreviousFinValue(testFin);
+                                    // Set confirmed value to trigger patient lookup
+                                    setConfirmedFinValue(testFin);
+                                  }
+                                  toast.success('Test FIN populated');
+                                }
                               }}
                               className="text-xs h-7 px-2"
                             >
@@ -1966,20 +2066,74 @@ export function NewSubmission() {
                         name="nric"
                         value={patientNric}
                         onChange={(e) => {
-                          setPatientNric(e.target.value.toUpperCase());
+                          const newValue = e.target.value.toUpperCase();
+                          setPatientNric(newValue);
+                          
                           // Clear error on change
                           if (nricError) setNricError(null);
                         }}
                         onBlur={(e) => {
+                          const value = e.target.value;
+                          
                           // For ICA exams, NRIC is optional - only validate if provided
                           if (isIcaExamType(examType)) {
-                            if (e.target.value) {
-                              setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                            if (value) {
+                              const error = validateNricOrFin(value, validateNRIC);
+                              setNricError(error);
+                              // Store as previous value only if valid
+                              if (!error && !previousFinValue) {
+                                setPreviousFinValue(value);
+                              }
+                              // Set confirmed value to trigger patient lookup
+                              if (!error) {
+                                setConfirmedFinValue(value);
+                              }
                             } else {
                               setNricError(null);
                             }
                           } else {
-                            setNricError(validateNricOrFin(e.target.value, validateNRIC));
+                            // Validate FIN
+                            const error = validateNricOrFin(value, validateNRIC);
+                            setNricError(error);
+                            
+                            // For MOM exams, check if FIN changed after validation passes
+                            if (!error && isMomExamType(examType)) {
+                              const hasData = hasAccordionDataFilled();
+                              
+                              console.log('[FIN Change Debug]', {
+                                currentValue: value,
+                                previousFinValue,
+                                hasData,
+                                examType,
+                                formDataKeys: Object.keys(formData),
+                                examinationDate,
+                                isEditingDraft: !!id
+                              });
+                              
+                              // Check if this is a FIN change (not initial entry) with accordion data
+                              if (previousFinValue && previousFinValue !== value && hasData) {
+                                console.log('[FIN Change] Showing dialog - FIN changed with accordion data');
+                                // Store the pending value and show dialog WITHOUT reverting the input
+                                // This prevents the API from fetching during the dialog
+                                setPendingFinValue(value);
+                                setShowFinChangeDialog(true);
+                                // DO NOT revert patientNric here - keep the new value in the input
+                                // The API fetch is blocked by checking pendingFinValue in useEffect
+                              } else if (!hasData) {
+                                console.log('[FIN Change] No accordion data - updating previousFinValue');
+                                // No accordion data filled yet - user can freely change FIN
+                                // Always update previousFinValue to track the latest valid FIN
+                                setPreviousFinValue(value);
+                                // Set confirmed value to trigger patient lookup
+                                setConfirmedFinValue(value);
+                              } else {
+                                console.log('[FIN Change] No action taken', {
+                                  hasPrevious: !!previousFinValue,
+                                  isDifferent: previousFinValue !== value,
+                                  hasData
+                                });
+                              }
+                            }
                           }
                         }}
                         className={nricError ? 'border-red-500' : ''}
@@ -2101,6 +2255,7 @@ export function NewSubmission() {
                             setEmailError(error);
                           }}
                           placeholder="example@email.com"
+                          autoComplete="off"
                           className={emailError ? 'border-red-500' : ''}
                         />
                         {emailError && <InlineError>{emailError}</InlineError>}
@@ -3365,6 +3520,50 @@ export function NewSubmission() {
           setShowSubmitDialog(true);
         }}
       />
+
+      {/* FIN Change Confirmation Dialog */}
+      <AlertDialog open={showFinChangeDialog} onOpenChange={setShowFinChangeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm FIN Change</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are changing the FIN to a different patient. All examination data you have entered will be cleared and the new patient's information will be loaded. Do you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              // User cancelled - revert to previous value
+              setPatientNric(previousFinValue);
+              setPendingFinValue('');
+              setShowFinChangeDialog(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              // User confirmed - keep the new FIN (already set in patientNric) and clear accordion data
+              setPreviousFinValue(pendingFinValue);
+              clearAccordionData();
+              
+              // Clear patient name to trigger fresh lookup
+              setPatientName('');
+              setIsNameFromApi(false);
+              
+              // Reset the lookup ref so the useEffect will fetch for the new FIN
+              lastLookedUpNricRef.current = null;
+              
+              // Set confirmed value to trigger patient lookup
+              setConfirmedFinValue(pendingFinValue);
+              
+              setShowFinChangeDialog(false);
+              setPendingFinValue('');
+              
+              // Don't show toast here - let the useEffect show it when patient is found
+            }}>
+              Proceed
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
