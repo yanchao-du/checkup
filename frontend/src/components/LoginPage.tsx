@@ -241,7 +241,7 @@ export function LoginPage() {
                         To get a dedicated demo account, please contact{' '}
                         <a 
                           href="mailto:du.yanchao@gt.tech.gov.sg" 
-                          className="text-slate-700 hover:text-blue-800 underline"
+                          className="text-xs text-slate-700 hover:text-blue-800 underline"
                         >
                           du.yanchao@gt.tech.gov.sg
                         </a>
