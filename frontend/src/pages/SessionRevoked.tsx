@@ -38,17 +38,6 @@ export function SessionRevoked() {
               You have been logged out as we are unable to support concurrent sessions for one user.
             </p>
             
-            <p>
-              Please{' '}
-              <a 
-                href="/"
-                className="text-blue-600 hover:text-blue-700 underline font-medium"
-              >
-                log in
-              </a>{' '}
-              again.
-            </p>
-            
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <p className="text-sm">
                 <strong>Important:</strong>
