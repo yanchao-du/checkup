@@ -16,28 +16,33 @@ export function SessionRevoked() {
           </div>
           
           <h1 className="text-2xl font-bold text-center text-slate-900 mb-4">
-            Session Revoked
+            Session Ended
           </h1>
           
           <div className="space-y-4 text-slate-700 mb-6">
-            <p className="text-center">
-              Your session has been ended because you logged in from another location or device.
+            <p>
+              You have been logged out as we are unable to support concurrent sessions for one user.
             </p>
             
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <p>
+              To work on medical examination, please{' '}
+              <a 
+                href="/"
+                className="text-blue-600 hover:text-blue-700 underline font-medium"
+              >
+                log in
+              </a>{' '}
+              again.
+            </p>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <p className="text-sm">
-                <strong>For security reasons:</strong>
+                <strong>Important:</strong>
               </p>
-              <ul className="text-sm mt-2 space-y-1 list-disc list-inside">
-                <li>Only one active session is allowed per user</li>
-                <li>Logging in from a new location ends your previous session</li>
-                <li>This helps protect your account from unauthorized access</li>
-              </ul>
+              <p className="text-sm mt-2">
+                All users should use their own SingPass ID. Please do not share your SingPass ID with anyone. Contact your organization's CorpPass Admin if someone else is using your account.
+              </p>
             </div>
-            
-            <p className="text-center text-sm">
-              If this wasn't you, please contact your administrator immediately.
-            </p>
           </div>
           
           <Button
