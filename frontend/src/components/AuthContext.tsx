@@ -70,35 +70,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  // Session heartbeat - check session validity periodically
-  // With 0.5 min (30 sec) timeout, check every 15 seconds
-  // With 20 min timeout, check every 60 seconds (1 minute)
+  // User activity detection and session keep-alive
   useEffect(() => {
     if (!user) return;
 
-    console.log('🔄 Starting session heartbeat (checking every 10 seconds)');
+    let lastActivityTime = Date.now();
+    let sessionRefreshTimer: NodeJS.Timeout | null = null;
+    let hasRecentActivity = false;
 
-    // Adjust heartbeat frequency based on expected timeout
-    // For testing (30 sec timeout): check every 10 seconds
-    // For production (20 min timeout): check every 60 seconds
-    const heartbeatInterval = setInterval(async () => {
+    // Track user activity (mouse, keyboard, touch)
+    const updateActivity = () => {
+      lastActivityTime = Date.now();
+      hasRecentActivity = true;
+    };
+
+    // Activity event listeners
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    activityEvents.forEach(event => {
+      window.addEventListener(event, updateActivity, { passive: true });
+    });
+
+    console.log('🔄 Starting user activity detection and session keep-alive');
+
+    // Check activity and refresh session every 2 minutes
+    const checkAndRefresh = async () => {
+      const timeSinceActivity = Date.now() - lastActivityTime;
       const timestamp = new Date().toLocaleTimeString();
-      console.log(`💓 [${timestamp}] Heartbeat: Checking session validity (won't refresh session)...`);
-      
-      try {
-        // Ping the /auth/me endpoint to validate session
-        // Use getMeHeartbeat to NOT refresh the session
-        await authApi.getMeHeartbeat();
-        console.log(`✅ [${timestamp}] Heartbeat: Session valid`);
-      } catch (error) {
-        // Session expired - event listener will handle toast and redirect
-        console.log(`❌ [${timestamp}] Heartbeat: Session validation failed -`, error);
+
+      if (hasRecentActivity) {
+        // User was active - refresh the session
+        console.log(`✨ [${timestamp}] User was active, refreshing session...`);
+        hasRecentActivity = false;
+        
+        try {
+          // Regular getMe call will refresh the session (not heartbeat)
+          await authApi.getMe();
+          console.log(`✅ [${timestamp}] Session refreshed due to user activity`);
+        } catch (error) {
+          console.log(`❌ [${timestamp}] Session refresh failed:`, error);
+          // Session expired - event listener will handle toast and redirect
+        }
+      } else {
+        // No activity - just check session validity without refreshing
+        console.log(`💤 [${timestamp}] No recent activity (idle for ${Math.round(timeSinceActivity / 1000)}s), checking session validity...`);
+        
+        try {
+          await authApi.getMeHeartbeat();
+          console.log(`✅ [${timestamp}] Session still valid (heartbeat check)`);
+        } catch (error) {
+          console.log(`❌ [${timestamp}] Session validation failed:`, error);
+        }
       }
-    }, 10000); // Check every 10 seconds for testing (change to 60000 for production)
+    };
+
+    // Run check every 2 minutes (120 seconds)
+    // This means the session will be refreshed if user is active within any 2-minute window
+    sessionRefreshTimer = setInterval(checkAndRefresh, 120000);
 
     return () => {
-      console.log('🛑 Stopping session heartbeat');
-      clearInterval(heartbeatInterval);
+      console.log('🛑 Stopping user activity detection');
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, updateActivity);
+      });
+      if (sessionRefreshTimer) {
+        clearInterval(sessionRefreshTimer);
+      }
     };
   }, [user]);
 
