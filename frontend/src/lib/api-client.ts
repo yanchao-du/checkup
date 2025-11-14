@@ -69,10 +69,11 @@ class ApiClient {
           // Dispatch session revoked event for special handling
           dispatchSessionRevoked(message);
           
-          // Redirect to dedicated session revoked page
-          setTimeout(() => {
-            window.location.href = '/session-revoked';
-          }, 100);
+          // Redirect immediately to dedicated session revoked page
+          window.location.href = '/session-revoked';
+          
+          // Return a promise that never resolves to prevent further execution
+          return new Promise(() => {});
         } else {
           // Regular session expiry
           dispatchSessionExpired(message);
@@ -81,9 +82,9 @@ class ApiClient {
           setTimeout(() => {
             window.location.href = '/';
           }, 500);
+          
+          throw new Error(message);
         }
-        
-        throw new Error(message);
       }
 
       const error = await response.json().catch(() => ({ message: response.statusText }));
