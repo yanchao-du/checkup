@@ -139,13 +139,12 @@ export class SubmissionsService {
       where.OR = [
         { createdById: userId },
         { approvedById: userId },
-        // Doctors can see drafts that were assigned to them (converted from pending_approval)
+        // Doctors can see submissions assigned to them
         ...(userRole === 'doctor' ? [{ assignedDoctorId: userId }] : []),
       ];
     }
 
-    // Apply filters
-    if (status) where.status = status;
+    // Apply additional filters (but NOT status - it's already set above)
     if (examType) where.examType = examType;
     if (patientName) where.patientName = { contains: patientName, mode: 'insensitive' };
     if (patientNric) where.patientNric = patientNric;
@@ -303,9 +302,9 @@ export class SubmissionsService {
 
     this.logger.log(`Proceeding with update for submission ${id} (status: ${existing.status})`);
 
-    // If a doctor is editing a pending_approval submission, convert it to draft
-    // so they can submit it directly (which auto-approves for doctors)
-    const shouldConvertToDraft = userRole === 'doctor' && existing.status === 'pending_approval';
+    // NOTE: We no longer automatically convert pending_approval to draft when doctor edits
+    // The status should only change when explicitly submitted for approval
+    // This preserves the workflow state for nurses who routed the submission
 
     try {
       const submission = await this.prisma.medicalSubmission.update({
@@ -324,8 +323,7 @@ export class SubmissionsService {
           ...(dto.formData && { formData: dto.formData }),
           ...(dto.assignedDoctorId !== undefined && { assignedDoctorId: dto.assignedDoctorId }),
           ...(dto.clinicId && { clinicId: dto.clinicId }),
-          // Convert to draft if doctor is editing pending_approval
-          ...(shouldConvertToDraft && { status: 'draft' as any }),
+          // Status is preserved - only changes when explicitly submitted
         },
         include: {
           createdBy: { select: { name: true } },
@@ -341,18 +339,11 @@ export class SubmissionsService {
           submissionId: id,
           userId,
           eventType: 'updated',
-          changes: {
-            ...dto,
-            ...(shouldConvertToDraft && { statusChange: { from: 'pending_approval', to: 'draft' } }),
-          } as any,
+          changes: dto as any,
         },
       });
 
-      if (shouldConvertToDraft) {
-        this.logger.log(`Converted submission ${id} from pending_approval to draft for doctor ${userId}`);
-      } else {
-        this.logger.log(`Successfully updated submission ${id}`);
-      }
+      this.logger.log(`Successfully updated submission ${id} - status preserved as ${existing.status}`);
       
       return this.formatSubmission(submission);
     } catch (error) {

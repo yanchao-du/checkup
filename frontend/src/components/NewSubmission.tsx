@@ -11,7 +11,7 @@ import { useUnsavedChanges } from './UnsavedChangesContext';
 import { submissionsApi } from '../services';
 import { usersApi, type Doctor } from '../services/users.service';
 import { patientsApi } from '../services/patients.service';
-import type { ExamType, UserClinic } from '../services';
+import type { ExamType, UserClinic, SubmissionStatus } from '../services';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -54,6 +54,7 @@ import { DrivingVocationalTpLtaAccordions } from './submission-form/accordions/D
 import { VocationalLicenceLtaAccordions } from './submission-form/accordions/VocationalLicenceLtaAccordions';
 import { FullMedicalExamFields } from './FullMedicalExamFields';
 import { FullMedicalExamSummary } from './FullMedicalExamSummary';
+import { useSubmissionWorkflow } from '../hooks/useSubmissionWorkflow';
 
 // Helper to check if exam type is ICA
 const isIcaExamType = (examType: ExamType | ''): boolean => {
@@ -166,6 +167,7 @@ export function NewSubmission() {
   const [pendingFinValue, setPendingFinValue] = useState<string>('');
   const [previousFinValue, setPreviousFinValue] = useState<string>('');
   const [confirmedFinValue, setConfirmedFinValue] = useState<string>(''); // FIN value after blur validation
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus | null>(null);
   
   // Track last saved state to detect actual changes
   const [lastSavedState, setLastSavedState] = useState<{
@@ -193,6 +195,16 @@ export function NewSubmission() {
   });
   // Ref to remember which NRIC we last looked up to avoid duplicate fetches
   const lastLookedUpNricRef = useRef<string | null>(null);
+
+  // Workflow rules - centralized business logic for permissions and state management
+  const workflow = useSubmissionWorkflow(
+    {
+      examType,
+      status: submissionStatus,
+      hasId: !!id,
+    },
+    user
+  );
 
   // Helper function to check if accordion data (beyond patient info) has been filled
   const hasAccordionDataFilled = (): boolean => {
@@ -378,7 +390,17 @@ export function NewSubmission() {
         try {
           setIsLoading(true);
           const existing = await submissionsApi.getById(id);
+          
+          // Access control: Nurses cannot edit submissions that are pending_approval
+          // (those are with the doctor for review)
+          if (user?.role === 'nurse' && existing.status === 'pending_approval') {
+            toast.error('This submission is currently with the doctor for review. You cannot edit it.');
+            navigate('/submissions');
+            return;
+          }
+          
           setExamType(existing.examType);
+          setSubmissionStatus(existing.status);
           
           // For MDW/FMW/WORK_PERMIT/FME drafts, restore the full name from formData if available
           // Otherwise use the patient name from the submission
@@ -1009,10 +1031,14 @@ export function NewSubmission() {
     }
     
     // Validate Patient Name
-    const patientNameValidationError = validatePatientName(patientName);
-    if (patientNameValidationError) {
-      setPatientNameError(patientNameValidationError);
-      return false;
+    // Skip validation if FIN is locked (e.g., doctor editing pending_approval MOM exam)
+    // because the name is already validated and stored from the API
+    if (workflow.canEditFIN) {
+      const patientNameValidationError = validatePatientName(patientName);
+      if (patientNameValidationError) {
+        setPatientNameError(patientNameValidationError);
+        return false;
+      }
     }
     
     // Validate DOB for AGED_DRIVERS and driver exams
@@ -1637,7 +1663,9 @@ export function NewSubmission() {
         examType,
         patientName,
         formData: enhancedFormData,
-        routeForApproval: false,
+        // Only include routeForApproval for new submissions, not updates
+        // This preserves the existing status (e.g., pending_approval) when saving edits
+        ...(workflow.shouldIncludeRouteForApproval && { routeForApproval: false }),
         assignedDoctorId: assignedDoctorId || undefined,
       };
 
@@ -1667,12 +1695,20 @@ export function NewSubmission() {
 
       if (id) {
         // Update existing draft - stay on the same page
-        await submissionsApi.update(id, submissionData);
+        const updated = await submissionsApi.update(id, submissionData);
+        // Preserve the submission status after update
+        if (updated.status) {
+          setSubmissionStatus(updated.status);
+        }
         toast.success('Draft updated successfully');
         // Do not navigate away; remain on the draft edit page
       } else {
         // Create new draft and navigate to its draft edit URL so user stays on the page
         const created = await submissionsApi.create(submissionData);
+        // Set the status of the newly created draft
+        if (created.status) {
+          setSubmissionStatus(created.status);
+        }
         toast.success('Draft saved successfully');
         // Navigate to /draft/:id which will load the draft into the form
         navigate(`/draft/${created.id}`, { replace: true });
@@ -2017,7 +2053,7 @@ export function NewSubmission() {
                             : 'NRIC / FIN'} 
                         {!isIcaExamType(examType) && <span className="text-red-500">*</span>}
                       </Label>
-                      {testFin && (
+                      {testFin && workflow.canShowTestFIN && (
                         <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
                           <p className="text-xs text-blue-700 mb-1">Test FIN available:</p>
                           <div className="flex items-center gap-2">
@@ -2068,6 +2104,7 @@ export function NewSubmission() {
                         id="patientNric"
                         name="nric"
                         value={patientNric}
+                        disabled={!workflow.canEditFIN}
                         onChange={(e) => {
                           const newValue = e.target.value.toUpperCase();
                           console.log('[FIN onChange]', {
@@ -2186,9 +2223,9 @@ export function NewSubmission() {
                               setPatientNameError(error);
                             }}
                             placeholder={isLoadingPatient ? "Loading..." : patientNric.length !== 9 || nricError ? "Fill NRIC/FIN first" : "Enter patient name"}
-                            readOnly={isNameFromApi || patientNric.length !== 9 || !!nricError}
-                            disabled={patientNric.length !== 9 || !!nricError}
-                            className={`${(isNameFromApi || patientNric.length !== 9 || nricError) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} ${patientNameError ? 'border-red-500' : ''}`}
+                            readOnly={isNameFromApi || patientNric.length !== 9 || !!nricError || !workflow.canEditFIN}
+                            disabled={patientNric.length !== 9 || !!nricError || !workflow.canEditFIN}
+                            className={`${(isNameFromApi || patientNric.length !== 9 || nricError || !workflow.canEditFIN) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} ${patientNameError ? 'border-red-500' : ''}`}
                           />
                           {patientNameError && !isNameFromApi && <InlineError>{patientNameError}</InlineError>}
                           {isNameFromApi && patientNric.length === 9 && !nricError && (

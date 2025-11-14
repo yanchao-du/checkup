@@ -100,17 +100,17 @@ export function Dashboard() {
   // Combine all activities for doctors
   const getRecentActivities = () => {
     type Activity = MedicalSubmission & { 
-      activityType: 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'submitted';
+      activityType: 'draft' | 'reopened' | 'pending_approval' | 'approved' | 'rejected' | 'submitted';
       activityDate: Date;
     };
 
     const activities: Activity[] = [];
 
-    // Add drafts
+    // Add drafts (distinguish between new drafts and reopened rejected submissions)
     drafts.forEach(draft => {
       activities.push({
         ...draft,
-        activityType: 'draft',
+        activityType: draft.rejectedReason ? 'reopened' : 'draft',
         activityDate: new Date(draft.createdDate),
       });
     });
@@ -158,6 +158,8 @@ export function Dashboard() {
     switch (activityType) {
       case 'draft':
         return { Icon: FileEdit, bgColor: 'bg-amber-50', iconColor: 'text-amber-600' };
+      case 'reopened':
+        return { Icon: FileEdit, bgColor: 'bg-purple-50', iconColor: 'text-purple-600' };
       case 'pending_approval':
         return { Icon: AlertCircle, bgColor: 'bg-orange-50', iconColor: 'text-orange-600' };
       case 'approved':
@@ -175,6 +177,8 @@ export function Dashboard() {
     switch (activityType) {
       case 'draft':
         return 'Draft Created';
+      case 'reopened':
+        return 'Reopened';
       case 'pending_approval':
         return 'Pending Approval';
       case 'approved':
@@ -374,7 +378,6 @@ export function Dashboard() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent Activities</CardTitle>
-            <CardDescription>{user?.role === 'admin' ? "Latest actions by your clinics" : "Your latest actions and submissions"}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentActivities.length === 0 ? (
@@ -391,7 +394,7 @@ export function Dashboard() {
               <div className="space-y-3">
                 {recentActivities.map((activity) => {
                   const { Icon, bgColor, iconColor } = getActivityIcon(activity.activityType);
-                  const linkPath = activity.activityType === 'draft' 
+                  const linkPath = (activity.activityType === 'draft' || activity.activityType === 'reopened')
                     ? `/draft/${activity.id}` 
                     : `/view-submission/${activity.id}`;
                   
@@ -413,11 +416,14 @@ export function Dashboard() {
                       <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
                         <div className="text-left sm:text-right">
                           <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType)}</p>
-                          {activity.activityType === 'approved' && activity.approvedByName && (
+                          {activity.activityType === 'approved' && activity.approvedByName && activity.approvedById !== user?.id && (
                             <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
                           )}
-                          {activity.activityType === 'rejected' && activity.approvedByName && (
+                          {activity.activityType === 'rejected' && activity.approvedByName && activity.approvedById !== user?.id && (
                             <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
+                          )}
+                          {(activity.activityType === 'draft' || activity.activityType === 'reopened' || activity.activityType === 'pending_approval' || activity.activityType === 'submitted') && activity.createdByName && activity.createdById !== user?.id && (
+                            <p className="text-xs text-slate-500">by {activity.createdByName}</p>
                           )}
                         </div>
                         <span className="text-sm text-slate-500 whitespace-nowrap">
