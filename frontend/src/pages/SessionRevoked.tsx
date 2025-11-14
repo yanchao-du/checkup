@@ -6,8 +6,22 @@ export function SessionRevoked() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-slate-50">
+      {/* Header with CheckUp logo */}
+      <div className="bg-white border-b border-slate-200 py-4">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="goCheckUp logo" className="w-12 h-12" />
+            <h1 className="text-2xl font-bold text-slate-900">
+              <span style={{ color: '#0ea5a4' }}>go</span>CheckUp
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Content */}
+      <div className="flex items-center justify-center px-4 py-16">
+        <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
@@ -25,7 +39,7 @@ export function SessionRevoked() {
             </p>
             
             <p>
-              To work on medical examination, please{' '}
+              Please{' '}
               <a 
                 href="/"
                 className="text-blue-600 hover:text-blue-700 underline font-medium"
@@ -53,6 +67,7 @@ export function SessionRevoked() {
           </Button>
         </div>
       </div>
+    </div>
     </div>
   );
 }
