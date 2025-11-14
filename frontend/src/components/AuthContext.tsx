@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi } from '../services';
-import { SESSION_EXPIRED_EVENT } from '../lib/api-client';
+import { SESSION_EXPIRED_EVENT, SESSION_REVOKED_EVENT } from '../lib/api-client';
 import { toast } from 'sonner';
 
 export type UserRole = 'doctor' | 'nurse' | 'admin';
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Listen for session expiry events from API client
+  // Listen for session expiry and revoked events from API client
   useEffect(() => {
     const handleSessionExpired = (event: CustomEvent) => {
       const message = event.detail?.message || 'Your session has expired';
@@ -45,10 +45,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     };
 
+    const handleSessionRevoked = (event: CustomEvent) => {
+      const message = event.detail?.message || 'Your session has been revoked';
+      
+      // Show error notification with more prominent styling
+      toast.error(message, {
+        duration: 8000,
+        description: 'You have logged in from another location',
+      });
+      
+      // Clear user state
+      setUser(null);
+    };
+
     window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired as EventListener);
+    window.addEventListener(SESSION_REVOKED_EVENT, handleSessionRevoked as EventListener);
 
     return () => {
       window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired as EventListener);
+      window.removeEventListener(SESSION_REVOKED_EVENT, handleSessionRevoked as EventListener);
     };
   }, []);
 

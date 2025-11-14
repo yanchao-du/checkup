@@ -133,7 +133,13 @@ export class AuthController {
         return res.redirect(errorUrl.toString());
       }
 
-      // Create user session for CorpPass authentication
+      // Enforce single session: Delete all existing sessions for this user
+      const deletedCount = this.userSessionService.deleteAllUserSessions(user.id);
+      if (deletedCount > 0) {
+        console.log(`🔐 Single session enforcement: Deleted ${deletedCount} existing session(s) for ${user.email} (CorpPass)`);
+      }
+
+      // Create new user session for CorpPass authentication
       const userSessionId = this.userSessionService.createSession(
         user.id,
         user.email,

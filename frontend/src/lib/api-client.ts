@@ -1,11 +1,16 @@
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3344/v1';
 
-// Custom event for session expiry
+// Custom events for session management
 export const SESSION_EXPIRED_EVENT = 'session-expired';
+export const SESSION_REVOKED_EVENT = 'session-revoked';
 
 export const dispatchSessionExpired = (message: string) => {
   window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT, { detail: { message } }));
+};
+
+export const dispatchSessionRevoked = (message: string) => {
+  window.dispatchEvent(new CustomEvent(SESSION_REVOKED_EVENT, { detail: { message } }));
 };
 
 // API Client with authentication
@@ -50,18 +55,25 @@ class ApiClient {
 
     if (!response.ok) {
       if (response.status === 401) {
-        // Get the error message from backend
+        // Get the error message and code from backend
         const errorData = await response.json().catch(() => ({ message: 'Your session has expired' }));
         const message = errorData.message || 'Your session has expired';
+        const code = errorData.code;
         
         // Clear token and user data
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
-        // Dispatch session expired event with the message
-        dispatchSessionExpired(message);
+        // Check if this is a session revoked error (logged in elsewhere)
+        if (code === 'SESSION_REVOKED') {
+          // Dispatch session revoked event for special handling
+          dispatchSessionRevoked(message);
+        } else {
+          // Regular session expiry
+          dispatchSessionExpired(message);
+        }
         
-        // Delay redirect slightly to allow toast to show
+        // Delay redirect slightly to allow error page to show
         setTimeout(() => {
           window.location.href = '/';
         }, 500);

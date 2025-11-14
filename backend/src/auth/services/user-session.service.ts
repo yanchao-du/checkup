@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SessionRevokedException } from '../exceptions/session-revoked.exception';
 
 interface UserSession {
   userId: string;  // Changed from number to string (UUID)
@@ -10,6 +11,7 @@ interface UserSession {
   createdAt: number;
   lastActivity: number;
   expiresAt: number;
+  revoked?: boolean;  // Flag to indicate session was revoked by another login
 }
 
 /**
@@ -109,13 +111,22 @@ export class UserSessionService {
    * @param isHeartbeat - If true, don't update lastActivity (just check validity)
    * @returns User session data if valid
    * @throws UnauthorizedException if session is expired or invalid
+   * @throws SessionRevokedException if session was revoked (logged in elsewhere)
    */
   validateAndRefreshSession(sessionId: string, isHeartbeat = false): UserSession {
     const session = this.sessions.get(sessionId);
 
     if (!session) {
-      // Session not found - user needs to log in again
+      // Session not found - could be revoked by another login or expired
+      // Since we can't distinguish, use generic message
       throw new UnauthorizedException('Session not found. Please sign in again.');
+    }
+
+    // Check if session was revoked (logged in elsewhere)
+    if (session.revoked) {
+      this.sessions.delete(sessionId);
+      console.log(`🚫 Session ${sessionId} was revoked (user logged in elsewhere)`);
+      throw new SessionRevokedException();
     }
 
     const now = Date.now();
@@ -163,20 +174,24 @@ export class UserSessionService {
 
   /**
    * Delete all sessions for a specific user (e.g., password change, security breach)
+   * Marks sessions as revoked first so they can send appropriate error message
    * @param userId - User ID (UUID string)
    */
   deleteAllUserSessions(userId: string): number {
-    let deleted = 0;
+    let revoked = 0;
     for (const [sessionId, session] of this.sessions.entries()) {
       if (session.userId === userId) {
-        this.sessions.delete(sessionId);
-        deleted++;
+        // Mark as revoked instead of deleting immediately
+        // This allows the next API call to get SESSION_REVOKED error
+        session.revoked = true;
+        this.sessions.set(sessionId, session);
+        revoked++;
       }
     }
-    if (deleted > 0) {
-      console.log(`🔒 Deleted ${deleted} sessions for user ID ${userId}`);
+    if (revoked > 0) {
+      console.log(`🔒 Revoked ${revoked} session(s) for user ID ${userId}`);
     }
-    return deleted;
+    return revoked;
   }
 
   /**
