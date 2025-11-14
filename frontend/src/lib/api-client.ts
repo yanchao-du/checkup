@@ -69,20 +69,24 @@ class ApiClient {
           // Dispatch session revoked event for special handling
           dispatchSessionRevoked(message);
           
-          // Redirect immediately to dedicated session revoked page
-          window.location.href = '/session-revoked';
+          // Small delay to ensure event is dispatched before redirect
+          setTimeout(() => {
+            window.location.href = '/session-revoked';
+          }, 10);
           
-          // Return a promise that never resolves to prevent further execution
-          return new Promise(() => {});
+          // Throw error to stop execution after redirect is initiated
+          throw new Error('SESSION_REVOKED');
         } else {
           // Regular session expiry - redirect to dedicated session expired page
           dispatchSessionExpired(message);
           
-          // Redirect to session expired page
-          window.location.href = '/session-expired';
+          // Small delay to ensure event is dispatched before redirect
+          setTimeout(() => {
+            window.location.href = '/session-expired';
+          }, 10);
           
-          // Return a promise that never resolves to prevent further execution
-          return new Promise(() => {});
+          // Throw error to stop execution after redirect is initiated
+          throw new Error('SESSION_EXPIRED');
         }
       }
 
