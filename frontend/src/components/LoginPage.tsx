@@ -202,7 +202,7 @@ export function LoginPage() {
               
               <div 
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  showDemoAccounts ? 'h-auto opacity-100 mt-2' : 'h-0 opacity-0'
+                  showDemoAccounts ? 'max-h-[800px] opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'
                 }`}
               >
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
