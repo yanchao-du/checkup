@@ -1,12 +1,19 @@
 import { AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { SgdsMasthead } from '@govtechsg/sgds-web-component/react';
+import SgdsFooter from '@govtechsg/sgds-web-component/react/footer/index.js';
+import '@govtechsg/sgds-web-component/themes/day.css';
+import '@govtechsg/sgds-web-component/css/sgds.css';
+import '@govtechsg/sgds-web-component';
 
 export function SessionRevoked() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <SgdsMasthead />
+      <div className="min-h-screen bg-slate-50">
       {/* Header with CheckUp logo */}
       <div className="bg-white border-b border-slate-200 py-4">
         <div className="container mx-auto px-4">
@@ -56,7 +63,8 @@ export function SessionRevoked() {
           </Button>
         </div>
       </div>
-    </div>
-    </div>
+      </div>
+      <SgdsFooter />
+    </>
   );
 }
