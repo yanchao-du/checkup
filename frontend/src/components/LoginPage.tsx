@@ -236,7 +236,10 @@ export function LoginPage() {
                   
                   <div className="pt-3 border-t border-blue-200 space-y-2">
                     <p className="text-xs font-semibold text-blue-900">Clinic UEN: <span className="font-normal">123456789D</span></p>
-                    <div className="pt-2 border-t border-blue-200">
+                    <div className="pt-2 border-t border-blue-200 space-y-2">
+                      <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                        <strong>Note:</strong> Concurrent login is not allowed. You may be logged out automatically if someone else logs in using the same shared demo account.
+                      </p>
                       <p className="text-xs text-slate-700">
                         To request a dedicated demo account, please contact Yanchao (
                         <a 
