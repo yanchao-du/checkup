@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     console.log('🔄 Starting user activity detection and session keep-alive');
 
-    // Check activity and refresh session every 2 minutes
+    // Check activity and refresh session periodically
     const checkAndRefresh = async () => {
       const timeSinceActivity = Date.now() - lastActivityTime;
       const timestamp = new Date().toLocaleTimeString();
