@@ -168,7 +168,339 @@ async function main() {
     },
   });
 
-  console.log('✅ Created additional test users (4 doctors total, 2 nurses total)');
+  // Create 10 more doctors
+  const doctor5 = await prisma.user.upsert({
+    where: { email: 'doctor5@clinic.sg' },
+    update: { nric: 'S8901234E', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440015',
+      clinicId: clinic.id,
+      email: 'doctor5@clinic.sg',
+      passwordHash,
+      name: 'Dr. David Ng',
+      nric: 'S8901234E',
+      role: 'doctor',
+      mcrNumber: 'M56789E',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor6 = await prisma.user.upsert({
+    where: { email: 'doctor6@clinic.sg' },
+    update: { nric: 'S9012345F', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440016',
+      clinicId: clinic.id,
+      email: 'doctor6@clinic.sg',
+      passwordHash,
+      name: 'Dr. Rachel Wong',
+      nric: 'S9012345F',
+      role: 'doctor',
+      mcrNumber: 'M67890F',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor7 = await prisma.user.upsert({
+    where: { email: 'doctor7@clinic.sg' },
+    update: { nric: 'S0123456G', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440017',
+      clinicId: clinic.id,
+      email: 'doctor7@clinic.sg',
+      passwordHash,
+      name: 'Dr. Benjamin Teo',
+      nric: 'S0123456G',
+      role: 'doctor',
+      mcrNumber: 'M78901G',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor8 = await prisma.user.upsert({
+    where: { email: 'doctor8@clinic.sg' },
+    update: { nric: 'S1234567H', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440018',
+      clinicId: clinic.id,
+      email: 'doctor8@clinic.sg',
+      passwordHash,
+      name: 'Dr. Priya Sharma',
+      nric: 'S1234567H',
+      role: 'doctor',
+      mcrNumber: 'M89012H',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor9 = await prisma.user.upsert({
+    where: { email: 'doctor9@clinic.sg' },
+    update: { nric: 'S2345678I', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440019',
+      clinicId: clinic.id,
+      email: 'doctor9@clinic.sg',
+      passwordHash,
+      name: 'Dr. Kevin Lim',
+      nric: 'S2345678I',
+      role: 'doctor',
+      mcrNumber: 'M90123I',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor10 = await prisma.user.upsert({
+    where: { email: 'doctor10@clinic.sg' },
+    update: { nric: 'S3456789J', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440020',
+      clinicId: clinic.id,
+      email: 'doctor10@clinic.sg',
+      passwordHash,
+      name: 'Dr. Michelle Goh',
+      nric: 'S3456789J',
+      role: 'doctor',
+      mcrNumber: 'M01234J',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor11 = await prisma.user.upsert({
+    where: { email: 'doctor11@clinic.sg' },
+    update: { nric: 'S4567890K', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440021',
+      clinicId: clinic.id,
+      email: 'doctor11@clinic.sg',
+      passwordHash,
+      name: 'Dr. Ryan Chan',
+      nric: 'S4567890K',
+      role: 'doctor',
+      mcrNumber: 'M12345K',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor12 = await prisma.user.upsert({
+    where: { email: 'doctor12@clinic.sg' },
+    update: { nric: 'S5678901L', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440022',
+      clinicId: clinic.id,
+      email: 'doctor12@clinic.sg',
+      passwordHash,
+      name: 'Dr. Amanda Tay',
+      nric: 'S5678901L',
+      role: 'doctor',
+      mcrNumber: 'M23456L',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor13 = await prisma.user.upsert({
+    where: { email: 'doctor13@clinic.sg' },
+    update: { nric: 'S6789012M', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440023',
+      clinicId: clinic.id,
+      email: 'doctor13@clinic.sg',
+      passwordHash,
+      name: 'Dr. Samuel Yeo',
+      nric: 'S6789012M',
+      role: 'doctor',
+      mcrNumber: 'M34567M',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const doctor14 = await prisma.user.upsert({
+    where: { email: 'doctor14@clinic.sg' },
+    update: { nric: 'S7890123N', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440024',
+      clinicId: clinic.id,
+      email: 'doctor14@clinic.sg',
+      passwordHash,
+      name: 'Dr. Grace Liu',
+      nric: 'S7890123N',
+      role: 'doctor',
+      mcrNumber: 'M45678N',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  // Create 10 more nurses
+  const nurse3 = await prisma.user.upsert({
+    where: { email: 'nurse3@clinic.sg' },
+    update: { nric: 'S8901234O', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440025',
+      clinicId: clinic.id,
+      email: 'nurse3@clinic.sg',
+      passwordHash,
+      name: 'Nurse Sarah Ong',
+      nric: 'S8901234O',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse4 = await prisma.user.upsert({
+    where: { email: 'nurse4@clinic.sg' },
+    update: { nric: 'S9012345P', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440026',
+      clinicId: clinic.id,
+      email: 'nurse4@clinic.sg',
+      passwordHash,
+      name: 'Nurse Jennifer Tan',
+      nric: 'S9012345P',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse5 = await prisma.user.upsert({
+    where: { email: 'nurse5@clinic.sg' },
+    update: { nric: 'S0123456Q', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440027',
+      clinicId: clinic.id,
+      email: 'nurse5@clinic.sg',
+      passwordHash,
+      name: 'Nurse Lisa Chua',
+      nric: 'S0123456Q',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse6 = await prisma.user.upsert({
+    where: { email: 'nurse6@clinic.sg' },
+    update: { nric: 'S1234567R', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440028',
+      clinicId: clinic.id,
+      email: 'nurse6@clinic.sg',
+      passwordHash,
+      name: 'Nurse Michelle Koh',
+      nric: 'S1234567R',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse7 = await prisma.user.upsert({
+    where: { email: 'nurse7@clinic.sg' },
+    update: { nric: 'S2345678S', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440029',
+      clinicId: clinic.id,
+      email: 'nurse7@clinic.sg',
+      passwordHash,
+      name: 'Nurse Rachel Ng',
+      nric: 'S2345678S',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse8 = await prisma.user.upsert({
+    where: { email: 'nurse8@clinic.sg' },
+    update: { nric: 'S3456789T', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440030',
+      clinicId: clinic.id,
+      email: 'nurse8@clinic.sg',
+      passwordHash,
+      name: 'Nurse Emily Lim',
+      nric: 'S3456789T',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse9 = await prisma.user.upsert({
+    where: { email: 'nurse9@clinic.sg' },
+    update: { nric: 'S4567890U', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440031',
+      clinicId: clinic.id,
+      email: 'nurse9@clinic.sg',
+      passwordHash,
+      name: 'Nurse Angela Wong',
+      nric: 'S4567890U',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse10 = await prisma.user.upsert({
+    where: { email: 'nurse10@clinic.sg' },
+    update: { nric: 'S5678901V', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440032',
+      clinicId: clinic.id,
+      email: 'nurse10@clinic.sg',
+      passwordHash,
+      name: 'Nurse Christine Teo',
+      nric: 'S5678901V',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse11 = await prisma.user.upsert({
+    where: { email: 'nurse11@clinic.sg' },
+    update: { nric: 'S6789012W', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440033',
+      clinicId: clinic.id,
+      email: 'nurse11@clinic.sg',
+      passwordHash,
+      name: 'Nurse Amy Chen',
+      nric: 'S6789012W',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  const nurse12 = await prisma.user.upsert({
+    where: { email: 'nurse12@clinic.sg' },
+    update: { nric: 'S7890123X', updatedAt: new Date() },
+    create: {
+      id: '550e8400-e29b-41d4-a716-446655440034',
+      clinicId: clinic.id,
+      email: 'nurse12@clinic.sg',
+      passwordHash,
+      name: 'Nurse Stephanie Yap',
+      nric: 'S7890123X',
+      role: 'nurse',
+      status: 'active',
+      updatedAt: new Date(),
+    },
+  });
+
+  console.log('✅ Created additional test users (14 doctors total, 12 nurses total)');
 
   // Create a second clinic to demonstrate many-to-many relationship
   const clinic2 = await prisma.clinic.upsert({
@@ -282,11 +614,31 @@ async function main() {
     },
   });
 
+  // Add doctor-clinic relationships for new doctors (doctor5-14)
+  const newDoctors = [doctor5, doctor6, doctor7, doctor8, doctor9, doctor10, doctor11, doctor12, doctor13, doctor14];
+  for (const doc of newDoctors) {
+    await prisma.doctorClinic.upsert({
+      where: { 
+        doctorId_clinicId: {
+          doctorId: doc.id,
+          clinicId: clinic.id,
+        }
+      },
+      update: {},
+      create: {
+        doctorId: doc.id,
+        clinicId: clinic.id,
+        isPrimary: true,
+      },
+    });
+  }
+
   console.log('✅ Created doctor-clinic relationships');
   console.log('   - Dr. Sarah Tan: HealthFirst (primary) + CareWell');
   console.log('   - Dr. James Lee: HealthFirst only');
   console.log('   - Dr. Emily Chen: HealthFirst + CareWell (primary)');
   console.log('   - Dr. Michael Tan: CareWell only');
+  console.log('   - 10 additional doctors: HealthFirst (primary)');
 
   // Create nurse-clinic relationships (many-to-many)
   // Nurse Mary Lim - works at HealthFirst (primary)
@@ -321,9 +673,29 @@ async function main() {
     },
   });
 
+  // Add nurse-clinic relationships for new nurses (nurse3-12)
+  const newNurses = [nurse3, nurse4, nurse5, nurse6, nurse7, nurse8, nurse9, nurse10, nurse11, nurse12];
+  for (const nrs of newNurses) {
+    await prisma.nurseClinic.upsert({
+      where: { 
+        nurseId_clinicId: {
+          nurseId: nrs.id,
+          clinicId: clinic.id,
+        }
+      },
+      update: {},
+      create: {
+        nurseId: nrs.id,
+        clinicId: clinic.id,
+        isPrimary: true,
+      },
+    });
+  }
+
   console.log('✅ Created nurse-clinic relationships');
   console.log('   - Nurse Mary Lim: HealthFirst (primary)');
   console.log('   - Nurse Linda Koh: HealthFirst (primary)');
+  console.log('   - 10 additional nurses: HealthFirst (primary)');
 
   // Check if sample submissions already exist (by checking for specific sample patient NRICs)
   const sampleNrics = ['S1234567A', 'S2345678B', 'S3456789C', 'S9988776D'];
