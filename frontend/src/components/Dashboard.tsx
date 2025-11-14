@@ -173,14 +173,14 @@ export function Dashboard() {
     }
   };
 
-  const getActivityLabel = (activityType: string) => {
+  const getActivityLabel = (activityType: string, userRole?: string) => {
     switch (activityType) {
       case 'draft':
         return 'Draft Created';
       case 'reopened':
         return 'Reopened';
       case 'pending_approval':
-        return 'Pending Approval';
+        return userRole === 'doctor' ? 'Pending Your Approval' : 'Pending Approval';
       case 'approved':
         return 'Approved & Submitted';
       case 'rejected':
@@ -420,7 +420,7 @@ export function Dashboard() {
                       </div>
                       <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
                         <div className="text-left sm:text-right">
-                          <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType)}</p>
+                          <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType, user?.role)}</p>
                           {activity.activityType === 'approved' && activity.approvedByName && activity.approvedById !== user?.id && (
                             <p className="text-xs text-slate-500">by {activity.approvedByName}</p>
                           )}
