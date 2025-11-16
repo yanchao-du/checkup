@@ -115,16 +115,39 @@ export class PdfService {
     // Add declaration (for submitted exams) - includes clinic and doctor info
     content.push(...buildDeclaration(submission));
 
+    const generatedDate = new Date().toLocaleString('en-SG', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'Asia/Singapore'
+    });
+
     return {
       content,
       styles: pdfStyles,
       pageSize: 'A4',
       pageMargins: [40, 60, 40, 60] as [number, number, number, number],
       footer: (currentPage, pageCount) => ({
-        text: `Page ${currentPage} of ${pageCount}`,
-        alignment: 'center',
-        fontSize: 9,
-        margin: [0, 20, 0, 0] as [number, number, number, number],
+        columns: [
+          {
+            text: `Generated: ${generatedDate}`,
+            alignment: 'left',
+            fontSize: 8,
+            color: '#64748b',
+            width: '*',
+          },
+          {
+            text: `Page ${currentPage} of ${pageCount}`,
+            alignment: 'right',
+            fontSize: 8,
+            color: '#64748b',
+            width: '*',
+          },
+        ],
+        margin: [40, 20, 40, 0] as [number, number, number, number],
       }),
     };
   }
