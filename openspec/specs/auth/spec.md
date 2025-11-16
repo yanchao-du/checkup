@@ -2,7 +2,6 @@
 
 ## Purpose
 Provides authentication and authorization for CheckUp users, supporting both traditional email/password login and Singapore CorpPass OpenID Connect integration. Enables secure access control with JWT tokens, role-based permissions, and account linking for business users.
-
 ## Requirements
 ### Requirement: CorpPass OAuth Authentication
 The system SHALL support CorpPass OpenID Connect (OIDC) authentication as an alternative login method alongside email/password authentication.
@@ -223,4 +222,15 @@ The system SHALL support traditional email and password authentication.
 - **THEN** authentication flow proceeds as expected
 - **AND** JWT token is issued
 - **AND** user accesses dashboard
+
+### Requirement: User profile data model
+The User entity SHALL store user preferences including favorite exam types.
+
+#### Scenario: User profile includes favorite exam types field
+**Given** the User model in the database  
+**When** the schema is inspected  
+**Then** the User table shall include a `favoriteExamTypes` field  
+**And** the field shall be of type JSON (array of strings)  
+**And** the field shall be nullable (defaults to null or empty array)  
+**And** the field shall store an array of valid ExamType enum values
 
