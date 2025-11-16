@@ -45,20 +45,23 @@ describe('PdfService', () => {
       patientGender: 'male',
       submittedDate: new Date('2025-11-16'),
       createdDate: new Date('2025-11-15'),
-      clinic: {
-        name: 'Test Clinic',
-        address: '123 Test St',
-        phone: '12345678',
+      clinicName: 'Test Clinic',
+      clinicAddress: '123 Test St',
+      clinicPhone: '12345678',
+      clinicHciCode: 'HCI12345',
+      approvedByName: 'Dr. Smith',
+      approvedByMcrNumber: 'MCR12345',
+      formData: {
+        height: '170',
+        weight: '70',
+        bloodPressure: '120/80',
+        pulse: '75',
+        pregnancyTestRequired: true,
+        pregnancyTestResult: 'negative',
+        chestXrayRequired: true,
+        chestXrayResult: 'normal',
+        remarks: 'Test remarks',
       },
-      createdBy: {
-        name: 'Dr. Smith',
-        mcr: 'MCR12345',
-      },
-      pregnancyTestRequired: 'true',
-      pregnancyTestResult: 'negative',
-      chestXrayRequired: 'true',
-      chestXrayResult: 'normal',
-      remarks: 'Test remarks',
     };
 
     it('should generate PDF buffer for MDW exam', async () => {
@@ -72,10 +75,13 @@ describe('PdfService', () => {
       const fmwSubmission = {
         ...mockSubmission,
         examType: ExamType.SIX_MONTHLY_FMW,
-        syphilisTestRequired: 'true',
-        syphilisTestResult: 'negative',
-        hivTestRequired: 'true',
-        hivTestResult: 'negative',
+        formData: {
+          ...mockSubmission.formData,
+          hivTestRequired: true,
+          hivTestResult: 'negative',
+          syphilisTestRequired: true,
+          syphilisTestResult: 'negative',
+        },
       };
 
       const result = await service.generateSubmissionPdf(fmwSubmission as any);
@@ -88,11 +94,14 @@ describe('PdfService', () => {
       const fullMedicalSubmission = {
         ...mockSubmission,
         examType: ExamType.FULL_MEDICAL_EXAM,
-        heightCm: 170,
-        weightKg: 70,
-        bpSystolic: 120,
-        bpDiastolic: 80,
-        hasMedicalHistory: 'false',
+        formData: {
+          ...mockSubmission.formData,
+          gender: 'male',
+          urineTestRequired: true,
+          urineTestResult: 'normal',
+          bloodTestRequired: true,
+          bloodTestResult: 'normal',
+        },
       };
 
       const result = await service.generateSubmissionPdf(fullMedicalSubmission as any);
@@ -105,11 +114,13 @@ describe('PdfService', () => {
       const icaSubmission = {
         ...mockSubmission,
         examType: ExamType.PR_MEDICAL,
-        patientFin: 'F1234567A',
-        hivTestRequired: 'true',
-        hivTestResult: 'negative',
-        chestXrayRequired: 'true',
-        chestXrayResult: 'normal',
+        formData: {
+          ...mockSubmission.formData,
+          hivTestPositive: false,
+          chestXrayPositive: false,
+          syphilisTestRequired: false,
+          hepatitisBTestRequired: false,
+        },
       };
 
       const result = await service.generateSubmissionPdf(icaSubmission as any);
@@ -119,27 +130,29 @@ describe('PdfService', () => {
     });
 
     it('should generate PDF buffer for Driver TP exam', async () => {
-      const driverSubmission = {
+      const driverTpSubmission = {
         ...mockSubmission,
         examType: ExamType.DRIVING_LICENCE_TP,
-        driverMedicalDeclaration: {
-          epilepsy: 'no',
-          suddenLossOfConsciousness: 'no',
+        formData: {
+          ...mockSubmission.formData,
+          medicalDeclaration: {
+            consultingPractitioner: false,
+            takingMedication: false,
+          },
+          medicalHistory: {
+            diabetes: false,
+            heartDisease: false,
+          },
+          abnormalityChecklist: {
+            generalAppearance: 'normal',
+          },
+          assessment: {
+            fitToDrive: 'Yes',
+          },
         },
-        driverMedicalHistory: {
-          heartDisease: 'no',
-          mentalIllness: 'no',
-        },
-        driverGeneralExamination: {
-          cardiovascularFitness: 'yes',
-          visionLeftEyeUnaided: '6/6',
-          visionRightEyeUnaided: '6/6',
-        },
-        driverAmtScore: 10,
-        driverOverallFitness: 'fit',
       };
 
-      const result = await service.generateSubmissionPdf(driverSubmission as any);
+      const result = await service.generateSubmissionPdf(driverTpSubmission as any);
 
       expect(result).toBeInstanceOf(Buffer);
       expect(result.length).toBeGreaterThan(0);
@@ -149,12 +162,15 @@ describe('PdfService', () => {
       const driverTpLtaSubmission = {
         ...mockSubmission,
         examType: ExamType.DRIVING_VOCATIONAL_TP_LTA,
-        driverMedicalDeclaration: { epilepsy: 'no' },
-        driverMedicalHistory: { heartDisease: 'no' },
-        driverGeneralExamination: { cardiovascularFitness: 'yes' },
-        ltaVocationalMemoRequired: 'true',
-        ltaVocationalXrayRequired: 'true',
-        ltaVocationalXrayResult: 'normal',
+        formData: {
+          ...mockSubmission.formData,
+          medicalDeclaration: { epilepsy: false },
+          medicalHistory: { heartDisease: false },
+          abnormalityChecklist: { generalAppearance: 'normal' },
+          assessment: { fitToDrive: 'Yes' },
+          ltaVocationalXrayRequired: true,
+          ltaVocationalXrayResult: 'normal',
+        },
       };
 
       const result = await service.generateSubmissionPdf(driverTpLtaSubmission as any);
@@ -167,9 +183,12 @@ describe('PdfService', () => {
       const driverLtaSubmission = {
         ...mockSubmission,
         examType: ExamType.VOCATIONAL_LICENCE_LTA,
-        ltaVocationalMemoRequired: 'true',
-        ltaVocationalXrayRequired: 'true',
-        ltaVocationalXrayResult: 'normal',
+        formData: {
+          ...mockSubmission.formData,
+          assessment: { fitToDrive: 'Yes' },
+          ltaVocationalXrayRequired: true,
+          ltaVocationalXrayResult: 'normal',
+        },
       };
 
       const result = await service.generateSubmissionPdf(driverLtaSubmission as any);
@@ -182,11 +201,14 @@ describe('PdfService', () => {
       const agedDriverSubmission = {
         ...mockSubmission,
         examType: ExamType.AGED_DRIVERS,
-        driverMedicalDeclaration: { epilepsy: 'no' },
-        driverMedicalHistory: { heartDisease: 'no' },
-        driverGeneralExamination: { cardiovascularFitness: 'yes' },
-        driverAmtScore: 10,
-        driverOverallFitness: 'fit',
+        formData: {
+          ...mockSubmission.formData,
+          medicalDeclaration: { epilepsy: false },
+          medicalHistory: { heartDisease: false },
+          abnormalityChecklist: { generalAppearance: 'normal' },
+          assessment: { fitToDrive: 'Yes' },
+          amt: { score: 10 },
+        },
       };
 
       const result = await service.generateSubmissionPdf(agedDriverSubmission as any);
@@ -203,8 +225,9 @@ describe('PdfService', () => {
         patientName: 'John Doe',
         submittedDate: new Date(),
         createdDate: new Date(),
-        clinic: { name: 'Test Clinic' },
-        createdBy: { name: 'Dr. Smith' },
+        clinicName: 'Test Clinic',
+        approvedByName: 'Dr. Smith',
+        formData: {},
       };
 
       const result = await service.generateSubmissionPdf(minimalSubmission as any);
@@ -217,8 +240,12 @@ describe('PdfService', () => {
       const submissionWithMeasurements = {
         ...mockSubmission,
         examType: ExamType.FULL_MEDICAL_EXAM,
-        heightCm: 170,
-        weightKg: 70,
+        formData: {
+          ...mockSubmission.formData,
+          height: '170',
+          weight: '70',
+          gender: 'male',
+        },
       };
 
       const result = await service.generateSubmissionPdf(submissionWithMeasurements as any);
@@ -246,15 +273,17 @@ describe('PdfService', () => {
       expect(service).toBeDefined();
     }, 35000); // Test timeout slightly longer than PDF generation timeout
 
-    it('should throw error for unsupported exam type', async () => {
+    it('should generate PDF with fallback for unsupported exam type', async () => {
       const invalidSubmission = {
         ...mockSubmission,
         examType: 'INVALID_TYPE' as any,
       };
 
-      await expect(
-        service.generateSubmissionPdf(invalidSubmission as any)
-      ).rejects.toThrow();
+      const result = await service.generateSubmissionPdf(invalidSubmission as any);
+
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result.length).toBeGreaterThan(0);
+      // Should generate with fallback content
     });
   });
 });

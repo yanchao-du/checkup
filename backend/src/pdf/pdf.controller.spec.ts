@@ -72,14 +72,18 @@ describe('PdfController', () => {
     };
 
     const mockPdfBuffer = Buffer.from('PDF content');
-    const mockUser = { id: 'user-1', role: 'doctor' };
+    const mockUser = { userId: 'user-1', role: 'doctor', clinicId: 'clinic-1' };
 
     let mockResponse: Partial<Response>;
+    let mockRequest: any;
 
     beforeEach(() => {
       mockResponse = {
-        set: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
+      };
+      mockRequest = {
+        user: mockUser,
       };
     });
 
@@ -87,15 +91,13 @@ describe('PdfController', () => {
       mockSubmissionsService.findOne.mockResolvedValue(mockSubmission);
       mockPdfService.generateSubmissionPdf.mockResolvedValue(mockPdfBuffer);
 
-      await controller.downloadPdf('submission-1', mockUser as any, mockResponse as Response);
+      await controller.downloadPdf('submission-1', mockRequest, mockResponse as Response);
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', mockUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', mockUser.userId, mockUser.role, mockUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).toHaveBeenCalledWith(mockSubmission);
-      expect(mockResponse.set).toHaveBeenCalledWith({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="submission-submission-1.pdf"',
-        'Content-Length': mockPdfBuffer.length,
-      });
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Disposition', 'attachment; filename="submission-submission-1.pdf"');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Length', mockPdfBuffer.length);
       expect(mockResponse.send).toHaveBeenCalledWith(mockPdfBuffer);
     });
 
@@ -105,10 +107,10 @@ describe('PdfController', () => {
       );
 
       await expect(
-        controller.downloadPdf('non-existent', mockUser as any, mockResponse as Response)
+        controller.downloadPdf('non-existent', mockRequest, mockResponse as Response)
       ).rejects.toThrow();
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('non-existent', mockUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('non-existent', mockUser.userId, mockUser.role, mockUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).not.toHaveBeenCalled();
     });
 
@@ -118,10 +120,10 @@ describe('PdfController', () => {
       );
 
       await expect(
-        controller.downloadPdf('submission-1', mockUser as any, mockResponse as Response)
+        controller.downloadPdf('submission-1', mockRequest, mockResponse as Response)
       ).rejects.toThrow();
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', mockUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', mockUser.userId, mockUser.role, mockUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).not.toHaveBeenCalled();
     });
 
@@ -132,10 +134,10 @@ describe('PdfController', () => {
       );
 
       await expect(
-        controller.downloadPdf('submission-1', mockUser as any, mockResponse as Response)
+        controller.downloadPdf('submission-1', mockRequest, mockResponse as Response)
       ).rejects.toThrow('PDF generation failed');
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', mockUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', mockUser.userId, mockUser.role, mockUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).toHaveBeenCalledWith(mockSubmission);
     });
 
@@ -143,13 +145,9 @@ describe('PdfController', () => {
       mockSubmissionsService.findOne.mockResolvedValue(mockSubmission);
       mockPdfService.generateSubmissionPdf.mockResolvedValue(mockPdfBuffer);
 
-      await controller.downloadPdf('test-id-123', mockUser as any, mockResponse as Response);
+      await controller.downloadPdf('test-id-123', mockRequest, mockResponse as Response);
 
-      expect(mockResponse.set).toHaveBeenCalledWith(
-        expect.objectContaining({
-          'Content-Disposition': 'attachment; filename="submission-test-id-123.pdf"',
-        })
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Disposition', 'attachment; filename="submission-test-id-123.pdf"');
     });
 
     it('should set correct Content-Length', async () => {
@@ -157,28 +155,26 @@ describe('PdfController', () => {
       mockSubmissionsService.findOne.mockResolvedValue(mockSubmission);
       mockPdfService.generateSubmissionPdf.mockResolvedValue(largePdfBuffer);
 
-      await controller.downloadPdf('submission-1', mockUser as any, mockResponse as Response);
+      await controller.downloadPdf('submission-1', mockRequest, mockResponse as Response);
 
-      expect(mockResponse.set).toHaveBeenCalledWith(
-        expect.objectContaining({
-          'Content-Length': 50000,
-        })
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Length', 50000);
     });
 
     it('should work for admin user accessing any clinic submission', async () => {
-      const adminUser = { id: 'admin-1', role: 'admin' };
+      const adminUser = { userId: 'admin-1', role: 'admin', clinicId: 'clinic-1' };
+      const adminRequest = { user: adminUser };
       mockSubmissionsService.findOne.mockResolvedValue(mockSubmission);
       mockPdfService.generateSubmissionPdf.mockResolvedValue(mockPdfBuffer);
 
-      await controller.downloadPdf('submission-1', adminUser as any, mockResponse as Response);
+      await controller.downloadPdf('submission-1', adminRequest, mockResponse as Response);
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', adminUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', adminUser.userId, adminUser.role, adminUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).toHaveBeenCalled();
     });
 
     it('should work for doctor accessing their approved submission', async () => {
-      const doctorUser = { id: 'doctor-1', role: 'doctor' };
+      const doctorUser = { userId: 'doctor-1', role: 'doctor', clinicId: 'clinic-1' };
+      const doctorRequest = { user: doctorUser };
       const doctorSubmission = {
         ...mockSubmission,
         approvedById: 'doctor-1',
@@ -186,14 +182,15 @@ describe('PdfController', () => {
       mockSubmissionsService.findOne.mockResolvedValue(doctorSubmission);
       mockPdfService.generateSubmissionPdf.mockResolvedValue(mockPdfBuffer);
 
-      await controller.downloadPdf('submission-1', doctorUser as any, mockResponse as Response);
+      await controller.downloadPdf('submission-1', doctorRequest, mockResponse as Response);
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', doctorUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', doctorUser.userId, doctorUser.role, doctorUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).toHaveBeenCalled();
     });
 
     it('should work for nurse accessing their created submission', async () => {
-      const nurseUser = { id: 'nurse-1', role: 'nurse' };
+      const nurseUser = { userId: 'nurse-1', role: 'nurse', clinicId: 'clinic-1' };
+      const nurseRequest = { user: nurseUser };
       const nurseSubmission = {
         ...mockSubmission,
         createdById: 'nurse-1',
@@ -201,9 +198,9 @@ describe('PdfController', () => {
       mockSubmissionsService.findOne.mockResolvedValue(nurseSubmission);
       mockPdfService.generateSubmissionPdf.mockResolvedValue(mockPdfBuffer);
 
-      await controller.downloadPdf('submission-1', nurseUser as any, mockResponse as Response);
+      await controller.downloadPdf('submission-1', nurseRequest, mockResponse as Response);
 
-      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', nurseUser);
+      expect(mockSubmissionsService.findOne).toHaveBeenCalledWith('submission-1', nurseUser.userId, nurseUser.role, nurseUser.clinicId);
       expect(mockPdfService.generateSubmissionPdf).toHaveBeenCalled();
     });
   });
