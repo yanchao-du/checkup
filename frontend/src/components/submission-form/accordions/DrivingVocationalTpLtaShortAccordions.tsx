@@ -26,7 +26,7 @@ export function DrivingVocationalTpLtaShortAccordions({
   
   // Validation function for assessment section
   const validateAssessment = (): boolean => {
-    const { fitToDriveMotorVehicle, fitToDrivePsvBavl, declarationAgreed } = formData;
+    const { fitToDriveMotorVehicle, fitToDrivePsvBavl } = formData;
     
     // Check fitness based on purpose
     if (purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' || 
@@ -40,8 +40,6 @@ export function DrivingVocationalTpLtaShortAccordions({
         purposeOfExam === 'BAVL_ANY_AGE') {
       if (!fitToDrivePsvBavl) return false;
     }
-    
-    if (!declarationAgreed) return false;
     
     return true;
   };

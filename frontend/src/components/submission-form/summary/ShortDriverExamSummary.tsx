@@ -144,16 +144,6 @@ export function ShortDriverExamSummary({
                 </dd>
               </div>
             )}
-            <div>
-              <dt className="font-medium text-gray-500">Declaration</dt>
-              <dd className="mt-1">
-                {formData.declarationAgreed ? (
-                  <span className="text-green-600 font-medium">✓ Agreed</span>
-                ) : (
-                  <span className="text-gray-400">Not agreed</span>
-                )}
-              </dd>
-            </div>
           </dl>
         </CardContent>
       </Card>

@@ -1,6 +1,5 @@
 import { Label } from '../../ui/label';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
-import { Checkbox } from '../../ui/checkbox';
 
 interface ShortDriverExamAssessmentProps {
   formData: Record<string, any>;
@@ -106,29 +105,6 @@ export function ShortDriverExamAssessment({
               <p className="text-sm text-red-500 mt-1">{errors.fitToDrivePsvBavl}</p>
             )}
           </div>
-        )}
-      </div>
-
-      {/* Declaration */}
-      <div className="border-t pt-6">
-        <h3 className="text-base font-semibold mb-4">Declaration</h3>
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="short-exam-declaration"
-            checked={formData.declarationAgreed === true}
-            onCheckedChange={(checked) => onChange('declarationAgreed', checked)}
-          />
-          <Label 
-            htmlFor="short-exam-declaration" 
-            className="text-sm font-normal leading-relaxed cursor-pointer"
-          >
-            I certify that I have examined the above-named person and that the information
-            provided is true and accurate to the best of my knowledge.
-            <span className="text-red-500 ml-1">*</span>
-          </Label>
-        </div>
-        {errors.declarationAgreed && (
-          <p className="text-sm text-red-500 mt-2 ml-7">{errors.declarationAgreed}</p>
         )}
       </div>
     </div>

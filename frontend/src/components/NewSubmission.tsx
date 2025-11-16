@@ -18,6 +18,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Checkbox } from './ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Send } from 'lucide-react';
@@ -3534,6 +3535,30 @@ export function NewSubmission() {
                           setIsEditingFromSummary(true);
                         }}
                       />
+
+                      {/* Declaration Section */}
+                      <Card>
+                        <CardContent className="pt-6">
+                          <h4 className="text-base font-semibold mb-4">Declaration</h4>
+                          <div className="flex items-start space-x-3">
+                            <Checkbox
+                              id="short-exam-summary-declaration"
+                              checked={formData.declarationAgreed === true}
+                              onCheckedChange={(checked: boolean) => {
+                                setFormData(prev => ({ ...prev, declarationAgreed: checked }));
+                              }}
+                            />
+                            <Label 
+                              htmlFor="short-exam-summary-declaration" 
+                              className="text-sm font-normal leading-relaxed cursor-pointer"
+                            >
+                              I certify that I have examined the above-named person and that the information
+                              provided is true and accurate to the best of my knowledge.
+                              <span className="text-red-500 ml-1">*</span>
+                            </Label>
+                          </div>
+                        </CardContent>
+                      </Card>
 
                       <div className="flex justify-start mt-4">
                         <Button
