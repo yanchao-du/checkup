@@ -24,7 +24,7 @@ export function formatExamType(examType: ExamType): string {
     case 'DRIVING_LICENCE_TP_SHORT':
       return 'Driving Licence - TP (Short)';
     case 'DRIVING_VOCATIONAL_TP_LTA_SHORT':
-      return 'Driving/Vocational - TP/LTA (Short)';
+      return 'Driving (TP) / Vocational (LTA) (Short)';
     case 'VOCATIONAL_LICENCE_LTA_SHORT':
       return 'Vocational Licence - LTA (Short)';
     case 'PR_MEDICAL':
