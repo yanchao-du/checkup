@@ -1665,6 +1665,9 @@ export function NewSubmission() {
       // For driver exams from patient-info, go directly to medical-declaration (first exam section)
       if (currentSection === 'patient-info' && isDriverExamType(examType)) {
         setActiveAccordion('medical-declaration');
+      } else if (currentSection === 'patient-info' && examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT') {
+        // For short form, go to overall-assessment
+        setActiveAccordion('overall-assessment');
       } else {
         // Move to next section
         setActiveAccordion(nextSection);
