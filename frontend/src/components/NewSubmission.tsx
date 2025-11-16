@@ -45,6 +45,7 @@ import { SixMonthlyFmwSummary } from './submission-form/summary/SixMonthlyFmwSum
 import { DrivingLicenceTpSummary } from './submission-form/summary/DrivingLicenceTpSummary';
 import { DrivingVocationalTpLtaSummary } from './submission-form/summary/DrivingVocationalTpLtaSummary';
 import { VocationalLicenceLtaSummary } from './submission-form/summary/VocationalLicenceLtaSummary';
+import { ShortDriverExamSummary } from './submission-form/summary/ShortDriverExamSummary';
 import { DeclarationSection } from './submission-form/summary/DeclarationSection';
 import { IcaDeclarationSection } from './submission-form/summary/IcaDeclarationSection';
 import { IcaExamFields } from './submission-form/exam-forms/IcaExamFields';
@@ -52,6 +53,9 @@ import { IcaExamSummary } from './submission-form/summary/IcaExamSummary';
 import { DrivingLicenceTpAccordions } from './submission-form/accordions/DrivingLicenceTpAccordions';
 import { DrivingVocationalTpLtaAccordions } from './submission-form/accordions/DrivingVocationalTpLtaAccordions';
 import { VocationalLicenceLtaAccordions } from './submission-form/accordions/VocationalLicenceLtaAccordions';
+import { DrivingLicenceTpShortAccordions } from './submission-form/accordions/DrivingLicenceTpShortAccordions';
+import { DrivingVocationalTpLtaShortAccordions } from './submission-form/accordions/DrivingVocationalTpLtaShortAccordions';
+import { VocationalLicenceLtaShortAccordions } from './submission-form/accordions/VocationalLicenceLtaShortAccordions';
 import { FullMedicalExamFields } from './FullMedicalExamFields';
 import { FullMedicalExamSummary } from './FullMedicalExamSummary';
 import { useSubmissionWorkflow } from '../hooks/useSubmissionWorkflow';
@@ -64,6 +68,11 @@ const isIcaExamType = (examType: ExamType | ''): boolean => {
 // Helper to check if exam type is a driver medical exam
 const isDriverExamType = (examType: ExamType | ''): boolean => {
   return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
+};
+
+// Helper to check if exam type is a short driver medical exam
+const isShortDriverExamType = (examType: ExamType | ''): boolean => {
+  return examType === 'DRIVING_LICENCE_TP_SHORT' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || examType === 'VOCATIONAL_LICENCE_LTA_SHORT';
 };
 
 // Helper to check if exam type is a MOM exam
@@ -2841,6 +2850,64 @@ export function NewSubmission() {
                 />
               )}
 
+              {/* Short Driver Exam Forms */}
+              {examType === 'DRIVING_LICENCE_TP_SHORT' && (
+                <DrivingLicenceTpShortAccordions
+                  formData={formData}
+                  onChange={handleFormDataChange}
+                  completedSections={completedSections}
+                  isPatientInfoValid={isPatientInfoValid}
+                  isEditingFromSummary={isEditingFromSummary}
+                  errors={{}}
+                  purposeOfExam={purposeOfExam}
+                  onContinue={(current, next) => {
+                    setCompletedSections(prev => new Set(prev).add(current));
+                    if (next === 'review-submit') {
+                      setShowSummary(true);
+                    }
+                    setActiveAccordion(next);
+                  }}
+                />
+              )}
+
+              {examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
+                <DrivingVocationalTpLtaShortAccordions
+                  formData={formData}
+                  onChange={handleFormDataChange}
+                  completedSections={completedSections}
+                  isPatientInfoValid={isPatientInfoValid}
+                  isEditingFromSummary={isEditingFromSummary}
+                  errors={{}}
+                  purposeOfExam={purposeOfExam}
+                  onContinue={(current, next) => {
+                    setCompletedSections(prev => new Set(prev).add(current));
+                    if (next === 'review-submit') {
+                      setShowSummary(true);
+                    }
+                    setActiveAccordion(next);
+                  }}
+                />
+              )}
+
+              {examType === 'VOCATIONAL_LICENCE_LTA_SHORT' && (
+                <VocationalLicenceLtaShortAccordions
+                  formData={formData}
+                  onChange={handleFormDataChange}
+                  completedSections={completedSections}
+                  isPatientInfoValid={isPatientInfoValid}
+                  isEditingFromSummary={isEditingFromSummary}
+                  errors={{}}
+                  purposeOfExam={purposeOfExam}
+                  onContinue={(current, next) => {
+                    setCompletedSections(prev => new Set(prev).add(current));
+                    if (next === 'review-submit') {
+                      setShowSummary(true);
+                    }
+                    setActiveAccordion(next);
+                  }}
+                />
+              )}
+
               {examType === 'SIX_MONTHLY_MDW' && showSummary && (
                 <AccordionItem value="summary">
                   <AccordionTrigger isCompleted={completedSections.has('summary')} isDisabled={!isPatientInfoValid || !completedSections.has('exam-specific')}>
@@ -3468,6 +3535,54 @@ export function NewSubmission() {
                           disabled={isSaving || !formData.assessment?.declarationAgreed}
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to LTA' : 'Route for Approval'}
+                        </Button>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {/* Short Driver Exam Summaries */}
+              {(examType === 'DRIVING_LICENCE_TP_SHORT' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || examType === 'VOCATIONAL_LICENCE_LTA_SHORT') && showSummary && (
+                <AccordionItem value="review-submit">
+                  <AccordionTrigger isCompleted={completedSections.has('review-submit')}>
+                    <div className="flex items-center gap-2">
+                      <span>Review & Submit</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-6">
+                      <ShortDriverExamSummary
+                        formData={formData}
+                        patientInfo={{
+                          name: patientName,
+                          nric: patientNric,
+                          mobile: patientMobile,
+                        }}
+                        purposeOfExam={purposeOfExam}
+                        examinationDate={examinationDate}
+                        onEdit={(section) => {
+                          setActiveAccordion(section);
+                          setIsEditingFromSummary(true);
+                        }}
+                      />
+
+                      <div className="flex justify-start mt-4">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setCompletedSections(prev => new Set(prev).add('review-submit'));
+                            if (role === 'doctor') {
+                              setIsRouteForApproval(false);
+                              setShowSubmitDialog(true);
+                            } else {
+                              setIsRouteForApproval(true);
+                              setShowSubmitDialog(true);
+                            }
+                          }}
+                          disabled={isSaving || !formData.declarationAgreed}
+                        >
+                          {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to SPF/LTA' : 'Route for Approval'}
                         </Button>
                       </div>
                     </div>

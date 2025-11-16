@@ -29,7 +29,10 @@ export type ExamType =
   | 'LTVP_MEDICAL'
   | 'DRIVING_LICENCE_TP'
   | 'DRIVING_VOCATIONAL_TP_LTA'
-  | 'VOCATIONAL_LICENCE_LTA';
+  | 'VOCATIONAL_LICENCE_LTA'
+  | 'DRIVING_LICENCE_TP_SHORT'
+  | 'DRIVING_VOCATIONAL_TP_LTA_SHORT'
+  | 'VOCATIONAL_LICENCE_LTA_SHORT';
 export type SubmissionStatus = 'draft' | 'pending_approval' | 'submitted' | 'rejected';
 
 export interface MedicalSubmission {

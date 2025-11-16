@@ -15,6 +15,7 @@ import { generateIcaContent } from './generators/ica.generator';
 import { generateDriverTpContent } from './generators/driver-tp.generator';
 import { generateDriverTpLtaContent } from './generators/driver-tp-lta.generator';
 import { generateDriverLtaContent } from './generators/driver-lta.generator';
+import { generateShortDriverExamContent } from './generators/short-driver-exam.generator';
 
 @Injectable()
 export class PdfService {
@@ -143,6 +144,13 @@ export class PdfService {
 
     if (examType === 'DRIVING_LICENCE_TP' || examType === 'AGED_DRIVERS') {
       return generateDriverTpContent(submission);
+    }
+
+    // Short driver exam forms
+    if (examType === 'DRIVING_LICENCE_TP_SHORT' || 
+        examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || 
+        examType === 'VOCATIONAL_LICENCE_LTA_SHORT') {
+      return generateShortDriverExamContent(submission);
     }
 
     // Default fallback

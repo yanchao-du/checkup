@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto, UpdateSubmissionDto, SubmissionQueryDto } from './dto/submission.dto';
 import { validateDriverExam } from './validation/driver-exam.validation';
 import { validateIcaExam } from './validation/ica-exam.validation';
+import { isShortDriverExam, validateShortDriverExam } from './validation/driver-exam-short.validation';
 
 @Injectable()
 export class SubmissionsService {
@@ -16,8 +17,13 @@ export class SubmissionsService {
     
     // Only validate driver exam and ICA exam submissions if not a draft
     if (!isDraft) {
-      validateDriverExam(dto);
-      validateIcaExam(dto);
+      // Route to appropriate validation based on exam type
+      if (isShortDriverExam(dto.examType)) {
+        validateShortDriverExam(dto);
+      } else {
+        validateDriverExam(dto);
+        validateIcaExam(dto);
+      }
     }
     
     let status: string;
