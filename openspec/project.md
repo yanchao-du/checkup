@@ -1,10 +1,14 @@
 # Project Context
 
 ## Purpose
-CheckUp is a comprehensive medical examination portal for Singapore clinics that manages medical exam submissions for government agencies (MOM, SPF). The system provides:
+CheckUp is a comprehensive medical examination portal for Singapore clinics that manages medical exam submissions for government agencies (MOM, SPF, TP, LTA, ICA). The system provides:
 - Role-based access control (Doctor, Nurse, Admin)
 - Complete approval workflow: Nurses create → Doctors approve → Submit to government
-- Support for 3 Singapore exam types: MOM migrant worker exams, MOM work permit exams, SPF aged driver exams
+- Support for 13 Singapore exam types across 5 agencies:
+  - MOM: Six-monthly MDW/FMW, Work Permit, Full Medical Exam
+  - ICA: PR, Student Pass, LTVP medical exams
+  - Aged Drivers (SPF): Medical examination for aged drivers
+  - Driver Exams (TP/LTA): 3 full forms + 3 short forms for driving and vocational licences
 - Draft management, audit trails, and search/filter capabilities
 
 ## Tech Stack
@@ -121,11 +125,12 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
   - File size: 30-50KB per PDF
   - Library overhead: ~2MB (pdfmake)
   - No deployment complexity (pure JavaScript, no system dependencies)
-- **Supported Exam Types**: All 7 exam types with exam-specific generators
+- **Supported Exam Types**: All 13 exam types with exam-specific generators
   - Six-monthly MDW/FMW
   - Full Medical Exam
   - ICA Exams (PR/Student Pass/LTVP)
-  - Driver Exams (TP/TP+LTA/LTA only)
+  - Driver Exams (TP/TP+LTA/LTA only) - Full Forms with AMT/Medical History
+  - Short Driver Exams (TP/TP+LTA/LTA) - Simplified forms without AMT/Medical History
 
 #### User Preferences (Backend & Frontend)
 - **Feature**: Favorite exam types for quick access
@@ -144,23 +149,48 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 
 #### Driver Medical Exam Validation (Backend)
 - **Feature**: Comprehensive validation for Singapore driver medical examinations (TP/LTA)
-  - **Exam Types Supported**: 3 driver exam types
-    - `DRIVING_LICENCE_TP`: Traffic Police driving licence only
-    - `DRIVING_VOCATIONAL_TP_LTA`: Combined TP and LTA vocational licence
-    - `VOCATIONAL_LICENCE_LTA`: LTA vocational licence only
-  - **Type Detection**: Helper functions (`isDriverExam`, `requiresTpValidation`, `requiresLtaValidation`)
-  - **Validation Rules**:
+  - **Exam Types Supported**: 6 driver exam types (3 full forms + 3 short forms)
+    - **Full Forms** (with AMT and medical history):
+      - `DRIVING_LICENCE_TP`: Traffic Police driving licence only
+      - `DRIVING_VOCATIONAL_TP_LTA`: Combined TP and LTA vocational licence
+      - `VOCATIONAL_LICENCE_LTA`: LTA vocational licence only
+    - **Short Forms** (simplified, no AMT/medical history):
+      - `DRIVING_LICENCE_TP_SHORT`: TP driving licence simplified form
+      - `DRIVING_VOCATIONAL_TP_LTA_SHORT`: Combined TP and LTA simplified form
+      - `VOCATIONAL_LICENCE_LTA_SHORT`: LTA vocational simplified form
+  - **Type Detection**: Helper functions (`isDriverExam`, `isShortDriverExam`, `requiresTpValidation`, `requiresLtaValidation`)
+  - **Validation Rules for Full Forms**:
     - **AMT (Abbreviated Mental Test)**: Required for TP exams, score 0-10, auto-calculated from 10 questions
     - **LTA Vocational**: Required for LTA exams, validates color/peripheral/night vision fields
     - **Medical Declaration**: Required patient confirmation of past 6 months medical history
     - **Medical History**: Required chronic conditions checklist
     - **Assessment**: TP exams require `fitToDrive`, LTA exams require `fitForVocational`
     - **Common Fields**: Height and weight required for all driver exams
-  - **Implementation**: Dedicated `driver-exam.validation.ts` with comprehensive unit test coverage
+  - **Validation Rules for Short Forms**:
+    - **Minimal Patient Info**: NRIC, name, mobile number (+65 format), examination date
+    - **Purpose of Examination**: Required selection (4 options based on age/licence type)
+    - **Fitness Determination**: Dynamic based on purpose:
+      - Age 65+ TP only: Requires `fitToDriveMotorVehicle` (Yes/No)
+      - Age 65+ TP & LTA: Requires `fitToDrivePsv` AND `fitForBavl` (Yes/No each)
+      - Age 64 below LTA only: Requires `fitToDrivePsv` AND `fitForBavl` (Yes/No each)
+      - BAVL any age: Requires `fitForBavl` only (Yes/No)
+    - **Declaration**: Required confirmation checkbox
+    - **Excluded Fields**: No AMT, no medical history, no height/weight, no email
+  - **Implementation**: 
+    - Full forms: `driver-exam.validation.ts` with comprehensive unit test coverage
+    - Short forms: `driver-exam-short.validation.ts` with unit test coverage
 - **Frontend Components**:
-  - **DrivingLicenceTpFields**: TP-only exam form with AMT section
-  - **DrivingVocationalTpLtaFields**: Combined exam form with both TP and LTA sections
-  - **VocationalLicenceLtaFields**: LTA-only exam form with extended vision tests
+  - **Full Forms**:
+    - **DrivingLicenceTpFields**: TP-only exam form with AMT section
+    - **DrivingVocationalTpLtaFields**: Combined exam form with both TP and LTA sections
+    - **VocationalLicenceLtaFields**: LTA-only exam form with extended vision tests
+  - **Short Forms**:
+    - **ShortDriverExamForm**: Unified accordion-based form for all 3 short exam types
+    - **Section 1 - Patient Information**: NRIC, name, mobile (+65 prefix), purpose dropdown (4 options), exam date
+    - **Section 2 - Overall Assessment**: Dynamic fitness questions based on selected purpose
+    - **Section 3 - Review & Submit**: Summary page with edit capability and declaration checkbox
+    - **Auto-expand**: Next section automatically opens after completing current section
+    - **Purpose-driven**: Form adapts based on purpose selection (no need for 3 separate components)
   - **Purpose-based Logic**: Different fields shown based on exam purpose (age 65+ TP only, age 64 below LTA only, etc.)
   - **Summary Components**: Exam-specific summary views before submission
   - **Detail Views**: Comprehensive read-only views for approved/submitted exams
@@ -291,7 +321,7 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 - **OpenAPI/Swagger**: API documentation (openapi.yaml)
 - **VS Code**: Recommended IDE with ESLint, Prettier extensions
 
-## Current State (October 2025)
+## Current State (November 2025)
 
 ### Completed Features
 - ✅ Full authentication system (JWT)
@@ -308,9 +338,14 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 - ✅ Settings page
 - ✅ Toast notifications
 - ✅ Navigation protection (unsaved changes)
-- ✅ PDF generation for medical submissions (server-side, all exam types)
+- ✅ PDF generation for medical submissions (server-side, all 13 exam types)
 - ✅ User favorite exam types (quick access to frequently used exam types, max 3)
 - ✅ Driver medical examinations (TP/LTA) with AMT and vocational licence sections
+- ✅ Short driver medical exam forms (simplified forms without AMT/medical history)
+  - Unified accordion-based UI for all 3 short exam types
+  - Purpose-driven fitness determinations (4 age/licence combinations)
+  - Material Icons checkbox in PDF declarations
+  - Streamlined single-page PDF reports
 - ✅ Comprehensive test coverage (backend & frontend)
 
 ### Known Issues

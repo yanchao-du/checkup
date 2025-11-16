@@ -21,6 +21,12 @@ export function formatExamType(examType: ExamType): string {
       return 'Driving (TP) / Vocational (LTA)';
     case 'VOCATIONAL_LICENCE_LTA':
       return 'Vocational Licence (LTA)';
+    case 'DRIVING_LICENCE_TP_SHORT':
+      return 'Driving Licence - TP (Short)';
+    case 'DRIVING_VOCATIONAL_TP_LTA_SHORT':
+      return 'Driving (TP) / Vocational (LTA) (Short)';
+    case 'VOCATIONAL_LICENCE_LTA_SHORT':
+      return 'Vocational Licence - LTA (Short)';
     case 'PR_MEDICAL':
       return 'PR (ICA)';
     case 'STUDENT_PASS_MEDICAL':
@@ -53,6 +59,12 @@ export function formatExamTypeFull(examType: ExamType): string {
       return 'Medical Examination for Driving Licence / Vocational Licence';
     case 'VOCATIONAL_LICENCE_LTA':
       return 'Medical Examination for Vocational Licence';
+    case 'DRIVING_LICENCE_TP_SHORT':
+      return 'Driving Licence (TP) Medical Exam';
+    case 'DRIVING_VOCATIONAL_TP_LTA_SHORT':
+      return 'Driving Licence (TP) / Vocational Licence (LTA) Medical Exam';
+    case 'VOCATIONAL_LICENCE_LTA_SHORT':
+      return 'Vocational Licence (LTA) Medical Exam';
     case 'PR_MEDICAL':
       return 'Medical Examination for Permanent Residency';
     case 'STUDENT_PASS_MEDICAL':
@@ -77,10 +89,13 @@ export function formatAgency(examType: ExamType): string {
     case 'AGED_DRIVERS':
       return 'SPF';
     case 'DRIVING_LICENCE_TP':
+    case 'DRIVING_LICENCE_TP_SHORT':
       return 'TP';
     case 'DRIVING_VOCATIONAL_TP_LTA':
+    case 'DRIVING_VOCATIONAL_TP_LTA_SHORT':
       return 'TP/LTA';
     case 'VOCATIONAL_LICENCE_LTA':
+    case 'VOCATIONAL_LICENCE_LTA_SHORT':
       return 'LTA';
     case 'PR_MEDICAL':
     case 'STUDENT_PASS_MEDICAL':

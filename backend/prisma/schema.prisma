@@ -26,30 +26,30 @@ model Clinic {
 }
 
 model User {
-  id                                                            String              @id @default(uuid())
-  clinicId                                                      String              @map("clinic_id")
-  email                                                         String              @unique
-  passwordHash                                                  String              @map("password_hash")
-  name                                                          String
-  role                                                          UserRole
-  status                                                        UserStatus          @default(active)
-  lastLoginAt                                                   DateTime?           @map("last_login_at")
-  createdAt                                                     DateTime            @default(now()) @map("created_at")
-  updatedAt                                                     DateTime            @updatedAt @map("updated_at")
-  defaultDoctorId                                               String?             @map("default_doctor_id")
-  mcrNumber                                                     String?             @unique @map("mcr_number")
-  nric                                                          String?             @unique
-  favoriteExamTypes                                             Json?               @map("favorite_exam_types")
-  auditLogs                                                     AuditLog[]
-  corpPassUsers                                                 CorpPassUser[]
-  doctorClinics                                                 DoctorClinic[]
-  approvedSubmissions                                           MedicalSubmission[] @relation("ApprovedBy")
-  assignedSubmissions                                           MedicalSubmission[] @relation("AssignedDoctor")
-  createdSubmissions                                            MedicalSubmission[] @relation("CreatedBy")
-  nurseClinics                                                  NurseClinic[]
-  clinic                                                        Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  defaultDoctor                                                 User?               @relation("DefaultDoctor", fields: [defaultDoctorId], references: [id])
-  nursesUsingAsDefault                                          User[]              @relation("DefaultDoctor")
+  id                   String              @id @default(uuid())
+  clinicId             String              @map("clinic_id")
+  email                String              @unique
+  passwordHash         String              @map("password_hash")
+  name                 String
+  role                 UserRole
+  status               UserStatus          @default(active)
+  lastLoginAt          DateTime?           @map("last_login_at")
+  createdAt            DateTime            @default(now()) @map("created_at")
+  updatedAt            DateTime            @updatedAt @map("updated_at")
+  defaultDoctorId      String?             @map("default_doctor_id")
+  mcrNumber            String?             @unique @map("mcr_number")
+  nric                 String?             @unique
+  favoriteExamTypes    Json?               @map("favorite_exam_types")
+  auditLogs            AuditLog[]
+  corpPassUsers        CorpPassUser[]
+  doctorClinics        DoctorClinic[]
+  approvedSubmissions  MedicalSubmission[] @relation("ApprovedBy")
+  assignedSubmissions  MedicalSubmission[] @relation("AssignedDoctor")
+  createdSubmissions   MedicalSubmission[] @relation("CreatedBy")
+  nurseClinics         NurseClinic[]
+  clinic               Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  defaultDoctor        User?               @relation("DefaultDoctor", fields: [defaultDoctorId], references: [id])
+  nursesUsingAsDefault User[]              @relation("DefaultDoctor")
 
   @@index([clinicId])
   @@index([email])
@@ -104,34 +104,34 @@ model NurseClinic {
 }
 
 model MedicalSubmission {
-  id                                              String           @id @default(uuid())
-  clinicId                                        String           @map("clinic_id")
-  createdById                                     String           @map("created_by")
-  approvedById                                    String?          @map("approved_by")
-  examType                                        ExamType         @map("exam_type")
-  patientName                                     String           @map("patient_name")
-  patientNric                                     String?          @map("patient_nric")
-  patientPassportNo                               String?          @map("patient_passport_no")
-  patientDob                                      DateTime?        @map("patient_dob") @db.Date
-  status                                          SubmissionStatus @default(draft)
-  formData                                        Json             @map("form_data")
-  createdDate                                     DateTime         @default(now()) @map("created_date")
-  submittedDate                                   DateTime?        @map("submitted_date")
-  approvedDate                                    DateTime?        @map("approved_date")
-  rejectedReason                                  String?          @map("rejected_reason")
-  updatedAt                                       DateTime         @updatedAt @map("updated_at")
-  examinationDate                                 DateTime?        @map("examination_date") @db.Date
-  assignedDoctorId                                String?          @map("assigned_doctor_id")
-  deletedAt                                       DateTime?        @map("deleted_at")
-  patientEmail                                    String?          @map("patient_email")
-  patientMobile                                   String?          @map("patient_mobile")
-  drivingLicenseClass                             String?          @map("driving_license_class")
-  purposeOfExam                                   String?          @map("purpose_of_exam")
-  auditLogs                                       AuditLog[]
-  approvedBy                                      User?            @relation("ApprovedBy", fields: [approvedById], references: [id])
-  assignedDoctor                                  User?            @relation("AssignedDoctor", fields: [assignedDoctorId], references: [id])
-  clinic                                          Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  createdBy                                       User             @relation("CreatedBy", fields: [createdById], references: [id])
+  id                  String           @id @default(uuid())
+  clinicId            String           @map("clinic_id")
+  createdById         String           @map("created_by")
+  approvedById        String?          @map("approved_by")
+  examType            ExamType         @map("exam_type")
+  patientName         String           @map("patient_name")
+  patientNric         String?          @map("patient_nric")
+  patientPassportNo   String?          @map("patient_passport_no")
+  patientDob          DateTime?        @map("patient_dob") @db.Date
+  status              SubmissionStatus @default(draft)
+  formData            Json             @map("form_data")
+  createdDate         DateTime         @default(now()) @map("created_date")
+  submittedDate       DateTime?        @map("submitted_date")
+  approvedDate        DateTime?        @map("approved_date")
+  rejectedReason      String?          @map("rejected_reason")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+  examinationDate     DateTime?        @map("examination_date") @db.Date
+  assignedDoctorId    String?          @map("assigned_doctor_id")
+  deletedAt           DateTime?        @map("deleted_at")
+  patientEmail        String?          @map("patient_email")
+  patientMobile       String?          @map("patient_mobile")
+  drivingLicenseClass String?          @map("driving_license_class")
+  purposeOfExam       String?          @map("purpose_of_exam")
+  auditLogs           AuditLog[]
+  approvedBy          User?            @relation("ApprovedBy", fields: [approvedById], references: [id])
+  assignedDoctor      User?            @relation("AssignedDoctor", fields: [assignedDoctorId], references: [id])
+  clinic              Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  createdBy           User             @relation("CreatedBy", fields: [createdById], references: [id])
 
   @@index([clinicId])
   @@index([createdById])
@@ -172,17 +172,20 @@ enum UserStatus {
 }
 
 enum ExamType {
-  SIX_MONTHLY_MDW           @map("Six-monthly Medical Exam for Migrant Domestic Workers (MOM)")
-  SIX_MONTHLY_FMW           @map("Six-monthly Medical Exam for Female Migrant Workers (MOM)")
-  WORK_PERMIT               @map("Full Medical Exam for Work Permit (MOM)")
-  FULL_MEDICAL_EXAM         @map("Full Medical Examination for Foreign Worker (MOM)")
-  AGED_DRIVERS              @map("Medical Exam for Aged Drivers (SPF)")
-  PR_MEDICAL                @map("Medical Examination for Permanent Residency (ICA)")
-  STUDENT_PASS_MEDICAL      @map("Medical Examination for Student Pass (ICA)")
-  LTVP_MEDICAL              @map("Medical Examination for Long Term Visit Pass (ICA)")
-  DRIVING_LICENCE_TP        @map("Driving Licence Medical Examination Report (TP)")
-  DRIVING_VOCATIONAL_TP_LTA @map("Driving Licence and Vocational Licence (TP & LTA)")
-  VOCATIONAL_LICENCE_LTA    @map("Vocational Licence Medical Examination (LTA)")
+  SIX_MONTHLY_MDW                 @map("Six-monthly Medical Exam for Migrant Domestic Workers (MOM)")
+  SIX_MONTHLY_FMW                 @map("Six-monthly Medical Exam for Female Migrant Workers (MOM)")
+  WORK_PERMIT                     @map("Full Medical Exam for Work Permit (MOM)")
+  FULL_MEDICAL_EXAM               @map("Full Medical Examination for Foreign Worker (MOM)")
+  AGED_DRIVERS                    @map("Medical Exam for Aged Drivers (SPF)")
+  PR_MEDICAL                      @map("Medical Examination for Permanent Residency (ICA)")
+  STUDENT_PASS_MEDICAL            @map("Medical Examination for Student Pass (ICA)")
+  LTVP_MEDICAL                    @map("Medical Examination for Long Term Visit Pass (ICA)")
+  DRIVING_LICENCE_TP              @map("Driving Licence Medical Examination Report (TP)")
+  DRIVING_VOCATIONAL_TP_LTA       @map("Driving Licence and Vocational Licence (TP & LTA)")
+  VOCATIONAL_LICENCE_LTA          @map("Vocational Licence Medical Examination (LTA)")
+  DRIVING_LICENCE_TP_SHORT        @map("Short Form: Driving Licence (TP)")
+  DRIVING_VOCATIONAL_TP_LTA_SHORT @map("Short Form: Driving Licence & Vocational (TP & LTA)")
+  VOCATIONAL_LICENCE_LTA_SHORT    @map("Short Form: Vocational Licence (LTA)")
 }
 
 enum SubmissionStatus {

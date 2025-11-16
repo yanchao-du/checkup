@@ -15,6 +15,7 @@ import { generateIcaContent } from './generators/ica.generator';
 import { generateDriverTpContent } from './generators/driver-tp.generator';
 import { generateDriverTpLtaContent } from './generators/driver-tp-lta.generator';
 import { generateDriverLtaContent } from './generators/driver-lta.generator';
+import { generateShortDriverExamContent } from './generators/short-driver-exam.generator';
 
 @Injectable()
 export class PdfService {
@@ -23,15 +24,32 @@ export class PdfService {
 
   constructor() {
     // Initialize pdfmake with fonts
-    const pdfFonts = require('pdfmake/build/vfs_fonts.js');
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Read Material Icons font file
+    const materialIconsPath = path.join(__dirname, 'fonts', 'MaterialIcons-Regular.ttf');
+    const materialIconsBuffer = fs.readFileSync(materialIconsPath);
+    
+    // Load default Roboto fonts from vfs_fonts
+    const vfsFonts = require('pdfmake/build/vfs_fonts.js');
+    const vfs = vfsFonts.pdfMake ? vfsFonts.pdfMake.vfs : vfsFonts;
+    
     const fonts = {
       Roboto: {
-        normal: Buffer.from(pdfFonts['Roboto-Regular.ttf'], 'base64'),
-        bold: Buffer.from(pdfFonts['Roboto-Medium.ttf'], 'base64'),
-        italics: Buffer.from(pdfFonts['Roboto-Italic.ttf'], 'base64'),
-        bolditalics: Buffer.from(pdfFonts['Roboto-MediumItalic.ttf'], 'base64'),
+        normal: Buffer.from(vfs['Roboto-Regular.ttf'], 'base64'),
+        bold: Buffer.from(vfs['Roboto-Medium.ttf'], 'base64'),
+        italics: Buffer.from(vfs['Roboto-Italic.ttf'], 'base64'),
+        bolditalics: Buffer.from(vfs['Roboto-MediumItalic.ttf'], 'base64'),
+      },
+      MaterialIcons: {
+        normal: materialIconsBuffer,
+        bold: materialIconsBuffer,
+        italics: materialIconsBuffer,
+        bolditalics: materialIconsBuffer,
       },
     };
+    
     this.printer = new PdfPrinter(fonts);
   }
 
@@ -143,6 +161,13 @@ export class PdfService {
 
     if (examType === 'DRIVING_LICENCE_TP' || examType === 'AGED_DRIVERS') {
       return generateDriverTpContent(submission);
+    }
+
+    // Short driver exam forms
+    if (examType === 'DRIVING_LICENCE_TP_SHORT' || 
+        examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || 
+        examType === 'VOCATIONAL_LICENCE_LTA_SHORT') {
+      return generateShortDriverExamContent(submission);
     }
 
     // Default fallback

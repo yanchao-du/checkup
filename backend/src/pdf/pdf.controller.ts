@@ -19,14 +19,15 @@ export class PdfController {
     @Res() res: Response,
   ): Promise<void> {
     console.log('📄 PDF Controller: Request received for submission', id);
-    console.log('👤 User:', req.user);
+    console.log('👤 User:', JSON.stringify(req.user, null, 2));
     
     // Use the existing authorization logic from SubmissionsService
+    // Note: JWT payload has 'id' not 'userId'
     const submission = await this.submissionsService.findOne(
       id,
-      req.user.userId,
+      req.user.id || req.user.userId, // Support both 'id' and 'userId' fields
       req.user.role,
-      req.user.clinicId,
+      req.user.clinicId || null,
     );
 
     console.log('✅ PDF Controller: Authorization passed, generating PDF');

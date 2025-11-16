@@ -15,6 +15,13 @@ function getPurposeOfExamDisplayName(purposeOfExam: string): string {
   return displayNames[purposeOfExam] || purposeOfExam;
 }
 
+// Format mobile number with space after +65
+function formatMobileNumber(mobile: string | null | undefined): string {
+  if (!mobile) return '-';
+  // Add space after +65 if present
+  return mobile.replace(/^\+65/, '+65 ');
+}
+
 export function buildPatientInfo(submission: SubmissionData): Content[] {
   const rows: any[] = [];
 
@@ -28,11 +35,19 @@ export function buildPatientInfo(submission: SubmissionData): Content[] {
                     submission.examType === 'STUDENT_PASS_MEDICAL' || 
                     submission.examType === 'LTVP_MEDICAL';
 
-  // Check if this is a driving exam
+  // Check if this is a driving exam (including short forms)
   const isDrivingExam = submission.examType === 'DRIVING_LICENCE_TP' || 
                         submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' || 
                         submission.examType === 'VOCATIONAL_LICENCE_LTA' ||
-                        submission.examType === 'AGED_DRIVERS';
+                        submission.examType === 'AGED_DRIVERS' ||
+                        submission.examType === 'DRIVING_LICENCE_TP_SHORT' ||
+                        submission.examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
+                        submission.examType === 'VOCATIONAL_LICENCE_LTA_SHORT';
+
+  // Check if this is a short driver exam (no email field)
+  const isShortDriverExam = submission.examType === 'DRIVING_LICENCE_TP_SHORT' ||
+                            submission.examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
+                            submission.examType === 'VOCATIONAL_LICENCE_LTA_SHORT';
 
   // Patient Name (show full name for submitted reports, mask for drafts)
   const displayName = submission.status === 'submitted' ? submission.patientName : maskName(submission.patientName);
@@ -72,13 +87,14 @@ export function buildPatientInfo(submission: SubmissionData): Content[] {
   }
 
   // Contact Information
-  // For driving and ICA exams, always show email (even if empty or "-")
-  if (isDrivingExam || isIcaExam) {
+  // For driving (long form only) and ICA exams, always show email (even if empty or "-")
+  // Short driver exams do NOT include email
+  if ((isDrivingExam && !isShortDriverExam) || isIcaExam) {
     rows.push([
       { text: 'Email', style: 'tableCell' },
       { text: submission.patientEmail || '-', style: 'tableCell' },
     ]);
-  } else if (submission.patientEmail) {
+  } else if (submission.patientEmail && !isShortDriverExam) {
     rows.push([
       { text: 'Email', style: 'tableCell' },
       { text: submission.patientEmail, style: 'tableCell' },
@@ -89,12 +105,12 @@ export function buildPatientInfo(submission: SubmissionData): Content[] {
   if (isDrivingExam) {
     rows.push([
       { text: 'Mobile', style: 'tableCell' },
-      { text: submission.patientMobile || '-', style: 'tableCell' },
+      { text: formatMobileNumber(submission.patientMobile), style: 'tableCell' },
     ]);
   } else if (submission.patientMobile) {
     rows.push([
       { text: 'Mobile', style: 'tableCell' },
-      { text: submission.patientMobile, style: 'tableCell' },
+      { text: formatMobileNumber(submission.patientMobile), style: 'tableCell' },
     ]);
   }
 

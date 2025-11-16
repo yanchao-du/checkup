@@ -2,13 +2,16 @@ import { BadRequestException } from '@nestjs/common';
 import { CreateSubmissionDto } from '../dto/submission.dto';
 
 /**
- * Check if exam type is a driver medical exam
+ * Check if exam type is a driver medical exam (long or short form)
  */
 export function isDriverExam(examType: string): boolean {
   return (
     examType === 'DRIVING_LICENCE_TP' ||
     examType === 'DRIVING_VOCATIONAL_TP_LTA' ||
-    examType === 'VOCATIONAL_LICENCE_LTA'
+    examType === 'VOCATIONAL_LICENCE_LTA' ||
+    examType === 'DRIVING_LICENCE_TP_SHORT' ||
+    examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
+    examType === 'VOCATIONAL_LICENCE_LTA_SHORT'
   );
 }
 
