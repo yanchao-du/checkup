@@ -9,10 +9,10 @@ interface ShortDriverExamAssessmentProps {
 }
 
 const PURPOSE_LABELS: Record<string, string> = {
-  AGE_65_ABOVE_TP_ONLY: 'Age 65+ TP Only',
-  AGE_65_ABOVE_TP_LTA: 'Age 65+ TP & LTA',
-  AGE_64_BELOW_LTA_ONLY: 'Age 64 & Below LTA Only',
-  BAVL_ANY_AGE: 'BAVL (Any Age)',
+  AGE_65_ABOVE_TP_ONLY: 'Renew driving licence (for drivers aged 65 and above) for submission to Traffic Police only',
+  AGE_65_ABOVE_TP_LTA: 'Renew driving licence and vocational licence (for drivers aged 65 and above) for submission to Traffic Police and Land Transport Authority',
+  AGE_64_BELOW_LTA_ONLY: 'Renew vocational licence (for drivers aged 64 and below) for submission to Land Transport Authority only',
+  BAVL_ANY_AGE: 'Renew only Bus Attendant\'s Vocational Licence (BAVL) regardless of age',
 };
 
 export function ShortDriverExamAssessment({
@@ -81,7 +81,7 @@ export function ShortDriverExamAssessment({
         {showPsvBavlFitness && (
           <div className="mb-6">
             <Label className="text-sm font-medium mb-2 block">
-              Is the examinee physically and mentally fit to drive a PSV and/or hold a BAVL?
+              Is the examinee physically and mentally fit to drive a Public Service Vehicle (PSV) and/or hold a Bus Attendant's Vocational Licence (BAVL)?
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <RadioGroup

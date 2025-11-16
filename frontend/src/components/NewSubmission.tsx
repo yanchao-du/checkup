@@ -18,7 +18,6 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Checkbox } from './ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Send } from 'lucide-react';
@@ -71,7 +70,7 @@ const isDriverExamType = (examType: ExamType | ''): boolean => {
 
 // Helper to check if exam type is a short driver medical exam
 const isShortDriverExamType = (examType: ExamType | ''): boolean => {
-  return examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT';
+  return examType === 'DRIVING_LICENCE_TP_SHORT' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT';
 };
 
 // Helper to check if exam type is a MOM exam
@@ -2858,7 +2857,7 @@ export function NewSubmission() {
               )}
 
               {/* Short Driver Exam Form */}
-              {examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
+              {isShortDriverExamType(examType) && (
                 <DrivingVocationalTpLtaShortAccordions
                   formData={formData}
                   onChange={handleFormDataChange}
@@ -2869,7 +2868,7 @@ export function NewSubmission() {
                   purposeOfExam={purposeOfExam}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
-                    if (next === 'review-submit') {
+                    if (next === 'summary') {
                       setShowSummary(true);
                     }
                     setActiveAccordion(next);
@@ -3512,9 +3511,9 @@ export function NewSubmission() {
               )}
 
               {/* Short Driver Exam Summary */}
-              {examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && showSummary && (
-                <AccordionItem value="review-submit">
-                  <AccordionTrigger isCompleted={completedSections.has('review-submit')}>
+              {isShortDriverExamType(examType) && showSummary && (
+                <AccordionItem value="summary">
+                  <AccordionTrigger isCompleted={completedSections.has('summary')}>
                     <div className="flex items-center gap-2">
                       <span>Review & Submit</span>
                     </div>
@@ -3530,41 +3529,24 @@ export function NewSubmission() {
                         }}
                         purposeOfExam={purposeOfExam}
                         examinationDate={examinationDate}
+                        doctorName={user?.name}
+                        doctorMcrNumber={user?.mcrNumber}
+                        clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
+                        userRole={role}
                         onEdit={(section) => {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
                         }}
+                        onDeclarationChange={(checked) => {
+                          setFormData(prev => ({ ...prev, declarationAgreed: checked }));
+                        }}
                       />
-
-                      {/* Declaration Section */}
-                      <Card>
-                        <CardContent className="pt-6">
-                          <h4 className="text-base font-semibold mb-4">Declaration</h4>
-                          <div className="flex items-start space-x-3">
-                            <Checkbox
-                              id="short-exam-summary-declaration"
-                              checked={formData.declarationAgreed === true}
-                              onCheckedChange={(checked: boolean) => {
-                                setFormData(prev => ({ ...prev, declarationAgreed: checked }));
-                              }}
-                            />
-                            <Label 
-                              htmlFor="short-exam-summary-declaration" 
-                              className="text-sm font-normal leading-relaxed cursor-pointer"
-                            >
-                              I certify that I have examined the above-named person and that the information
-                              provided is true and accurate to the best of my knowledge.
-                              <span className="text-red-500 ml-1">*</span>
-                            </Label>
-                          </div>
-                        </CardContent>
-                      </Card>
 
                       <div className="flex justify-start mt-4">
                         <Button
                           type="button"
                           onClick={() => {
-                            setCompletedSections(prev => new Set(prev).add('review-submit'));
+                            setCompletedSections(prev => new Set(prev).add('summary'));
                             if (role === 'doctor') {
                               setIsRouteForApproval(false);
                               setShowSubmitDialog(true);
@@ -3573,9 +3555,25 @@ export function NewSubmission() {
                               setShowSubmitDialog(true);
                             }
                           }}
-                          disabled={isSaving || !formData.declarationAgreed}
+                          disabled={
+                            isSaving || 
+                            !formData.declarationAgreed ||
+                            (purposeOfExam === 'BAVL_ANY_AGE' 
+                              ? !formData.fitToDrivePsvBavl
+                              : purposeOfExam === 'AGE_65_ABOVE_TP_ONLY'
+                              ? !formData.fitToDriveMotorVehicle
+                              : !formData.fitToDriveMotorVehicle || !formData.fitToDrivePsvBavl)
+                          }
                         >
-                          {isSaving ? 'Submitting...' : role === 'doctor' ? 'Submit to SPF/LTA' : 'Route for Approval'}
+                          {isSaving ? 'Submitting...' : role === 'doctor' ? (
+                            examType === 'DRIVING_LICENCE_TP_SHORT' 
+                              ? 'Submit to TP'
+                              : purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE'
+                              ? 'Submit to LTA'
+                              : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
+                              ? 'Submit to TP & LTA'
+                              : 'Submit to TP'
+                          ) : 'Route for Approval'}
                         </Button>
                       </div>
                     </div>
@@ -3583,7 +3581,7 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && examType !== 'FULL_MEDICAL_EXAM' && !isIcaExamType(examType) && examType !== 'DRIVING_LICENCE_TP' && examType !== 'DRIVING_VOCATIONAL_TP_LTA' && examType !== 'VOCATIONAL_LICENCE_LTA' && (
+              {examType !== 'SIX_MONTHLY_MDW' && examType !== 'SIX_MONTHLY_FMW' && examType !== 'FULL_MEDICAL_EXAM' && !isIcaExamType(examType) && examType !== 'DRIVING_LICENCE_TP' && examType !== 'DRIVING_VOCATIONAL_TP_LTA' && examType !== 'VOCATIONAL_LICENCE_LTA' && examType !== 'DRIVING_LICENCE_TP_SHORT' && examType !== 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
                 <AccordionItem value="remarks">
                   <AccordionTrigger isCompleted={completedSections.has('remarks')} isDisabled={!isPatientInfoValid}>
                     <div className="flex items-center gap-2">

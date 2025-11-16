@@ -65,7 +65,7 @@ export function generateShortDriverExamContent(submission: SubmissionData): Cont
       show: showMotorVehicleFitness,
     },
     {
-      label: 'Physically and mentally fit to drive a PSV and/or hold a BAVL?',
+      label: 'Physically and mentally fit to drive a Public Service Vehicle (PSV) and/or hold a Bus Attendant\'s Vocational Licence (BAVL)?',
       value: formData.fitToDrivePsvBavl === 'yes' ? 'Yes' : formData.fitToDrivePsvBavl === 'no' ? 'No' : '-',
       show: showPsvBavlFitness,
     },

@@ -71,7 +71,7 @@ export function DrivingVocationalTpLtaShortAccordions({
                 type="button"
                 disabled={!isAssessmentValid}
                 onClick={() => {
-                  onContinue('overall-assessment', 'review-submit');
+                  onContinue('overall-assessment', 'summary');
                 }}
               >
                 {isEditingFromSummary ? 'Continue to Summary' : 'Continue to Review & Submit'}
