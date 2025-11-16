@@ -3,14 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
-import { Loader2, CheckCircle, UserCheck } from 'lucide-react';
+import { Loader2, CheckCircle, UserCheck, Download } from 'lucide-react';
 import { getDisplayName } from '../lib/nameDisplay';
+import { toast } from 'sonner';
 
 export function Acknowledgement() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -61,6 +65,35 @@ export function Acknowledgement() {
 
   const submittedAt = submission.submittedDate ? new Date(submission.submittedDate) : new Date(submission.createdDate);
   const isPendingApproval = submission.status === 'pending_approval';
+  const isSubmitted = submission.status === 'submitted';
+
+  const handleDownloadPdf = async () => {
+    if (!id) return;
+    
+    try {
+      setIsDownloadingPdf(true);
+      const blob = await submissionsApi.downloadPdf(id);
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submission-${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      toast.error('Failed to download PDF. Please try again.');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto py-12">
@@ -137,6 +170,33 @@ export function Acknowledgement() {
                 </li>
               </ul>
             </div> */}
+
+            {/* Only show PDF download for submitted status (not pending_approval) */}
+            {isSubmitted && (
+              <div className="mt-6 pt-4 border-t border-slate-200">
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleDownloadPdf}
+                    disabled={isDownloadingPdf}
+                    className="w-full sm:w-auto"
+                    variant="outline"
+                  >
+                    {isDownloadingPdf ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Downloading...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF
+                      </>
+                    )}
+                  </Button>
+                  <span className="text-sm text-slate-500">~30KB</span>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
