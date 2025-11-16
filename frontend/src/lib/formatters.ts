@@ -60,11 +60,11 @@ export function formatExamTypeFull(examType: ExamType): string {
     case 'VOCATIONAL_LICENCE_LTA':
       return 'Medical Examination for Vocational Licence';
     case 'DRIVING_LICENCE_TP_SHORT':
-      return 'Medical Examination for Driving Licence - TP Only (Short Form)';
+      return 'Driving Licence (TP) Medical Exam';
     case 'DRIVING_VOCATIONAL_TP_LTA_SHORT':
-      return 'Medical Examination for Driving Licence / Vocational Licence (Short Form)';
+      return 'Driving Licence (TP) / Vocational Licence (LTA) Medical Exam';
     case 'VOCATIONAL_LICENCE_LTA_SHORT':
-      return 'Medical Examination for Vocational Licence - LTA Only (Short Form)';
+      return 'Vocational Licence (LTA) Medical Exam';
     case 'PR_MEDICAL':
       return 'Medical Examination for Permanent Residency';
     case 'STUDENT_PASS_MEDICAL':

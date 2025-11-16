@@ -169,6 +169,7 @@ export function NewSubmission() {
   const [showSummary, setShowSummary] = useState(false);
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
+  const initialPurposeOfExamRef = useRef<string>('');
   const [testFin, setTestFin] = useState<string>('');
   const [showFinChangeDialog, setShowFinChangeDialog] = useState(false);
   const [pendingFinValue, setPendingFinValue] = useState<string>('');
@@ -437,7 +438,8 @@ export function NewSubmission() {
           setPatientPassportNo(existing.patientPassportNo || '');
           setPatientDateOfBirth(existing.patientDateOfBirth);
           setPatientEmail(existing.patientEmail || '');
-          setPatientMobile(existing.patientMobile || '');
+          // Strip +65 prefix from mobile number when loading (UI shows it separately)
+          setPatientMobile(existing.patientMobile ? existing.patientMobile.replace(/^\+65/, '') : '');
           setDrivingLicenseClass(existing.drivingLicenseClass || '');
           setPurposeOfExam(existing.purposeOfExam || '');
           setExaminationDate(existing.examinationDate || '');
@@ -1562,6 +1564,7 @@ export function NewSubmission() {
     ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) ? patientDateOfBirth : true) &&
     ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') ? drivingLicenseClass : true) &&
     (examType === 'DRIVING_VOCATIONAL_TP_LTA' ? purposeOfExam : true) &&
+    (isShortDriverExamType(examType) ? patientMobile.trim() : true) &&
     examinationDate &&
     !examinationDateError &&
     !emailError &&
@@ -1795,7 +1798,11 @@ export function NewSubmission() {
         ...(patientPassportNo && { patientPassportNo }), // Include passport number if provided
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
-        ...(patientMobile && { patientMobile: patientMobile.replace(/\s/g, '') }), // Remove spaces before saving
+        ...(patientMobile && { 
+          patientMobile: patientMobile.startsWith('+65') 
+            ? patientMobile.replace(/\s/g, '') 
+            : `+65${patientMobile.replace(/\s/g, '')}` 
+        }), // Add +65 prefix if not present and remove spaces
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
         ...(examinationDate && { examinationDate }), // Only include if not empty
@@ -2339,7 +2346,7 @@ export function NewSubmission() {
                     {(isDriverExamType(examType) || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT') && (
                       <div className="space-y-2 max-w-xs">
                         <Label htmlFor="patientMobile">
-                          Mobile Number{examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && <span className="text-red-500 ml-1">*</span>}
+                          Mobile Number{isShortDriverExamType(examType) && <span className="text-red-500 ml-1">*</span>}
                         </Label>
                         <div className="flex gap-2 items-start">
                           <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-muted-foreground whitespace-nowrap">
@@ -2480,6 +2487,12 @@ export function NewSubmission() {
                     <Button 
                       type="button"
                       onClick={() => {
+                        // Validate mobile number for short driver exams
+                        if (isShortDriverExamType(examType) && !patientMobile.trim()) {
+                          setMobileError('Mobile number is required');
+                          return;
+                        }
+                        
                         if (examType === 'FULL_MEDICAL_EXAM') {
                           // For FME, navigate to medical-history accordion
                           setCompletedSections(prev => new Set(prev).add('patient-info'));
@@ -2489,13 +2502,26 @@ export function NewSubmission() {
                           } else {
                             setActiveAccordion('medical-history');
                           }
+                        } else if (isShortDriverExamType(examType) && isEditingFromSummary && purposeOfExam !== initialPurposeOfExamRef.current) {
+                          // For short driver exam, if purpose of exam changed, go to overall assessment
+                          setCompletedSections(prev => new Set(prev).add('patient-info'));
+                          setActiveAccordion('overall-assessment');
+                          setIsEditingFromSummary(false);
+                          // Clear overall assessment completion since it needs to be redone
+                          setCompletedSections(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete('overall-assessment');
+                            return newSet;
+                          });
                         } else {
                           handleContinue('patient-info', 'exam-specific');
                         }
                       }}
                       disabled={!isPatientInfoValid}
                     >
-                      {isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
+                      {isEditingFromSummary && isShortDriverExamType(examType) && purposeOfExam !== initialPurposeOfExamRef.current 
+                        ? 'Continue to Overall Assessment'
+                        : isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
                     </Button>
                   </div>
                 </AccordionContent>
@@ -3536,6 +3562,10 @@ export function NewSubmission() {
                         onEdit={(section) => {
                           setActiveAccordion(section);
                           setIsEditingFromSummary(true);
+                          // Store initial purpose of exam when editing from summary
+                          if (section === 'patient-info') {
+                            initialPurposeOfExamRef.current = purposeOfExam;
+                          }
                         }}
                         onDeclarationChange={(checked) => {
                           setFormData(prev => ({ ...prev, declarationAgreed: checked }));
@@ -3558,11 +3588,15 @@ export function NewSubmission() {
                           disabled={
                             isSaving || 
                             !formData.declarationAgreed ||
-                            (purposeOfExam === 'BAVL_ANY_AGE' 
-                              ? !formData.fitToDrivePsvBavl
-                              : purposeOfExam === 'AGE_65_ABOVE_TP_ONLY'
+                            (purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' 
                               ? !formData.fitToDriveMotorVehicle
-                              : !formData.fitToDriveMotorVehicle || !formData.fitToDrivePsvBavl)
+                              : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
+                              ? !formData.fitToDrivePsv || !formData.fitForBavl
+                              : purposeOfExam === 'AGE_64_BELOW_LTA_ONLY'
+                              ? !formData.fitToDrivePsv || !formData.fitForBavl
+                              : purposeOfExam === 'BAVL_ANY_AGE'
+                              ? !formData.fitForBavl
+                              : false)
                           }
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? (

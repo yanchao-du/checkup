@@ -12,33 +12,6 @@ export function generateShortDriverExamContent(submission: SubmissionData): Cont
   const formData = submission.formData;
   const content: Content[] = [];
 
-  // Patient Information Section
-  content.push({
-    text: 'Patient Information',
-    style: 'sectionTitle',
-    margin: [0, 10, 0, 5] as [number, number, number, number],
-  });
-
-  const patientInfo: Array<{ label: string; value: string }> = [
-    { label: 'Name', value: submission.patientName || '-' },
-    { label: 'NRIC', value: submission.patientNric || '-' },
-    { label: 'Mobile Number', value: submission.patientMobile || '-' },
-    { label: 'Purpose of Examination', value: PURPOSE_LABELS[submission.purposeOfExam || ''] || submission.purposeOfExam || '-' },
-    { label: 'Examination Date', value: submission.examinationDate || '-' },
-  ];
-
-  content.push({
-    table: {
-      widths: ['30%', '70%'],
-      body: patientInfo.map(info => [
-        { text: info.label, bold: true, fontSize: 10 },
-        { text: info.value, fontSize: 10 },
-      ]),
-    },
-    layout: 'noBorders',
-    margin: [0, 0, 0, 15] as [number, number, number, number],
-  });
-
   // Fitness Determination Section
   content.push({
     text: 'Fitness Determination',
@@ -48,12 +21,13 @@ export function generateShortDriverExamContent(submission: SubmissionData): Cont
 
   // Determine which fitness questions are relevant
   const purpose = submission.purposeOfExam;
-  const showMotorVehicleFitness = 
-    purpose === 'AGE_65_ABOVE_TP_ONLY' || 
+  const showMotorVehicleFitness = purpose === 'AGE_65_ABOVE_TP_ONLY';
+  
+  const showPsvFitness = 
     purpose === 'AGE_65_ABOVE_TP_LTA' || 
     purpose === 'AGE_64_BELOW_LTA_ONLY';
   
-  const showPsvBavlFitness = 
+  const showBavlFitness = 
     purpose === 'AGE_65_ABOVE_TP_LTA' || 
     purpose === 'AGE_64_BELOW_LTA_ONLY' ||
     purpose === 'BAVL_ANY_AGE';
@@ -61,13 +35,18 @@ export function generateShortDriverExamContent(submission: SubmissionData): Cont
   const fitnessInfo: Array<{ label: string; value: string; show: boolean }> = [
     {
       label: 'Physically and mentally fit to drive a motor vehicle?',
-      value: formData.fitToDriveMotorVehicle === 'yes' ? 'Yes' : formData.fitToDriveMotorVehicle === 'no' ? 'No' : '-',
+      value: formData.fitToDriveMotorVehicle === 'yes' ? 'Yes' : 'No',
       show: showMotorVehicleFitness,
     },
     {
-      label: 'Physically and mentally fit to drive a Public Service Vehicle (PSV) and/or hold a Bus Attendant\'s Vocational Licence (BAVL)?',
-      value: formData.fitToDrivePsvBavl === 'yes' ? 'Yes' : formData.fitToDrivePsvBavl === 'no' ? 'No' : '-',
-      show: showPsvBavlFitness,
+      label: 'Physically and mentally fit to drive a Public Service Vehicle (PSV)?',
+      value: formData.fitToDrivePsv === 'yes' ? 'Yes' : 'No',
+      show: showPsvFitness,
+    },
+    {
+      label: 'Physically and mentally fit to hold a Bus Attendant\'s Vocational Licence (BAVL)?',
+      value: formData.fitForBavl === 'yes' ? 'Yes' : 'No',
+      show: showBavlFitness,
     },
   ];
 
@@ -96,46 +75,6 @@ export function generateShortDriverExamContent(submission: SubmissionData): Cont
       margin: [0, 0, 0, 15] as [number, number, number, number],
     });
   }
-
-  // Declaration Section
-  content.push({
-    text: 'Declaration',
-    style: 'sectionTitle',
-    margin: [0, 10, 0, 5] as [number, number, number, number],
-  });
-
-  content.push({
-    text: formData.declarationAgreed 
-      ? '✓ I certify that I have examined the above-named person and that the information provided is true and accurate to the best of my knowledge.'
-      : 'Declaration not agreed',
-    fontSize: 10,
-    color: formData.declarationAgreed ? '#16a34a' : '#dc2626',
-    margin: [0, 0, 0, 15] as [number, number, number, number],
-  });
-
-  // Medical Practitioner Information
-  content.push({
-    text: 'Medical Practitioner Information',
-    style: 'sectionTitle',
-    margin: [0, 15, 0, 5] as [number, number, number, number],
-  });
-
-  const doctorInfo: Array<{ label: string; value: string }> = [
-    { label: 'Name', value: submission.createdByName || '-' },
-    { label: 'MCR Number', value: submission.createdByMcrNumber || '-' },
-  ];
-
-  content.push({
-    table: {
-      widths: ['30%', '70%'],
-      body: doctorInfo.map(info => [
-        { text: info.label, bold: true, fontSize: 10 },
-        { text: info.value, fontSize: 10 },
-      ]),
-    },
-    layout: 'noBorders',
-    margin: [0, 0, 0, 10] as [number, number, number, number],
-  });
 
   return content;
 }

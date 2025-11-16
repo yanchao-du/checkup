@@ -40,12 +40,13 @@ export function ShortDriverExamSummary({
   onDeclarationChange,
 }: ShortDriverExamSummaryProps) {
   // Determine which fitness questions are relevant based on purpose
-  const showMotorVehicleFitness = 
-    purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' || 
+  const showMotorVehicleFitness = purposeOfExam === 'AGE_65_ABOVE_TP_ONLY';
+  
+  const showPsvFitness = 
     purposeOfExam === 'AGE_65_ABOVE_TP_LTA' || 
     purposeOfExam === 'AGE_64_BELOW_LTA_ONLY';
   
-  const showPsvBavlFitness = 
+  const showBavlFitness = 
     purposeOfExam === 'AGE_65_ABOVE_TP_LTA' || 
     purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' ||
     purposeOfExam === 'BAVL_ANY_AGE';
@@ -130,13 +131,27 @@ export function ShortDriverExamSummary({
                 </p>
               </div>
             )}
-            {showPsvBavlFitness && (
+            {showPsvFitness && (
               <div>
-                <p className="text-slate-500">Physically and mentally fit to drive a Public Service Vehicle (PSV) and/or hold a Bus Attendant's Vocational Licence (BAVL)?</p>
+                <p className="text-slate-500">Physically and mentally fit to drive a Public Service Vehicle (PSV)?</p>
                 <p className="font-medium">
-                  {formData.fitToDrivePsvBavl === 'yes' ? (
+                  {formData.fitToDrivePsv === 'yes' ? (
                     <span className="text-green-600">Yes</span>
-                  ) : formData.fitToDrivePsvBavl === 'no' ? (
+                  ) : formData.fitToDrivePsv === 'no' ? (
+                    <span className="text-red-600">No</span>
+                  ) : (
+                    '-'
+                  )}
+                </p>
+              </div>
+            )}
+            {showBavlFitness && (
+              <div>
+                <p className="text-slate-500">Physically and mentally fit to hold a Bus Attendant's Vocational Licence (BAVL)?</p>
+                <p className="font-medium">
+                  {formData.fitForBavl === 'yes' ? (
+                    <span className="text-green-600">Yes</span>
+                  ) : formData.fitForBavl === 'no' ? (
                     <span className="text-red-600">No</span>
                   ) : (
                     '-'

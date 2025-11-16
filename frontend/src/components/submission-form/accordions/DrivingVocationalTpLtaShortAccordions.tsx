@@ -26,19 +26,26 @@ export function DrivingVocationalTpLtaShortAccordions({
   
   // Validation function for assessment section
   const validateAssessment = (): boolean => {
-    const { fitToDriveMotorVehicle, fitToDrivePsvBavl } = formData;
+    const { fitToDriveMotorVehicle, fitToDrivePsv, fitForBavl } = formData;
     
-    // Check fitness based on purpose
-    if (purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' || 
-        purposeOfExam === 'AGE_65_ABOVE_TP_LTA' || 
-        purposeOfExam === 'AGE_64_BELOW_LTA_ONLY') {
+    // Purpose 1: Age 65+ TP only - requires motor vehicle fitness
+    if (purposeOfExam === 'AGE_65_ABOVE_TP_ONLY') {
       if (!fitToDriveMotorVehicle) return false;
     }
     
-    if (purposeOfExam === 'AGE_65_ABOVE_TP_LTA' || 
-        purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' ||
-        purposeOfExam === 'BAVL_ANY_AGE') {
-      if (!fitToDrivePsvBavl) return false;
+    // Purpose 2: Age 65+ TP & LTA - requires PSV and BAVL fitness
+    if (purposeOfExam === 'AGE_65_ABOVE_TP_LTA') {
+      if (!fitToDrivePsv || !fitForBavl) return false;
+    }
+    
+    // Purpose 3: Age 64 below LTA only - requires PSV and BAVL fitness
+    if (purposeOfExam === 'AGE_64_BELOW_LTA_ONLY') {
+      if (!fitToDrivePsv || !fitForBavl) return false;
+    }
+    
+    // Purpose 4: BAVL any age - requires BAVL fitness only
+    if (purposeOfExam === 'BAVL_ANY_AGE') {
+      if (!fitForBavl) return false;
     }
     
     return true;

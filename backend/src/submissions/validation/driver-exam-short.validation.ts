@@ -49,77 +49,76 @@ function validateNric(nric: string): boolean {
  * Main validation function for short form driver exams
  */
 export function validateShortDriverExam(dto: CreateSubmissionDto): void {
-  const { formData } = dto;
+  const { formData, patientNric, patientName, patientMobile, examinationDate, purposeOfExam } = dto;
 
   if (!formData) {
     throw new BadRequestException('Form data is required');
   }
 
-  const patientInfo = formData.patientInfo || {};
-  const assessment = formData.assessment || {};
-  const declaration = formData.declaration || {};
+  // For short driver exams, fitness fields are stored at the root level of formData
+  // not in a nested assessment object
 
-  // Validate Patient NRIC
-  if (!patientInfo.nric) {
+  // Validate Patient NRIC (comes from dto.patientNric at root level)
+  if (!patientNric) {
     throw new BadRequestException('Patient NRIC is required');
   }
-  if (!validateNric(patientInfo.nric)) {
+  if (!validateNric(patientNric)) {
     throw new BadRequestException('Invalid NRIC format');
   }
 
-  // Validate Patient Name
-  if (!patientInfo.name || typeof patientInfo.name !== 'string' || patientInfo.name.trim() === '') {
+  // Validate Patient Name (comes from dto.patientName at root level)
+  if (!patientName || typeof patientName !== 'string' || patientName.trim() === '') {
     throw new BadRequestException('Patient name is required');
   }
 
-  // Validate Mobile Number
-  if (!patientInfo.mobileNumber) {
+  // Validate Mobile Number (comes from dto.patientMobile at root level)
+  if (!patientMobile) {
     throw new BadRequestException('Mobile number is required');
   }
-  if (!validateMobileNumber(patientInfo.mobileNumber)) {
+  if (!validateMobileNumber(patientMobile)) {
     throw new BadRequestException(
       'Invalid mobile number format. Expected +65 followed by 8 digits',
     );
   }
 
-  // Validate Examination Date
-  if (!patientInfo.examinationDate) {
+  // Validate Examination Date (comes from dto.examinationDate at root level)
+  if (!examinationDate) {
     throw new BadRequestException('Examination date is required');
   }
 
-  // Validate Purpose of Exam
-  if (!patientInfo.purposeOfExam) {
+  // Validate Purpose of Exam (comes from dto.purposeOfExam at root level)
+  if (!purposeOfExam) {
     throw new BadRequestException('Purpose of exam is required');
   }
-  if (!VALID_PURPOSES.includes(patientInfo.purposeOfExam)) {
+  if (!VALID_PURPOSES.includes(purposeOfExam)) {
     throw new BadRequestException('Invalid purpose of exam');
   }
 
   // Validate Fitness Determinations based on Purpose
-  const purpose = patientInfo.purposeOfExam;
-
-  if (purpose === PURPOSE_AGE_65_ABOVE_TP_ONLY) {
+  // purposeOfExam already extracted from dto at function level
+  if (purposeOfExam === PURPOSE_AGE_65_ABOVE_TP_ONLY) {
     // Requires fitToDriveMotorVehicle
-    if (assessment.fitToDriveMotorVehicle === undefined || assessment.fitToDriveMotorVehicle === null) {
+    if (formData.fitToDriveMotorVehicle === undefined || formData.fitToDriveMotorVehicle === null) {
       throw new BadRequestException('Fitness to drive motor vehicle determination is required');
     }
-  } else if (purpose === PURPOSE_AGE_65_ABOVE_TP_LTA || purpose === PURPOSE_AGE_64_BELOW_LTA_ONLY) {
-    // Requires both fitToDrivePublicService AND fitBusAttendant
-    if (assessment.fitToDrivePublicService === undefined || assessment.fitToDrivePublicService === null) {
+  } else if (purposeOfExam === PURPOSE_AGE_65_ABOVE_TP_LTA || purposeOfExam === PURPOSE_AGE_64_BELOW_LTA_ONLY) {
+    // Requires both fitToDrivePsv AND fitForBavl
+    if (formData.fitToDrivePsv === undefined || formData.fitToDrivePsv === null) {
       throw new BadRequestException('Public service vehicle fitness determination is required');
     }
-    if (assessment.fitBusAttendant === undefined || assessment.fitBusAttendant === null) {
+    if (formData.fitForBavl === undefined || formData.fitForBavl === null) {
       throw new BadRequestException('Bus attendant vocational licence fitness determination is required');
     }
-  } else if (purpose === PURPOSE_BAVL_ANY_AGE) {
-    // Requires fitBusAttendant only
-    if (assessment.fitBusAttendant === undefined || assessment.fitBusAttendant === null) {
+  } else if (purposeOfExam === PURPOSE_BAVL_ANY_AGE) {
+    // Requires fitForBavl only
+    if (formData.fitForBavl === undefined || formData.fitForBavl === null) {
       throw new BadRequestException('Bus attendant vocational licence fitness determination is required');
     }
   }
 
   // Validate Declaration
-  if (declaration.confirmed !== true) {
+  // Declaration checkbox is stored at root of formData as 'declarationAgreed'
+  if (formData.declarationAgreed !== true) {
     throw new BadRequestException('Declaration confirmation is required');
   }
 }

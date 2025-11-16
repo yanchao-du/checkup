@@ -11,6 +11,9 @@ export const examTypeDisplayNames: Record<string, string> = {
   'DRIVING_LICENCE_TP': 'Driving Licence Medical Examination Report (TP)',
   'DRIVING_VOCATIONAL_TP_LTA': 'Driving Licence (TP) / Vocational Licence (LTA)',
   'VOCATIONAL_LICENCE_LTA': 'Vocational Licence Medical Examination (LTA)',
+  'DRIVING_LICENCE_TP_SHORT': 'Driving Licence (TP) Medical Exam',
+  'DRIVING_VOCATIONAL_TP_LTA_SHORT': 'Driving Licence (TP) / Vocational Licence (LTA) Medical Exam',
+  'VOCATIONAL_LICENCE_LTA_SHORT': 'Vocational Licence (LTA) Medical Exam',
 };
 
 export function getExamTypeDisplayName(examType: string): string {

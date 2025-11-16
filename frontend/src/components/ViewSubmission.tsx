@@ -22,6 +22,7 @@ import { IcaExamDetails } from './submission-view/IcaExamDetails';
 import { DrivingLicenceTpDetails } from './submission-form/details/DrivingLicenceTpDetails';
 import { DrivingVocationalTpLtaDetails } from './submission-form/details/DrivingVocationalTpLtaDetails';
 import { VocationalLicenceLtaDetails } from './submission-form/details/VocationalLicenceLtaDetails';
+import { ShortDriverExamDetails } from './submission-form/details/ShortDriverExamDetails';
 import { FullMedicalExamDetails } from './FullMedicalExamDetails';
 import { SubmissionTimeline } from './submission-view/SubmissionTimeline';
 import { DeclarationView } from './submission-view/DeclarationView';
@@ -40,6 +41,10 @@ import {
 
 const isDriverExamType = (examType: string) => {
   return examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'VOCATIONAL_LICENCE_LTA';
+};
+
+const isShortDriverExamType = (examType: string) => {
+  return examType === 'DRIVING_LICENCE_TP_SHORT' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || examType === 'VOCATIONAL_LICENCE_LTA_SHORT';
 };
 
 const isIcaExamType = (examType: string) => {
@@ -271,7 +276,7 @@ export function ViewSubmission() {
                     <p className="text-slate-900">{submission.patientEmail || '-'}</p>
                   </div>
                 )}
-                {isDriverExamType(submission.examType) && (
+                {(isDriverExamType(submission.examType) || isShortDriverExamType(submission.examType)) && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Mobile Number</p>
                     <p className="text-slate-900">{submission.patientMobile ? `+65 ${submission.patientMobile}` : '-'}</p>
@@ -283,7 +288,7 @@ export function ViewSubmission() {
                     <p className="text-slate-900">{(submission as any).drivingLicenseClass}</p>
                   </div>
                 )}
-                {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && submission.purposeOfExam && (
+                {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' || isShortDriverExamType(submission.examType)) && submission.purposeOfExam && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Purpose of Exam</p>
                     <p className="text-slate-900">
@@ -431,6 +436,11 @@ export function ViewSubmission() {
                 <IcaExamDetails submission={submission} />
               )}
 
+              {/* Short Driver Exam Forms */}
+              {isShortDriverExamType(submission.examType) && (
+                <ShortDriverExamDetails submission={submission} />
+              )}
+
               {/* General Remarks section - for all exam types except ICA and driver exams (which include remarks in their detail components) */}
               {submission.examType !== 'PR_MEDICAL' && 
                submission.examType !== 'STUDENT_PASS_MEDICAL' && 
@@ -438,7 +448,8 @@ export function ViewSubmission() {
                submission.examType !== 'DRIVING_LICENCE_TP' &&
                submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
                submission.examType !== 'VOCATIONAL_LICENCE_LTA' &&
-               submission.examType !== 'FULL_MEDICAL_EXAM' && (
+               submission.examType !== 'FULL_MEDICAL_EXAM' &&
+               !isShortDriverExamType(submission.examType) && (
                 <>
                   <Separator />
                   <div>
@@ -473,7 +484,8 @@ export function ViewSubmission() {
                   {submission.examType !== 'PR_MEDICAL' && 
                    submission.examType !== 'STUDENT_PASS_MEDICAL' && 
                    submission.examType !== 'LTVP_MEDICAL' &&
-                   !isDriverExamType(submission.examType) && (
+                   !isDriverExamType(submission.examType) &&
+                   !isShortDriverExamType(submission.examType) && (
                     <DeclarationView
                       doctorName={submission.approvedByName || submission.createdByName}
                       doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
@@ -567,7 +579,11 @@ export function ViewSubmission() {
                         {(submission.examType === 'PR_MEDICAL' || 
                           submission.examType === 'STUDENT_PASS_MEDICAL' || 
                           submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
-                        {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (
+                        {(submission.examType === 'DRIVING_LICENCE_TP' || 
+                          submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' ||
+                          submission.examType === 'DRIVING_LICENCE_TP_SHORT' ||
+                          submission.examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
+                          submission.examType === 'VOCATIONAL_LICENCE_LTA_SHORT') && (
                           <>
                             {(submission.purposeOfExam === 'AGE_65_ABOVE_DRIVING_ONLY' || submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY') && 'Traffic Police'}
                             {submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && 'Traffic Police & Land Transport Authority'}
@@ -592,10 +608,11 @@ export function ViewSubmission() {
             </Card>
           )}
 
-          {/* Clinic Information - hide for TP, TP_LTA, MDW, FMW, FME, and ICA exams as they show it in declaration section */}
+          {/* Clinic Information - hide for TP, TP_LTA, short driver exams, MDW, FMW, FME, and ICA exams as they show it in declaration section */}
           {submission.clinicName && 
            submission.examType !== 'DRIVING_LICENCE_TP' && 
            submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
+           !isShortDriverExamType(submission.examType) &&
            submission.examType !== 'SIX_MONTHLY_MDW' &&
            submission.examType !== 'SIX_MONTHLY_FMW' &&
            submission.examType !== 'FULL_MEDICAL_EXAM' &&

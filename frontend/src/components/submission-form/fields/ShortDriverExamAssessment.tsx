@@ -22,12 +22,13 @@ export function ShortDriverExamAssessment({
   errors = {},
 }: ShortDriverExamAssessmentProps) {
   // Determine which fitness questions to show based on purpose
-  const showMotorVehicleFitness = 
-    purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' || 
+  const showMotorVehicleFitness = purposeOfExam === 'AGE_65_ABOVE_TP_ONLY';
+  
+  const showPsvFitness = 
     purposeOfExam === 'AGE_65_ABOVE_TP_LTA' || 
     purposeOfExam === 'AGE_64_BELOW_LTA_ONLY';
   
-  const showPsvBavlFitness = 
+  const showBavlFitness = 
     purposeOfExam === 'AGE_65_ABOVE_TP_LTA' || 
     purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' ||
     purposeOfExam === 'BAVL_ANY_AGE';
@@ -77,32 +78,62 @@ export function ShortDriverExamAssessment({
           </div>
         )}
 
-        {/* PSV/BAVL Fitness Question */}
-        {showPsvBavlFitness && (
+        {/* PSV Fitness Question */}
+        {showPsvFitness && (
           <div className="mb-6">
             <Label className="text-sm font-medium mb-2 block">
-              Is the examinee physically and mentally fit to drive a Public Service Vehicle (PSV) and/or hold a Bus Attendant's Vocational Licence (BAVL)?
+              Is the examinee physically and mentally fit to drive a Public Service Vehicle (PSV)?
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <RadioGroup
-              value={formData.fitToDrivePsvBavl || ''}
-              onValueChange={(value: string) => onChange('fitToDrivePsvBavl', value)}
+              value={formData.fitToDrivePsv || ''}
+              onValueChange={(value: string) => onChange('fitToDrivePsv', value)}
             >
               <div className="flex items-center space-x-2 mb-2">
-                <RadioGroupItem value="yes" id="psv-bavl-yes" />
-                <Label htmlFor="psv-bavl-yes" className="font-normal cursor-pointer">
+                <RadioGroupItem value="yes" id="psv-yes" />
+                <Label htmlFor="psv-yes" className="font-normal cursor-pointer">
                   Yes
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="psv-bavl-no" />
-                <Label htmlFor="psv-bavl-no" className="font-normal cursor-pointer">
+                <RadioGroupItem value="no" id="psv-no" />
+                <Label htmlFor="psv-no" className="font-normal cursor-pointer">
                   No
                 </Label>
               </div>
             </RadioGroup>
-            {errors.fitToDrivePsvBavl && (
-              <p className="text-sm text-red-500 mt-1">{errors.fitToDrivePsvBavl}</p>
+            {errors.fitToDrivePsv && (
+              <p className="text-sm text-red-500 mt-1">{errors.fitToDrivePsv}</p>
+            )}
+          </div>
+        )}
+
+        {/* BAVL Fitness Question */}
+        {showBavlFitness && (
+          <div className="mb-6">
+            <Label className="text-sm font-medium mb-2 block">
+              Is the examinee physically and mentally fit to hold a Bus Attendant's Vocational Licence (BAVL)?
+              <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <RadioGroup
+              value={formData.fitForBavl || ''}
+              onValueChange={(value: string) => onChange('fitForBavl', value)}
+            >
+              <div className="flex items-center space-x-2 mb-2">
+                <RadioGroupItem value="yes" id="bavl-yes" />
+                <Label htmlFor="bavl-yes" className="font-normal cursor-pointer">
+                  Yes
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="bavl-no" />
+                <Label htmlFor="bavl-no" className="font-normal cursor-pointer">
+                  No
+                </Label>
+              </div>
+            </RadioGroup>
+            {errors.fitForBavl && (
+              <p className="text-sm text-red-500 mt-1">{errors.fitForBavl}</p>
             )}
           </div>
         )}

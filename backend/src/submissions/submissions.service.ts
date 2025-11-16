@@ -238,7 +238,7 @@ export class SubmissionsService {
     };
   }
 
-  async findOne(id: string, userId: string, userRole: string, clinicId: string) {
+  async findOne(id: string, userId: string, userRole: string, clinicId: string | null) {
     const submission = await this.prisma.medicalSubmission.findUnique({
       where: { id },
       include: {
@@ -259,11 +259,22 @@ export class SubmissionsService {
     }
 
     // Check access - user must be admin, creator, approver, assigned doctor, or from same clinic
-    if (userRole !== 'admin' && 
-        submission.createdById !== userId && 
-        submission.approvedById !== userId &&
-        submission.assignedDoctorId !== userId &&
-        submission.clinicId !== clinicId) {
+    // Allow access if user is creator, approver, or assigned doctor (regardless of clinic)
+    // OR if user is from the same clinic
+    const hasDirectAccess = userRole === 'admin' || 
+                            submission.createdById === userId || 
+                            submission.approvedById === userId ||
+                            submission.assignedDoctorId === userId;
+    
+    const hasSameClinicAccess = clinicId && submission.clinicId && submission.clinicId === clinicId;
+    
+    // Debug logging
+    this.logger.debug(`Access check for submission ${id}: userId=${userId}, userRole=${userRole}, clinicId=${clinicId}`);
+    this.logger.debug(`Submission: createdById=${submission.createdById}, approvedById=${submission.approvedById}, assignedDoctorId=${submission.assignedDoctorId}, clinicId=${submission.clinicId}`);
+    this.logger.debug(`hasDirectAccess=${hasDirectAccess}, hasSameClinicAccess=${hasSameClinicAccess}`);
+    
+    if (!hasDirectAccess && !hasSameClinicAccess) {
+      this.logger.warn(`Access denied for user ${userId} to submission ${id}`);
       throw new ForbiddenException('Access denied');
     }
 

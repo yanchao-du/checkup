@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { submissionsApi } from '../services/submissions.service';
 import { getDisplayName } from '../lib/nameDisplay';
+import { formatExamType } from '../lib/formatters';
 import { Card, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
@@ -325,17 +326,7 @@ export function SubmissionsList() {
                       <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {submission.examType === 'SIX_MONTHLY_MDW' && '6ME for MDW (MOM)'}
-                          {submission.examType === 'SIX_MONTHLY_FMW' && '6ME for FMW (MOM)'}
-                          {submission.examType === 'WORK_PERMIT' && 'Work Permit (MOM)'}
-                          {submission.examType === 'FULL_MEDICAL_EXAM' && 'Full Medical Exam (MOM)'}
-                          {submission.examType === 'AGED_DRIVERS' && 'Aged Drivers (SPF)'}
-                          {submission.examType === 'DRIVING_LICENCE_TP' && 'Driving Licence (TP)'}
-                          {submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' && 'Driving (TP) / Vocational (LTA)'}
-                          {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Vocational Licence (LTA)'}
-                          {submission.examType === 'PR_MEDICAL' && 'PR (ICA)'}
-                          {submission.examType === 'STUDENT_PASS_MEDICAL' && 'Student Pass (ICA)'}
-                          {submission.examType === 'LTVP_MEDICAL' && 'LTVP (ICA)'}
+                          {formatExamType(submission.examType)}
                         </div>
                       </TableCell>
                       {!isDoctor && (

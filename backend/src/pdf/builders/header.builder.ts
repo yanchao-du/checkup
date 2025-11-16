@@ -3,10 +3,61 @@ import { SubmissionData } from '../utils/types';
 import { getExamTypeDisplayName } from '../utils/exam-type-mapper';
 import { format } from 'date-fns';
 
+function getSubmittedTo(submission: SubmissionData): string {
+  const { examType, purposeOfExam } = submission;
+  
+  // MOM exams
+  if (examType === 'SIX_MONTHLY_MDW' || 
+      examType === 'SIX_MONTHLY_FMW' || 
+      examType === 'WORK_PERMIT' ||
+      examType === 'FULL_MEDICAL_EXAM') {
+    return 'Ministry of Manpower';
+  }
+  
+  // ICA exams
+  if (examType === 'PR_MEDICAL' || 
+      examType === 'STUDENT_PASS_MEDICAL' || 
+      examType === 'LTVP_MEDICAL') {
+    return 'Immigration & Checkpoints Authority';
+  }
+  
+  // SPF exam
+  if (examType === 'AGED_DRIVERS') {
+    return 'Singapore Police Force';
+  }
+  
+  // Driver exams (including short forms)
+  if (examType === 'DRIVING_LICENCE_TP' || 
+      examType === 'DRIVING_VOCATIONAL_TP_LTA' ||
+      examType === 'DRIVING_LICENCE_TP_SHORT' ||
+      examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
+      examType === 'VOCATIONAL_LICENCE_LTA_SHORT') {
+    if (purposeOfExam === 'AGE_65_ABOVE_DRIVING_ONLY' || purposeOfExam === 'AGE_65_ABOVE_TP_ONLY') {
+      return 'Traffic Police';
+    }
+    if (purposeOfExam === 'AGE_65_ABOVE_TP_LTA') {
+      return 'Traffic Police & Land Transport Authority';
+    }
+    if (purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE') {
+      return 'Land Transport Authority';
+    }
+    return 'Traffic Police / Land Transport Authority';
+  }
+  
+  // LTA vocational exam
+  if (examType === 'VOCATIONAL_LICENCE_LTA') {
+    return 'Land Transport Authority';
+  }
+  
+  return 'N/A';
+}
+
 export function buildHeader(submission: SubmissionData): Content[] {
   const submittedDateTime = submission.submittedDate 
     ? format(new Date(submission.submittedDate), 'dd MMM yyyy, hh:mm a')
     : 'N/A';
+  
+  const submittedTo = getSubmittedTo(submission);
 
   return [
     // CheckUp Logo/Branding
@@ -40,6 +91,10 @@ export function buildHeader(submission: SubmissionData): Content[] {
           [
             { text: 'Reference Number', style: 'tableCell', bold: true },
             { text: submission.id, style: 'tableCell' },
+          ],
+          [
+            { text: 'Submitted To', style: 'tableCell', bold: true },
+            { text: submittedTo, style: 'tableCell' },
           ],
           [
             { text: 'Submission Date & Time', style: 'tableCell', bold: true },
