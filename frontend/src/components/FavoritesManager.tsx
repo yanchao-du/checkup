@@ -18,7 +18,7 @@ type ExamType =
   | 'SIX_MONTHLY_MDW'
   | 'FULL_MEDICAL_EXAM'
   | 'SIX_MONTHLY_FMW'
-  | 'DRIVING_VOCATIONAL_TP_LTA'
+  | 'DRIVING_VOCATIONAL_TP_LTA_SHORT'
   | 'PR_MEDICAL'
   | 'LTVP_MEDICAL'
   | 'STUDENT_PASS_MEDICAL';
@@ -27,7 +27,7 @@ const EXAM_TYPES: { value: ExamType; label: string; category: string }[] = [
   { value: 'SIX_MONTHLY_MDW', label: 'Six-monthly Medical Exam (6ME) for Migrant Domestic Worker', category: 'Ministry of Manpower (MOM)' },
   { value: 'FULL_MEDICAL_EXAM', label: 'Full Medical Examination for Foreign Worker', category: 'Ministry of Manpower (MOM)' },
   { value: 'SIX_MONTHLY_FMW', label: 'Six-monthly Medical Exam (6ME) for Female Migrant Worker', category: 'Ministry of Manpower (MOM)' },
-  { value: 'DRIVING_VOCATIONAL_TP_LTA', label: 'Driving Licence / Vocational Licence', category: 'Traffic Police (TP) / Land Transport Authority (LTA)' },
+  { value: 'DRIVING_VOCATIONAL_TP_LTA_SHORT', label: 'Driving Licence / Vocational Licence', category: 'Traffic Police (TP) / Land Transport Authority (LTA)' },
   { value: 'PR_MEDICAL', label: 'Medical Examination for Permanent Residency', category: 'Immigration & Checkpoints Authority (ICA)' },
   { value: 'LTVP_MEDICAL', label: 'Medical Examination for Long Term Visit Pass', category: 'Immigration & Checkpoints Authority (ICA)' },
   { value: 'STUDENT_PASS_MEDICAL', label: 'Medical Examination for Student Pass', category: 'Immigration & Checkpoints Authority (ICA)' },
@@ -126,7 +126,7 @@ export function FavoritesManager() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
             <CardTitle>My Favorite Exam Types</CardTitle>
@@ -134,7 +134,7 @@ export function FavoritesManager() {
           {favoriteExamTypes.length < 3 && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="w-full lg:w-auto shrink-0">
                   <Plus className="w-4 h-4 mr-1" />
                   Add Favorite
                 </Button>
