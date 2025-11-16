@@ -20,7 +20,7 @@ export function buildDeclaration(submission: SubmissionData): Content[] {
     {
       text: 'Declaration',
       style: 'sectionTitle',
-      margin: [0, 20, 0, 10] as [number, number, number, number],
+      margin: [0, 15, 0, 8] as [number, number, number, number],
     },
   ];
 
@@ -53,9 +53,9 @@ export function buildDeclaration(submission: SubmissionData): Content[] {
     ul: declarationPoints.map(point => ({
       text: point,
       fontSize: 9,
-      margin: [0, 2, 0, 2] as [number, number, number, number],
+      margin: [0, 1, 0, 1] as [number, number, number, number],
     })),
-    margin: [0, 0, 0, 10] as [number, number, number, number],
+    margin: [0, 0, 0, 8] as [number, number, number, number],
   });
 
   content.push({
@@ -76,18 +76,18 @@ export function buildDeclaration(submission: SubmissionData): Content[] {
         color: '#1e40af',
       },
     ],
-    margin: [0, 5, 0, 15] as [number, number, number, number],
+    margin: [0, 4, 0, 10] as [number, number, number, number],
   });
 
   // Show "Prepared by" if we have both creator and approver
   if (doctorName && createdByName) {
     content.push({
       stack: [
-        { text: 'Prepared by', fontSize: 10, bold: true, color: '#1e40af', margin: [0, 0, 0, 5] as [number, number, number, number] },
-        { text: `Name: ${createdByName}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] },
-        ...(createdByMcr ? [{ text: `MCR Number: ${createdByMcr}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] }] : []),
+        { text: 'Prepared by', fontSize: 10, bold: true, color: '#1e40af', margin: [0, 0, 0, 4] as [number, number, number, number] },
+        { text: `Name: ${createdByName}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] },
+        ...(createdByMcr ? [{ text: `MCR Number: ${createdByMcr}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] }] : []),
       ],
-      margin: [0, 0, 0, 10] as [number, number, number, number],
+      margin: [0, 0, 0, 8] as [number, number, number, number],
     });
   }
 
@@ -95,11 +95,11 @@ export function buildDeclaration(submission: SubmissionData): Content[] {
   if (doctorName) {
     content.push({
       stack: [
-        { text: 'Examining Doctor', fontSize: 10, bold: true, color: '#1e40af', margin: [0, 0, 0, 5] as [number, number, number, number] },
-        { text: `Name: ${doctorName}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] },
-        ...(doctorMcr ? [{ text: `MCR Number: ${doctorMcr}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] }] : []),
+        { text: 'Examining Doctor', fontSize: 10, bold: true, color: '#1e40af', margin: [0, 0, 0, 4] as [number, number, number, number] },
+        { text: `Name: ${doctorName}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] },
+        ...(doctorMcr ? [{ text: `MCR Number: ${doctorMcr}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] }] : []),
       ],
-      margin: [0, 0, 0, 10] as [number, number, number, number],
+      margin: [0, 0, 0, 8] as [number, number, number, number],
     });
   }
 
@@ -107,12 +107,12 @@ export function buildDeclaration(submission: SubmissionData): Content[] {
   if (clinicName) {
     content.push({
       stack: [
-        { text: 'Clinic Information', fontSize: 10, bold: true, color: '#1e40af', margin: [0, 0, 0, 5] as [number, number, number, number] },
-        { text: `Name: ${clinicName}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] },
-        ...(clinicHciCode ? [{ text: `HCI Code: ${clinicHciCode}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] }] : []),
-        ...(clinicPhone ? [{ text: `Phone: ${clinicPhone}`, fontSize: 10, margin: [0, 2, 0, 2] as [number, number, number, number] }] : []),
+        { text: 'Clinic Information', fontSize: 10, bold: true, color: '#1e40af', margin: [0, 0, 0, 4] as [number, number, number, number] },
+        { text: `Name: ${clinicName}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] },
+        ...(clinicHciCode ? [{ text: `HCI Code: ${clinicHciCode}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] }] : []),
+        ...(clinicPhone ? [{ text: `Phone: ${clinicPhone}`, fontSize: 10, margin: [0, 1, 0, 1] as [number, number, number, number] }] : []),
       ],
-      margin: [0, 0, 0, 10] as [number, number, number, number],
+      margin: [0, 0, 0, 8] as [number, number, number, number],
     });
   }
 

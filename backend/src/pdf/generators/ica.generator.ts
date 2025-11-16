@@ -10,7 +10,7 @@ export function generateIcaContent(submission: SubmissionData): Content[] {
   content.push({
     text: 'Test Results',
     style: 'sectionTitle',
-    margin: [0, 10, 0, 5] as [number, number, number, number],
+    margin: [0, 8, 0, 4] as [number, number, number, number],
   });
 
   const testRows: any[] = [
@@ -53,7 +53,7 @@ export function generateIcaContent(submission: SubmissionData): Content[] {
       hLineColor: () => '#e2e8f0',
       vLineColor: () => '#e2e8f0',
     },
-    margin: [0, 0, 0, 15] as [number, number, number, number],
+    margin: [0, 0, 0, 10] as [number, number, number, number],
   });
 
   return content;
