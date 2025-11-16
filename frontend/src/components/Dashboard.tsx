@@ -404,12 +404,11 @@ export function Dashboard() {
                     : `/view-submission/${activity.id}`;
                   
                   return (
-                    <Link 
+                    <div 
                       key={activity.id} 
-                      to={linkPath}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors gap-3"
                     >
-                      <div className="flex items-center gap-3">
+                      <Link to={linkPath} className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`w-10 h-10 flex-shrink-0 ${bgColor} rounded flex items-center justify-center`}>
                           <Icon className={`w-5 h-5 ${iconColor}`} />
                         </div>
@@ -417,7 +416,7 @@ export function Dashboard() {
                           <p className="text-slate-900 truncate">{getDisplayName(activity.patientName, activity.examType, activity.status)}</p>
                           <p className="text-sm text-slate-500 truncate">{formatExamType(activity.examType)}</p>
                         </div>
-                      </div>
+                      </Link>
                       <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
                         <div className="text-left sm:text-right">
                           <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType, user?.role)}</p>
@@ -435,7 +434,7 @@ export function Dashboard() {
                           {activity.activityDate.toLocaleDateString()}
                         </span>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
