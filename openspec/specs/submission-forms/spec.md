@@ -672,3 +672,72 @@ The system SHALL only collect and validate test result data for tests that are r
 **And** validation SHALL NOT require `chestXrayPositive` data  
 **And** the form SHALL be considered complete with only required test data
 
+---
+
+### Requirement: PDF generation for approved submissions
+The system SHALL provide secure server-side PDF generation for approved or submitted medical examination submissions, with access control matching submission viewing permissions.
+
+#### Scenario: Authorized user downloads PDF for approved submission
+**Given** a user is viewing an approved or submitted medical exam  
+**And** the user has permission to view this submission  
+**When** the user clicks the "Download PDF" button  
+**Then** the system shall generate a PDF document on the server  
+**And** the PDF shall be downloaded to the user's device  
+**And** the PDF filename shall be `submission-{id}.pdf` format  
+**And** the PDF shall contain all submission details visible in the view page
+
+#### Scenario: PDF contains complete submission information
+**Given** a user downloads a PDF for a medical submission  
+**When** the PDF is generated  
+**Then** the PDF shall include:
+- goCheckUp branding header with exam type and reference number
+- Patient information (name, NRIC/FIN, date of birth, sex)
+- Body measurements (height, weight, BMI with category) for applicable exam types
+- All exam-specific test results and findings
+- Remarks section if remarks exist
+- Medical practitioner declaration with doctor name and date
+**And** the content shall match the information displayed in ViewSubmission page  
+**And** the layout shall be professional and suitable for official records
+
+#### Scenario: PDF generation supports all exam types
+**Given** a user downloads a PDF  
+**When** the submission is of any supported exam type  
+**Then** the system shall generate exam-type specific content:
+- Six-monthly MDW: Pregnancy, Syphilis, HIV, Chest X-ray tests (as required)
+- Six-monthly FMW: Pregnancy, Syphilis, HIV, Chest X-ray tests (as required)
+- Full Medical: HIV, Syphilis, TB, Chest X-ray tests
+- ICA (PR/Student/LTVP): HIV, Chest X-ray tests
+- Driver TP: Vision acuity, hearing, diabetes, other conditions
+- Driver TP+LTA: Combined TP and LTA fields
+- Driver LTA only: Vocational license specific fields
+
+#### Scenario: Unauthorized user cannot download PDF
+**Given** a user attempts to download a PDF for a submission  
+**And** the user does not have permission to view this submission  
+**When** the user makes a request to the PDF endpoint  
+**Then** the system shall return a 403 Forbidden error  
+**And** no PDF shall be generated
+
+#### Scenario: PDF generation fails gracefully
+**Given** a user attempts to download a PDF  
+**When** PDF generation encounters an error  
+**Then** the system shall log the error with submission details  
+**And** the user shall see an error message indicating generation failed  
+**And** the system shall not expose internal error details to the user
+
+#### Scenario: PDF generation performance
+**Given** a user requests a PDF download  
+**When** the PDF is generated  
+**Then** generation shall complete within 30 seconds (timeout threshold)  
+**And** typical generation time shall be 100-500ms  
+**And** memory usage shall be approximately 10-20MB per PDF generation
+
+#### Scenario: PDF button only shown for appropriate submission states
+**Given** a user is viewing a medical submission  
+**When** the submission is in draft or pending_approval state  
+**Then** the "Download PDF" button SHALL NOT be visible  
+**When** the submission is in approved or submitted state  
+**Then** the "Download PDF" button SHALL be visible  
+**And** the button shall be clearly labeled and accessible
+
+
