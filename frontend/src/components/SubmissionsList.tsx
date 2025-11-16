@@ -7,8 +7,9 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Loader2, Eye, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Loader2, Eye, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronsLeft, ChevronsRight, Download } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -39,9 +40,37 @@ export function SubmissionsList() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageInput, setPageInput] = useState('1');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const rowsPerPage = 10;
 
   const isDoctor = user?.role === 'doctor';
+
+  const handleDownloadPdf = async (submissionId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click
+    try {
+      setDownloadingId(submissionId);
+      const blob = await submissionsApi.downloadPdf(submissionId);
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submission-${submissionId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      toast.error('Failed to download PDF. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -323,16 +352,31 @@ export function SubmissionsList() {
                         {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Link to={`/view-submission/${submission.id}`} state={{ from: '/submissions' }}>
+                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Link to={`/view-submission/${submission.id}`} state={{ from: '/submissions' }}>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Eye className="w-4 h-4 mr-1.5" />
+                              View
+                            </Button>
+                          </Link>
                           <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            variant="ghost"
+                            size="sm" 
+                            onClick={(e) => handleDownloadPdf(submission.id, e)}
+                            disabled={downloadingId === submission.id}
+                            className="text-slate-600"
                           >
-                            <Eye className="w-4 h-4 mr-1.5" />
-                            View
+                            {downloadingId === submission.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Download className="w-4 h-4" />
+                            )}
                           </Button>
-                        </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

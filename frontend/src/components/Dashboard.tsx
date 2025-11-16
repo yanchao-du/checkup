@@ -11,9 +11,7 @@ import {
   XCircle,
   AlertCircle,
   Send,
-  Star,
-  Download,
-  Loader2
+  Star
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
@@ -30,33 +28,6 @@ export function Dashboard() {
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [reopeningId, setReopeningId] = useState<string | null>(null);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
-  const handleDownloadPdf = async (submissionId: string) => {
-    try {
-      setDownloadingId(submissionId);
-      const blob = await submissionsApi.downloadPdf(submissionId);
-      
-      // Create a download link and trigger it
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `submission-${submissionId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      toast.success('PDF downloaded successfully');
-    } catch (error) {
-      console.error('Failed to download PDF:', error);
-      toast.error('Failed to download PDF. Please try again.');
-    } finally {
-      setDownloadingId(null);
-    }
-  };
 
   const handleReopenAndFix = async (submissionId: string) => {
     try {
@@ -283,21 +254,6 @@ export function Dashboard() {
                         View
                       </Button>
                     </Link>
-                    {submission.status === 'submitted' && (
-                      <Button 
-                        variant="outline"
-                        size="sm" 
-                        onClick={() => handleDownloadPdf(submission.id)}
-                        disabled={downloadingId === submission.id}
-                        className="text-slate-600"
-                      >
-                        {downloadingId === submission.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Download className="w-4 h-4" />
-                        )}
-                      </Button>
-                    )}
                     {submission.status === 'rejected' && (
                       <Button 
                         size="sm" 
@@ -448,12 +404,11 @@ export function Dashboard() {
                     : `/view-submission/${activity.id}`;
                   
                   return (
-                    <Link 
+                    <div 
                       key={activity.id} 
-                      to={linkPath}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors gap-3"
                     >
-                      <div className="flex items-center gap-3">
+                      <Link to={linkPath} className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`w-10 h-10 flex-shrink-0 ${bgColor} rounded flex items-center justify-center`}>
                           <Icon className={`w-5 h-5 ${iconColor}`} />
                         </div>
@@ -461,7 +416,7 @@ export function Dashboard() {
                           <p className="text-slate-900 truncate">{getDisplayName(activity.patientName, activity.examType, activity.status)}</p>
                           <p className="text-sm text-slate-500 truncate">{formatExamType(activity.examType)}</p>
                         </div>
-                      </div>
+                      </Link>
                       <div className="flex items-center justify-between sm:justify-end gap-3 pl-13 sm:pl-0">
                         <div className="text-left sm:text-right">
                           <p className="text-sm font-medium text-slate-900">{getActivityLabel(activity.activityType, user?.role)}</p>
@@ -479,7 +434,7 @@ export function Dashboard() {
                           {activity.activityDate.toLocaleDateString()}
                         </span>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
