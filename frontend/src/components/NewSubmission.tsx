@@ -53,9 +53,7 @@ import { IcaExamSummary } from './submission-form/summary/IcaExamSummary';
 import { DrivingLicenceTpAccordions } from './submission-form/accordions/DrivingLicenceTpAccordions';
 import { DrivingVocationalTpLtaAccordions } from './submission-form/accordions/DrivingVocationalTpLtaAccordions';
 import { VocationalLicenceLtaAccordions } from './submission-form/accordions/VocationalLicenceLtaAccordions';
-import { DrivingLicenceTpShortAccordions } from './submission-form/accordions/DrivingLicenceTpShortAccordions';
 import { DrivingVocationalTpLtaShortAccordions } from './submission-form/accordions/DrivingVocationalTpLtaShortAccordions';
-import { VocationalLicenceLtaShortAccordions } from './submission-form/accordions/VocationalLicenceLtaShortAccordions';
 import { FullMedicalExamFields } from './FullMedicalExamFields';
 import { FullMedicalExamSummary } from './FullMedicalExamSummary';
 import { useSubmissionWorkflow } from '../hooks/useSubmissionWorkflow';
@@ -72,7 +70,7 @@ const isDriverExamType = (examType: ExamType | ''): boolean => {
 
 // Helper to check if exam type is a short driver medical exam
 const isShortDriverExamType = (examType: ExamType | ''): boolean => {
-  return examType === 'DRIVING_LICENCE_TP_SHORT' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || examType === 'VOCATIONAL_LICENCE_LTA_SHORT';
+  return examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT';
 };
 
 // Helper to check if exam type is a MOM exam
@@ -1989,14 +1987,8 @@ export function NewSubmission() {
                   <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
                     Driving Licence / Vocational Licence (Full Form)
                   </SelectItem>
-                  <SelectItem value="DRIVING_LICENCE_TP_SHORT">
-                    Driving Licence - TP Only (Short Form)
-                  </SelectItem>
                   <SelectItem value="DRIVING_VOCATIONAL_TP_LTA_SHORT">
                     Driving Licence / Vocational Licence (Short Form)
-                  </SelectItem>
-                  <SelectItem value="VOCATIONAL_LICENCE_LTA_SHORT">
-                    Vocational Licence - LTA Only (Short Form)
                   </SelectItem>
                 </SelectGroup>
                 
@@ -2341,9 +2333,11 @@ export function NewSubmission() {
                         {!emailError && (isIcaExamType(examType) || isDriverExamType(examType)) && <p className="text-xs text-slate-500">The medical report will be sent to this email address, if provided.</p>}
                       </div>
                     )}
-                    {isDriverExamType(examType) && (
+                    {(isDriverExamType(examType) || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT') && (
                       <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="patientMobile">Mobile Number</Label>
+                        <Label htmlFor="patientMobile">
+                          Mobile Number{examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && <span className="text-red-500 ml-1">*</span>}
+                        </Label>
                         <div className="flex gap-2 items-start">
                           <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-muted-foreground whitespace-nowrap">
                             +65
@@ -2380,7 +2374,7 @@ export function NewSubmission() {
                         onChange={setDrivingLicenseClass}
                       />
                     )}
-                    {examType === 'DRIVING_VOCATIONAL_TP_LTA' && (
+                    {(examType === 'DRIVING_VOCATIONAL_TP_LTA' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT') && (
                       <div className="space-y-2 max-w-2xl">
                         <Label htmlFor="purposeOfExam">Purpose of Exam <span className="text-red-500">*</span></Label>
                         <Select value={purposeOfExam} onValueChange={setPurposeOfExam}>
@@ -2859,47 +2853,9 @@ export function NewSubmission() {
                 />
               )}
 
-              {/* Short Driver Exam Forms */}
-              {examType === 'DRIVING_LICENCE_TP_SHORT' && (
-                <DrivingLicenceTpShortAccordions
-                  formData={formData}
-                  onChange={handleFormDataChange}
-                  completedSections={completedSections}
-                  isPatientInfoValid={isPatientInfoValid}
-                  isEditingFromSummary={isEditingFromSummary}
-                  errors={{}}
-                  purposeOfExam={purposeOfExam}
-                  onContinue={(current, next) => {
-                    setCompletedSections(prev => new Set(prev).add(current));
-                    if (next === 'review-submit') {
-                      setShowSummary(true);
-                    }
-                    setActiveAccordion(next);
-                  }}
-                />
-              )}
-
+              {/* Short Driver Exam Form */}
               {examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
                 <DrivingVocationalTpLtaShortAccordions
-                  formData={formData}
-                  onChange={handleFormDataChange}
-                  completedSections={completedSections}
-                  isPatientInfoValid={isPatientInfoValid}
-                  isEditingFromSummary={isEditingFromSummary}
-                  errors={{}}
-                  purposeOfExam={purposeOfExam}
-                  onContinue={(current, next) => {
-                    setCompletedSections(prev => new Set(prev).add(current));
-                    if (next === 'review-submit') {
-                      setShowSummary(true);
-                    }
-                    setActiveAccordion(next);
-                  }}
-                />
-              )}
-
-              {examType === 'VOCATIONAL_LICENCE_LTA_SHORT' && (
-                <VocationalLicenceLtaShortAccordions
                   formData={formData}
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
@@ -3551,8 +3507,8 @@ export function NewSubmission() {
                 </AccordionItem>
               )}
 
-              {/* Short Driver Exam Summaries */}
-              {(examType === 'DRIVING_LICENCE_TP_SHORT' || examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' || examType === 'VOCATIONAL_LICENCE_LTA_SHORT') && showSummary && (
+              {/* Short Driver Exam Summary */}
+              {examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && showSummary && (
                 <AccordionItem value="review-submit">
                   <AccordionTrigger isCompleted={completedSections.has('review-submit')}>
                     <div className="flex items-center gap-2">
