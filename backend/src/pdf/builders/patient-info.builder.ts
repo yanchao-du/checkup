@@ -52,7 +52,7 @@ export function buildPatientInfo(submission: SubmissionData): Content[] {
   // Patient Name (show full name for submitted reports, mask for drafts)
   const displayName = submission.status === 'submitted' ? submission.patientName : maskName(submission.patientName);
   rows.push([
-    { text: 'Patient Name', style: 'tableCell', bold: true },
+    { text: 'Patient Name', style: 'tableCell' },
     { text: displayName, style: 'tableCell' },
   ]);
 

@@ -89,15 +89,15 @@ export function buildHeader(submission: SubmissionData): Content[] {
         widths: ['30%', '70%'],
         body: [
           [
-            { text: 'Reference Number', style: 'tableCell', bold: true },
+            { text: 'Reference Number', style: 'tableCell' },
             { text: submission.id, style: 'tableCell' },
           ],
           [
-            { text: 'Submitted To', style: 'tableCell', bold: true },
+            { text: 'Submitted To', style: 'tableCell' },
             { text: submittedTo, style: 'tableCell' },
           ],
           [
-            { text: 'Submission Date & Time', style: 'tableCell', bold: true },
+            { text: 'Submission Date & Time', style: 'tableCell' },
             { text: submittedDateTime, style: 'tableCell' },
           ],
         ],
