@@ -79,6 +79,7 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
   - Audit logging for sensitive operations
   - Many-to-many relationships via junction tables (DoctorClinic, NurseClinic)
   - `createdAt`/`updatedAt` timestamps on all entities
+  - JSON fields for user preferences (e.g., favoriteExamTypes)
 
 #### Frontend (React)
 - **Component Organization**:
@@ -125,6 +126,21 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
   - Full Medical Exam
   - ICA Exams (PR/Student Pass/LTVP)
   - Driver Exams (TP/TP+LTA/LTA only)
+
+#### User Preferences (Backend & Frontend)
+- **Feature**: Favorite exam types for quick access
+  - **Backend**: User model includes `favoriteExamTypes` JSON field (array of ExamType enums)
+  - **API Endpoint**: `PUT /v1/users/me/favorites` to update user's favorite exam types
+  - **Validation**: Maximum 3 favorites per user, validates against valid ExamType enum values
+  - **Storage**: Persisted in PostgreSQL User table, returned in user profile responses
+- **Frontend Components**:
+  - **FavoritesManager**: Settings page component for managing favorites (add/remove)
+  - **Dashboard Integration**: Quick action links on dashboard for favorite exam types
+  - **User Experience**: Click favorite to navigate directly to new submission with exam type pre-selected
+- **User Benefits**:
+  - Saves 2-3 clicks per submission for frequently used exam types
+  - Personalized workflow based on clinic's primary exam types
+  - Favorites persist across sessions and devices
 
 ### Testing Strategy
 
@@ -254,6 +270,7 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 - ✅ Toast notifications
 - ✅ Navigation protection (unsaved changes)
 - ✅ PDF generation for medical submissions (server-side, all exam types)
+- ✅ User favorite exam types (quick access to frequently used exam types, max 3)
 - ✅ Comprehensive test coverage (backend & frontend)
 
 ### Known Issues
