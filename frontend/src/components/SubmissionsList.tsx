@@ -363,19 +363,21 @@ export function SubmissionsList() {
                               View
                             </Button>
                           </Link>
-                          <Button 
-                            variant="ghost"
-                            size="sm" 
-                            onClick={(e) => handleDownloadPdf(submission.id, e)}
-                            disabled={downloadingId === submission.id}
-                            className="text-slate-600"
-                          >
-                            {downloadingId === submission.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Download className="w-4 h-4" />
-                            )}
-                          </Button>
+                          {submission.status === 'submitted' && (
+                            <Button 
+                              variant="ghost"
+                              size="sm" 
+                              onClick={(e) => handleDownloadPdf(submission.id, e)}
+                              disabled={downloadingId === submission.id}
+                              className="text-slate-600"
+                            >
+                              {downloadingId === submission.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Download className="w-4 h-4" />
+                              )}
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
