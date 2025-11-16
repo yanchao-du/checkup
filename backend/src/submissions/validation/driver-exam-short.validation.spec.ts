@@ -35,37 +35,31 @@ describe('driver-exam-short.validation', () => {
   });
 
   describe('validateShortDriverExam', () => {
-    const createValidDto = (purpose: string, assessment: any): CreateSubmissionDto => ({
+    const createValidDto = (purpose: string, fitnessData: any): CreateSubmissionDto => ({
       examType: 'DRIVING_LICENCE_TP_SHORT',
       patientName: 'John Doe',
       patientNric: 'S1234567D',
+      patientMobile: '+6591234567',
+      examinationDate: '2024-01-15',
+      purposeOfExam: purpose,
       clinicId: '123',
       formData: {
-        patientInfo: {
-          nric: 'S1234567D',
-          name: 'John Doe',
-          mobileNumber: '+6591234567',
-          purposeOfExam: purpose,
-          examinationDate: '2024-01-15',
-        },
-        assessment,
-        declaration: {
-          confirmed: true,
-        },
+        ...fitnessData,
+        declarationAgreed: true,
       },
     });
 
     describe('Patient NRIC validation', () => {
       it('should throw when NRIC is missing', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.nric = '';
+        dto.patientNric = '';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Patient NRIC is required');
       });
 
       it('should throw when NRIC format is invalid', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.nric = 'INVALID123';
+        dto.patientNric = 'INVALID123';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Invalid NRIC format');
       });
@@ -75,7 +69,7 @@ describe('driver-exam-short.validation', () => {
         
         validNrics.forEach(nric => {
           const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-          dto.formData.patientInfo.nric = nric;
+          dto.patientNric = nric;
           
           expect(() => validateShortDriverExam(dto)).not.toThrow();
         });
@@ -85,14 +79,14 @@ describe('driver-exam-short.validation', () => {
     describe('Patient Name validation', () => {
       it('should throw when name is missing', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.name = '';
+        dto.patientName = '';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Patient name is required');
       });
 
       it('should throw when name is only whitespace', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.name = '   ';
+        dto.patientName = '   ';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Patient name is required');
       });
@@ -101,28 +95,28 @@ describe('driver-exam-short.validation', () => {
     describe('Mobile Number validation', () => {
       it('should throw when mobile number is missing', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.mobileNumber = '';
+        dto.patientMobile = '';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Mobile number is required');
       });
 
       it('should throw when mobile number format is invalid', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.mobileNumber = '91234567'; // Missing +65
+        dto.patientMobile = '91234567'; // Missing +65
         
         expect(() => validateShortDriverExam(dto)).toThrow('Invalid mobile number format');
       });
 
       it('should throw when mobile number has wrong digit count', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.mobileNumber = '+659123456'; // Only 7 digits
+        dto.patientMobile = '+659123456'; // Only 7 digits
         
         expect(() => validateShortDriverExam(dto)).toThrow('Invalid mobile number format');
       });
 
       it('should accept valid mobile number', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.mobileNumber = '+6591234567';
+        dto.patientMobile = '+6591234567';
         
         expect(() => validateShortDriverExam(dto)).not.toThrow();
       });
@@ -131,7 +125,7 @@ describe('driver-exam-short.validation', () => {
     describe('Examination Date validation', () => {
       it('should throw when examination date is missing', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.examinationDate = '';
+        dto.examinationDate = '';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Examination date is required');
       });
@@ -140,14 +134,14 @@ describe('driver-exam-short.validation', () => {
     describe('Purpose of Exam validation', () => {
       it('should throw when purpose is missing', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.purposeOfExam = '';
+        dto.purposeOfExam = '';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Purpose of exam is required');
       });
 
       it('should throw when purpose is invalid', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.patientInfo.purposeOfExam = 'INVALID_PURPOSE';
+        dto.purposeOfExam = 'INVALID_PURPOSE';
         
         expect(() => validateShortDriverExam(dto)).toThrow('Invalid purpose of exam');
       });
@@ -161,10 +155,12 @@ describe('driver-exam-short.validation', () => {
         ];
 
         validPurposes.forEach(purpose => {
-          const assessment = purpose === PURPOSE_AGE_65_ABOVE_TP_ONLY 
+          const fitnessData = purpose === PURPOSE_AGE_65_ABOVE_TP_ONLY 
             ? { fitToDriveMotorVehicle: true }
-            : { fitToDrivePublicService: true, fitBusAttendant: true };
-          const dto = createValidDto(purpose, assessment);
+            : purpose === PURPOSE_BAVL_ANY_AGE
+            ? { fitForBavl: true }
+            : { fitToDrivePsv: true, fitForBavl: true };
+          const dto = createValidDto(purpose, fitnessData);
           
           expect(() => validateShortDriverExam(dto)).not.toThrow();
         });
@@ -202,16 +198,16 @@ describe('driver-exam-short.validation', () => {
         );
       });
 
-      it('should require fitBusAttendant when only fitToDrivePublicService provided', () => {
-        const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_LTA, { fitToDrivePublicService: true });
+      it('should require fitForBavl when only fitToDrivePsv provided', () => {
+        const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_LTA, { fitToDrivePsv: true });
         
         expect(() => validateShortDriverExam(dto)).toThrow(
           'Bus attendant vocational licence fitness determination is required',
         );
       });
 
-      it('should require fitToDrivePublicService when only fitBusAttendant provided', () => {
-        const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_LTA, { fitBusAttendant: true });
+      it('should require fitToDrivePsv when only fitForBavl provided', () => {
+        const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_LTA, { fitForBavl: true });
         
         expect(() => validateShortDriverExam(dto)).toThrow(
           'Public service vehicle fitness determination is required',
@@ -220,8 +216,8 @@ describe('driver-exam-short.validation', () => {
 
       it('should accept both determinations', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_LTA, {
-          fitToDrivePublicService: true,
-          fitBusAttendant: false,
+          fitToDrivePsv: true,
+          fitForBavl: false,
         });
         
         expect(() => validateShortDriverExam(dto)).not.toThrow();
@@ -239,8 +235,8 @@ describe('driver-exam-short.validation', () => {
 
       it('should accept both determinations', () => {
         const dto = createValidDto(PURPOSE_AGE_64_BELOW_LTA_ONLY, {
-          fitToDrivePublicService: false,
-          fitBusAttendant: true,
+          fitToDrivePsv: false,
+          fitForBavl: true,
         });
         
         expect(() => validateShortDriverExam(dto)).not.toThrow();
@@ -248,7 +244,7 @@ describe('driver-exam-short.validation', () => {
     });
 
     describe('Fitness Determination validation - Purpose 4 (BAVL any age)', () => {
-      it('should require fitBusAttendant', () => {
+      it('should require fitForBavl', () => {
         const dto = createValidDto(PURPOSE_BAVL_ANY_AGE, {});
         
         expect(() => validateShortDriverExam(dto)).toThrow(
@@ -256,16 +252,16 @@ describe('driver-exam-short.validation', () => {
         );
       });
 
-      it('should accept fitBusAttendant', () => {
-        const dto = createValidDto(PURPOSE_BAVL_ANY_AGE, { fitBusAttendant: true });
+      it('should accept fitForBavl', () => {
+        const dto = createValidDto(PURPOSE_BAVL_ANY_AGE, { fitForBavl: true });
         
         expect(() => validateShortDriverExam(dto)).not.toThrow();
       });
 
       it('should not require other fitness determinations', () => {
         const dto = createValidDto(PURPOSE_BAVL_ANY_AGE, {
-          fitBusAttendant: true,
-          // No fitToDrivePublicService or fitToDriveMotorVehicle
+          fitForBavl: true,
+          // No fitToDrivePsv or fitToDriveMotorVehicle
         });
         
         expect(() => validateShortDriverExam(dto)).not.toThrow();
@@ -275,14 +271,14 @@ describe('driver-exam-short.validation', () => {
     describe('Declaration validation', () => {
       it('should throw when declaration is not confirmed', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.declaration.confirmed = false;
+        dto.formData.declarationAgreed = false;
         
         expect(() => validateShortDriverExam(dto)).toThrow('Declaration confirmation is required');
       });
 
       it('should accept when declaration is confirmed', () => {
         const dto = createValidDto(PURPOSE_AGE_65_ABOVE_TP_ONLY, { fitToDriveMotorVehicle: true });
-        dto.formData.declaration.confirmed = true;
+        dto.formData.declarationAgreed = true;
         
         expect(() => validateShortDriverExam(dto)).not.toThrow();
       });
