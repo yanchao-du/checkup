@@ -142,6 +142,33 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
   - Personalized workflow based on clinic's primary exam types
   - Favorites persist across sessions and devices
 
+#### Driver Medical Exam Validation (Backend)
+- **Feature**: Comprehensive validation for Singapore driver medical examinations (TP/LTA)
+  - **Exam Types Supported**: 3 driver exam types
+    - `DRIVING_LICENCE_TP`: Traffic Police driving licence only
+    - `DRIVING_VOCATIONAL_TP_LTA`: Combined TP and LTA vocational licence
+    - `VOCATIONAL_LICENCE_LTA`: LTA vocational licence only
+  - **Type Detection**: Helper functions (`isDriverExam`, `requiresTpValidation`, `requiresLtaValidation`)
+  - **Validation Rules**:
+    - **AMT (Abbreviated Mental Test)**: Required for TP exams, score 0-10, auto-calculated from 10 questions
+    - **LTA Vocational**: Required for LTA exams, validates color/peripheral/night vision fields
+    - **Medical Declaration**: Required patient confirmation of past 6 months medical history
+    - **Medical History**: Required chronic conditions checklist
+    - **Assessment**: TP exams require `fitToDrive`, LTA exams require `fitForVocational`
+    - **Common Fields**: Height and weight required for all driver exams
+  - **Implementation**: Dedicated `driver-exam.validation.ts` with comprehensive unit test coverage
+- **Frontend Components**:
+  - **DrivingLicenceTpFields**: TP-only exam form with AMT section
+  - **DrivingVocationalTpLtaFields**: Combined exam form with both TP and LTA sections
+  - **VocationalLicenceLtaFields**: LTA-only exam form with extended vision tests
+  - **Purpose-based Logic**: Different fields shown based on exam purpose (age 65+ TP only, age 64 below LTA only, etc.)
+  - **Summary Components**: Exam-specific summary views before submission
+  - **Detail Views**: Comprehensive read-only views for approved/submitted exams
+- **Validation Enforcement**:
+  - Backend validates all required fields before submission
+  - Frontend provides real-time validation feedback
+  - Clear error messages guide users to complete missing information
+
 ### Testing Strategy
 
 #### Backend Testing
@@ -189,12 +216,24 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 1. **Six-monthly Medical Exam for Migrant Domestic Worker (MOM)**
    - Required every 6 months for MDWs
    - Includes pregnancy test, infectious diseases screening
-2. **Full Medical Exam for Work Permit (MOM)**
+2. **Six-monthly Medical Exam for Foreign Migrant Worker (MOM)**
+   - Required every 6 months for FMWs
+   - Similar to MDW exams with pregnancy, syphilis, HIV, chest X-ray tests
+3. **Full Medical Exam for Work Permit (MOM)**
    - Required for new work permit holders
-   - Comprehensive health screening
-3. **Medical Exam for Aged Drivers (SPF)**
-   - Required for elderly drivers to renew license
-   - Focuses on vision, cognitive function
+   - Comprehensive health screening including HIV, syphilis, TB tests
+4. **ICA Medical Exams (PR/Student Pass/LTVP)**
+   - Required for immigration applications
+   - Includes HIV and chest X-ray tests
+5. **Driving Licence Medical Examination Report (TP)**
+   - Required for Traffic Police driving licence applications
+   - Includes Abbreviated Mental Test (AMT), vision, hearing, general medical exam
+6. **Driving Licence and Vocational Licence (TP & LTA)**
+   - Combined exam for both TP driving licence and LTA vocational licence
+   - Includes AMT, extended vision tests (color, peripheral, night), general medical exam
+7. **Vocational Licence Medical Examination (LTA)**
+   - Required for LTA vocational licence only (e.g., bus, taxi drivers)
+   - Includes extended vision tests, general medical exam, no AMT required
 
 ### Roles & Permissions
 - **Admin**: Full system access, user management, clinic management
@@ -271,6 +310,7 @@ CheckUp is a comprehensive medical examination portal for Singapore clinics that
 - ✅ Navigation protection (unsaved changes)
 - ✅ PDF generation for medical submissions (server-side, all exam types)
 - ✅ User favorite exam types (quick access to frequently used exam types, max 3)
+- ✅ Driver medical examinations (TP/LTA) with AMT and vocational licence sections
 - ✅ Comprehensive test coverage (backend & frontend)
 
 ### Known Issues
