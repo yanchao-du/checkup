@@ -2307,8 +2307,8 @@ export function NewSubmission() {
                         onChange={setPatientDateOfBirth}
                       />
                     )}
-                    {/* Email Address - Available for ICA and Driver exams only (not MOM exams) */}
-                    {!isMomExamType(examType) && examType && (
+                    {/* Email Address - Available for ICA and Driver exams only (not MOM exams or short forms) */}
+                    {!isMomExamType(examType) && examType && examType !== 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
                       <div className="space-y-2 max-w-md">
                         <Label htmlFor="patientEmail">Email Address</Label>
                         <Input
