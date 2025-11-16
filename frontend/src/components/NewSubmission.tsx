@@ -1987,7 +1987,16 @@ export function NewSubmission() {
                 <SelectGroup>
                   <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
                   <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
-                    Driving Licence / Vocational Licence
+                    Driving Licence / Vocational Licence (Full Form)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_LICENCE_TP_SHORT">
+                    Driving Licence - TP Only (Short Form)
+                  </SelectItem>
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA_SHORT">
+                    Driving Licence / Vocational Licence (Short Form)
+                  </SelectItem>
+                  <SelectItem value="VOCATIONAL_LICENCE_LTA_SHORT">
+                    Vocational Licence - LTA Only (Short Form)
                   </SelectItem>
                 </SelectGroup>
                 
