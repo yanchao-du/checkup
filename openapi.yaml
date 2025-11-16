@@ -422,6 +422,77 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  /submissions/{id}/pdf:
+    get:
+      tags:
+        - Submissions
+      summary: Download submission PDF
+      description: |
+        Generate and download a PDF report of the medical submission.
+        Only available for submitted submissions.
+        
+        **Authorization:**
+        - Admin: Can download any clinic's submission PDF
+        - Doctor: Can download their approved submission PDFs or submissions from their clinic
+        - Nurse: Can download submissions they created from their clinic
+        
+        **PDF Content:**
+        - Header with clinic name and submission ID
+        - Patient information (masked for drafts, full for submitted)
+        - Exam-specific content matching the ViewSubmission display
+        - Body measurements (where applicable, excludes ICA, FMW, driver exams)
+        - Test results and medical history (exam type dependent)
+        - Remarks section (if applicable)
+        - Declaration section with practitioner information
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Submission ID
+          schema:
+            type: string
+            example: sub-001
+      responses:
+        '200':
+          description: PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: Attachment with filename
+              schema:
+                type: string
+                example: attachment; filename="submission-sub-001.pdf"
+            Content-Type:
+              description: MIME type
+              schema:
+                type: string
+                example: application/pdf
+            Content-Length:
+              description: Size of the PDF in bytes
+              schema:
+                type: integer
+                example: 35244
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - user does not have permission to download this PDF
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          description: PDF generation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /drafts:
     get:
       tags:

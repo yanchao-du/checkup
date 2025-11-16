@@ -11,7 +11,9 @@ import {
   XCircle,
   AlertCircle,
   Send,
-  Star
+  Star,
+  Download,
+  Loader2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
@@ -28,6 +30,33 @@ export function Dashboard() {
   const [rejectedSubmissions, setRejectedSubmissions] = useState<MedicalSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [reopeningId, setReopeningId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadPdf = async (submissionId: string) => {
+    try {
+      setDownloadingId(submissionId);
+      const blob = await submissionsApi.downloadPdf(submissionId);
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submission-${submissionId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      toast.error('Failed to download PDF. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleReopenAndFix = async (submissionId: string) => {
     try {
@@ -254,6 +283,21 @@ export function Dashboard() {
                         View
                       </Button>
                     </Link>
+                    {submission.status === 'submitted' && (
+                      <Button 
+                        variant="outline"
+                        size="sm" 
+                        onClick={() => handleDownloadPdf(submission.id)}
+                        disabled={downloadingId === submission.id}
+                        className="text-slate-600"
+                      >
+                        {downloadingId === submission.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
                     {submission.status === 'rejected' && (
                       <Button 
                         size="sm" 
