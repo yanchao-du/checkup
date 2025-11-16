@@ -10,7 +10,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { ArrowLeft, CheckCircle, Edit, Loader2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Edit, Loader2, XCircle, FileDown } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { getSubmissionStatusBadgeVariant, getSubmissionStatusLabel } from '../lib/badge-utils';
 import { calculateAge, formatAge } from '../lib/ageCalculation';
@@ -64,6 +64,7 @@ export function ViewSubmission() {
   const [approvalNotes, setApprovalNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -86,6 +87,34 @@ export function ViewSubmission() {
 
     fetchSubmission();
   }, [id]);
+
+  const handleDownloadPdf = async () => {
+    if (!id) return;
+    
+    try {
+      setIsDownloadingPdf(true);
+      const blob = await submissionsApi.downloadPdf(id);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `submission-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('PDF downloaded successfully');
+    } catch (error: any) {
+      console.error('Failed to download PDF:', error);
+      toast.error(error.message || 'Failed to download PDF');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const handleApprove = async () => {
     if (!id) return;
@@ -159,6 +188,25 @@ export function ViewSubmission() {
           <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examination Details</h2>
           <p className="text-slate-600">View submission information</p>
         </div>
+        {submission.status === 'submitted' && (
+          <Button 
+            variant="outline" 
+            onClick={handleDownloadPdf}
+            disabled={isDownloadingPdf}
+          >
+            {isDownloadingPdf ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <FileDown className="w-4 h-4 mr-2" />
+                Download PDF
+              </>
+            )}
+          </Button>
+        )}
         <Badge
           variant={getSubmissionStatusBadgeVariant(submission.status)}
           className="text-sm px-3 py-1"

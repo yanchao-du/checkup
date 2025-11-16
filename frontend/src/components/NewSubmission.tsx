@@ -816,28 +816,30 @@ export function NewSubmission() {
             }));
           }
           
-          // Set required tests from patient data
-          if (patient.requiredTests) {
-            setRequiredTests(patient.requiredTests);
-            // Save required test flags to formData so they persist when submission is saved
-            setFormData(prev => ({
-              ...prev,
-              hivTestRequired: patient.requiredTests!.hiv ? 'true' : 'false',
-              chestXrayRequired: patient.requiredTests!.chestXray ? 'true' : 'false',
-            }));
-          } else {
-            // Default to all tests required if not specified
-            setRequiredTests({
-              pregnancy: true,
-              syphilis: true,
-              hiv: true,
-              chestXray: true,
-            });
-            setFormData(prev => ({
-              ...prev,
-              hivTestRequired: 'true',
-              chestXrayRequired: 'true',
-            }));
+          // Set required tests from patient data (only for MOM exam types)
+          if (isMomExamType(examType)) {
+            if (patient.requiredTests) {
+              setRequiredTests(patient.requiredTests);
+              // Save required test flags to formData so they persist when submission is saved
+              setFormData(prev => ({
+                ...prev,
+                hivTestRequired: patient.requiredTests!.hiv ? 'true' : 'false',
+                chestXrayRequired: patient.requiredTests!.chestXray ? 'true' : 'false',
+              }));
+            } else {
+              // Default to all tests required if not specified (MOM exams only)
+              setRequiredTests({
+                pregnancy: true,
+                syphilis: true,
+                hiv: true,
+                chestXray: true,
+              });
+              setFormData(prev => ({
+                ...prev,
+                hivTestRequired: 'true',
+                chestXrayRequired: 'true',
+              }));
+            }
           }
           
           // Only store and auto-populate vitals for SIX_MONTHLY_MDW
@@ -862,18 +864,20 @@ export function NewSubmission() {
             setLastRecordedHeight('');
             setLastRecordedWeight('');
             setLastRecordedDate('');
-            // Reset to default all tests required
-            setRequiredTests({
-              pregnancy: true,
-              syphilis: true,
-              hiv: true,
-              chestXray: true,
-            });
-            setFormData(prev => ({
-              ...prev,
-              hivTestRequired: 'true',
-              chestXrayRequired: 'true',
-            }));
+            // Reset to default all tests required (only for MOM exam types)
+            if (isMomExamType(examType)) {
+              setRequiredTests({
+                pregnancy: true,
+                syphilis: true,
+                hiv: true,
+                chestXray: true,
+              });
+              setFormData(prev => ({
+                ...prev,
+                hivTestRequired: 'true',
+                chestXrayRequired: 'true',
+              }));
+            }
             toast.info('Patient not found.');
           }
         }
@@ -954,6 +958,21 @@ export function NewSubmission() {
     // Reset name-from-API flag when switching exam types
     if (newExamType === 'AGED_DRIVERS') {
       setIsNameFromApi(false);
+    }
+    
+    // For ICA exams, both HIV and Chest X-ray are always required
+    if (isIcaExamType(newExamType)) {
+      setRequiredTests({
+        pregnancy: false,
+        syphilis: false,
+        hiv: true,
+        chestXray: true,
+      });
+      setFormData(prev => ({
+        ...prev,
+        hivTestRequired: 'true',
+        chestXrayRequired: 'true',
+      }));
     }
     
     // Reset completed sections and active accordion when exam type changes

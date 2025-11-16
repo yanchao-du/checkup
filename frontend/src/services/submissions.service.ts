@@ -73,4 +73,35 @@ export const submissionsApi = {
   delete: async (id: string): Promise<{ success: boolean; message: string }> => {
     return apiClient.delete<{ success: boolean; message: string }>(`/submissions/${id}`);
   },
+
+  // Download PDF
+  downloadPdf: async (id: string): Promise<Blob> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('You must be logged in to download PDFs');
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/submissions/${id}/pdf`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Your session has expired. Please log in again.');
+      } else if (response.status === 404) {
+        throw new Error('Submission not found');
+      } else if (response.status === 403) {
+        throw new Error('You do not have permission to download this PDF');
+      } else {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to download PDF: ${errorText}`);
+      }
+    }
+
+    return response.blob();
+  },
 };

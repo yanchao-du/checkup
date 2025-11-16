@@ -9,6 +9,7 @@ import { ApprovalsModule } from './approvals/approvals.module';
 import { UsersModule } from './users/users.module';
 import { ClinicsModule } from './clinics/clinics.module';
 import { PatientsModule } from './patients/patients.module';
+import { PdfModule } from './pdf/pdf.module';
 import { WellKnownController } from './well-known/well-known.controller';
 
 @Module({
@@ -23,6 +24,7 @@ import { WellKnownController } from './well-known/well-known.controller';
     UsersModule,
     ClinicsModule,
     PatientsModule,
+    PdfModule,
   ],
   controllers: [AppController, WellKnownController],
   providers: [AppService],
