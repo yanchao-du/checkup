@@ -2582,8 +2582,8 @@ export function NewSubmission() {
                 </>
               )}
 
-              {/* Examination Details - hidden for driver exams and FME as they have their own structure */}
-              {!isDriverExamType(examType) && examType !== 'FULL_MEDICAL_EXAM' && (
+              {/* Examination Details - hidden for driver exams, FME, and short forms as they have their own structure */}
+              {!isDriverExamType(examType) && examType !== 'FULL_MEDICAL_EXAM' && examType !== 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
               <AccordionItem value="exam-specific">
                 <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
                   <div className="flex items-center gap-2">
