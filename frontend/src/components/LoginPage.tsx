@@ -186,6 +186,21 @@ export function LoginPage() {
               Login with CorpPass
             </Button>
 
+            {/* Video Tutorial Tip */}
+            <div className="mt-6 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+              <p className="text-xs text-purple-900">
+                💡 Not sure how to login?{' '}
+                <a 
+                  href="https://youtu.be/nGstq3BtlO0" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-semibold text-purple-700 hover:text-purple-900 underline"
+                >
+                  Watch this tutorial
+                </a>
+              </p>
+            </div>
+
             {/* Collapsible Demo Accounts */}
             <div className="mt-6">
               <button
