@@ -13,8 +13,6 @@ export function Acknowledgement() {
   const [submission, setSubmission] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -69,11 +67,11 @@ export function Acknowledgement() {
 
   const handleDownloadPdf = async () => {
     if (!id) return;
-    
+
     try {
       setIsDownloadingPdf(true);
       const blob = await submissionsApi.downloadPdf(id);
-      
+
       // Create a download link and trigger it
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -81,11 +79,11 @@ export function Acknowledgement() {
       a.download = `submission-${id}.pdf`;
       document.body.appendChild(a);
       a.click();
-      
+
       // Cleanup
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast.success('PDF downloaded successfully');
     } catch (error) {
       console.error('Failed to download PDF:', error);
@@ -126,10 +124,10 @@ export function Acknowledgement() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="pl-3 md:pl-4">
                   <p className="text-xs text-slate-500">
-                    {submission.examType === 'PR_MEDICAL' || 
-                     submission.examType === 'LTVP_MEDICAL' || 
-                     submission.examType === 'STUDENT_PASS_MEDICAL' 
-                      ? 'Passport Number' 
+                    {submission.examType === 'PR_MEDICAL' ||
+                      submission.examType === 'LTVP_MEDICAL' ||
+                      submission.examType === 'STUDENT_PASS_MEDICAL'
+                      ? 'Passport Number'
                       : submission.examType === 'SIX_MONTHLY_MDW' ||
                         submission.examType === 'SIX_MONTHLY_FMW' ||
                         submission.examType === 'FULL_MEDICAL_EXAM'
@@ -137,9 +135,9 @@ export function Acknowledgement() {
                         : 'NRIC / FIN'}
                   </p>
                   <p className="text-slate-900 font-medium">
-                    {submission.examType === 'PR_MEDICAL' || 
-                     submission.examType === 'LTVP_MEDICAL' || 
-                     submission.examType === 'STUDENT_PASS_MEDICAL'
+                    {submission.examType === 'PR_MEDICAL' ||
+                      submission.examType === 'LTVP_MEDICAL' ||
+                      submission.examType === 'STUDENT_PASS_MEDICAL'
                       ? (submission.patientPassportNo || '-')
                       : (submission.patientNric || '-')}
                   </p>
@@ -174,27 +172,24 @@ export function Acknowledgement() {
             {/* Only show PDF download for submitted status (not pending_approval) */}
             {isSubmitted && (
               <div className="mt-6 pt-4 border-t border-slate-200">
-                <div className="flex items-center gap-3">
-                  <Button
-                    onClick={handleDownloadPdf}
-                    disabled={isDownloadingPdf}
-                    className="w-full sm:w-auto"
-                    variant="outline"
-                  >
-                    {isDownloadingPdf ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Downloading...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-4 h-4 mr-2" />
-                        Download PDF
-                      </>
-                    )}
-                  </Button>
-                  <span className="text-sm text-slate-500">~30KB</span>
-                </div>
+                <Button
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf}
+                  className="w-full sm:w-auto"
+                  variant="outline"
+                >
+                  {isDownloadingPdf ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF (~30KB)
+                    </>
+                  )}
+                </Button>
               </div>
             )}
           </div>

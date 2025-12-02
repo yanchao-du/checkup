@@ -51,7 +51,7 @@ export function SubmissionsList() {
     try {
       setDownloadingId(submissionId);
       const blob = await submissionsApi.downloadPdf(submissionId);
-      
+
       // Create a download link and trigger it
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -59,11 +59,11 @@ export function SubmissionsList() {
       a.download = `submission-${submissionId}.pdf`;
       document.body.appendChild(a);
       a.click();
-      
+
       // Cleanup
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast.success('PDF downloaded successfully');
     } catch (error) {
       console.error('Failed to download PDF:', error);
@@ -86,7 +86,7 @@ export function SubmissionsList() {
     if (sortColumn !== column) {
       return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-30" />;
     }
-    return sortDirection === 'asc' 
+    return sortDirection === 'asc'
       ? <ArrowUp className="w-4 h-4 ml-1 inline" />
       : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
@@ -112,11 +112,11 @@ export function SubmissionsList() {
   const mySubmissions = submissions;
 
   const filteredSubmissions = mySubmissions.filter((submission: any) => {
-    const matchesSearch = 
+    const matchesSearch =
       submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (submission.patientNric && submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (submission.patientPassportNo && submission.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
     const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
 
@@ -197,8 +197,8 @@ export function SubmissionsList() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                  placeholder="Search by patient name, NRIC/FIN, or passport number..."
+                <Input
+                  placeholder="Search name, NRIC/FIN, or passport..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -214,33 +214,33 @@ export function SubmissionsList() {
               <div className="relative mt-6">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Search by patient name, NRIC/FIN, or passport number..."
+                  placeholder="Search name, NRIC/FIN, or passport..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              {/* <label className="text-sm text-slate-700">Status</label> */}
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="submitted">Submitted</SelectItem>
-                  <SelectItem value="pending_approval">Pending Approval</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  {/* <label className="text-sm text-slate-700">Status</label> */}
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="submitted">Submitted</SelectItem>
+                      <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              {/* <label className="text-sm text-slate-700">Exam Type</label> */}
-              <ExamTypeFilter value={filterExamType} onValueChange={setFilterExamType} />
-            </div>
-          </div>
+                <div className="space-y-2">
+                  {/* <label className="text-sm text-slate-700">Exam Type</label> */}
+                  <ExamTypeFilter value={filterExamType} onValueChange={setFilterExamType} />
+                </div>
+              </div>
             </>
           )}
         </CardContent>
@@ -264,129 +264,205 @@ export function SubmissionsList() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('patientName')}
-                    >
-                      Patient Name{getSortIcon('patientName')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('nric')}
-                    >
-                      NRIC/FIN{getSortIcon('nric')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('patientPassportNo')}
-                    >
-                      Passport{getSortIcon('patientPassportNo')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('examType')}
-                    >
-                      Examination Type{getSortIcon('examType')}
-                    </TableHead>
-                    {!isDoctor && (
-                      <TableHead 
-                        className="cursor-pointer hover:bg-slate-50 select-none"
-                        onClick={() => handleSort('status')}
-                      >
-                        Status{getSortIcon('status')}
-                      </TableHead>
-                    )}
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('createdBy')}
-                    >
-                      Created By{getSortIcon('createdBy')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('date')}
-                    >
-                      Date{getSortIcon('date')}
-                    </TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedSubmissions.map((submission: any) => (
-                    <TableRow 
-                      key={submission.id}
-                      className="cursor-pointer hover:bg-slate-50"
-                      onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/submissions' } })}
-                    >
-                      <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientNric || '-'}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {formatExamType(submission.examType)}
-                        </div>
-                      </TableCell>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4 mb-4">
+                {paginatedSubmissions.map((submission: any) => (
+                  <Card key={submission.id} className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-semibold">{submission.patientName}</h3>
+                        <p className="text-sm text-slate-500">
+                          {submission.patientNric || submission.patientPassportNo || '-'}
+                        </p>
+                      </div>
                       {!isDoctor && (
-                        <TableCell>
-                          <Badge
-                            variant={getSubmissionStatusBadgeVariant(submission.status)}
-                          >
-                            {getSubmissionStatusLabel(submission.status)}
-                          </Badge>
-                        </TableCell>
+                        <Badge variant={getSubmissionStatusBadgeVariant(submission.status)}>
+                          {getSubmissionStatusLabel(submission.status)}
+                        </Badge>
                       )}
-                      <TableCell className="text-slate-600">{submission.createdByName}</TableCell>
-                      <TableCell className="text-slate-600">
-                        {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                          <Link to={`/view-submission/${submission.id}`} state={{ from: '/submissions' }}>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              <Eye className="w-4 h-4 mr-1.5" />
-                              View
-                            </Button>
-                          </Link>
-                          {submission.status === 'submitted' && (
-                            <Button 
-                              variant="ghost"
-                              size="sm" 
-                              onClick={(e) => handleDownloadPdf(submission.id, e)}
-                              disabled={downloadingId === submission.id}
-                              className="text-slate-600"
-                            >
-                              {downloadingId === submission.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <Download className="w-4 h-4" />
-                              )}
-                            </Button>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-slate-600 mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Exam:</span>
+                        <span className="font-medium text-right">{formatExamType(submission.examType)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Created By:</span>
+                        <span>{submission.createdByName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Date:</span>
+                        <span>{new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
+                      <Link to={`/view-submission/${submission.id}`} state={{ from: '/submissions' }} className="flex-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" />
+                          View
+                        </Button>
+                      </Link>
+                      {submission.status === 'submitted' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleDownloadPdf(submission.id, e)}
+                          disabled={downloadingId === submission.id}
+                          className="flex-1 text-slate-600"
+                        >
+                          {downloadingId === submission.id ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                              PDF
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-4 h-4 mr-1.5" />
+                              PDF
+                            </>
                           )}
-                        </div>
-                      </TableCell>
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientName')}
+                      >
+                        Patient Name{getSortIcon('patientName')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('nric')}
+                      >
+                        NRIC/FIN{getSortIcon('nric')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientPassportNo')}
+                      >
+                        Passport{getSortIcon('patientPassportNo')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('examType')}
+                      >
+                        Examination Type{getSortIcon('examType')}
+                      </TableHead>
+                      {!isDoctor && (
+                        <TableHead
+                          className="cursor-pointer hover:bg-slate-50 select-none"
+                          onClick={() => handleSort('status')}
+                        >
+                          Status{getSortIcon('status')}
+                        </TableHead>
+                      )}
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('createdBy')}
+                      >
+                        Created By{getSortIcon('createdBy')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('date')}
+                      >
+                        Date{getSortIcon('date')}
+                      </TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedSubmissions.map((submission: any) => (
+                      <TableRow
+                        key={submission.id}
+                        className="cursor-pointer hover:bg-slate-50"
+                        onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/submissions' } })}
+                      >
+                        <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
+                        <TableCell className="text-slate-600">{submission.patientNric || '-'}</TableCell>
+                        <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            {formatExamType(submission.examType)}
+                          </div>
+                        </TableCell>
+                        {!isDoctor && (
+                          <TableCell>
+                            <Badge
+                              variant={getSubmissionStatusBadgeVariant(submission.status)}
+                            >
+                              {getSubmissionStatusLabel(submission.status)}
+                            </Badge>
+                          </TableCell>
+                        )}
+                        <TableCell className="text-slate-600">{submission.createdByName}</TableCell>
+                        <TableCell className="text-slate-600">
+                          {new Date(submission.submittedDate || submission.createdDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Link to={`/view-submission/${submission.id}`} state={{ from: '/submissions' }}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <Eye className="w-4 h-4 mr-1.5" />
+                                View
+                              </Button>
+                            </Link>
+                            {submission.status === 'submitted' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => handleDownloadPdf(submission.id, e)}
+                                disabled={downloadingId === submission.id}
+                                className="text-slate-600"
+                              >
+                                {downloadingId === submission.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Download className="w-4 h-4" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-2 py-4">
-                  <div className="text-sm text-slate-600">
-                    Showing {startIndex + 1}-{Math.min(endIndex, sortedSubmissions.length)} of {sortedSubmissions.length} submissions
+                <div className="flex flex-col sm:flex-row items-center justify-between px-2 py-4 gap-4 sm:gap-0">
+                  <div className="text-sm text-slate-600 text-center sm:text-left">
+                    <span className="hidden sm:inline">Showing {startIndex + 1}-{Math.min(endIndex, sortedSubmissions.length)} of {sortedSubmissions.length} submissions</span>
+                    <span className="sm:hidden">{startIndex + 1}-{Math.min(endIndex, sortedSubmissions.length)} of {sortedSubmissions.length}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
                       title="First page"
+                      className="hidden sm:inline-flex"
                     >
                       <ChevronsLeft className="w-4 h-4" />
                     </Button>
@@ -395,11 +471,13 @@ export function SubmissionsList() {
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
+                      className="px-2 sm:px-3"
                     >
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Prev</span>
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-600">Page</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-xs sm:text-sm text-slate-600 hidden sm:inline">Page</span>
                       <Input
                         type="number"
                         min={1}
@@ -417,15 +495,16 @@ export function SubmissionsList() {
                           // Reset to current page if input is invalid
                           setPageInput(currentPage.toString());
                         }}
-                        className="w-16 h-8 text-center"
+                        className="w-12 sm:w-16 h-8 text-center text-sm"
                       />
-                      <span className="text-sm text-slate-600">of {totalPages}</span>
+                      <span className="text-xs sm:text-sm text-slate-600">of {totalPages}</span>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
+                      className="px-2 sm:px-3"
                     >
                       Next
                     </Button>
@@ -435,6 +514,7 @@ export function SubmissionsList() {
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
                       title="Last page"
+                      className="hidden sm:inline-flex"
                     >
                       <ChevronsRight className="w-4 h-4" />
                     </Button>
