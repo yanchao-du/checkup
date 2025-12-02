@@ -19,7 +19,7 @@ export function ExamTypeFilter({ value, onValueChange }: ExamTypeFilterProps) {
       <SelectTrigger className="h-auto whitespace-normal text-left py-3">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="max-w-[calc(100vw-2rem)]">
+      <SelectContent className="max-w-[calc(100vw-2rem)]" position="popper" side="bottom" align="start" sideOffset={4}>
         <SelectItem value="all">All Examination Types</SelectItem>
 
         <SelectGroup>
