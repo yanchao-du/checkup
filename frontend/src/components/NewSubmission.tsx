@@ -1982,36 +1982,36 @@ export function NewSubmission() {
               <SelectContent className="max-w-[calc(100vw-2rem)]" avoidCollisions={true} collisionPadding={8}>
                 <SelectGroup>
                   <SelectLabel>Ministry of Manpower (MOM)</SelectLabel>
-                  <SelectItem value="SIX_MONTHLY_MDW" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="SIX_MONTHLY_MDW" className="whitespace-normal h-auto py-2">
                     Six-monthly Medical Exam (6ME) for Migrant Domestic Worker
                   </SelectItem>
-                  <SelectItem value="FULL_MEDICAL_EXAM" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="FULL_MEDICAL_EXAM" className="whitespace-normal h-auto py-2">
                     Full Medical Examination for Foreign Worker
                   </SelectItem>
-                  <SelectItem value="SIX_MONTHLY_FMW" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="SIX_MONTHLY_FMW" className="whitespace-normal h-auto py-2">
                     Six-monthly Medical Exam (6ME) for Female Migrant Worker
                   </SelectItem>
                 </SelectGroup>
 
                 <SelectGroup>
                   <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
-                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA" className="whitespace-normal h-auto py-2">
                     Driving Licence / Vocational Licence (Full Form)
                   </SelectItem>
-                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA_SHORT" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA_SHORT" className="whitespace-normal h-auto py-2">
                     Driving Licence / Vocational Licence (Short Form)
                   </SelectItem>
                 </SelectGroup>
 
                 <SelectGroup>
                   <SelectLabel>Immigration & Checkpoints Authority (ICA)</SelectLabel>
-                  <SelectItem value="PR_MEDICAL" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="PR_MEDICAL" className="whitespace-normal h-auto py-2">
                     Medical Examination for Permanent Residency
                   </SelectItem>
-                  <SelectItem value="LTVP_MEDICAL" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="LTVP_MEDICAL" className="whitespace-normal h-auto py-2">
                     Medical Examination for Long Term Visit Pass
                   </SelectItem>
-                  <SelectItem value="STUDENT_PASS_MEDICAL" className="whitespace-normal h-auto py-3">
+                  <SelectItem value="STUDENT_PASS_MEDICAL" className="whitespace-normal h-auto py-2">
                     Medical Examination for Student Pass
                   </SelectItem>
                 </SelectGroup>
@@ -2029,7 +2029,7 @@ export function NewSubmission() {
                 </SelectTrigger>
                 <SelectContent className="max-w-[calc(100vw-2rem)]" avoidCollisions={true} collisionPadding={8}>
                   {clinics.map((clinic) => (
-                    <SelectItem key={clinic.id} value={clinic.id} className="h-auto py-3">
+                    <SelectItem key={clinic.id} value={clinic.id} className="h-auto py-2">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-1 sm:gap-4">
                         <span className="font-medium">{clinic.name}</span>
                         {clinic.hciCode && (
@@ -2393,10 +2393,10 @@ export function NewSubmission() {
                             <SelectValue placeholder="Select purpose of exam" />
                           </SelectTrigger>
                           <SelectContent className="max-w-[calc(100vw-2rem)]" avoidCollisions={true} collisionPadding={8}>
-                            <SelectItem value="AGE_65_ABOVE_TP_ONLY" className="whitespace-normal h-auto py-3">Age 65 and above - Renew Traffic Police Driving Licence only</SelectItem>
-                            <SelectItem value="AGE_65_ABOVE_TP_LTA" className="whitespace-normal h-auto py-3">Age 65 and above - Renew both Traffic Police & LTA Vocational Licence</SelectItem>
-                            <SelectItem value="AGE_64_BELOW_LTA_ONLY" className="whitespace-normal h-auto py-3">Age 64 and below - Renew LTA Vocational Licence only</SelectItem>
-                            <SelectItem value="BAVL_ANY_AGE" className="whitespace-normal h-auto py-3">Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age</SelectItem>
+                            <SelectItem value="AGE_65_ABOVE_TP_ONLY" className="whitespace-normal h-auto py-2">Age 65 and above - Renew Traffic Police Driving Licence only</SelectItem>
+                            <SelectItem value="AGE_65_ABOVE_TP_LTA" className="whitespace-normal h-auto py-2">Age 65 and above - Renew both Traffic Police & LTA Vocational Licence</SelectItem>
+                            <SelectItem value="AGE_64_BELOW_LTA_ONLY" className="whitespace-normal h-auto py-2">Age 64 and below - Renew LTA Vocational Licence only</SelectItem>
+                            <SelectItem value="BAVL_ANY_AGE" className="whitespace-normal h-auto py-2">Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age</SelectItem>
                           </SelectContent>
                         </Select>
                         {purposeOfExamWarning && (
