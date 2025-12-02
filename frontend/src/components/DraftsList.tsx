@@ -225,8 +225,8 @@ export function DraftsList() {
             <button
               onClick={() => setFilterStatus('all')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${filterStatus === 'all'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               All Drafts ({drafts.length})
@@ -235,8 +235,8 @@ export function DraftsList() {
               <button
                 onClick={() => setFilterStatus('routed')}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${filterStatus === 'routed'
-                    ? 'text-purple-600 border-b-2 border-purple-600'
-                    : 'text-slate-600 hover:text-slate-900'
+                  ? 'text-purple-600 border-b-2 border-purple-600'
+                  : 'text-slate-600 hover:text-slate-900'
                   }`}
               >
                 Routed for Review ({drafts.filter(isRoutedToDr).length})
@@ -245,8 +245,8 @@ export function DraftsList() {
             <button
               onClick={() => setFilterStatus('pending-memo')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${filterStatus === 'pending-memo'
-                  ? 'text-yellow-600 border-b-2 border-yellow-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'text-yellow-600 border-b-2 border-yellow-600'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               Pending Memo/Report ({drafts.filter(hasPendingMemos).length})
@@ -254,8 +254,8 @@ export function DraftsList() {
             <button
               onClick={() => setFilterStatus('pending-ntbcc')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${filterStatus === 'pending-ntbcc'
-                  ? 'text-amber-600 border-b-2 border-amber-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'text-amber-600 border-b-2 border-amber-600'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               Pending NTBCC Clearance ({drafts.filter(hasPendingNTBCCClearance).length})
@@ -263,8 +263,8 @@ export function DraftsList() {
             <button
               onClick={() => setFilterStatus('complete')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${filterStatus === 'complete'
-                  ? 'text-slate-600 border-b-2 border-slate-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'text-slate-600 border-b-2 border-slate-600'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               No Pending Items ({drafts.filter(d => !hasPendingMemos(d) && !hasPendingNTBCCClearance(d)).length})
@@ -314,12 +314,12 @@ export function DraftsList() {
                     <div
                       key={draft.id}
                       className={`p-4 rounded-lg border ${isDeleted
-                          ? 'bg-red-50 border-red-100 opacity-60'
-                          : routed
-                            ? 'bg-purple-50 border-purple-100'
-                            : (pendingMemo || pendingNTBCC)
-                              ? 'bg-amber-50 border-amber-100'
-                              : 'bg-white border-slate-200'
+                        ? 'bg-red-50 border-red-100 opacity-60'
+                        : routed
+                          ? 'bg-purple-50 border-purple-100'
+                          : (pendingMemo || pendingNTBCC)
+                            ? 'bg-amber-50 border-amber-100'
+                            : 'bg-white border-slate-200'
                         }`}
                     >
                       <div className="flex justify-between items-start mb-2">
@@ -549,17 +549,19 @@ export function DraftsList() {
                 </Table>
               </div>
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-2 py-4">
-                  <div className="text-sm text-slate-600">
-                    Showing {startIndex + 1}-{Math.min(endIndex, sortedDrafts.length)} of {sortedDrafts.length} drafts
+                <div className="flex flex-col sm:flex-row items-center justify-between px-2 py-4 gap-4 sm:gap-0">
+                  <div className="text-sm text-slate-600 text-center sm:text-left">
+                    <span className="hidden sm:inline">Showing {startIndex + 1}-{Math.min(endIndex, sortedDrafts.length)} of {sortedDrafts.length} drafts</span>
+                    <span className="sm:hidden">{startIndex + 1}-{Math.min(endIndex, sortedDrafts.length)} of {sortedDrafts.length}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
                       title="First page"
+                      className="hidden sm:inline-flex"
                     >
                       <ChevronsLeft className="w-4 h-4" />
                     </Button>
@@ -568,11 +570,13 @@ export function DraftsList() {
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
+                      className="px-2 sm:px-3"
                     >
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Prev</span>
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-600">Page</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-xs sm:text-sm text-slate-600 hidden sm:inline">Page</span>
                       <Input
                         type="number"
                         min={1}
@@ -590,15 +594,16 @@ export function DraftsList() {
                           // Reset to current page if input is invalid
                           setPageInput(currentPage.toString());
                         }}
-                        className="w-16 h-8 text-center"
+                        className="w-12 sm:w-16 h-8 text-center text-sm"
                       />
-                      <span className="text-sm text-slate-600">of {totalPages}</span>
+                      <span className="text-xs sm:text-sm text-slate-600">of {totalPages}</span>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
+                      className="px-2 sm:px-3"
                     >
                       Next
                     </Button>
@@ -608,6 +613,7 @@ export function DraftsList() {
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
                       title="Last page"
+                      className="hidden sm:inline-flex"
                     >
                       <ChevronsRight className="w-4 h-4" />
                     </Button>
