@@ -185,17 +185,17 @@ export function ViewSubmission() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => origin ? navigate(origin) : navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0">
             <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examination Details</h2>
             <p className="text-slate-600">View submission information</p>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:ml-14">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 ml-14 md:ml-0">
           <Badge
             variant={getSubmissionStatusBadgeVariant(submission.status)}
             className="text-sm px-3 py-1 w-fit"
