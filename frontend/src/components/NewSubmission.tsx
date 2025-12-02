@@ -1979,7 +1979,7 @@ export function NewSubmission() {
               <SelectTrigger id="examType" data-testid="examType" className="h-auto whitespace-normal text-left py-3">
                 <SelectValue placeholder="Select examination type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-w-[calc(100vw-2rem)]">
                 <SelectGroup>
                   <SelectLabel>Ministry of Manpower (MOM)</SelectLabel>
                   <SelectItem value="SIX_MONTHLY_MDW" className="whitespace-normal h-auto py-3">
@@ -2027,7 +2027,7 @@ export function NewSubmission() {
                 <SelectTrigger id="clinic" className="h-auto whitespace-normal text-left py-3">
                   <SelectValue placeholder="Select clinic" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
                   {clinics.map((clinic) => (
                     <SelectItem key={clinic.id} value={clinic.id} className="h-auto py-3">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-1 sm:gap-4">
@@ -2392,7 +2392,7 @@ export function NewSubmission() {
                           <SelectTrigger id="purposeOfExam" className={`h-auto whitespace-normal text-left py-3 ${!purposeOfExam ? 'text-muted-foreground' : ''}`}>
                             <SelectValue placeholder="Select purpose of exam" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="max-w-[calc(100vw-2rem)]">
                             <SelectItem value="AGE_65_ABOVE_TP_ONLY" className="whitespace-normal h-auto py-3">Age 65 and above - Renew Traffic Police Driving Licence only</SelectItem>
                             <SelectItem value="AGE_65_ABOVE_TP_LTA" className="whitespace-normal h-auto py-3">Age 65 and above - Renew both Traffic Police & LTA Vocational Licence</SelectItem>
                             <SelectItem value="AGE_64_BELOW_LTA_ONLY" className="whitespace-normal h-auto py-3">Age 64 and below - Renew LTA Vocational Licence only</SelectItem>
