@@ -284,7 +284,7 @@ export function ViewSubmission() {
                 {(isDriverExamType(submission.examType) || isShortDriverExamType(submission.examType)) && (
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Mobile Number</p>
-                    <p className="text-slate-900">{submission.patientMobile ? `+65 ${submission.patientMobile}` : '-'}</p>
+                    <p className="text-slate-900">{submission.patientMobile ? `${submission.patientMobile}` : '-'}</p>
                   </div>
                 )}
                 {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') && (submission as any).drivingLicenseClass && (
