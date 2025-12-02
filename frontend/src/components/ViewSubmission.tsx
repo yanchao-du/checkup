@@ -74,7 +74,7 @@ export function ViewSubmission() {
   useEffect(() => {
     const fetchSubmission = async () => {
       if (!id) return;
-      
+
       try {
         setIsLoading(true);
         const [submissionData, historyData] = await Promise.all([
@@ -95,11 +95,11 @@ export function ViewSubmission() {
 
   const handleDownloadPdf = async () => {
     if (!id) return;
-    
+
     try {
       setIsDownloadingPdf(true);
       const blob = await submissionsApi.downloadPdf(id);
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -107,11 +107,11 @@ export function ViewSubmission() {
       link.download = `submission-${id}.pdf`;
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('PDF downloaded successfully');
     } catch (error: any) {
       console.error('Failed to download PDF:', error);
@@ -123,7 +123,7 @@ export function ViewSubmission() {
 
   const handleApprove = async () => {
     if (!id) return;
-    
+
     try {
       setIsSubmitting(true);
       await approvalsApi.approve(id, { notes: approvalNotes || undefined });
@@ -144,7 +144,7 @@ export function ViewSubmission() {
       toast.warning('Please provide a reason for rejection');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
       await approvalsApi.reject(id, { reason: rejectionReason });
@@ -185,39 +185,44 @@ export function ViewSubmission() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => origin ? navigate(origin) : navigate(-1)}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1">
-          <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examination Details</h2>
-          <p className="text-slate-600">View submission information</p>
-        </div>
-        {submission.status === 'submitted' && (
-          <Button 
-            variant="outline" 
-            onClick={handleDownloadPdf}
-            disabled={isDownloadingPdf}
-          >
-            {isDownloadingPdf ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <FileDown className="w-4 h-4 mr-2" />
-                Download PDF
-              </>
-            )}
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => origin ? navigate(origin) : navigate(-1)}>
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-        )}
-        <Badge
-          variant={getSubmissionStatusBadgeVariant(submission.status)}
-          className="text-sm px-3 py-1"
-        >
-          {getSubmissionStatusLabel(submission.status)}
-        </Badge>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-slate-900 mb-1 text-2xl font-semibold">Medical Examination Details</h2>
+            <p className="text-slate-600">View submission information</p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:ml-14">
+          <Badge
+            variant={getSubmissionStatusBadgeVariant(submission.status)}
+            className="text-sm px-3 py-1 w-fit"
+          >
+            {getSubmissionStatusLabel(submission.status)}
+          </Badge>
+          {submission.status === 'submitted' && (
+            <Button
+              variant="outline"
+              onClick={handleDownloadPdf}
+              disabled={isDownloadingPdf}
+              className="w-full sm:w-auto"
+            >
+              {isDownloadingPdf ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Download PDF
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Submission Reference */}
@@ -303,7 +308,7 @@ export function ViewSubmission() {
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Examination Date</p>
                   <p className="text-slate-900">
-                    {submission.examinationDate 
+                    {submission.examinationDate
                       ? new Date(submission.examinationDate).toLocaleDateString()
                       : 'Not specified'}
                   </p>
@@ -364,7 +369,7 @@ export function ViewSubmission() {
                                   const isAlert = category === 'Underweight' || category === 'Obese';
                                   return (
                                     <p className="text-slate-900">
-                                      {bmi} - 
+                                      {bmi} -
                                       <span className={isAlert ? 'font-semibold text-red-600' : ''}> {category}</span>
                                     </p>
                                   );
@@ -430,11 +435,11 @@ export function ViewSubmission() {
                 <VocationalLicenceLtaDetails submission={submission} />
               )}
 
-              {(submission.examType === 'PR_MEDICAL' || 
-                submission.examType === 'STUDENT_PASS_MEDICAL' || 
+              {(submission.examType === 'PR_MEDICAL' ||
+                submission.examType === 'STUDENT_PASS_MEDICAL' ||
                 submission.examType === 'LTVP_MEDICAL') && (
-                <IcaExamDetails submission={submission} />
-              )}
+                  <IcaExamDetails submission={submission} />
+                )}
 
               {/* Short Driver Exam Forms */}
               {isShortDriverExamType(submission.examType) && (
@@ -442,63 +447,63 @@ export function ViewSubmission() {
               )}
 
               {/* General Remarks section - for all exam types except ICA and driver exams (which include remarks in their detail components) */}
-              {submission.examType !== 'PR_MEDICAL' && 
-               submission.examType !== 'STUDENT_PASS_MEDICAL' && 
-               submission.examType !== 'LTVP_MEDICAL' &&
-               submission.examType !== 'DRIVING_LICENCE_TP' &&
-               submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
-               submission.examType !== 'VOCATIONAL_LICENCE_LTA' &&
-               submission.examType !== 'FULL_MEDICAL_EXAM' &&
-               !isShortDriverExamType(submission.examType) && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
-                    <div className="bg-slate-50 p-3 rounded-md">
-                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : '-'}</p>
+              {submission.examType !== 'PR_MEDICAL' &&
+                submission.examType !== 'STUDENT_PASS_MEDICAL' &&
+                submission.examType !== 'LTVP_MEDICAL' &&
+                submission.examType !== 'DRIVING_LICENCE_TP' &&
+                submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
+                submission.examType !== 'VOCATIONAL_LICENCE_LTA' &&
+                submission.examType !== 'FULL_MEDICAL_EXAM' &&
+                !isShortDriverExamType(submission.examType) && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-900 mb-3">Remarks</h4>
+                      <div className="bg-slate-50 p-3 rounded-md">
+                        <p className="text-sm text-slate-900 whitespace-pre-wrap">{submission.formData.remarks ? submission.formData.remarks : '-'}</p>
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
 
               {/* Declaration - show for submitted submissions (MOM exams only) */}
               {submission.status === 'submitted' && (
                 <>
                   <Separator />
-                  {(submission.examType === 'PR_MEDICAL' || 
-                    submission.examType === 'STUDENT_PASS_MEDICAL' || 
+                  {(submission.examType === 'PR_MEDICAL' ||
+                    submission.examType === 'STUDENT_PASS_MEDICAL' ||
                     submission.examType === 'LTVP_MEDICAL') && (
-                    <DeclarationView
-                      doctorName={submission.approvedByName || submission.createdByName}
-                      doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
-                      createdByName={submission.approvedByName ? submission.createdByName : undefined}
-                      createdByMcrNumber={submission.approvedByName ? submission.createdByMcrNumber : undefined}
-                      clinicName={submission.clinicName}
-                      clinicHciCode={submission.clinicHciCode}
-                      clinicPhone={submission.clinicPhone}
-                      status={submission.status}
-                    >
-                      <IcaDeclarationContent />
-                    </DeclarationView>
-                  )}
-                  {submission.examType !== 'PR_MEDICAL' && 
-                   submission.examType !== 'STUDENT_PASS_MEDICAL' && 
-                   submission.examType !== 'LTVP_MEDICAL' &&
-                   !isDriverExamType(submission.examType) &&
-                   !isShortDriverExamType(submission.examType) && (
-                    <DeclarationView
-                      doctorName={submission.approvedByName || submission.createdByName}
-                      doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
-                      createdByName={submission.approvedByName ? submission.createdByName : undefined}
-                      createdByMcrNumber={submission.approvedByName ? submission.createdByMcrNumber : undefined}
-                      clinicName={submission.clinicName}
-                      clinicHciCode={submission.clinicHciCode}
-                      clinicPhone={submission.clinicPhone}
-                      status={submission.status}
-                    >
-                      <MomDeclarationContent />
-                    </DeclarationView>
-                  )}
+                      <DeclarationView
+                        doctorName={submission.approvedByName || submission.createdByName}
+                        doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                        createdByName={submission.approvedByName ? submission.createdByName : undefined}
+                        createdByMcrNumber={submission.approvedByName ? submission.createdByMcrNumber : undefined}
+                        clinicName={submission.clinicName}
+                        clinicHciCode={submission.clinicHciCode}
+                        clinicPhone={submission.clinicPhone}
+                        status={submission.status}
+                      >
+                        <IcaDeclarationContent />
+                      </DeclarationView>
+                    )}
+                  {submission.examType !== 'PR_MEDICAL' &&
+                    submission.examType !== 'STUDENT_PASS_MEDICAL' &&
+                    submission.examType !== 'LTVP_MEDICAL' &&
+                    !isDriverExamType(submission.examType) &&
+                    !isShortDriverExamType(submission.examType) && (
+                      <DeclarationView
+                        doctorName={submission.approvedByName || submission.createdByName}
+                        doctorMcrNumber={submission.approvedByMcrNumber || submission.createdByMcrNumber}
+                        createdByName={submission.approvedByName ? submission.createdByName : undefined}
+                        createdByMcrNumber={submission.approvedByName ? submission.createdByMcrNumber : undefined}
+                        clinicName={submission.clinicName}
+                        clinicHciCode={submission.clinicHciCode}
+                        clinicPhone={submission.clinicPhone}
+                        status={submission.status}
+                      >
+                        <MomDeclarationContent />
+                      </DeclarationView>
+                    )}
                 </>
               )}
 
@@ -548,93 +553,93 @@ export function ViewSubmission() {
                   </div>
                 </>
               )}
-              
+
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-6">
           {/* Exam Category - show for draft, pending_approval, rejected, and submitted */}
-          {(submission.status === 'draft' || 
-            submission.status === 'pending_approval' || 
-            submission.status === 'rejected' || 
+          {(submission.status === 'draft' ||
+            submission.status === 'pending_approval' ||
+            submission.status === 'rejected' ||
             submission.status === 'submitted') && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {submission.status === 'submitted' ? 'Agency & Examination Information' : 'Examination Information'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {submission.status === 'submitted' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {submission.status === 'submitted' ? 'Agency & Examination Information' : 'Examination Information'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {submission.status === 'submitted' && (
+                      <div>
+                        <p className="text-sm text-slate-500">Submitted To</p>
+                        <p className="text-slate-900">
+                          {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
+                          {(submission.examType === 'SIX_MONTHLY_MDW' ||
+                            submission.examType === 'SIX_MONTHLY_FMW' ||
+                            submission.examType === 'WORK_PERMIT' ||
+                            submission.examType === 'FULL_MEDICAL_EXAM') && 'Ministry of Manpower'}
+                          {(submission.examType === 'PR_MEDICAL' ||
+                            submission.examType === 'STUDENT_PASS_MEDICAL' ||
+                            submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
+                          {(submission.examType === 'DRIVING_LICENCE_TP' ||
+                            submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' ||
+                            submission.examType === 'DRIVING_LICENCE_TP_SHORT' ||
+                            submission.examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
+                            submission.examType === 'VOCATIONAL_LICENCE_LTA_SHORT') && (
+                              <>
+                                {(submission.purposeOfExam === 'AGE_65_ABOVE_DRIVING_ONLY' || submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY') && 'Traffic Police'}
+                                {submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && 'Traffic Police & Land Transport Authority'}
+                                {(submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || submission.purposeOfExam === 'BAVL_ANY_AGE') && 'Land Transport Authority'}
+                                {!submission.purposeOfExam && 'Traffic Police / Land Transport Authority'}
+                              </>
+                            )}
+                          {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Land Transport Authority'}
+                        </p>
+                      </div>
+                    )}
                     <div>
-                      <p className="text-sm text-slate-500">Submitted To</p>
-                      <p className="text-slate-900">
-                        {submission.examType === 'AGED_DRIVERS' && 'Singapore Police Force'}
-                        {(submission.examType === 'SIX_MONTHLY_MDW' || 
-                          submission.examType === 'SIX_MONTHLY_FMW' || 
-                          submission.examType === 'WORK_PERMIT' ||
-                          submission.examType === 'FULL_MEDICAL_EXAM') && 'Ministry of Manpower'}
-                        {(submission.examType === 'PR_MEDICAL' || 
-                          submission.examType === 'STUDENT_PASS_MEDICAL' || 
-                          submission.examType === 'LTVP_MEDICAL') && 'Immigration & Checkpoints Authority'}
-                        {(submission.examType === 'DRIVING_LICENCE_TP' || 
-                          submission.examType === 'DRIVING_VOCATIONAL_TP_LTA' ||
-                          submission.examType === 'DRIVING_LICENCE_TP_SHORT' ||
-                          submission.examType === 'DRIVING_VOCATIONAL_TP_LTA_SHORT' ||
-                          submission.examType === 'VOCATIONAL_LICENCE_LTA_SHORT') && (
-                          <>
-                            {(submission.purposeOfExam === 'AGE_65_ABOVE_DRIVING_ONLY' || submission.purposeOfExam === 'AGE_65_ABOVE_TP_ONLY') && 'Traffic Police'}
-                            {submission.purposeOfExam === 'AGE_65_ABOVE_TP_LTA' && 'Traffic Police & Land Transport Authority'}
-                            {(submission.purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || submission.purposeOfExam === 'BAVL_ANY_AGE') && 'Land Transport Authority'}
-                            {!submission.purposeOfExam && 'Traffic Police / Land Transport Authority'}
-                          </>
-                        )}
-                        {submission.examType === 'VOCATIONAL_LICENCE_LTA' && 'Land Transport Authority'}
+                      <p className="text-sm text-slate-500">Examination Category</p>
+                      <p className="text-slate-900 text-sm">
+                        {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA')
+                          ? 'Medical Examination for Driving Licence / Vocational Licence'
+                          : formatExamTypeFull(submission.examType)}
                       </p>
                     </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-slate-500">Examination Category</p>
-                    <p className="text-slate-900 text-sm">
-                      {(submission.examType === 'DRIVING_LICENCE_TP' || submission.examType === 'DRIVING_VOCATIONAL_TP_LTA') 
-                        ? 'Medical Examination for Driving Licence / Vocational Licence'
-                        : formatExamTypeFull(submission.examType)}
-                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
           {/* Clinic Information - hide for TP, TP_LTA, short driver exams, MDW, FMW, FME, and ICA exams as they show it in declaration section */}
-          {submission.clinicName && 
-           submission.examType !== 'DRIVING_LICENCE_TP' && 
-           submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
-           !isShortDriverExamType(submission.examType) &&
-           submission.examType !== 'SIX_MONTHLY_MDW' &&
-           submission.examType !== 'SIX_MONTHLY_FMW' &&
-           submission.examType !== 'FULL_MEDICAL_EXAM' &&
-           submission.examType !== 'PR_MEDICAL' &&
-           submission.examType !== 'STUDENT_PASS_MEDICAL' &&
-           submission.examType !== 'LTVP_MEDICAL' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Clinic Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-slate-900 font-medium">{submission.clinicName}</p>
-                  {(submission.clinicHciCode || submission.clinicPhone) && (
-                    <p className="text-sm text-slate-600">
-                      {[submission.clinicHciCode, submission.clinicPhone].filter(Boolean).join(' • ')}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {submission.clinicName &&
+            submission.examType !== 'DRIVING_LICENCE_TP' &&
+            submission.examType !== 'DRIVING_VOCATIONAL_TP_LTA' &&
+            !isShortDriverExamType(submission.examType) &&
+            submission.examType !== 'SIX_MONTHLY_MDW' &&
+            submission.examType !== 'SIX_MONTHLY_FMW' &&
+            submission.examType !== 'FULL_MEDICAL_EXAM' &&
+            submission.examType !== 'PR_MEDICAL' &&
+            submission.examType !== 'STUDENT_PASS_MEDICAL' &&
+            submission.examType !== 'LTVP_MEDICAL' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Clinic Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-slate-900 font-medium">{submission.clinicName}</p>
+                    {(submission.clinicHciCode || submission.clinicPhone) && (
+                      <p className="text-sm text-slate-600">
+                        {[submission.clinicHciCode, submission.clinicPhone].filter(Boolean).join(' • ')}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Submission Timeline */}
           <SubmissionTimeline history={submission.history} submission={submission} />
@@ -690,7 +695,7 @@ export function ViewSubmission() {
               This will submit it to the relevant agency.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="space-y-2 py-4">
             <Label htmlFor="approval-notes">Additional Notes (Optional)</Label>
             <Textarea
@@ -735,7 +740,7 @@ export function ViewSubmission() {
               Please provide a reason for rejection.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="space-y-2 py-4">
             <Label htmlFor="rejection-reason">
               Reason for Rejection <span className="text-red-500">*</span>
