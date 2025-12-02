@@ -81,22 +81,22 @@ const isMomExamType = (examType: ExamType | ''): boolean => {
 // Helper to check if there are pending memos for TP_LTA exam
 const hasPendingMemos = (examType: ExamType | '', formData: Record<string, any>): boolean => {
   if (examType !== 'DRIVING_VOCATIONAL_TP_LTA') return false;
-  
-  const memoRequirements = formData.memoRequirements 
-    ? (typeof formData.memoRequirements === 'string' 
-        ? JSON.parse(formData.memoRequirements) 
-        : formData.memoRequirements)
+
+  const memoRequirements = formData.memoRequirements
+    ? (typeof formData.memoRequirements === 'string'
+      ? JSON.parse(formData.memoRequirements)
+      : formData.memoRequirements)
     : {};
-  
+
   const checkedConditions = Object.entries(memoRequirements)
     .filter(([_, value]) => value === true)
     .map(([key]) => key);
-  
+
   // Check each checked condition for pending memos
   for (const conditionId of checkedConditions) {
     const memoProvided = formData[`memoProvided_${conditionId}`];
     const furtherMemoRequired = formData[`furtherMemoRequired_${conditionId}`];
-    
+
     // Memo is pending if:
     // 1. Patient has not provided memo (answered "no")
     // 2. Patient provided memo but further memo is required (answered "yes" to further memo)
@@ -104,7 +104,7 @@ const hasPendingMemos = (examType: ExamType | '', formData: Record<string, any>)
       return true;
     }
   }
-  
+
   return false;
 };
 
@@ -150,7 +150,7 @@ export function NewSubmission() {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [lastRecordedHeight, setLastRecordedHeight] = useState<string>('');
   const [lastRecordedWeight, setLastRecordedWeight] = useState<string>('');
-  
+
   // Clinic selection state
   const [clinics, setClinics] = useState<UserClinic[]>([]);
   const [selectedClinicId, setSelectedClinicId] = useState<string>('');
@@ -164,7 +164,7 @@ export function NewSubmission() {
   const [drivingLicenceTimingError, setDrivingLicenceTimingError] = useState<string | null>(null);
   const [drivingLicenceTimingWarning, setDrivingLicenceTimingWarning] = useState<string | null>(null);
   const [chestXrayTbError, setChestXrayTbError] = useState<string | null>(null);
-  
+
   const [purposeOfExamWarning, setPurposeOfExamWarning] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
@@ -176,7 +176,7 @@ export function NewSubmission() {
   const [previousFinValue, setPreviousFinValue] = useState<string>('');
   const [confirmedFinValue, setConfirmedFinValue] = useState<string>(''); // FIN value after blur validation
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus | null>(null);
-  
+
   // Track last saved state to detect actual changes
   const [lastSavedState, setLastSavedState] = useState<{
     examType: ExamType | '';
@@ -189,7 +189,7 @@ export function NewSubmission() {
     examinationDate: string;
     formData: Record<string, any>;
   } | null>(null);
-  
+
   const [requiredTests, setRequiredTests] = useState<{
     pregnancy: boolean;
     syphilis: boolean;
@@ -218,11 +218,11 @@ export function NewSubmission() {
   const hasAccordionDataFilled = (): boolean => {
     // Check examination date
     if (examinationDate) return true;
-    
+
     // Check if any formData exists (excluding auto-populated fields from API)
     // These fields are set automatically by patient lookup and shouldn't trigger the warning
     const autoPopulatedFields = ['hivTestRequired', 'chestXrayRequired', 'gender', 'height'];
-    
+
     if (Object.keys(formData).length > 0) {
       // Check if there's any non-empty value that's NOT auto-populated
       for (const [key, value] of Object.entries(formData)) {
@@ -236,7 +236,7 @@ export function NewSubmission() {
         }
       }
     }
-    
+
     return false;
   };
 
@@ -255,7 +255,7 @@ export function NewSubmission() {
       hiv: true,
       chestXray: true,
     });
-    
+
     // Clear all accordion-related errors
     setExaminationDateError(null);
     setExaminationDateBlurred(false);
@@ -276,7 +276,7 @@ export function NewSubmission() {
   // Reset form when refresh parameter is present (navigating to /new-submission from /new-submission)
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    
+
     // Pre-select exam type from query parameter (for quick actions/favorites)
     if (searchParams.has('examType') && !id) {
       const typeParam = searchParams.get('examType');
@@ -284,7 +284,7 @@ export function NewSubmission() {
         setExamType(typeParam as ExamType);
       }
     }
-    
+
     if (searchParams.has('refresh') && !id) {
       // Reset all form state
       setExamType('');
@@ -304,7 +304,7 @@ export function NewSubmission() {
       setLastRecordedWeight('');
       setLastRecordedDate('');
       setIsNameFromApi(false);
-      
+
       // Clear all errors
       setNricError(null);
       setPatientNameError(null);
@@ -323,7 +323,7 @@ export function NewSubmission() {
       setMedicalHistoryErrors({});
       setFmeMedicalHistoryErrors({});
       setAbnormalityChecklistErrors({});
-      
+
       // Remove the refresh parameter from URL
       navigate('/new-submission', { replace: true });
     }
@@ -350,7 +350,7 @@ export function NewSubmission() {
         try {
           const userClinics = await usersApi.getMyClinics();
           setClinics(userClinics);
-          
+
           // Set primary clinic as default
           const primaryClinic = userClinics.find(c => c.isPrimary);
           if (primaryClinic && !id) {
@@ -375,11 +375,11 @@ export function NewSubmission() {
         try {
           const doctorsList = await usersApi.getDoctors();
           setDoctors(doctorsList);
-          
+
           // Load default doctor
           const { defaultDoctorId } = await usersApi.getDefaultDoctor();
           setHasDefaultDoctor(!!defaultDoctorId);
-          
+
           if (defaultDoctorId && !id) {
             // Only set default doctor for new submissions, not when editing drafts
             setAssignedDoctorId(defaultDoctorId);
@@ -398,7 +398,7 @@ export function NewSubmission() {
         try {
           setIsLoading(true);
           const existing = await submissionsApi.getById(id);
-          
+
           // Access control: Nurses cannot edit submissions that are pending_approval
           // (those are with the doctor for review)
           if (user?.role === 'nurse' && existing.status === 'pending_approval') {
@@ -406,30 +406,30 @@ export function NewSubmission() {
             navigate('/submissions');
             return;
           }
-          
+
           setExamType(existing.examType);
           setSubmissionStatus(existing.status);
-          
+
           // For MDW/FMW/WORK_PERMIT/FME drafts, restore the full name from formData if available
           // Otherwise use the patient name from the submission
-          if ((existing.examType === 'SIX_MONTHLY_MDW' || 
-               existing.examType === 'SIX_MONTHLY_FMW' || 
-               existing.examType === 'WORK_PERMIT' ||
-               existing.examType === 'FULL_MEDICAL_EXAM') && 
-              existing.formData?._fullName) {
+          if ((existing.examType === 'SIX_MONTHLY_MDW' ||
+            existing.examType === 'SIX_MONTHLY_FMW' ||
+            existing.examType === 'WORK_PERMIT' ||
+            existing.examType === 'FULL_MEDICAL_EXAM') &&
+            existing.formData?._fullName) {
             setPatientName(existing.formData._fullName);
             setIsNameFromApi(true);
           } else {
             setPatientName(existing.patientName);
             // For MDW/FMW/WORK_PERMIT/FME drafts without stored full name, assume it came from API
-            if (existing.examType === 'SIX_MONTHLY_MDW' || 
-                existing.examType === 'SIX_MONTHLY_FMW' || 
-                existing.examType === 'WORK_PERMIT' ||
-                existing.examType === 'FULL_MEDICAL_EXAM') {
+            if (existing.examType === 'SIX_MONTHLY_MDW' ||
+              existing.examType === 'SIX_MONTHLY_FMW' ||
+              existing.examType === 'WORK_PERMIT' ||
+              existing.examType === 'FULL_MEDICAL_EXAM') {
               setIsNameFromApi(true);
             }
           }
-          
+
           setPatientNric(existing.patientNric || '');
           // Set previousFinValue when loading existing submission to enable FIN change detection
           if (existing.patientNric && isMomExamType(existing.examType)) {
@@ -446,7 +446,7 @@ export function NewSubmission() {
           setAssignedDoctorId(existing.assignedDoctorId || '');
           setSelectedClinicId(existing.clinicId || '');
           setFormData(existing.formData);
-          
+
           // Restore required tests from formData
           if (existing.formData) {
             setRequiredTests({
@@ -456,29 +456,29 @@ export function NewSubmission() {
               chestXray: existing.formData.chestXrayRequired === 'true',
             });
           }
-          
+
           // Mark sections as complete if they have valid data
           const completed = new Set<string>();
-          
+
           // Check patient info
-          const hasRequiredPatientId = isIcaExamType(existing.examType) 
+          const hasRequiredPatientId = isIcaExamType(existing.examType)
             ? existing.patientPassportNo // ICA requires passport
             : existing.patientNric; // Others require NRIC
-            
+
           if (existing.patientName && hasRequiredPatientId && existing.examinationDate) {
             if (existing.examType !== 'AGED_DRIVERS' || existing.patientDateOfBirth) {
               completed.add('patient-info');
             }
           }
-          
+
           // Mark other sections as complete if loading existing submission
           if (existing.formData && Object.keys(existing.formData).length > 0) {
             completed.add('exam-specific');
             completed.add('remarks');
           }
-          
+
           setCompletedSections(completed);
-          
+
           // Initialize last saved state when loading existing draft
           setLastSavedState({
             examType: existing.examType,
@@ -539,39 +539,39 @@ export function NewSubmission() {
 
   // Validate driving licence exam timing
   useEffect(() => {
-    if ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') && 
-        patientDateOfBirth && examinationDate && drivingLicenseClass) {
-      
+    if ((examType === 'DRIVING_LICENCE_TP' || examType === 'DRIVING_VOCATIONAL_TP_LTA') &&
+      patientDateOfBirth && examinationDate && drivingLicenseClass) {
+
       // Skip age validation for TP_LTA when certain purposes are selected
-      const skipAgeValidation = examType === 'DRIVING_VOCATIONAL_TP_LTA' && 
+      const skipAgeValidation = examType === 'DRIVING_VOCATIONAL_TP_LTA' &&
         (purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE');
-      
+
       if (skipAgeValidation) {
         setDrivingLicenceTimingError(null);
         setDrivingLicenceTimingWarning(null);
         return;
       }
-      
+
       // Check if exam date is before DOB - this is a critical error
       if (new Date(examinationDate) < new Date(patientDateOfBirth)) {
         setDrivingLicenceTimingError('Examination date cannot be before date of birth.');
         setDrivingLicenceTimingWarning(null);
         return;
       }
-      
+
       const validation = validateDrivingLicenceExamTiming(
         patientDateOfBirth,
         examinationDate,
         drivingLicenseClass
       );
-      
+
       // Convert age validation errors to warnings instead of blocking errors
       if (!validation.isValid && validation.error) {
         setDrivingLicenceTimingError(null); // Don't block the form
         setDrivingLicenceTimingWarning(validation.error); // Show as warning instead
       } else {
         setDrivingLicenceTimingError(null);
-        
+
         if (validation.warningMessage) {
           setDrivingLicenceTimingWarning(validation.warningMessage);
         } else {
@@ -586,11 +586,11 @@ export function NewSubmission() {
 
   // Check if patient is within 2 months before 65 with AGE_64_BELOW_LTA_ONLY
   useEffect(() => {
-    if (examType === 'DRIVING_VOCATIONAL_TP_LTA' && 
-        purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' &&
-        patientDateOfBirth && 
-        examinationDate) {
-      
+    if (examType === 'DRIVING_VOCATIONAL_TP_LTA' &&
+      purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' &&
+      patientDateOfBirth &&
+      examinationDate) {
+
       const age = calculateAge(patientDateOfBirth, examinationDate);
       if (!age) {
         setPurposeOfExamWarning(null);
@@ -612,11 +612,11 @@ export function NewSubmission() {
         const dob = new Date(patientDateOfBirth);
         const birthday65 = new Date(dob);
         birthday65.setFullYear(dob.getFullYear() + 65);
-        
+
         // Calculate months difference
-        const monthsDiff = (birthday65.getFullYear() - examDate.getFullYear()) * 12 + 
-                           (birthday65.getMonth() - examDate.getMonth());
-        
+        const monthsDiff = (birthday65.getFullYear() - examDate.getFullYear()) * 12 +
+          (birthday65.getMonth() - examDate.getMonth());
+
         // Warn if within 2 months before turning 65
         if (monthsDiff <= 2 && monthsDiff >= 0) {
           setPurposeOfExamWarning(
@@ -641,10 +641,10 @@ export function NewSubmission() {
       // - AGE_64_BELOW_LTA_ONLY (LTA vocational only)
       // - BAVL_ANY_AGE (Bus Attendant's Vocational Licence)
       // - AGE_65_ABOVE_TP_LTA (Both TP and LTA vocational)
-      const holdsLTAVocational = purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || 
-                                 purposeOfExam === 'BAVL_ANY_AGE' || 
-                                 purposeOfExam === 'AGE_65_ABOVE_TP_LTA';
-      
+      const holdsLTAVocational = purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' ||
+        purposeOfExam === 'BAVL_ANY_AGE' ||
+        purposeOfExam === 'AGE_65_ABOVE_TP_LTA';
+
       setFormData(prev => ({
         ...prev,
         holdsLTAVocationalLicence: holdsLTAVocational ? 'yes' : 'no',
@@ -657,7 +657,7 @@ export function NewSubmission() {
   useEffect(() => {
     // If we have a saved state, compare current state with it
     if (lastSavedState) {
-      const hasChanges = 
+      const hasChanges =
         examType !== lastSavedState.examType ||
         patientName !== lastSavedState.patientName ||
         patientNric !== lastSavedState.patientNric ||
@@ -667,12 +667,12 @@ export function NewSubmission() {
         purposeOfExam !== lastSavedState.purposeOfExam ||
         examinationDate !== lastSavedState.examinationDate ||
         JSON.stringify(formData) !== JSON.stringify(lastSavedState.formData);
-      
+
       setHasUnsavedChanges(hasChanges);
     } else {
       // No saved state - mark as changed if any field has data (for new submissions)
       const hasData = !!(examType || patientName || patientNric || patientPassportNo || patientDateOfBirth || drivingLicenseClass ||
-                      purposeOfExam || examinationDate || Object.keys(formData).length > 0);
+        purposeOfExam || examinationDate || Object.keys(formData).length > 0);
       setHasUnsavedChanges(hasData);
     }
   }, [examType, patientName, patientNric, patientPassportNo, patientDateOfBirth, drivingLicenseClass, purposeOfExam, examinationDate, formData, setHasUnsavedChanges, lastSavedState]);
@@ -690,10 +690,10 @@ export function NewSubmission() {
       const scrollToAccordion = async () => {
         // Wait for DOM to update with the new accordion state
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        
+
         // Find all accordion triggers - they have data-radix-collection-item and aria-expanded attributes
         const allTriggers = document.querySelectorAll('button[data-radix-collection-item][aria-expanded]');
-        
+
         // Find the one that's currently open
         let openTrigger: Element | null = null;
         allTriggers.forEach(trigger => {
@@ -702,14 +702,14 @@ export function NewSubmission() {
             openTrigger = trigger;
           }
         });
-        
+
         if (openTrigger) {
           const triggerElement = openTrigger as HTMLElement;
-          
+
           // Wait for the accordion animation to complete
           await new Promise<void>((resolve) => {
             let settled = false;
-            
+
             const onDone = () => {
               if (settled) return;
               settled = true;
@@ -727,12 +727,12 @@ export function NewSubmission() {
 
           // Wait additional time for content to fully render and push other elements
           await new Promise(resolve => setTimeout(resolve, 100));
-          
+
           const rect = triggerElement.getBoundingClientRect();
-          
+
           // Calculate the target scroll position to position the trigger 80px from the top
           const targetScrollY = window.scrollY + rect.top - 80;
-          
+
           // Scroll directly to the target position in one smooth motion
           window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
         }
@@ -746,19 +746,19 @@ export function NewSubmission() {
   useEffect(() => {
     setCompletedSections(prev => {
       const newCompleted = new Set(prev);
-      
+
       // Check Medical Declaration certification
       const medicalDeclaration = formData.medicalDeclaration || {};
       if (!medicalDeclaration.patientCertification && newCompleted.has('medical-declaration')) {
         newCompleted.delete('medical-declaration');
       }
-      
+
       // Check Medical History certification
       const medicalHistory = formData.medicalHistory || {};
       if (!medicalHistory.patientCertification && newCompleted.has('medical-history')) {
         newCompleted.delete('medical-history');
       }
-      
+
       return newCompleted;
     });
   }, [formData.medicalDeclaration, formData.medicalHistory]);
@@ -766,7 +766,7 @@ export function NewSubmission() {
   // Fetch a random test FIN when exam type supports patient lookup
   useEffect(() => {
     const shouldShowTestFin = !id && (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM');
-    
+
     if (shouldShowTestFin) {
       patientsApi.getRandomTestFin(examType).then((result) => {
         if (result) {
@@ -787,14 +787,14 @@ export function NewSubmission() {
     if (showFinChangeDialog || pendingFinValue) {
       return;
     }
-    
+
     // Skip if no confirmed FIN value
     if (!confirmedFinValue) {
       return;
     }
-    
+
     // Only fetch for specific exam types
-    const shouldFetchPatientName = 
+    const shouldFetchPatientName =
       !isIcaExamType(examType) &&
       (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM');
 
@@ -808,7 +808,7 @@ export function NewSubmission() {
         console.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { nric: confirmedFinValue });
         return;
       }
-      
+
       setIsLoadingPatient(true);
       try {
         const patient = await patientsApi.getByNric(confirmedFinValue);
@@ -816,7 +816,7 @@ export function NewSubmission() {
           lastLookedUpNricRef.current = confirmedFinValue;
           setPatientName(patient.name);
           setIsNameFromApi(true);
-          
+
           // Set gender from API for FME
           if (examType === 'FULL_MEDICAL_EXAM' && patient.gender) {
             setFormData(prev => ({
@@ -824,7 +824,7 @@ export function NewSubmission() {
               gender: patient.gender,
             }));
           }
-          
+
           // Set required tests from patient data (only for MOM exam types)
           if (isMomExamType(examType)) {
             if (patient.requiredTests) {
@@ -850,20 +850,20 @@ export function NewSubmission() {
               }));
             }
           }
-          
+
           // Only store and auto-populate vitals for SIX_MONTHLY_MDW
           if (examType === 'SIX_MONTHLY_MDW') {
             // Store last recorded vitals
             setLastRecordedHeight(patient.lastHeight || '');
             setLastRecordedWeight(patient.lastWeight || '');
             setLastRecordedDate(patient.lastExamDate || '');
-            
+
             // Auto-populate height if not already set
             if (patient.lastHeight && !formData.height) {
               setFormData(prev => ({ ...prev, height: patient.lastHeight }));
             }
           }
-          
+
           toast.success(`Patient found: ${maskName(patient.name)}`);
         } else {
           // Clear name and vitals if no patient found
@@ -906,7 +906,7 @@ export function NewSubmission() {
   useEffect(() => {
     if (examType === 'FULL_MEDICAL_EXAM') {
       const isMedicalExaminationComplete = formData.chestXray && formData.syphilis;
-      
+
       if (isMedicalExaminationComplete && !completedSections.has('medical-examination')) {
         setCompletedSections(prev => new Set(prev).add('medical-examination'));
       } else if (!isMedicalExaminationComplete && completedSections.has('medical-examination')) {
@@ -963,12 +963,12 @@ export function NewSubmission() {
   const handleExamTypeChange = (value: string) => {
     const newExamType = value as ExamType;
     setExamType(newExamType);
-    
+
     // Reset name-from-API flag when switching exam types
     if (newExamType === 'AGED_DRIVERS') {
       setIsNameFromApi(false);
     }
-    
+
     // For ICA exams, both HIV and Chest X-ray are always required
     if (isIcaExamType(newExamType)) {
       setRequiredTests({
@@ -983,20 +983,20 @@ export function NewSubmission() {
         chestXrayRequired: 'true',
       }));
     }
-    
+
     // Reset completed sections and active accordion when exam type changes
     setCompletedSections(new Set());
     setActiveAccordion('patient-info');
-    
+
     // Clear last recorded values when changing exam type
     setLastRecordedHeight('');
     setLastRecordedWeight('');
     setLastRecordedDate('');
-    
+
     // Reset summary and declaration
     setShowSummary(false);
     setDeclarationChecked(false);
-    
+
     // Clear all error states when changing exam type
     setNricError(null);
     setPatientNameError(null);
@@ -1057,7 +1057,7 @@ export function NewSubmission() {
         return false;
       }
     }
-    
+
     // Validate Patient Name
     // Skip validation if FIN is locked (e.g., doctor editing pending_approval MOM exam)
     // because the name is already validated and stored from the API
@@ -1068,7 +1068,7 @@ export function NewSubmission() {
         return false;
       }
     }
-    
+
     // Validate DOB for AGED_DRIVERS and driver exams
     if ((examType === 'AGED_DRIVERS' || isDriverExamType(examType)) && !patientDateOfBirth) {
       toast.error('Date of Birth is required for this exam type');
@@ -1096,7 +1096,7 @@ export function NewSubmission() {
 
     // Validate examination date is not in the future
     const todayString = getTodayInSingapore();
-    
+
     if (examinationDate > todayString) {
       setExaminationDateError('Examination date cannot be in the future');
       return false;
@@ -1113,7 +1113,7 @@ export function NewSubmission() {
           return false;
         }
       }
-      
+
       // Validate mobile if provided
       if (patientMobile) {
         const mobileValidationError = validateSingaporeMobile(patientMobile);
@@ -1126,7 +1126,7 @@ export function NewSubmission() {
     }
 
     // Validate driving licence exam timing - show as warning only, do not block
-    
+
     // clear inline exam date error if present
     if (examinationDateError) setExaminationDateError(null);
     if (emailError) setEmailError(null);
@@ -1157,7 +1157,7 @@ export function NewSubmission() {
     for (const condition of medicalHistoryConditions) {
       const fieldName = `medicalHistory_${condition}`;
       const remarksFieldName = `${fieldName}Remarks`;
-      
+
       if (formData[fieldName] === 'yes' && !formData[remarksFieldName]?.trim()) {
         handleValidationError(remarksFieldName, 'Remarks are required when this condition is selected');
         if (!firstErrorField) {
@@ -1217,15 +1217,15 @@ export function NewSubmission() {
     // Update errors state
     if (!isValid) {
       setFmeMedicalHistoryErrors(prev => ({ ...prev, ...newErrors }));
-      
+
       // Scroll to first error
       setTimeout(() => {
-        const firstErrorField = !formData.chestXray ? 'chestXray' : 
-                               !formData.syphilis ? 'syphilis' :
-                               'test_pregnancy';
-        const element = document.getElementById(firstErrorField === 'chestXray' ? 'xray-normal' : 
-                                               firstErrorField === 'syphilis' ? 'syphilis-normal' :
-                                               'test_pregnancy');
+        const firstErrorField = !formData.chestXray ? 'chestXray' :
+          !formData.syphilis ? 'syphilis' :
+            'test_pregnancy';
+        const element = document.getElementById(firstErrorField === 'chestXray' ? 'xray-normal' :
+          firstErrorField === 'syphilis' ? 'syphilis-normal' :
+            'test_pregnancy');
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -1236,11 +1236,11 @@ export function NewSubmission() {
   };
 
   const validateExamSpecific = (): boolean => {
-    
+
     // For ICA exams, require chest X-ray TB question to be answered and passport number
     if (isIcaExamType(examType)) {
       let hasError = false;
-      
+
       // Validate passport number
       if (!patientPassportNo || !patientPassportNo.trim()) {
         setPassportNoError('Passport number is required for ICA medical examinations');
@@ -1254,7 +1254,7 @@ export function NewSubmission() {
           setPassportNoError(null);
         }
       }
-      
+
       // Validate chest X-ray TB
       if (!formData.chestXrayTb) {
         setChestXrayTbError('Please answer the TB (Chest X-ray) question');
@@ -1262,7 +1262,7 @@ export function NewSubmission() {
       } else {
         setChestXrayTbError(null);
       }
-      
+
       if (hasError) {
         // Scroll to patient info accordion if passport error
         if (passportNoError) {
@@ -1271,7 +1271,7 @@ export function NewSubmission() {
         return false;
       }
     }
-    
+
     // For Six-Monthly MDW, require height and weight and validate police report if physical exam concerns are present
     if (examType === 'SIX_MONTHLY_MDW') {
       // Height and weight are mandatory
@@ -1279,15 +1279,15 @@ export function NewSubmission() {
         // Set inline errors instead of toasts
         if (!formData.height) setHeightError('Height is required');
         if (!formData.weight) setWeightError('Weight is required');
-  // Scroll to first invalid field (height/weight) so user sees the error
-  focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
+        // Scroll to first invalid field (height/weight) so user sees the error
+        focusFirstInvalidField({ height: !!formData.height, weight: !!formData.weight, policeReport: !!formData.policeReport, remarks: !!formData.remarks });
         return false;
       }
 
-      const hasPhysicalExamConcerns = 
-        formData.suspiciousInjuries === 'true' || 
+      const hasPhysicalExamConcerns =
+        formData.suspiciousInjuries === 'true' ||
         formData.unintentionalWeightLoss === 'true';
-      
+
       if (hasPhysicalExamConcerns) {
         if (!formData.policeReport) {
           setPoliceReportError('Please indicate whether you have made a police report');
@@ -1353,7 +1353,7 @@ export function NewSubmission() {
         // ignore DOM errors
       }
     }
-    
+
     // clear inline errors if validation passes
     setHeightError(null);
     setWeightError(null);
@@ -1364,7 +1364,7 @@ export function NewSubmission() {
 
   // Scroll and focus the first invalid field in order: height, weight, police report, remarks
   const focusFirstInvalidField = async (states: { height: boolean; weight: boolean; policeReport: boolean; remarks: boolean; }) => {
-    
+
     const getScrollableParent = (node: HTMLElement | null): HTMLElement | null => {
       let el = node?.parentElement;
       const html = document.documentElement;
@@ -1442,7 +1442,7 @@ export function NewSubmission() {
         // ignore and continue to measurement
       }
 
-      
+
       let originalOverflow: string | null = null;
       if (accordionAncestor) {
         const style = getComputedStyle(accordionAncestor);
@@ -1454,7 +1454,7 @@ export function NewSubmission() {
 
       const scrollableParent = getScrollableParent(el);
 
-      
+
 
       try {
         if (scrollableParent && scrollableParent !== document.scrollingElement) {
@@ -1468,7 +1468,7 @@ export function NewSubmission() {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-  // Focus after a short delay to allow smooth scroll/accordion animations to complete
+        // Focus after a short delay to allow smooth scroll/accordion animations to complete
         setTimeout(() => {
           const focusable = el.querySelector<HTMLElement>('input, textarea, select, button, [tabindex]');
           try {
@@ -1486,7 +1486,7 @@ export function NewSubmission() {
           }
         }, 260);
 
-        
+
 
         // Restore any temporary overflow change after animations
         if (accordionAncestor && originalOverflow !== null) {
@@ -1573,7 +1573,7 @@ export function NewSubmission() {
 
   const handleContinue = (currentSection: string, nextSection: string) => {
     let isValid = false;
-    
+
     switch (currentSection) {
       case 'patient-info':
         isValid = validatePatientInfo();
@@ -1587,27 +1587,27 @@ export function NewSubmission() {
       default:
         isValid = true;
     }
-    
+
     if (isValid) {
       // Mark current section as completed
       setCompletedSections(prev => new Set(prev).add(currentSection));
-      
+
       // If editing from summary, check AMT requirement for driver exams before returning
       if (isEditingFromSummary && isDriverExamType(examType)) {
         console.log('🔍 Checking AMT requirement...');
         console.log('patientDateOfBirth:', patientDateOfBirth);
         console.log('examinationDate:', examinationDate);
         console.log('drivingLicenseClass:', drivingLicenseClass);
-        
+
         const newAmtRequired = recalculateAMTRequirement();
         console.log('newAmtRequired:', newAmtRequired);
         console.log('oldAmtRequired:', formData.amtRequired);
-        
+
         // Update formData.amtRequired if it changed
         if (newAmtRequired !== null && newAmtRequired !== formData.amtRequired) {
           setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
           console.log('✏️ Updated amtRequired to:', newAmtRequired);
-          
+
           // If AMT newly became required, remove it from completed sections
           if (newAmtRequired === true && formData.amtRequired === false) {
             console.log('🔄 AMT became required - clearing completion status');
@@ -1618,13 +1618,13 @@ export function NewSubmission() {
             });
           }
         }
-        
+
         // If AMT is required OR we can't determine (null), check if AMT section was completed
         if (newAmtRequired === true || newAmtRequired === null) {
           // Check if AMT section was completed (user visited and clicked continue)
           // When editing from summary, also check if AMT data exists in formData
           const hasAmtData = formData.amt && (
-            formData.amt.score !== undefined || 
+            formData.amt.score !== undefined ||
             Object.keys(formData.amt).some(key => key !== 'score' && formData.amt[key] === true)
           );
           const amtSectionCompleted = completedSections.has('amt') || hasAmtData;
@@ -1632,7 +1632,7 @@ export function NewSubmission() {
           console.log('completedSections.has(amt):', completedSections.has('amt'));
           console.log('hasAmtData:', hasAmtData);
           console.log('formData.amt:', formData.amt);
-          
+
           if (!amtSectionCompleted) {
             // AMT is required/uncertain but section not completed
             const oldAmtRequired = formData.amtRequired;
@@ -1650,21 +1650,21 @@ export function NewSubmission() {
             return;
           }
         }
-        
+
         console.log('✅ AMT check passed, going to summary');
         // AMT check passed or not required, go back to summary
         setActiveAccordion('summary');
         setIsEditingFromSummary(false);
         return;
       }
-      
+
       // If editing from summary for non-driver exams, go back to summary
       if (isEditingFromSummary) {
         setActiveAccordion('summary');
         setIsEditingFromSummary(false);
         return;
       }
-      
+
       // For driver exams from patient-info, go directly to medical-declaration (first exam section)
       if (currentSection === 'patient-info' && isDriverExamType(examType)) {
         setActiveAccordion('medical-declaration');
@@ -1745,10 +1745,10 @@ export function NewSubmission() {
         // Navigate to /draft/:id which will load the draft into the form
         navigate(`/draft/${created.id}`, { replace: true });
       }
-      
+
       // Update formData to match what was saved
       setFormData(enhancedFormData);
-      
+
       // Save current state as the last saved state
       setLastSavedState({
         examType,
@@ -1761,7 +1761,7 @@ export function NewSubmission() {
         examinationDate,
         formData: JSON.parse(JSON.stringify(enhancedFormData)), // Deep copy with masked/full names
       });
-      
+
       setHasUnsavedChanges(false); // Clear unsaved changes after saving state
     } catch (error) {
       console.error('Failed to save draft:', error);
@@ -1798,10 +1798,10 @@ export function NewSubmission() {
         ...(patientPassportNo && { patientPassportNo }), // Include passport number if provided
         ...(patientDateOfBirth && { patientDateOfBirth }), // Only include if not empty
         ...(patientEmail && { patientEmail }), // Only include if not empty
-        ...(patientMobile && { 
-          patientMobile: patientMobile.startsWith('+65') 
-            ? patientMobile.replace(/\s/g, '') 
-            : `+65${patientMobile.replace(/\s/g, '')}` 
+        ...(patientMobile && {
+          patientMobile: patientMobile.startsWith('+65')
+            ? patientMobile.replace(/\s/g, '')
+            : `+65${patientMobile.replace(/\s/g, '')}`
         }), // Add +65 prefix if not present and remove spaces
         ...(drivingLicenseClass && { drivingLicenseClass }), // Only include if not empty
         ...(purposeOfExam && { purposeOfExam }), // Only include if not empty
@@ -1814,35 +1814,35 @@ export function NewSubmission() {
         ...(selectedClinicId && { clinicId: selectedClinicId }),
       };
 
-        if (id) {
+      if (id) {
         // Update existing submission
-          await submissionsApi.update(id, submissionData);
+        await submissionsApi.update(id, submissionData);
 
-          // Submit the draft (changes status from draft to submitted/pending_approval)
-          if (user.role === 'nurse' && isRouteForApproval) {
-            const routed = await submissionsApi.submitForApproval(id);
-            toast.success('Routed for approval successfully');
-            navigate(`/acknowledgement/${routed.id}`, { replace: true });
-          } else if (user.role === 'doctor') {
-            // Doctor submitting directly to agency
-            const submitted = await submissionsApi.submitForApproval(id);
-            toast.success('Medical examination submitted successfully');
-            navigate(`/acknowledgement/${submitted.id}`, { replace: true });
-          } else {
-            toast.success('Submission updated successfully');
-            navigate('/submissions', { replace: true });
-          }
+        // Submit the draft (changes status from draft to submitted/pending_approval)
+        if (user.role === 'nurse' && isRouteForApproval) {
+          const routed = await submissionsApi.submitForApproval(id);
+          toast.success('Routed for approval successfully');
+          navigate(`/acknowledgement/${routed.id}`, { replace: true });
+        } else if (user.role === 'doctor') {
+          // Doctor submitting directly to agency
+          const submitted = await submissionsApi.submitForApproval(id);
+          toast.success('Medical examination submitted successfully');
+          navigate(`/acknowledgement/${submitted.id}`, { replace: true });
+        } else {
+          toast.success('Submission updated successfully');
+          navigate('/submissions', { replace: true });
+        }
       } else {
         // Create new submission
-          const created = await submissionsApi.create(submissionData);
+        const created = await submissionsApi.create(submissionData);
 
-          if (user.role === 'doctor' || !isRouteForApproval) {
-            toast.success('Medical examination submitted successfully');
-            navigate(`/acknowledgement/${created.id}`, { replace: true });
-          } else {
-            toast.success('Routed for approval successfully');
-            navigate(`/acknowledgement/${created.id}`, { replace: true });
-          }
+        if (user.role === 'doctor' || !isRouteForApproval) {
+          toast.success('Medical examination submitted successfully');
+          navigate(`/acknowledgement/${created.id}`, { replace: true });
+        } else {
+          toast.success('Routed for approval successfully');
+          navigate(`/acknowledgement/${created.id}`, { replace: true });
+        }
       }
     } catch (error) {
       console.error('Failed to submit:', error);
@@ -1860,7 +1860,7 @@ export function NewSubmission() {
     }
 
     const AMT_AGE_CHECK_CLASSES = ['4', '4A', '4P', '4AP', '5', '5P'];
-    
+
     const calculateAgeOnNextBirthday = (dob: string, examDate: string): number | null => {
       if (!dob || !examDate) return null;
       const dobDate = new Date(dob);
@@ -1887,7 +1887,7 @@ export function NewSubmission() {
     };
 
     const cognitiveImpairment = formData.abnormalityChecklist?.cognitiveImpairment || false;
-    
+
     // Condition 3: Cognitive impairment
     if (cognitiveImpairment) {
       console.log('🧠 Cognitive impairment detected - AMT required');
@@ -1896,11 +1896,11 @@ export function NewSubmission() {
 
     const ageNextBirthday = calculateAgeOnNextBirthday(patientDateOfBirth, examinationDate);
     const ageOnExamDate = calculateAgeOnExamDate(patientDateOfBirth, examinationDate);
-    
+
     // Check if age is outside critical ranges
     const ageOutsideCriticalRange = (ageNextBirthday !== null && (ageNextBirthday < 70 || ageNextBirthday > 74)) &&
-                                    (ageOnExamDate !== null && ageOnExamDate < 70);
-    
+      (ageOnExamDate !== null && ageOnExamDate < 70);
+
     if (ageOutsideCriticalRange) {
       return false; // AMT definitely not required
     }
@@ -1955,18 +1955,19 @@ export function NewSubmission() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+      <div className="flex items-center gap-4 flex-wrap">
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => navigateWithConfirmation(-1)}
+          className="shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div>
-          <h1 className="text-slate-900 text-2xl font-semibold">{id ? 'Edit Submission' : 'New Medical Examination'}</h1>
+        <div className="min-w-0">
+          <h1 className="text-slate-900 text-2xl font-semibold break-words">{id ? 'Edit Submission' : 'New Medical Examination'}</h1>
           {/* debug badge removed */}
-          <p className="text-slate-600">Complete the form to submit medical examination results</p>
+          <p className="text-slate-600 text-sm sm:text-base">Complete the form to submit medical examination results</p>
         </div>
       </div>
 
@@ -1975,42 +1976,42 @@ export function NewSubmission() {
           <div className="space-y-2">
             <Label htmlFor="examType" className="pt-4">Examination Type <span className="text-red-500">*</span></Label>
             <Select value={examType} onValueChange={handleExamTypeChange} name="examType">
-              <SelectTrigger id="examType" data-testid="examType">
+              <SelectTrigger id="examType" data-testid="examType" className="h-auto whitespace-normal text-left py-3">
                 <SelectValue placeholder="Select examination type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Ministry of Manpower (MOM)</SelectLabel>
-                  <SelectItem value="SIX_MONTHLY_MDW">
+                  <SelectItem value="SIX_MONTHLY_MDW" className="whitespace-normal h-auto py-3">
                     Six-monthly Medical Exam (6ME) for Migrant Domestic Worker
                   </SelectItem>
-                  <SelectItem value="FULL_MEDICAL_EXAM">
+                  <SelectItem value="FULL_MEDICAL_EXAM" className="whitespace-normal h-auto py-3">
                     Full Medical Examination for Foreign Worker
                   </SelectItem>
-                  <SelectItem value="SIX_MONTHLY_FMW">
+                  <SelectItem value="SIX_MONTHLY_FMW" className="whitespace-normal h-auto py-3">
                     Six-monthly Medical Exam (6ME) for Female Migrant Worker
                   </SelectItem>
                 </SelectGroup>
-                
+
                 <SelectGroup>
                   <SelectLabel>Traffic Police (TP) / Land Transport Authority (LTA)</SelectLabel>
-                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA">
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA" className="whitespace-normal h-auto py-3">
                     Driving Licence / Vocational Licence (Full Form)
                   </SelectItem>
-                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA_SHORT">
+                  <SelectItem value="DRIVING_VOCATIONAL_TP_LTA_SHORT" className="whitespace-normal h-auto py-3">
                     Driving Licence / Vocational Licence (Short Form)
                   </SelectItem>
                 </SelectGroup>
-                
+
                 <SelectGroup>
                   <SelectLabel>Immigration & Checkpoints Authority (ICA)</SelectLabel>
-                  <SelectItem value="PR_MEDICAL">
+                  <SelectItem value="PR_MEDICAL" className="whitespace-normal h-auto py-3">
                     Medical Examination for Permanent Residency
                   </SelectItem>
-                  <SelectItem value="LTVP_MEDICAL">
+                  <SelectItem value="LTVP_MEDICAL" className="whitespace-normal h-auto py-3">
                     Medical Examination for Long Term Visit Pass
                   </SelectItem>
-                  <SelectItem value="STUDENT_PASS_MEDICAL">
+                  <SelectItem value="STUDENT_PASS_MEDICAL" className="whitespace-normal h-auto py-3">
                     Medical Examination for Student Pass
                   </SelectItem>
                 </SelectGroup>
@@ -2023,12 +2024,12 @@ export function NewSubmission() {
             <div className="space-y-2 max-w-lg">
               <Label htmlFor="clinic">Clinic <span className="text-red-500">*</span></Label>
               <Select value={selectedClinicId} onValueChange={setSelectedClinicId} name="clinic">
-                <SelectTrigger id="clinic">
+                <SelectTrigger id="clinic" className="h-auto whitespace-normal text-left py-3">
                   <SelectValue placeholder="Select clinic" />
                 </SelectTrigger>
                 <SelectContent>
                   {clinics.map((clinic) => (
-                    <SelectItem key={clinic.id} value={clinic.id}>
+                    <SelectItem key={clinic.id} value={clinic.id} className="h-auto py-3">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-1 sm:gap-4">
                         <span className="font-medium">{clinic.name}</span>
                         {clinic.hciCode && (
@@ -2085,11 +2086,11 @@ export function NewSubmission() {
                     )}
                     <div className="space-y-2 max-w-xs">
                       <Label htmlFor="patientNric">
-                        {isIcaExamType(examType) 
-                          ? 'FIN (if applicable)' 
-                          : isMomExamType(examType) 
-                            ? 'FIN' 
-                            : 'NRIC / FIN'} 
+                        {isIcaExamType(examType)
+                          ? 'FIN (if applicable)'
+                          : isMomExamType(examType)
+                            ? 'FIN'
+                            : 'NRIC / FIN'}
                         {!isIcaExamType(examType) && <span className="text-red-500">*</span>}
                       </Label>
                       {testFin && workflow.canShowTestFIN && (
@@ -2111,7 +2112,7 @@ export function NewSubmission() {
                                   hasPrevious: !!previousFinValue,
                                   hasAccordionData: hasAccordionDataFilled()
                                 });
-                                
+
                                 // If this is a FIN change with accordion data for MOM exams
                                 if (isMomExamType(examType) && previousFinValue && previousFinValue !== testFin && hasAccordionDataFilled()) {
                                   console.log('[Use This] FIN change detected with data - showing dialog');
@@ -2153,13 +2154,13 @@ export function NewSubmission() {
                             isNameFromApi
                           });
                           setPatientNric(newValue);
-                          
+
                           // Clear error on change
                           if (nricError) setNricError(null);
                         }}
                         onBlur={(e) => {
                           const value = e.target.value;
-                          
+
                           // For ICA exams, NRIC is optional - only validate if provided
                           if (isIcaExamType(examType)) {
                             if (value) {
@@ -2182,15 +2183,15 @@ export function NewSubmission() {
                               setNricError('FIN is required');
                               return;
                             }
-                            
+
                             // Validate FIN format
                             const error = validateNricOrFin(value, validateNRIC);
                             setNricError(error);
-                            
+
                             // For MOM exams, check if FIN changed after validation passes
                             if (!error && isMomExamType(examType)) {
                               const hasData = hasAccordionDataFilled();
-                              
+
                               console.log('[FIN Change Debug]', {
                                 currentValue: value,
                                 previousFinValue,
@@ -2200,7 +2201,7 @@ export function NewSubmission() {
                                 examinationDate,
                                 isEditingDraft: !!id
                               });
-                              
+
                               // Check if this is a FIN change (not initial entry) with accordion data
                               if (previousFinValue && previousFinValue !== value && hasData) {
                                 console.log('[FIN Change] Showing dialog - FIN changed with accordion data');
@@ -2236,10 +2237,10 @@ export function NewSubmission() {
                     {/* Patient Name below NRIC/FIN, with conditional rendering for exam type */}
                     <div className="space-y-2 max-w-md">
                       <Label htmlFor="patientName">
-                        {isIcaExamType(examType) 
-                          ? 'Full Name (as in Passport)' 
-                          : isMomExamType(examType) 
-                            ? 'Full Name (as in FIN)' 
+                        {isIcaExamType(examType)
+                          ? 'Full Name (as in Passport)'
+                          : isMomExamType(examType)
+                            ? 'Full Name (as in FIN)'
                             : 'Full Name (as in NRIC / FIN)'} <span className="text-red-500">*</span>
                       </Label>
                       {(examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || examType === 'WORK_PERMIT' || examType === 'FULL_MEDICAL_EXAM') ? (
@@ -2450,14 +2451,14 @@ export function NewSubmission() {
                         onChange={(e) => {
                           const selectedDate = e.target.value;
                           setExaminationDate(selectedDate);
-                          
+
                           // Clear previous errors
                           if (examinationDateError) setExaminationDateError(null);
-                          
+
                           // Validate if future date
                           if (selectedDate) {
                             const todayString = getTodayInSingapore();
-                            
+
                             if (selectedDate > todayString) {
                               setExaminationDateError('Examination date cannot be in the future');
                             }
@@ -2484,7 +2485,7 @@ export function NewSubmission() {
                     )}
                   </div>
                   <div className="flex justify-start mt-4">
-                    <Button 
+                    <Button
                       type="button"
                       onClick={() => {
                         // Validate mobile number for short driver exams
@@ -2492,7 +2493,7 @@ export function NewSubmission() {
                           setMobileError('Mobile number is required');
                           return;
                         }
-                        
+
                         if (examType === 'FULL_MEDICAL_EXAM') {
                           // For FME, navigate to medical-history accordion
                           setCompletedSections(prev => new Set(prev).add('patient-info'));
@@ -2519,7 +2520,7 @@ export function NewSubmission() {
                       }}
                       disabled={!isPatientInfoValid}
                     >
-                      {isEditingFromSummary && isShortDriverExamType(examType) && purposeOfExam !== initialPurposeOfExamRef.current 
+                      {isEditingFromSummary && isShortDriverExamType(examType) && purposeOfExam !== initialPurposeOfExamRef.current
                         ? 'Continue to Overall Assessment'
                         : isEditingFromSummary ? 'Continue to Summary' : 'Continue'}
                     </Button>
@@ -2549,7 +2550,7 @@ export function NewSubmission() {
                         onValidate={handleValidationError}
                       />
                       <div className="flex justify-start mt-4">
-                        <Button 
+                        <Button
                           type="button"
                           disabled={!formData.medicalHistory_patientCertification}
                           onClick={() => {
@@ -2589,7 +2590,7 @@ export function NewSubmission() {
                         onValidate={handleValidationError}
                       />
                       <div className="flex justify-start mt-4">
-                        <Button 
+                        <Button
                           type="button"
                           onClick={() => {
                             if (validateFmeMedicalExamination()) {
@@ -2613,81 +2614,81 @@ export function NewSubmission() {
 
               {/* Examination Details - hidden for driver exams, FME, and short forms as they have their own structure */}
               {!isDriverExamType(examType) && examType !== 'FULL_MEDICAL_EXAM' && examType !== 'DRIVING_VOCATIONAL_TP_LTA_SHORT' && (
-              <AccordionItem value="exam-specific">
-                <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
-                  <div className="flex items-center gap-2">
-                    <span>Examination Details</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  {examType === 'SIX_MONTHLY_MDW' && (
-                    <SixMonthlyMdwFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                      lastRecordedHeight={lastRecordedHeight}
-                      lastRecordedWeight={lastRecordedWeight}
-                      lastRecordedDate={lastRecordedDate}
-                      heightError={heightError}
-                      setHeightError={setHeightError}
-                      weightError={weightError}
-                      setWeightError={setWeightError}
-                      policeReportError={policeReportError}
-                      setPoliceReportError={setPoliceReportError}
-                      remarksError={remarksError}
-                      setRemarksError={setRemarksError}
-                      requiredTests={requiredTests}
-                    />
-                  )}
-                  {examType === 'SIX_MONTHLY_FMW' && (
-                    <SixMonthlyFmwFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                      remarksError={remarksError}
-                      setRemarksError={setRemarksError}
-                      requiredTests={requiredTests}
-                    />
-                  )}
-                  {examType === 'WORK_PERMIT' && (
-                    <WorkPermitFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                    />
-                  )}
-                  {examType === 'AGED_DRIVERS' && (
-                    <AgedDriversFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                    />
-                  )}
-                  {isIcaExamType(examType) && (
-                    <IcaExamFields
-                      formData={formData}
-                      onChange={handleFormDataChange}
-                      remarksError={remarksError}
-                      chestXrayTbError={chestXrayTbError}
-                    />
-                  )}
-                  <div className="flex justify-start mt-4">
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
-                          // For MDW, FMW, and ICA exams, show summary page
-                          if (validateExamSpecific()) {
-                            setCompletedSections(prev => new Set(prev).add('exam-specific'));
-                            setShowSummary(true);
-                            setActiveAccordion('summary');
+                <AccordionItem value="exam-specific">
+                  <AccordionTrigger isCompleted={completedSections.has('exam-specific')} isDisabled={!isPatientInfoValid}>
+                    <div className="flex items-center gap-2">
+                      <span>Examination Details</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    {examType === 'SIX_MONTHLY_MDW' && (
+                      <SixMonthlyMdwFields
+                        formData={formData}
+                        onChange={handleFormDataChange}
+                        lastRecordedHeight={lastRecordedHeight}
+                        lastRecordedWeight={lastRecordedWeight}
+                        lastRecordedDate={lastRecordedDate}
+                        heightError={heightError}
+                        setHeightError={setHeightError}
+                        weightError={weightError}
+                        setWeightError={setWeightError}
+                        policeReportError={policeReportError}
+                        setPoliceReportError={setPoliceReportError}
+                        remarksError={remarksError}
+                        setRemarksError={setRemarksError}
+                        requiredTests={requiredTests}
+                      />
+                    )}
+                    {examType === 'SIX_MONTHLY_FMW' && (
+                      <SixMonthlyFmwFields
+                        formData={formData}
+                        onChange={handleFormDataChange}
+                        remarksError={remarksError}
+                        setRemarksError={setRemarksError}
+                        requiredTests={requiredTests}
+                      />
+                    )}
+                    {examType === 'WORK_PERMIT' && (
+                      <WorkPermitFields
+                        formData={formData}
+                        onChange={handleFormDataChange}
+                      />
+                    )}
+                    {examType === 'AGED_DRIVERS' && (
+                      <AgedDriversFields
+                        formData={formData}
+                        onChange={handleFormDataChange}
+                      />
+                    )}
+                    {isIcaExamType(examType) && (
+                      <IcaExamFields
+                        formData={formData}
+                        onChange={handleFormDataChange}
+                        remarksError={remarksError}
+                        chestXrayTbError={chestXrayTbError}
+                      />
+                    )}
+                    <div className="flex justify-start mt-4">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (examType === 'SIX_MONTHLY_MDW' || examType === 'SIX_MONTHLY_FMW' || isIcaExamType(examType)) {
+                            // For MDW, FMW, and ICA exams, show summary page
+                            if (validateExamSpecific()) {
+                              setCompletedSections(prev => new Set(prev).add('exam-specific'));
+                              setShowSummary(true);
+                              setActiveAccordion('summary');
+                            }
+                          } else {
+                            handleContinue('exam-specific', 'remarks');
                           }
-                        } else {
-                          handleContinue('exam-specific', 'remarks');
-                        }
-                      }}
-                    >
-                      Continue
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+                        }}
+                      >
+                        Continue
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               )}
 
               {/* Driver Exam Details - render accordion items directly for TP Driving Licence */}
@@ -2698,7 +2699,7 @@ export function NewSubmission() {
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
                   isEditingFromSummary={isEditingFromSummary}
-                  errors={{ 
+                  errors={{
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
                     ...medicalHistoryErrors,
@@ -2710,20 +2711,20 @@ export function NewSubmission() {
                   examinationDate={examinationDate}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
-                    
+
                     console.log('📍 onContinue (DRIVING_LICENCE_TP):', { current, next, isEditingFromSummary });
-                    
+
                     // Check AMT requirement when navigating to summary (from any section)
                     if (next === 'summary' || isEditingFromSummary) {
                       const newAmtRequired = recalculateAMTRequirement();
                       const oldAmtRequired = formData.amtRequired;
-                      
+
                       console.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
-                      
+
                       // Update formData.amtRequired if it changed
                       if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
                         setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
-                        
+
                         // If AMT newly became required, remove it from completed sections
                         if (newAmtRequired === true && oldAmtRequired === false) {
                           console.log('🔄 AMT became required - clearing completion status');
@@ -2734,13 +2735,13 @@ export function NewSubmission() {
                           });
                         }
                       }
-                      
+
                       // If AMT is required OR uncertain (null), verify AMT section was completed
                       if (newAmtRequired === true || newAmtRequired === null) {
                         // Check if AMT section was completed (includes current if we're on AMT)
                         const amtSectionCompleted = current === 'amt' || completedSections.has('amt');
                         console.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
-                        
+
                         if (!amtSectionCompleted) {
                           // AMT is required/uncertain but section not completed
                           if (newAmtRequired === null) {
@@ -2756,7 +2757,7 @@ export function NewSubmission() {
                         }
                       }
                     }
-                    
+
                     if (isEditingFromSummary) {
                       // When editing from summary, go back to summary
                       setActiveAccordion('summary');
@@ -2779,7 +2780,7 @@ export function NewSubmission() {
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
                   isEditingFromSummary={isEditingFromSummary}
-                  errors={{ 
+                  errors={{
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
                     ...medicalHistoryErrors,
@@ -2792,20 +2793,20 @@ export function NewSubmission() {
                   purposeOfExam={purposeOfExam}
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
-                    
+
                     console.log('📍 onContinue (DRIVING_VOCATIONAL_TP_LTA):', { current, next, isEditingFromSummary });
-                    
+
                     // Check AMT requirement when navigating to summary (from any section)
                     if (next === 'summary' || isEditingFromSummary) {
                       const newAmtRequired = recalculateAMTRequirement();
                       const oldAmtRequired = formData.amtRequired;
-                      
+
                       console.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
-                      
+
                       // Update formData.amtRequired if it changed
                       if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
                         setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
-                        
+
                         // If AMT newly became required, remove it from completed sections
                         if (newAmtRequired === true && oldAmtRequired === false) {
                           console.log('🔄 AMT became required - clearing completion status');
@@ -2816,13 +2817,13 @@ export function NewSubmission() {
                           });
                         }
                       }
-                      
+
                       // If AMT is required OR uncertain (null), verify AMT section was completed
                       if (newAmtRequired === true || newAmtRequired === null) {
                         // Check if AMT section was completed (includes current if we're on AMT)
                         const amtSectionCompleted = current === 'amt' || completedSections.has('amt');
                         console.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
-                        
+
                         if (!amtSectionCompleted) {
                           // AMT is required/uncertain but section not completed
                           if (newAmtRequired === null) {
@@ -2838,7 +2839,7 @@ export function NewSubmission() {
                         }
                       }
                     }
-                    
+
                     if (isEditingFromSummary) {
                       // When editing from summary, go back to summary
                       setActiveAccordion('summary');
@@ -2860,7 +2861,7 @@ export function NewSubmission() {
                   onChange={handleFormDataChange}
                   completedSections={completedSections}
                   isPatientInfoValid={isPatientInfoValid}
-                  errors={{ 
+                  errors={{
                     medicalDeclarationRemarks: medicalDeclarationRemarksError || '',
                     medicalDeclarationPatientCertification: medicalDeclarationPatientCertificationError || '',
                     ...medicalHistoryErrors,
@@ -2926,7 +2927,7 @@ export function NewSubmission() {
                           setIsEditingFromSummary(true);
                         }}
                       />
-                      
+
                       <DeclarationSection
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
@@ -2935,7 +2936,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                         clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
-                      
+
                       <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
@@ -3024,7 +3025,7 @@ export function NewSubmission() {
                           setIsEditingFromSummary(true);
                         }}
                       />
-                      
+
                       <DeclarationSection
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
@@ -3033,7 +3034,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                         clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
-                      
+
                       <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
@@ -3162,16 +3163,14 @@ export function NewSubmission() {
                                 </div>
                               </div>
                             </div>
-                            
+
                             {formData.fitForWork && (
-                              <div className={`p-4 rounded-lg border ${
-                                formData.fitForWork === 'yes' 
-                                  ? 'bg-green-50 border-green-200' 
-                                  : 'bg-red-50 border-red-200'
-                              }`}>
-                                <p className={`font-semibold ${
-                                  formData.fitForWork === 'yes' ? 'text-green-700' : 'text-red-700'
+                              <div className={`p-4 rounded-lg border ${formData.fitForWork === 'yes'
+                                ? 'bg-green-50 border-green-200'
+                                : 'bg-red-50 border-red-200'
                                 }`}>
+                                <p className={`font-semibold ${formData.fitForWork === 'yes' ? 'text-green-700' : 'text-red-700'
+                                  }`}>
                                   {formData.fitForWork === 'yes' ? '✓' : '✗'} The patient is{' '}
                                   {formData.fitForWork === 'yes' ? 'fit for work' : 'NOT fit for work'}
                                 </p>
@@ -3180,7 +3179,7 @@ export function NewSubmission() {
                           </div>
                         </CardContent>
                       </Card>
-                      
+
                       <DeclarationSection
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
@@ -3189,7 +3188,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                         clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
-                      
+
                       <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
@@ -3289,7 +3288,7 @@ export function NewSubmission() {
                           setIsEditingFromSummary(true);
                         }}
                       />
-                      
+
                       <IcaDeclarationSection
                         checked={declarationChecked}
                         onChange={setDeclarationChecked}
@@ -3298,7 +3297,7 @@ export function NewSubmission() {
                         doctorMcrNumber={user?.mcrNumber}
                         clinicInfo={selectedClinicId ? clinics.find(c => c.id === selectedClinicId) : undefined}
                       />
-                      
+
                       <div className="flex justify-start mt-4">
                         {role === 'doctor' ? (
                           <Button
@@ -3427,7 +3426,7 @@ export function NewSubmission() {
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0">
                               <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                               </svg>
                             </div>
                             <div className="flex-1">
@@ -3460,22 +3459,22 @@ export function NewSubmission() {
                             }
                           }}
                           disabled={
-                            isSaving || 
-                            !formData.assessment?.declarationAgreed || 
-                            (purposeOfExam === 'BAVL_ANY_AGE' 
+                            isSaving ||
+                            !formData.assessment?.declarationAgreed ||
+                            (purposeOfExam === 'BAVL_ANY_AGE'
                               ? formData.assessment?.fitForBusAttendant === undefined
                               : purposeOfExam === 'AGE_65_ABOVE_TP_ONLY'
-                              ? formData.assessment?.fitToDrive === undefined
-                              : formData.assessment?.fitToDrivePublicService === undefined) ||
+                                ? formData.assessment?.fitToDrive === undefined
+                                : formData.assessment?.fitToDrivePublicService === undefined) ||
                             hasPendingMemos(examType, formData)
                           }
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? (
-                            purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE' 
+                            purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE'
                               ? 'Submit to LTA'
                               : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
-                              ? 'Submit to TP & LTA'
-                              : 'Submit to TP'
+                                ? 'Submit to TP & LTA'
+                                : 'Submit to TP'
                           ) : 'Route for Approval'}
                         </Button>
                       </div>
@@ -3586,27 +3585,27 @@ export function NewSubmission() {
                             }
                           }}
                           disabled={
-                            isSaving || 
+                            isSaving ||
                             !formData.declarationAgreed ||
-                            (purposeOfExam === 'AGE_65_ABOVE_TP_ONLY' 
+                            (purposeOfExam === 'AGE_65_ABOVE_TP_ONLY'
                               ? !formData.fitToDriveMotorVehicle
                               : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
-                              ? !formData.fitToDrivePsv || !formData.fitForBavl
-                              : purposeOfExam === 'AGE_64_BELOW_LTA_ONLY'
-                              ? !formData.fitToDrivePsv || !formData.fitForBavl
-                              : purposeOfExam === 'BAVL_ANY_AGE'
-                              ? !formData.fitForBavl
-                              : false)
+                                ? !formData.fitToDrivePsv || !formData.fitForBavl
+                                : purposeOfExam === 'AGE_64_BELOW_LTA_ONLY'
+                                  ? !formData.fitToDrivePsv || !formData.fitForBavl
+                                  : purposeOfExam === 'BAVL_ANY_AGE'
+                                    ? !formData.fitForBavl
+                                    : false)
                           }
                         >
                           {isSaving ? 'Submitting...' : role === 'doctor' ? (
-                            examType === 'DRIVING_LICENCE_TP_SHORT' 
+                            examType === 'DRIVING_LICENCE_TP_SHORT'
                               ? 'Submit to TP'
                               : purposeOfExam === 'AGE_64_BELOW_LTA_ONLY' || purposeOfExam === 'BAVL_ANY_AGE'
-                              ? 'Submit to LTA'
-                              : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
-                              ? 'Submit to TP & LTA'
-                              : 'Submit to TP'
+                                ? 'Submit to LTA'
+                                : purposeOfExam === 'AGE_65_ABOVE_TP_LTA'
+                                  ? 'Submit to TP & LTA'
+                                  : 'Submit to TP'
                           ) : 'Route for Approval'}
                         </Button>
                       </div>
@@ -3628,7 +3627,7 @@ export function NewSubmission() {
                       onChange={(value) => handleFormDataChange('remarks', value)}
                     />
                     <div className="flex justify-start mt-4">
-                      <Button 
+                      <Button
                         type="button"
                         onClick={() => {
                           if (validateRemarks()) {
@@ -3649,15 +3648,15 @@ export function NewSubmission() {
       </Card>
 
       {examType && (
-        <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={handleSaveDraft} disabled={!examType || isSaving}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+          <Button variant="outline" onClick={handleSaveDraft} disabled={!examType || isSaving} className="w-full sm:w-auto">
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save as Draft'}
           </Button>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 w-full sm:w-auto">
             {/* Nurses submit for approval from the Summary section only; no footer button here for MDW/FMW. */}
-            
+
             {/* Doctors submit from the Summary section only; no footer button here for MDW/FMW. */}
           </div>
         </div>
@@ -3670,14 +3669,14 @@ export function NewSubmission() {
               {isRouteForApproval ? 'Route for Approval?' : 'Submit Medical Examination?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {isRouteForApproval 
+              {isRouteForApproval
                 ? 'This will send the medical examination to a doctor for review and approval before submission.'
                 : user?.role === 'doctor'
-                ? 'This will submit the medical examination results to the relevant government agency. This action cannot be undone.'
-                : 'This will submit the medical examination results. Please ensure all information is accurate.'}
+                  ? 'This will submit the medical examination results to the relevant government agency. This action cannot be undone.'
+                  : 'This will submit the medical examination results. Please ensure all information is accurate.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           {user?.role === 'nurse' && isRouteForApproval && (
             <div className="space-y-2 px-6 pb-4">
               <Label htmlFor="assignedDoctor">Assign to Doctor <span className="text-red-500">*</span></Label>
@@ -3699,7 +3698,7 @@ export function NewSubmission() {
               </p>
             </div>
           )}
-          
+
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction data-testid="confirm-submit-button" onClick={handleSubmit}>
@@ -3744,20 +3743,20 @@ export function NewSubmission() {
               // User confirmed - keep the new FIN (already set in patientNric) and clear accordion data
               setPreviousFinValue(pendingFinValue);
               clearAccordionData();
-              
+
               // Clear patient name to trigger fresh lookup
               setPatientName('');
               setIsNameFromApi(false);
-              
+
               // Reset the lookup ref so the useEffect will fetch for the new FIN
               lastLookedUpNricRef.current = null;
-              
+
               // Set confirmed value to trigger patient lookup
               setConfirmedFinValue(pendingFinValue);
-              
+
               setShowFinChangeDialog(false);
               setPendingFinValue('');
-              
+
               // Don't show toast here - let the useEffect show it when patient is found
             }}>
               Proceed
