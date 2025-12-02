@@ -2389,14 +2389,14 @@ export function NewSubmission() {
                       <div className="space-y-2 max-w-2xl">
                         <Label htmlFor="purposeOfExam">Purpose of Exam <span className="text-red-500">*</span></Label>
                         <Select value={purposeOfExam} onValueChange={setPurposeOfExam}>
-                          <SelectTrigger id="purposeOfExam" className={!purposeOfExam ? 'text-muted-foreground' : ''}>
+                          <SelectTrigger id="purposeOfExam" className={`h-auto whitespace-normal text-left py-3 ${!purposeOfExam ? 'text-muted-foreground' : ''}`}>
                             <SelectValue placeholder="Select purpose of exam" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="AGE_65_ABOVE_TP_ONLY">Age 65 and above - Renew Traffic Police Driving Licence only</SelectItem>
-                            <SelectItem value="AGE_65_ABOVE_TP_LTA">Age 65 and above - Renew both Traffic Police & LTA Vocational Licence</SelectItem>
-                            <SelectItem value="AGE_64_BELOW_LTA_ONLY">Age 64 and below - Renew LTA Vocational Licence only</SelectItem>
-                            <SelectItem value="BAVL_ANY_AGE">Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age</SelectItem>
+                            <SelectItem value="AGE_65_ABOVE_TP_ONLY" className="whitespace-normal h-auto py-3">Age 65 and above - Renew Traffic Police Driving Licence only</SelectItem>
+                            <SelectItem value="AGE_65_ABOVE_TP_LTA" className="whitespace-normal h-auto py-3">Age 65 and above - Renew both Traffic Police & LTA Vocational Licence</SelectItem>
+                            <SelectItem value="AGE_64_BELOW_LTA_ONLY" className="whitespace-normal h-auto py-3">Age 64 and below - Renew LTA Vocational Licence only</SelectItem>
+                            <SelectItem value="BAVL_ANY_AGE" className="whitespace-normal h-auto py-3">Renew only Bus Attendant's Vocational Licence (BAVL) regardless of age</SelectItem>
                           </SelectContent>
                         </Select>
                         {purposeOfExamWarning && (
