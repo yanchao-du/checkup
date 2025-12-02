@@ -67,19 +67,19 @@ export function PendingApprovals() {
     if (sortField !== column) {
       return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-30" />;
     }
-    return sortDirection === 'asc' 
+    return sortDirection === 'asc'
       ? <ArrowUp className="w-4 h-4 ml-1 inline" />
       : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
   const filteredApprovals = pendingApprovals.filter(approval => {
-    const matchesSearch = 
+    const matchesSearch =
       approval.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (approval.patientNric && approval.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (approval.patientPassportNo && approval.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesExamType = filterExamType === 'all' || approval.examType === filterExamType;
-    
+
     return matchesSearch && matchesExamType;
   });
 
@@ -138,7 +138,7 @@ export function PendingApprovals() {
       await approvalsApi.approve(selectedSubmission.id, {
         notes: 'Approved by doctor'
       });
-      
+
       // Remove from pending list
       setPendingApprovals(pendingApprovals.filter(s => s.id !== selectedSubmission.id));
       toast.success('Medical examination approved and submitted successfully');
@@ -159,7 +159,7 @@ export function PendingApprovals() {
       await approvalsApi.reject(selectedSubmission.id, {
         reason: 'Requires corrections'
       });
-      
+
       // Remove from pending list
       setPendingApprovals(pendingApprovals.filter(s => s.id !== selectedSubmission.id));
       toast.success('Medical examination rejected and returned to drafts');
@@ -224,126 +224,152 @@ export function PendingApprovals() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table role="table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('patientName')}
-                    >
-                      Patient Name{getSortIcon('patientName')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('patientNric')}
-                    >
-                      NRIC/FIN{getSortIcon('patientNric')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('patientPassportNo')}
-                    >
-                      Passport{getSortIcon('patientPassportNo')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('examType')}
-                    >
-                      Examination Type{getSortIcon('examType')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('createdByName')}
-                    >
-                      Submitted By{getSortIcon('createdByName')}
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-slate-50 select-none"
-                      onClick={() => handleSort('createdDate')}
-                    >
-                      Date Submitted{getSortIcon('createdDate')}
-                    </TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedApprovals.map((submission) => (
-                    <TableRow 
-                      key={submission.id}
-                      className="cursor-pointer hover:bg-slate-50"
-                      onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/pending-approvals' } })}
-                    >
-                      <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientNric || '-'}</TableCell>
-                      <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {formatExamType(submission.examType)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-slate-600">
-                        {submission.createdByName || submission.createdBy}
-                      </TableCell>
-                      <TableCell className="text-slate-600">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          {new Date(submission.createdDate).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <Link to={`/view-submission/${submission.id}`} state={{ from: '/pending-approvals' }}>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              <Eye className="w-4 h-4 mr-1.5" />
-                              Review
-                            </Button>
-                          </Link>
-                          {/* <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            onClick={() => {
-                              setIsApproving(true);
-                              setSelectedSubmission(submission);
-                            }}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1.5" />
-                            Approve
-                          </Button> */}
-                          {/* <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => {
-                              setIsApproving(false);
-                              setSelectedSubmission(submission);
-                            }}
-                          >
-                            <XCircle className="w-4 h-4 mr-1.5" />
-                            Reject
-                          </Button> */}
-                        </div>
-                      </TableCell>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4 mb-4">
+                {paginatedApprovals.map((submission) => (
+                  <Card key={submission.id} className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-semibold">{submission.patientName}</h3>
+                        <p className="text-sm text-slate-500">
+                          {submission.patientNric || submission.patientPassportNo || '-'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-slate-600 mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Exam:</span>
+                        <span className="font-medium text-right">{formatExamType(submission.examType)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Submitted By:</span>
+                        <span>{submission.createdByName || submission.createdBy}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Date:</span>
+                        <span>{new Date(submission.createdDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
+                      <Link to={`/view-submission/${submission.id}`} state={{ from: '/pending-approvals' }} className="flex-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" />
+                          Review
+                        </Button>
+                      </Link>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table role="table">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientName')}
+                      >
+                        Patient Name{getSortIcon('patientName')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientNric')}
+                      >
+                        NRIC/FIN{getSortIcon('patientNric')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientPassportNo')}
+                      >
+                        Passport{getSortIcon('patientPassportNo')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('examType')}
+                      >
+                        Examination Type{getSortIcon('examType')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('createdByName')}
+                      >
+                        Submitted By{getSortIcon('createdByName')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('createdDate')}
+                      >
+                        Date Submitted{getSortIcon('createdDate')}
+                      </TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedApprovals.map((submission) => (
+                      <TableRow
+                        key={submission.id}
+                        className="cursor-pointer hover:bg-slate-50"
+                        onClick={() => navigate(`/view-submission/${submission.id}`, { state: { from: '/pending-approvals' } })}
+                      >
+                        <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
+                        <TableCell className="text-slate-600">{submission.patientNric || '-'}</TableCell>
+                        <TableCell className="text-slate-600">{submission.patientPassportNo || '-'}</TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            {formatExamType(submission.examType)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600">
+                          {submission.createdByName || submission.createdBy}
+                        </TableCell>
+                        <TableCell className="text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            {new Date(submission.createdDate).toLocaleDateString()}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Link to={`/view-submission/${submission.id}`} state={{ from: '/pending-approvals' }}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <Eye className="w-4 h-4 mr-1.5" />
+                                Review
+                              </Button>
+                            </Link>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-2 py-4">
-                  <div className="text-sm text-slate-600">
-                    Showing {startIndex + 1}-{Math.min(endIndex, sortedApprovals.length)} of {sortedApprovals.length} approvals
+                <div className="flex flex-col sm:flex-row items-center justify-between px-2 py-4 gap-4 sm:gap-0">
+                  <div className="text-sm text-slate-600 text-center sm:text-left">
+                    <span className="hidden sm:inline">Showing {startIndex + 1}-{Math.min(endIndex, sortedApprovals.length)} of {sortedApprovals.length} approvals</span>
+                    <span className="sm:hidden">{startIndex + 1}-{Math.min(endIndex, sortedApprovals.length)} of {sortedApprovals.length}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
                       title="First page"
+                      className="hidden sm:inline-flex"
                     >
                       <ChevronsLeft className="w-4 h-4" />
                     </Button>
@@ -352,11 +378,13 @@ export function PendingApprovals() {
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
+                      className="px-2 sm:px-3"
                     >
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Prev</span>
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-600">Page</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-xs sm:text-sm text-slate-600 hidden sm:inline">Page</span>
                       <Input
                         type="number"
                         min={1}
@@ -374,15 +402,16 @@ export function PendingApprovals() {
                           // Reset to current page if input is invalid
                           setPageInput(currentPage.toString());
                         }}
-                        className="w-16 h-8 text-center"
+                        className="w-12 sm:w-16 h-8 text-center text-sm"
                       />
-                      <span className="text-sm text-slate-600">of {totalPages}</span>
+                      <span className="text-xs sm:text-sm text-slate-600">of {totalPages}</span>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
+                      className="px-2 sm:px-3"
                     >
                       Next
                     </Button>
@@ -392,6 +421,7 @@ export function PendingApprovals() {
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
                       title="Last page"
+                      className="hidden sm:inline-flex"
                     >
                       <ChevronsRight className="w-4 h-4" />
                     </Button>

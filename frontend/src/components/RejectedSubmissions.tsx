@@ -41,7 +41,7 @@ export function RejectedSubmissions() {
       try {
         setIsLoading(true);
         // Doctors use approvals endpoint, nurses use submissions endpoint
-        const response = user?.role === 'doctor' 
+        const response = user?.role === 'doctor'
           ? await approvalsApi.getRejected({ page: 1, limit: 100 })
           : await submissionsApi.getRejected({ page: 1, limit: 100 });
         setRejectedSubmissions(response.data);
@@ -60,19 +60,19 @@ export function RejectedSubmissions() {
     if (sortField !== column) {
       return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-30" />;
     }
-    return sortDirection === 'asc' 
+    return sortDirection === 'asc'
       ? <ArrowUp className="w-4 h-4 ml-1 inline" />
       : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
   const filteredRejections = rejectedSubmissions.filter(submission => {
-    const matchesSearch = 
+    const matchesSearch =
       submission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (submission.patientNric && submission.patientNric.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (submission.patientPassportNo && submission.patientPassportNo.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesExamType = filterExamType === 'all' || submission.examType === filterExamType;
-    
+
     return matchesSearch && matchesExamType;
   });
 
@@ -128,13 +128,13 @@ export function RejectedSubmissions() {
       setReopeningId(submissionId);
       await submissionsApi.reopenSubmission(submissionId);
       toast.success('Submission reopened - you can now edit it');
-      
+
       // Refresh the list to show updated status
-      const response = user?.role === 'doctor' 
+      const response = user?.role === 'doctor'
         ? await approvalsApi.getRejected({ page: 1, limit: 100 })
         : await submissionsApi.getRejected({ page: 1, limit: 100 });
       setRejectedSubmissions(response.data);
-      
+
       // Redirect to draft edit page after a brief delay
       setTimeout(() => navigate(`/draft/${submissionId}`), 1000);
     } catch (error) {
@@ -161,7 +161,7 @@ export function RejectedSubmissions() {
           {user?.role === 'doctor' ? 'Reports Rejected by Me' : 'Reports Rejected by Doctor'}
         </h2>
         <p className="text-slate-600">
-          {user?.role === 'doctor' 
+          {user?.role === 'doctor'
             ? 'Review submissions you have rejected'
             : 'Review your submissions that were rejected'}
         </p>
@@ -203,198 +203,288 @@ export function RejectedSubmissions() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                <TableRow>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('patientName')}
-                  >
-                    Patient Name{getSortIcon('patientName')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('patientNric')}
-                  >
-                    NRIC/FIN{getSortIcon('patientNric')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('patientPassportNo')}
-                  >
-                    Passport{getSortIcon('patientPassportNo')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('examType')}
-                  >
-                    Examination Type{getSortIcon('examType')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('rejectedReason')}
-                  >
-                    Rejection Reason{getSortIcon('rejectedReason')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('createdByName')}
-                  >
-                    Submitted By{getSortIcon('createdByName')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('approvedByName')}
-                  >
-                    Rejected By{getSortIcon('approvedByName')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('createdDate')}
-                  >
-                    Rejected Date{getSortIcon('createdDate')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-slate-50 select-none"
-                    onClick={() => handleSort('status')}
-                  >
-                    Status{getSortIcon('status')}
-                  </TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4 mb-4">
                 {paginatedRejections.map((submission) => (
-                  <TableRow key={submission.id}>
-                    <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
-                    <TableCell>{submission.patientNric || '-'}</TableCell>
-                    <TableCell>{submission.patientPassportNo || '-'}</TableCell>
-                    <TableCell className="text-sm">{formatExamType(submission.examType)}</TableCell>
-                    <TableCell className="max-w-[200px]">
-                      <p className="text-sm text-slate-600 truncate" title={submission.rejectedReason || 'No reason provided'}>
-                        {submission.rejectedReason || 'No reason provided'}
-                      </p>
-                    </TableCell>
-                    <TableCell>{submission.createdByName}</TableCell>
-                    <TableCell>{submission.approvedByName || 'Unknown'}</TableCell>
-                    <TableCell>
-                      {new Date(submission.createdDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
+                  <Card key={submission.id} className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-semibold">{submission.patientName}</h3>
+                        <p className="text-sm text-slate-500">
+                          {submission.patientNric || submission.patientPassportNo || '-'}
+                        </p>
+                      </div>
                       {submission.status === 'draft' ? (
-                        <div className="flex gap-1">
-                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                            Reopened
-                          </Badge>
-                        </div>
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                          Reopened
+                        </Badge>
                       ) : (
                         <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
                           Rejected
                         </Badge>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Link to={`/view-submission/${submission.id}`}>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          >
-                            <Eye className="w-4 h-4 mr-1.5" />
-                            View
-                          </Button>
-                        </Link>
-                        {user?.role === 'nurse' && submission.status === 'rejected' && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleReopen(submission.id)}
-                            disabled={reopeningId === submission.id}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                          >
-                            {reopeningId === submission.id ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                                Reopening...
-                              </>
-                            ) : (
-                              <>
-                                <RotateCcw className="w-4 h-4 mr-1.5" />
-                                Reopen
-                              </>
-                            )}
-                          </Button>
-                        )}
+                    </div>
+
+                    <div className="space-y-2 text-sm text-slate-600 mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Exam:</span>
+                        <span className="font-medium text-right">{formatExamType(submission.examType)}</span>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-slate-500">Reason:</span>
+                        <span className="text-red-600 bg-red-50 p-2 rounded text-xs">
+                          {submission.rejectedReason || 'No reason provided'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Rejected By:</span>
+                        <span>{submission.approvedByName || 'Unknown'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Date:</span>
+                        <span>{new Date(submission.createdDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
+                      <Link to={`/view-submission/${submission.id}`} className="flex-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" />
+                          View
+                        </Button>
+                      </Link>
+                      {user?.role === 'nurse' && submission.status === 'rejected' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleReopen(submission.id)}
+                          disabled={reopeningId === submission.id}
+                          className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          {reopeningId === submission.id ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                              Reopening...
+                            </>
+                          ) : (
+                            <>
+                              <RotateCcw className="w-4 h-4 mr-1.5" />
+                              Reopen
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-2 py-4">
-                <div className="text-sm text-slate-600">
-                  Showing {startIndex + 1}-{Math.min(endIndex, sortedRejections.length)} of {sortedRejections.length} rejections
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
-                    title="First page"
-                  >
-                    <ChevronsLeft className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </Button>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-600">Page</span>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={totalPages}
-                      value={pageInput}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setPageInput(value);
-                        const page = parseInt(value);
-                        if (!isNaN(page) && page >= 1 && page <= totalPages) {
-                          setCurrentPage(page);
-                        }
-                      }}
-                      onBlur={() => {
-                        // Reset to current page if input is invalid
-                        setPageInput(currentPage.toString());
-                      }}
-                      className="w-16 h-8 text-center"
-                    />
-                    <span className="text-sm text-slate-600">of {totalPages}</span>
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientName')}
+                      >
+                        Patient Name{getSortIcon('patientName')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientNric')}
+                      >
+                        NRIC/FIN{getSortIcon('patientNric')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('patientPassportNo')}
+                      >
+                        Passport{getSortIcon('patientPassportNo')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('examType')}
+                      >
+                        Examination Type{getSortIcon('examType')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('rejectedReason')}
+                      >
+                        Rejection Reason{getSortIcon('rejectedReason')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('createdByName')}
+                      >
+                        Submitted By{getSortIcon('createdByName')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('approvedByName')}
+                      >
+                        Rejected By{getSortIcon('approvedByName')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('createdDate')}
+                      >
+                        Rejected Date{getSortIcon('createdDate')}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-slate-50 select-none"
+                        onClick={() => handleSort('status')}
+                      >
+                        Status{getSortIcon('status')}
+                      </TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedRejections.map((submission) => (
+                      <TableRow key={submission.id}>
+                        <TableCell>{getDisplayName(submission.patientName, submission.examType, submission.status)}</TableCell>
+                        <TableCell>{submission.patientNric || '-'}</TableCell>
+                        <TableCell>{submission.patientPassportNo || '-'}</TableCell>
+                        <TableCell className="text-sm">{formatExamType(submission.examType)}</TableCell>
+                        <TableCell className="max-w-[200px]">
+                          <p className="text-sm text-slate-600 truncate" title={submission.rejectedReason || 'No reason provided'}>
+                            {submission.rejectedReason || 'No reason provided'}
+                          </p>
+                        </TableCell>
+                        <TableCell>{submission.createdByName}</TableCell>
+                        <TableCell>{submission.approvedByName || 'Unknown'}</TableCell>
+                        <TableCell>
+                          {new Date(submission.createdDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          {submission.status === 'draft' ? (
+                            <div className="flex gap-1">
+                              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                Reopened
+                              </Badge>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                              Rejected
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Link to={`/view-submission/${submission.id}`}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <Eye className="w-4 h-4 mr-1.5" />
+                                View
+                              </Button>
+                            </Link>
+                            {user?.role === 'nurse' && submission.status === 'rejected' && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleReopen(submission.id)}
+                                disabled={reopeningId === submission.id}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                              >
+                                {reopeningId === submission.id ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                                    Reopening...
+                                  </>
+                                ) : (
+                                  <>
+                                    <RotateCcw className="w-4 h-4 mr-1.5" />
+                                    Reopen
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between px-2 py-4 gap-4 sm:gap-0">
+                  <div className="text-sm text-slate-600 text-center sm:text-left">
+                    <span className="hidden sm:inline">Showing {startIndex + 1}-{Math.min(endIndex, sortedRejections.length)} of {sortedRejections.length} rejections</span>
+                    <span className="sm:hidden">{startIndex + 1}-{Math.min(endIndex, sortedRejections.length)} of {sortedRejections.length}</span>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(totalPages)}
-                    disabled={currentPage === totalPages}
-                    title="Last page"
-                  >
-                    <ChevronsRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      title="First page"
+                      className="hidden sm:inline-flex"
+                    >
+                      <ChevronsLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-2 sm:px-3"
+                    >
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Prev</span>
+                    </Button>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-xs sm:text-sm text-slate-600 hidden sm:inline">Page</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={totalPages}
+                        value={pageInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPageInput(value);
+                          const page = parseInt(value);
+                          if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                            setCurrentPage(page);
+                          }
+                        }}
+                        onBlur={() => {
+                          // Reset to current page if input is invalid
+                          setPageInput(currentPage.toString());
+                        }}
+                        className="w-12 sm:w-16 h-8 text-center text-sm"
+                      />
+                      <span className="text-xs sm:text-sm text-slate-600">of {totalPages}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-2 sm:px-3"
+                    >
+                      Next
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      title="Last page"
+                      className="hidden sm:inline-flex"
+                    >
+                      <ChevronsRight className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               )}
