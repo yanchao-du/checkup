@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 
-type ExamType = 
+type ExamType =
   | 'SIX_MONTHLY_MDW'
   | 'FULL_MEDICAL_EXAM'
   | 'SIX_MONTHLY_FMW'
@@ -65,10 +65,10 @@ export function FavoritesManager() {
     try {
       await usersApi.updateFavoriteExamTypes(newFavorites);
       setFavoriteExamTypes(newFavorites);
-      
+
       // Update user context
       setUser({ ...user, favoriteExamTypes: newFavorites });
-      
+
       toast.success('Added to favorites');
       setIsDialogOpen(false);
     } catch (error) {
@@ -95,10 +95,10 @@ export function FavoritesManager() {
     try {
       await usersApi.updateFavoriteExamTypes(newFavorites);
       setFavoriteExamTypes(newFavorites);
-      
+
       // Update user context
       setUser({ ...user, favoriteExamTypes: newFavorites });
-      
+
       toast.success('Removed from favorites');
     } catch (error) {
       console.error('Failed to remove favorite:', error);
@@ -126,7 +126,7 @@ export function FavoritesManager() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
             <CardTitle>My Favorite Exam Types</CardTitle>
@@ -134,7 +134,7 @@ export function FavoritesManager() {
           {favoriteExamTypes.length < 3 && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full lg:w-auto shrink-0">
+                <Button variant="outline" size="sm" className="shrink-0">
                   <Plus className="w-4 h-4 mr-1" />
                   Add Favorite
                 </Button>
