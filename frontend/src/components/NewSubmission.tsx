@@ -329,6 +329,13 @@ export function NewSubmission() {
     }
   }, [location.search, id, navigate]);
 
+  // Scroll to top when opening a new submission
+  useEffect(() => {
+    if (!id) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [id]);
+
   // Block browser navigation (refresh, close tab, etc.)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
