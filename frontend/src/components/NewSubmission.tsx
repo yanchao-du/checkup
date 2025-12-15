@@ -395,6 +395,9 @@ export function NewSubmission() {
   useEffect(() => {
     const loadSubmission = async () => {
       if (id) {
+        // Scroll to top when opening a draft
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
         try {
           setIsLoading(true);
           const existing = await submissionsApi.getById(id);
