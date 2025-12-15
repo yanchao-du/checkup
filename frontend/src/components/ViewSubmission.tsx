@@ -71,6 +71,11 @@ export function ViewSubmission() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
+  // Scroll to top when component mounts or ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
+
   useEffect(() => {
     const fetchSubmission = async () => {
       if (!id) return;
