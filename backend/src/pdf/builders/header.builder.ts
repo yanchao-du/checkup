@@ -1,7 +1,7 @@
 import { Content } from 'pdfmake/interfaces';
 import { SubmissionData } from '../utils/types';
 import { getExamTypeDisplayName } from '../utils/exam-type-mapper';
-import { format } from 'date-fns';
+import { format, toZonedTime } from 'date-fns-tz';
 
 function getSubmittedTo(submission: SubmissionData): string {
   const { examType, purposeOfExam } = submission;
@@ -53,8 +53,9 @@ function getSubmittedTo(submission: SubmissionData): string {
 }
 
 export function buildHeader(submission: SubmissionData): Content[] {
+  // Convert to Singapore timezone (UTC+8) and format
   const submittedDateTime = submission.submittedDate 
-    ? format(new Date(submission.submittedDate), 'dd MMM yyyy, hh:mm a')
+    ? format(toZonedTime(new Date(submission.submittedDate), 'Asia/Singapore'), 'dd MMM yyyy, hh:mm a')
     : 'N/A';
   
   const submittedTo = getSubmittedTo(submission);
