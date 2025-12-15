@@ -46,6 +46,11 @@ export function SubmissionsList() {
 
   const isDoctor = user?.role === 'doctor';
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const handleDownloadPdf = async (submissionId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent row click
     try {

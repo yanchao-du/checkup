@@ -46,6 +46,11 @@ export function PendingApprovals() {
   const [pageInput, setPageInput] = useState('1');
   const rowsPerPage = 10;
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const fetchPendingApprovals = async () => {
       try {

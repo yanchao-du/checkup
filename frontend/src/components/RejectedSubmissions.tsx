@@ -36,6 +36,11 @@ export function RejectedSubmissions() {
   const [pageInput, setPageInput] = useState('1');
   const rowsPerPage = 10;
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const fetchRejectedSubmissions = async () => {
       try {
