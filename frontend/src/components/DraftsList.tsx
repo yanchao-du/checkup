@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from './ui/alert-dialog';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 
 // Helper to check if a draft has pending memos
 const hasPendingMemos = (draft: MedicalSubmission): boolean => {
@@ -104,7 +105,7 @@ export function DraftsList() {
         });
         setDrafts(response.data);
       } catch (error) {
-        console.error('Failed to fetch drafts:', error);
+        logger.error('Failed to fetch drafts:', error);
         toast.error('Failed to load drafts');
       } finally {
         setIsLoading(false);
@@ -198,7 +199,7 @@ export function DraftsList() {
         toast.success('Draft deleted successfully');
         setDeleteId(null);
       } catch (error) {
-        console.error('Failed to delete draft:', error);
+        logger.error('Failed to delete draft:', error);
         toast.error('Failed to delete draft');
       }
     }

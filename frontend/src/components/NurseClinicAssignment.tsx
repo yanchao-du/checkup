@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from './ui/select';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 
 export function NurseClinicAssignment() {
   const [nurses, setNurses] = useState<ClinicUser[]>([]);
@@ -60,14 +61,14 @@ export function NurseClinicAssignment() {
             const nurseClinics = await usersApi.getNurseClinics(nurse.id);
             counts.set(nurse.id, nurseClinics.length);
           } catch (error) {
-            console.error(`Failed to fetch clinics for nurse ${nurse.id}:`, error);
+            logger.error(`Failed to fetch clinics for nurse ${nurse.id}:`, error);
             counts.set(nurse.id, 0);
           }
         })
       );
       setNurseClinicCounts(counts);
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      logger.error('Failed to fetch data:', error);
       toast.error('Failed to load data');
     } finally {
       setIsLoading(false);
@@ -82,7 +83,7 @@ export function NurseClinicAssignment() {
       // Update the clinic count for this nurse
       setNurseClinicCounts(prev => new Map(prev).set(nurseId, clinics.length));
     } catch (error) {
-      console.error('Failed to fetch nurse clinics:', error);
+      logger.error('Failed to fetch nurse clinics:', error);
       toast.error('Failed to load nurse\'s clinics');
     } finally {
       setIsLoadingClinics(false);

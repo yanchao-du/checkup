@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { submissionsApi, approvalsApi } from '../services';
 import type { MedicalSubmission } from '../services';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import { FavoritesManager } from './FavoritesManager';
 
 export function Dashboard() {
@@ -38,7 +39,7 @@ export function Dashboard() {
       // Navigate directly to edit page
       navigate(`/draft/${submissionId}`);
     } catch (error) {
-      console.error('Failed to reopen submission:', error);
+      logger.error('Failed to reopen submission:', error);
       toast.error('Failed to reopen submission');
       setReopeningId(null);
     }
@@ -88,7 +89,7 @@ export function Dashboard() {
           setRejectedSubmissions(rejectedResponse.data);
         }
       } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+        logger.error('Failed to fetch dashboard data:', error);
       } finally {
         setIsLoading(false);
       }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usersApi, type Doctor } from '../services/users.service';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +39,7 @@ export function SetDefaultDoctorDialog({ open, doctors, onClose, onSave }: SetDe
       onSave(selectedDoctorId);
       onClose();
     } catch (error) {
-      console.error('Failed to set default doctor:', error);
+      logger.error('Failed to set default doctor:', error);
       toast.error('Failed to set default doctor');
     } finally {
       setIsSaving(false);

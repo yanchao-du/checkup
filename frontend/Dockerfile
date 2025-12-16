@@ -22,8 +22,8 @@ COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
-# Build the application
-RUN npm run build
+# Build the application in production mode (disables console logs)
+RUN npm run build -- --mode production
 
 # Stage 2: Production stage with nginx
 FROM nginx:alpine AS production

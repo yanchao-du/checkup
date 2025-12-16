@@ -4,6 +4,7 @@ import { submissionsApi } from '../services/submissions.service';
 import { approvalsApi } from '../services/approvals.service';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import { getDisplayName } from '../lib/nameDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -88,7 +89,7 @@ export function ViewSubmission() {
         ]);
         setSubmission({ ...submissionData, history: historyData });
       } catch (error) {
-        console.error('Failed to fetch submission:', error);
+        logger.error('Failed to fetch submission:', error);
         toast.error('Failed to load submission details');
       } finally {
         setIsLoading(false);
@@ -119,7 +120,7 @@ export function ViewSubmission() {
 
       toast.success('PDF downloaded successfully');
     } catch (error: any) {
-      console.error('Failed to download PDF:', error);
+      logger.error('Failed to download PDF:', error);
       toast.error(error.message || 'Failed to download PDF');
     } finally {
       setIsDownloadingPdf(false);
@@ -137,7 +138,7 @@ export function ViewSubmission() {
       // Navigate to acknowledgement page
       navigate(`/acknowledgement/${id}`);
     } catch (error) {
-      console.error('Failed to approve submission:', error);
+      logger.error('Failed to approve submission:', error);
       toast.error('Failed to approve submission');
     } finally {
       setIsSubmitting(false);
@@ -161,7 +162,7 @@ export function ViewSubmission() {
       // Optionally navigate back to pending approvals
       setTimeout(() => navigate('/pending-approvals'), 1000);
     } catch (error) {
-      console.error('Failed to reject submission:', error);
+      logger.error('Failed to reject submission:', error);
       toast.error('Failed to reject submission');
     } finally {
       setIsSubmitting(false);
@@ -534,7 +535,7 @@ export function ViewSubmission() {
                             toast.success('Submission reopened and moved to drafts');
                             navigate(`/draft/${id}`);
                           } catch (error) {
-                            console.error('Failed to reopen submission:', error);
+                            logger.error('Failed to reopen submission:', error);
                             toast.error('Failed to reopen submission');
                           } finally {
                             setIsSubmitting(false);

@@ -11,6 +11,7 @@ import { Button } from './ui/button';
 import { Loader2, Eye, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronsLeft, ChevronsRight, Download } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import {
   Select,
   SelectContent,
@@ -71,7 +72,7 @@ export function SubmissionsList() {
 
       toast.success('PDF downloaded successfully');
     } catch (error) {
-      console.error('Failed to download PDF:', error);
+      logger.error('Failed to download PDF:', error);
       toast.error('Failed to download PDF. Please try again.');
     } finally {
       setDownloadingId(null);
@@ -103,7 +104,7 @@ export function SubmissionsList() {
         const response = await submissionsApi.getAll({ limit: 100 });
         setSubmissions(response.data);
       } catch (error) {
-        console.error('Failed to fetch submissions:', error);
+        logger.error('Failed to fetch submissions:', error);
       } finally {
         setIsLoading(false);
       }

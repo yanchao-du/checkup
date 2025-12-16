@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import logger from '../utils/logger';
 
 /**
  * CorpPass OAuth Callback Handler
@@ -40,7 +41,7 @@ export function CorpPassCallback() {
         // Redirect to dashboard
         navigate('/');
       } catch (error) {
-        console.error('CorpPass callback error:', error);
+        logger.error('CorpPass callback error:', error);
         toast.error('Failed to complete CorpPass login. Please try again.');
         navigate('/login');
       }

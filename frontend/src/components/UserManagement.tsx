@@ -33,6 +33,7 @@ import {
 } from './ui/dialog';
 import { Users, UserPlus, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 
 export function UserManagement() {
   const [users, setUsers] = useState<ClinicUser[]>([]);
@@ -58,7 +59,7 @@ export function UserManagement() {
       const response = await usersApi.getAll();
       setUsers(response.data);
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      logger.error('Failed to fetch users:', error);
       toast.error('Failed to load users');
     } finally {
       setIsLoading(false);

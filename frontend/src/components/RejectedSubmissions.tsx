@@ -20,6 +20,7 @@ import {
   TableRow,
 } from './ui/table';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import { useAuth } from './AuthContext';
 
 export function RejectedSubmissions() {
@@ -51,7 +52,7 @@ export function RejectedSubmissions() {
           : await submissionsApi.getRejected({ page: 1, limit: 100 });
         setRejectedSubmissions(response.data);
       } catch (error) {
-        console.error('Failed to fetch rejected submissions:', error);
+        logger.error('Failed to fetch rejected submissions:', error);
         toast.error('Failed to load rejected submissions');
       } finally {
         setIsLoading(false);
@@ -143,7 +144,7 @@ export function RejectedSubmissions() {
       // Redirect to draft edit page after a brief delay
       setTimeout(() => navigate(`/draft/${submissionId}`), 1000);
     } catch (error) {
-      console.error('Failed to reopen submission:', error);
+      logger.error('Failed to reopen submission:', error);
       toast.error('Failed to reopen submission');
     } finally {
       setReopeningId(null);

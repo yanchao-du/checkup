@@ -1,4 +1,5 @@
 import { apiClient } from '../lib/api-client';
+import logger from '../utils/logger';
 import type {
   ClinicUser,
   CreateUserRequest,
@@ -95,7 +96,7 @@ export const usersApi = {
         const updatedUser = { ...user, favoriteExamTypes };
         localStorage.setItem('user', JSON.stringify(updatedUser));
       } catch (error) {
-        console.error('Failed to update localStorage:', error);
+        logger.error('Failed to update localStorage:', error);
       }
     }
     
