@@ -27,6 +27,7 @@ services:
     ports:
       - "3344:3344"
     environment:
+      - TZ=Asia/Singapore
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - JWT_SECRET=${JWT_SECRET}
       - CORS_ORIGIN=${CORS_ORIGIN}
