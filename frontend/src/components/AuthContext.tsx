@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi } from '../services';
 import { SESSION_EXPIRED_EVENT, SESSION_REVOKED_EVENT } from '../lib/api-client';
+import logger from '../utils/logger';
 
 export type UserRole = 'doctor' | 'nurse' | 'admin';
 
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.addEventListener(event, updateActivity, { passive: true });
     });
 
-    console.log('🔄 Starting user activity detection and session keep-alive');
+    logger.log('🔄 Starting user activity detection and session keep-alive');
 
     // Check activity and refresh session periodically
     const checkAndRefresh = async () => {
@@ -99,26 +100,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (hasRecentActivity) {
         // User was active - refresh the session
-        console.log(`✨ [${timestamp}] User was active, refreshing session...`);
+        logger.log(`✨ [${timestamp}] User was active, refreshing session...`);
         hasRecentActivity = false;
         
         try {
           // Regular getMe call will refresh the session (not heartbeat)
           await authApi.getMe();
-          console.log(`✅ [${timestamp}] Session refreshed due to user activity`);
+          logger.log(`✅ [${timestamp}] Session refreshed due to user activity`);
         } catch (error) {
-          console.log(`❌ [${timestamp}] Session refresh failed:`, error);
+          logger.log(`❌ [${timestamp}] Session refresh failed:`, error);
           // Session expired - event listener will handle toast and redirect
         }
       } else {
         // No activity - just check session validity without refreshing
-        console.log(`💤 [${timestamp}] No recent activity (idle for ${Math.round(timeSinceActivity / 1000)}s), checking session validity...`);
+        logger.log(`💤 [${timestamp}] No recent activity (idle for ${Math.round(timeSinceActivity / 1000)}s), checking session validity...`);
         
         try {
           await authApi.getMeHeartbeat();
-          console.log(`✅ [${timestamp}] Session still valid (heartbeat check)`);
+          logger.log(`✅ [${timestamp}] Session still valid (heartbeat check)`);
         } catch (error) {
-          console.log(`❌ [${timestamp}] Session validation failed:`, error);
+          logger.log(`❌ [${timestamp}] Session validation failed:`, error);
         }
       }
     };
@@ -128,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionRefreshTimer = setInterval(checkAndRefresh, 120000);
 
     return () => {
-      console.log('🛑 Stopping user activity detection');
+      logger.log('🛑 Stopping user activity detection');
       activityEvents.forEach(event => {
         window.removeEventListener(event, updateActivity);
       });
@@ -144,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(response.user);
       return true;
     } catch (error) {
-      console.error('Login failed:', error);
+      logger.error('Login failed:', error);
       return false;
     }
   };

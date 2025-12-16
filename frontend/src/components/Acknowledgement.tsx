@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Loader2, CheckCircle, UserCheck, Download } from 'lucide-react';
 import { getDisplayName } from '../lib/nameDisplay';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 
 export function Acknowledgement() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ export function Acknowledgement() {
         const data = await submissionsApi.getById(id);
         setSubmission(data);
       } catch (err) {
-        console.error('Failed to load submission for acknowledgement', err);
+        logger.error('Failed to load submission for acknowledgement', err);
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +87,7 @@ export function Acknowledgement() {
 
       toast.success('PDF downloaded successfully');
     } catch (error) {
-      console.error('Failed to download PDF:', error);
+      logger.error('Failed to download PDF:', error);
       toast.error('Failed to download PDF. Please try again.');
     } finally {
       setIsDownloadingPdf(false);

@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { Star, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import { usersApi } from '../services';
 import { useAuth } from './AuthContext';
 import {
@@ -72,7 +73,7 @@ export function FavoritesManager() {
       toast.success('Added to favorites');
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Failed to add favorite:', error);
+      logger.error('Failed to add favorite:', error);
       toast.error('Failed to add favorite', {
         description: 'Please try again',
       });
@@ -101,7 +102,7 @@ export function FavoritesManager() {
 
       toast.success('Removed from favorites');
     } catch (error) {
-      console.error('Failed to remove favorite:', error);
+      logger.error('Failed to remove favorite:', error);
       toast.error('Failed to remove favorite', {
         description: 'Please try again',
       });

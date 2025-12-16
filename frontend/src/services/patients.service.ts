@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '../utils/logger';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -49,7 +50,7 @@ export const patientsApi = {
       if (error.response?.status === 404) {
         return null;
       }
-      console.error('Error fetching patient by NRIC:', error);
+      logger.error('Error fetching patient by NRIC:', error);
       throw error;
     }
   },
@@ -65,7 +66,7 @@ export const patientsApi = {
       const response = await api.get<RandomTestFin>('/patients/random-test-fin', { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching random test FIN:', error);
+      logger.error('Error fetching random test FIN:', error);
       return null;
     }
   },

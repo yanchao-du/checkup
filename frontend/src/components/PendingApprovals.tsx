@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from './ui/alert-dialog';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 
 export function PendingApprovals() {
   const { user } = useAuth();
@@ -58,7 +59,7 @@ export function PendingApprovals() {
         const response = await approvalsApi.getPending({ page: 1, limit: 100 });
         setPendingApprovals(response.data);
       } catch (error) {
-        console.error('Failed to fetch pending approvals:', error);
+        logger.error('Failed to fetch pending approvals:', error);
         toast.error('Failed to load pending approvals');
       } finally {
         setIsLoading(false);
@@ -149,7 +150,7 @@ export function PendingApprovals() {
       toast.success('Medical examination approved and submitted successfully');
       setSelectedSubmission(null);
     } catch (error) {
-      console.error('Failed to approve submission:', error);
+      logger.error('Failed to approve submission:', error);
       toast.error('Failed to approve submission');
     } finally {
       setIsApproving(false);
@@ -170,7 +171,7 @@ export function PendingApprovals() {
       toast.success('Medical examination rejected and returned to drafts');
       setSelectedSubmission(null);
     } catch (error) {
-      console.error('Failed to reject submission:', error);
+      logger.error('Failed to reject submission:', error);
       toast.error('Failed to reject submission');
     } finally {
       setIsApproving(false);

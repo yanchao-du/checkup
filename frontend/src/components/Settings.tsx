@@ -7,6 +7,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import { Settings as SettingsIcon, Save, Users, Building2, UserCog } from 'lucide-react';
 import { UserManagement } from './UserManagement';
 import { ClinicManagement } from './ClinicManagement';
@@ -56,7 +57,7 @@ export function Settings() {
         setCurrentDefaultDoctorId(defaultDoctorId);
         setSelectedDoctorId(defaultDoctorId || '');
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        logger.error('Failed to load settings:', error);
         toast.error('Failed to load settings');
       } finally {
         setIsLoading(false);
@@ -78,7 +79,7 @@ export function Settings() {
       setCurrentDefaultDoctorId(selectedDoctorId);
       toast.success('Default doctor updated successfully');
     } catch (error) {
-      console.error('Failed to update default doctor:', error);
+      logger.error('Failed to update default doctor:', error);
       toast.error('Failed to update default doctor');
     } finally {
       setIsSaving(false);

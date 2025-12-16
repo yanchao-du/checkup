@@ -20,6 +20,7 @@ import { InlineError } from './ui/InlineError';
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 import { ArrowLeft, Save, Send } from 'lucide-react';
 import {
   AlertDialog,
@@ -365,7 +366,7 @@ export function NewSubmission() {
             setSelectedClinicId(primaryClinic.id);
           }
         } catch (error) {
-          console.error('Failed to fetch clinics:', error);
+          logger.error('Failed to fetch clinics:', error);
         }
       } else if (user?.clinicId) {
         // Admin users have a single clinic
@@ -392,7 +393,7 @@ export function NewSubmission() {
             setAssignedDoctorId(defaultDoctorId);
           }
         } catch (error) {
-          console.error('Failed to fetch doctors:', error);
+          logger.error('Failed to fetch doctors:', error);
         }
       }
     };
@@ -502,7 +503,7 @@ export function NewSubmission() {
             formData: JSON.parse(JSON.stringify(existing.formData)), // Deep copy
           });
         } catch (error) {
-          console.error('Failed to load submission:', error);
+          logger.error('Failed to load submission:', error);
           toast.error('Failed to load submission');
           navigate('/drafts');
         } finally {
@@ -783,7 +784,7 @@ export function NewSubmission() {
           setTestFin(result.fin);
         }
       }).catch((error) => {
-        console.error('Failed to fetch test FIN:', error);
+        logger.error('Failed to fetch test FIN:', error);
       });
     } else {
       setTestFin('');
@@ -815,7 +816,7 @@ export function NewSubmission() {
     const fetchPatientName = async () => {
       // Guard: if we've already looked up this NRIC, skip
       if (lastLookedUpNricRef.current === confirmedFinValue) {
-        console.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { nric: confirmedFinValue });
+        logger.debug('[NewSubmission] Skipping fetch - NRIC already looked up', { nric: confirmedFinValue });
         return;
       }
 
@@ -901,7 +902,7 @@ export function NewSubmission() {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch patient:', error);
+        logger.error('Failed to fetch patient:', error);
         // Don't show error toast, just allow manual entry
       } finally {
         setIsLoadingPatient(false);
@@ -1604,23 +1605,23 @@ export function NewSubmission() {
 
       // If editing from summary, check AMT requirement for driver exams before returning
       if (isEditingFromSummary && isDriverExamType(examType)) {
-        console.log('🔍 Checking AMT requirement...');
-        console.log('patientDateOfBirth:', patientDateOfBirth);
-        console.log('examinationDate:', examinationDate);
-        console.log('drivingLicenseClass:', drivingLicenseClass);
+        logger.log('🔍 Checking AMT requirement...');
+        logger.log('patientDateOfBirth:', patientDateOfBirth);
+        logger.log('examinationDate:', examinationDate);
+        logger.log('drivingLicenseClass:', drivingLicenseClass);
 
         const newAmtRequired = recalculateAMTRequirement();
-        console.log('newAmtRequired:', newAmtRequired);
-        console.log('oldAmtRequired:', formData.amtRequired);
+        logger.log('newAmtRequired:', newAmtRequired);
+        logger.log('oldAmtRequired:', formData.amtRequired);
 
         // Update formData.amtRequired if it changed
         if (newAmtRequired !== null && newAmtRequired !== formData.amtRequired) {
           setFormData(prev => ({ ...prev, amtRequired: newAmtRequired }));
-          console.log('✏️ Updated amtRequired to:', newAmtRequired);
+          logger.log('✏️ Updated amtRequired to:', newAmtRequired);
 
           // If AMT newly became required, remove it from completed sections
           if (newAmtRequired === true && formData.amtRequired === false) {
-            console.log('🔄 AMT became required - clearing completion status');
+            logger.log('🔄 AMT became required - clearing completion status');
             setCompletedSections(prev => {
               const newSet = new Set(prev);
               newSet.delete('amt');
@@ -1638,15 +1639,15 @@ export function NewSubmission() {
             Object.keys(formData.amt).some(key => key !== 'score' && formData.amt[key] === true)
           );
           const amtSectionCompleted = completedSections.has('amt') || hasAmtData;
-          console.log('amtSectionCompleted:', amtSectionCompleted);
-          console.log('completedSections.has(amt):', completedSections.has('amt'));
-          console.log('hasAmtData:', hasAmtData);
-          console.log('formData.amt:', formData.amt);
+          logger.log('amtSectionCompleted:', amtSectionCompleted);
+          logger.log('completedSections.has(amt):', completedSections.has('amt'));
+          logger.log('hasAmtData:', hasAmtData);
+          logger.log('formData.amt:', formData.amt);
 
           if (!amtSectionCompleted) {
             // AMT is required/uncertain but section not completed
             const oldAmtRequired = formData.amtRequired;
-            console.log('⚠️ AMT required/uncertain but not completed! Showing toast...');
+            logger.log('⚠️ AMT required/uncertain but not completed! Showing toast...');
             if (newAmtRequired === null) {
               toast.warning('Please complete the AMT questions to continue.');
             } else if (newAmtRequired !== oldAmtRequired) {
@@ -1654,14 +1655,14 @@ export function NewSubmission() {
             } else {
               toast.warning('Please complete the AMT questions before continuing.');
             }
-            console.log('📍 Setting accordion to amt');
+            logger.log('📍 Setting accordion to amt');
             setActiveAccordion('amt');
             setIsEditingFromSummary(false);
             return;
           }
         }
 
-        console.log('✅ AMT check passed, going to summary');
+        logger.log('✅ AMT check passed, going to summary');
         // AMT check passed or not required, go back to summary
         setActiveAccordion('summary');
         setIsEditingFromSummary(false);
@@ -1774,7 +1775,7 @@ export function NewSubmission() {
 
       setHasUnsavedChanges(false); // Clear unsaved changes after saving state
     } catch (error) {
-      console.error('Failed to save draft:', error);
+      logger.error('Failed to save draft:', error);
       toast.error('Failed to save draft');
     } finally {
       setIsSaving(false);
@@ -1855,7 +1856,7 @@ export function NewSubmission() {
         }
       }
     } catch (error) {
-      console.error('Failed to submit:', error);
+      logger.error('Failed to submit:', error);
       toast.error('Failed to submit medical examination');
       setHasUnsavedChanges(true); // Restore unsaved changes flag on error
     } finally {
@@ -1900,7 +1901,7 @@ export function NewSubmission() {
 
     // Condition 3: Cognitive impairment
     if (cognitiveImpairment) {
-      console.log('🧠 Cognitive impairment detected - AMT required');
+      logger.log('🧠 Cognitive impairment detected - AMT required');
       return true;
     }
 
@@ -1932,7 +1933,7 @@ export function NewSubmission() {
 
     // Need more info if we can't make determination
     if (formData.isPrivateDrivingInstructor === undefined || formData.holdsLTAVocationalLicence === undefined) {
-      console.log('⚠️ Cannot determine AMT - missing fields:', {
+      logger.log('⚠️ Cannot determine AMT - missing fields:', {
         isPrivateDrivingInstructor: formData.isPrivateDrivingInstructor,
         holdsLTAVocationalLicence: formData.holdsLTAVocationalLicence,
         ageNextBirthday,
@@ -1942,7 +1943,7 @@ export function NewSubmission() {
       return null;
     }
 
-    console.log('AMT not required - all checks passed', {
+    logger.log('AMT not required - all checks passed', {
       ageNextBirthday,
       ageOnExamDate,
       drivingLicenseClass,
@@ -2115,7 +2116,7 @@ export function NewSubmission() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                console.log('[Use This Debug]', {
+                                logger.log('[Use This Debug]', {
                                   testFin,
                                   currentPatientNric: patientNric,
                                   previousFinValue,
@@ -2125,14 +2126,14 @@ export function NewSubmission() {
 
                                 // If this is a FIN change with accordion data for MOM exams
                                 if (isMomExamType(examType) && previousFinValue && previousFinValue !== testFin && hasAccordionDataFilled()) {
-                                  console.log('[Use This] FIN change detected with data - showing dialog');
+                                  logger.log('[Use This] FIN change detected with data - showing dialog');
                                   // Set the new FIN in the input field (like manual typing)
                                   setPatientNric(testFin);
                                   // Store as pending and show dialog
                                   setPendingFinValue(testFin);
                                   setShowFinChangeDialog(true);
                                 } else {
-                                  console.log('[Use This] Setting FIN directly');
+                                  logger.log('[Use This] Setting FIN directly');
                                   setPatientNric(testFin);
                                   // Update previousFinValue if no accordion data yet
                                   if (!hasAccordionDataFilled()) {
@@ -2157,7 +2158,7 @@ export function NewSubmission() {
                         disabled={!workflow.canEditFIN}
                         onChange={(e) => {
                           const newValue = e.target.value.toUpperCase();
-                          console.log('[FIN onChange]', {
+                          logger.log('[FIN onChange]', {
                             oldValue: patientNric,
                             newValue,
                             currentPatientName: patientName,
@@ -2202,7 +2203,7 @@ export function NewSubmission() {
                             if (!error && isMomExamType(examType)) {
                               const hasData = hasAccordionDataFilled();
 
-                              console.log('[FIN Change Debug]', {
+                              logger.log('[FIN Change Debug]', {
                                 currentValue: value,
                                 previousFinValue,
                                 hasData,
@@ -2214,7 +2215,7 @@ export function NewSubmission() {
 
                               // Check if this is a FIN change (not initial entry) with accordion data
                               if (previousFinValue && previousFinValue !== value && hasData) {
-                                console.log('[FIN Change] Showing dialog - FIN changed with accordion data');
+                                logger.log('[FIN Change] Showing dialog - FIN changed with accordion data');
                                 // Store the pending value and show dialog WITHOUT reverting the input
                                 // This prevents the API from fetching during the dialog
                                 setPendingFinValue(value);
@@ -2222,14 +2223,14 @@ export function NewSubmission() {
                                 // DO NOT revert patientNric here - keep the new value in the input
                                 // The API fetch is blocked by checking pendingFinValue in useEffect
                               } else if (!hasData) {
-                                console.log('[FIN Change] No accordion data - updating previousFinValue');
+                                logger.log('[FIN Change] No accordion data - updating previousFinValue');
                                 // No accordion data filled yet - user can freely change FIN
                                 // Always update previousFinValue to track the latest valid FIN
                                 setPreviousFinValue(value);
                                 // Set confirmed value to trigger patient lookup
                                 setConfirmedFinValue(value);
                               } else {
-                                console.log('[FIN Change] No action taken', {
+                                logger.log('[FIN Change] No action taken', {
                                   hasPrevious: !!previousFinValue,
                                   isDifferent: previousFinValue !== value,
                                   hasData
@@ -2722,14 +2723,14 @@ export function NewSubmission() {
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
 
-                    console.log('📍 onContinue (DRIVING_LICENCE_TP):', { current, next, isEditingFromSummary });
+                    logger.log('📍 onContinue (DRIVING_LICENCE_TP):', { current, next, isEditingFromSummary });
 
                     // Check AMT requirement when navigating to summary (from any section)
                     if (next === 'summary' || isEditingFromSummary) {
                       const newAmtRequired = recalculateAMTRequirement();
                       const oldAmtRequired = formData.amtRequired;
 
-                      console.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
+                      logger.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
 
                       // Update formData.amtRequired if it changed
                       if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
@@ -2737,7 +2738,7 @@ export function NewSubmission() {
 
                         // If AMT newly became required, remove it from completed sections
                         if (newAmtRequired === true && oldAmtRequired === false) {
-                          console.log('🔄 AMT became required - clearing completion status');
+                          logger.log('🔄 AMT became required - clearing completion status');
                           setCompletedSections(prev => {
                             const newSet = new Set(prev);
                             newSet.delete('amt');
@@ -2750,7 +2751,7 @@ export function NewSubmission() {
                       if (newAmtRequired === true || newAmtRequired === null) {
                         // Check if AMT section was completed (includes current if we're on AMT)
                         const amtSectionCompleted = current === 'amt' || completedSections.has('amt');
-                        console.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
+                        logger.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
 
                         if (!amtSectionCompleted) {
                           // AMT is required/uncertain but section not completed
@@ -2804,14 +2805,14 @@ export function NewSubmission() {
                   onContinue={(current, next) => {
                     setCompletedSections(prev => new Set(prev).add(current));
 
-                    console.log('📍 onContinue (DRIVING_VOCATIONAL_TP_LTA):', { current, next, isEditingFromSummary });
+                    logger.log('📍 onContinue (DRIVING_VOCATIONAL_TP_LTA):', { current, next, isEditingFromSummary });
 
                     // Check AMT requirement when navigating to summary (from any section)
                     if (next === 'summary' || isEditingFromSummary) {
                       const newAmtRequired = recalculateAMTRequirement();
                       const oldAmtRequired = formData.amtRequired;
 
-                      console.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
+                      logger.log('AMT requirement check:', { newAmtRequired, oldAmtRequired });
 
                       // Update formData.amtRequired if it changed
                       if (newAmtRequired !== null && newAmtRequired !== oldAmtRequired) {
@@ -2819,7 +2820,7 @@ export function NewSubmission() {
 
                         // If AMT newly became required, remove it from completed sections
                         if (newAmtRequired === true && oldAmtRequired === false) {
-                          console.log('🔄 AMT became required - clearing completion status');
+                          logger.log('🔄 AMT became required - clearing completion status');
                           setCompletedSections(prev => {
                             const newSet = new Set(prev);
                             newSet.delete('amt');
@@ -2832,7 +2833,7 @@ export function NewSubmission() {
                       if (newAmtRequired === true || newAmtRequired === null) {
                         // Check if AMT section was completed (includes current if we're on AMT)
                         const amtSectionCompleted = current === 'amt' || completedSections.has('amt');
-                        console.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
+                        logger.log('AMT section completed?', amtSectionCompleted, 'current:', current, 'has amt:', completedSections.has('amt'));
 
                         if (!amtSectionCompleted) {
                           // AMT is required/uncertain but section not completed
@@ -2984,7 +2985,7 @@ export function NewSubmission() {
                                     if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
                                   }
                                 } catch (e) {
-                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                  logger.error('Failed to fetch default doctor before routing for approval', e);
                                 }
 
                                 setIsRouteForApproval(true);
@@ -3082,7 +3083,7 @@ export function NewSubmission() {
                                     if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
                                   }
                                 } catch (e) {
-                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                  logger.error('Failed to fetch default doctor before routing for approval', e);
                                 }
 
                                 setIsRouteForApproval(true);
@@ -3248,7 +3249,7 @@ export function NewSubmission() {
                                     if (defaultDoctorId) setAssignedDoctorId(defaultDoctorId);
                                   }
                                 } catch (e) {
-                                  console.error('Failed to fetch default doctor before routing for approval', e);
+                                  logger.error('Failed to fetch default doctor before routing for approval', e);
                                 }
 
                                 setIsRouteForApproval(true);

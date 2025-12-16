@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { toast } from 'sonner';
+import logger from '../utils/logger';
 
 export function ClinicManagement() {
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -49,7 +50,7 @@ export function ClinicManagement() {
       const response = await clinicsApi.getAll(1, 100);
       setClinics(response.data);
     } catch (error) {
-      console.error('Failed to fetch clinics:', error);
+      logger.error('Failed to fetch clinics:', error);
       toast.error('Failed to load clinics');
     } finally {
       setIsLoading(false);

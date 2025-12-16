@@ -14,6 +14,7 @@ import {
   validateGeneralMedical,
   validateVocationalXray
 } from '../utils/validation';
+import logger from '../../../utils/logger';
 
 interface DrivingVocationalTpLtaAccordionsProps {
   formData: Record<string, any>;
@@ -136,13 +137,13 @@ export function DrivingVocationalTpLtaAccordions({
               <Button 
                 type="button"
                 onClick={() => {
-                  console.log('🔍 General Medical Continue clicked');
-                  console.log('FormData:', formData);
+                  logger.log('🔍 General Medical Continue clicked');
+                  logger.log('FormData:', formData);
                   
                   const isGeneralMedicalValid = validateGeneralMedical(formData, onValidate);
                   const isAbnormalityValid = validateAbnormalityChecklist(formData, onValidate);
                   
-                  console.log('Validation results:', {
+                  logger.log('Validation results:', {
                     isGeneralMedicalValid,
                     isAbnormalityValid,
                     bloodPressure: formData.bloodPressure,
@@ -156,10 +157,10 @@ export function DrivingVocationalTpLtaAccordions({
                   });
                   
                   if (isGeneralMedicalValid && isAbnormalityValid) {
-                    console.log('✅ Validation passed, calling onContinue');
+                    logger.log('✅ Validation passed, calling onContinue');
                     onContinue('general-medical', 'amt');
                   } else {
-                    console.log('❌ Validation failed');
+                    logger.log('❌ Validation failed');
                   }
                 }}
               >
